@@ -9,7 +9,6 @@ import com.liquordb.review.repository.CommentRepository;
 import com.liquordb.review.entity.Review;
 import com.liquordb.review.repository.ReviewRepository;
 import com.liquordb.user.entity.User;
-import com.liquordb.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

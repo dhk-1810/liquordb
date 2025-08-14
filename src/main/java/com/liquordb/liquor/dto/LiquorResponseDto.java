@@ -3,10 +3,7 @@ package com.liquordb.liquor.dto;
 import com.liquordb.liquor.entity.LiquorCategory;
 import com.liquordb.liquor.entity.LiquorSubCategory;
 import com.liquordb.review.dto.ReviewResponseDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -14,7 +11,7 @@ import java.util.List;
  * 주류 하나에 대한 응답 DTO입니다.
  */
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

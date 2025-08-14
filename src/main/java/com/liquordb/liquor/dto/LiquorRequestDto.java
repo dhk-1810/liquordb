@@ -2,16 +2,13 @@ package com.liquordb.liquor.dto;
 
 import com.liquordb.liquor.entity.LiquorCategory;
 import com.liquordb.liquor.entity.LiquorSubCategory;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * 주류 하나에 대한 요청 DTO입니다.
  */
 
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

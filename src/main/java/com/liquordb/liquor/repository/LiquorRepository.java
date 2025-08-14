@@ -58,14 +58,23 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long> {
     """)
     List<LiquorSummaryDto> findSummaryBySubcategory(@Param("subcategory") LiquorSubCategory subcategory); // 소분류로 필터링
 
-    // ??
     @Query("""
-    SELECT l FROM Liquor l
-    LEFT JOIN FETCH l.category
+    SELECT new com.liquordb.liquor.dto.LiquorSummaryDto(
+    l.id,
+    l.name,
+    lc.name,
+    l.imageUrl,
+    COUNT(DISTINCT r.id),
+    COUNT(DISTINCT li.id)
+    )
+    FROM Liquor l
+    LEFT JOIN l.category lc
     LEFT JOIN l.reviews r
     LEFT JOIN l.likes li
+    GROUP BY l.id, l.name, lc.name, l.imageUrl
     """)
     List<LiquorSummaryDto> findAllWithCategoryAndCounts();
+
 
     // 삭제되지 않은 주류 단건 조회
     Optional<Liquor> findByIdAndIsDeletedFalse(Long id);

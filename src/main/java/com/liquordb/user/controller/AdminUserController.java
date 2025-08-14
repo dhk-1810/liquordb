@@ -6,6 +6,7 @@ import com.liquordb.user.dto.UserAdminDto;
 import com.liquordb.user.entity.UserStatus;
 import com.liquordb.user.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class AdminUserController {
 
     // 유저 전체 조회 및 검색
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public String userList(@RequestParam(required = false) String keyword,
                            @RequestParam(required = false) UserStatus status,
                            Model model) {
@@ -36,6 +38,7 @@ public class AdminUserController {
 
     // 유저별 리뷰 조회
     @GetMapping("/{userId}/reviews")
+    @PreAuthorize("hasRole('ADMIN')")
     public String userReviews(@PathVariable Long userId, Model model) {
         List<ReviewResponseDto> reviews = adminUserService.getUserReviews(userId);
         model.addAttribute("reviews", reviews);
@@ -44,6 +47,7 @@ public class AdminUserController {
 
     // 유저별 댓글 조회
     @GetMapping("/{userId}/comments")
+    @PreAuthorize("hasRole('ADMIN')")
     public String userComments(@PathVariable Long userId, Model model) {
         List<CommentResponseDto> comments = adminUserService.getUserComments(userId);
         model.addAttribute("comments", comments);
@@ -52,6 +56,7 @@ public class AdminUserController {
 
     // 유저 이용제한 처리
     @PostMapping("/{userId}/restrict")
+    @PreAuthorize("hasRole('ADMIN')")
     public String restrictUser(@PathVariable Long userId,
                                @RequestParam String period) {
         adminUserService.restrictUser(userId, period);

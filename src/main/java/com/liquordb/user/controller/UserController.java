@@ -1,5 +1,6 @@
 package com.liquordb.user.controller;
 
+import com.liquordb.liquor.dto.LiquorSummaryDto;
 import com.liquordb.user.dto.*;
 import com.liquordb.user.entity.User;
 import com.liquordb.user.service.UserService;
@@ -9,9 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 유저 컨트롤러 클래스입니다.
- * 유저 회원가입, 로그인, 아이디 찾기, 비밀번호 찾기, 회원 탈퇴, 마이페이지 조회 기능을 지원합니다.
+ * 유저 회원가입, 로그인, 아이디 찾기, 비밀번호 찾기, 회원 탈퇴, 마이페이지 조회, 선호 태그 기반 주류 추천 기능을 지원합니다.
  */
 
 @Slf4j // 로그
@@ -64,5 +67,11 @@ public class UserController {
                                                  @RequestBody UserUpdatePasswordDto dto) {
         userService.updatePassword(currentUser.getId(), dto);
         return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+    }
+
+    @GetMapping("/{userId}/preferred-liquors") // 선호 태그 기반 주류 추천
+    public ResponseEntity<List<LiquorSummaryDto>> getPreferredLiquors(@PathVariable Long userId) {
+        List<LiquorSummaryDto> liquors = userService.getLiquorsByUserPreferredTags(userId);
+        return ResponseEntity.ok(liquors);
     }
 }

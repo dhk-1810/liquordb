@@ -4,24 +4,30 @@ import com.liquordb.like.entity.LikeTargetType;
 import com.liquordb.liquor.dto.LiquorSummaryDto;
 
 import com.liquordb.liquor.repository.LiquorRepository;
+import com.liquordb.liquor.repository.LiquorTagRepository;
 import com.liquordb.review.dto.CommentResponseDto;
 import com.liquordb.review.dto.ReviewSummaryDto;
 import com.liquordb.tag.service.TagService;
 import com.liquordb.user.dto.*;
 import com.liquordb.user.entity.User;
+import com.liquordb.user.entity.UserLevel;
 import com.liquordb.user.entity.UserStatus;
+import com.liquordb.user.repository.UserLevelRepository;
 import com.liquordb.user.repository.UserRepository;
 import com.liquordb.review.repository.ReviewRepository;
 import com.liquordb.review.repository.CommentRepository;
 import com.liquordb.like.repository.LikeRepository;
 
+import com.liquordb.user.repository.UserTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,6 +42,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
+    private final UserTagRepository userTagRepository;
+    private final UserLevelRepository userLevelRepository;
+    private final LiquorTagRepository liquorTagRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
@@ -75,7 +84,7 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        return UserLoginResponseDto.fromEntity(user);
+        return UserLoginResponseDto.from(user);
     }
 
     // 비밀번호 찾기 (임시 비밀번호 발급)
@@ -109,12 +118,12 @@ public class UserService {
         User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        long reviewCount = reviewRepository.countByUserId(userId);
-        long commentCount = commentRepository.countByUserId(userId);
+        Long reviewCount = reviewRepository.countByUserId(userId);
+        Long commentCount = commentRepository.countByUserId(userId);
 
-        long likedLiquorCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.LIQUOR);
-        long likedReviewCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.REVIEW);
-        long likedCommentCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.COMMENT);
+        Long likedLiquorCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.LIQUOR);
+        Long likedReviewCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.REVIEW);
+        Long likedCommentCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.COMMENT);
 
         // 리뷰 작성 목록
         List<ReviewSummaryDto> reviewList = reviewRepository.findByUserId(userId).stream()
@@ -219,4 +228,46 @@ public class UserService {
         mailSender.send(message);
     }
 
+    /**
+     * 유저가 선택한 태그별로 주류 목록 조회
+     * @param userId 유저 아이디
+     * @return 유저가 선호하는 태그가 붙은 주류 리스트 (중복 제거)
+     */
+    @Transactional(readOnly = true)
+    public List<LiquorSummaryDto> getLiquorsByUserPreferredTags(Long userId) {
+        // 1. 유저가 선택한 태그 아이디 목록 조회
+        List<Long> preferredTagIds = userTagRepository.findTagIdsByUserId(userId);
+
+        if (preferredTagIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2. 해당 태그들을 가진 주류 아이디 목록 조회 (중복 가능)
+        List<Long> liquorIds = liquorTagRepository.findLiquorIdsByTagIds(preferredTagIds);
+
+        if (liquorIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 3. 중복 제거 및 주류 요약 DTO 리스트로 변환
+        return liquorRepository.findAllById(liquorIds).stream()
+                .map(LiquorSummaryDto::from)
+                .distinct()
+                .toList();
+    }
+
+    // 유저 레벨업
+    @Transactional
+    public void updateUserLevel(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        Long reviewCount = reviewRepository.countByUserId(userId);
+
+        // 조건을 만족하는 레벨 목록 중 가장 높은 레벨 선택
+        List<UserLevel> levels = userLevelRepository.findApplicableLevels(reviewCount);
+        if (!levels.isEmpty()) {
+            user.setUserLevel(levels.get(0));
+        }
+    }
 }

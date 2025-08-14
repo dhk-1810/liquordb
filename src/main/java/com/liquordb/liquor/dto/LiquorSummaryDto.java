@@ -4,8 +4,9 @@ import com.liquordb.liquor.entity.Liquor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 @AllArgsConstructor
 public class LiquorSummaryDto {

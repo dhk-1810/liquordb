@@ -2,18 +2,13 @@ package com.liquordb.review.dto;
 
 import com.liquordb.review.entity.Review;
 import com.liquordb.review.entity.ReviewImage;
-import com.liquordb.user.dto.UserAdminDto;
-import com.liquordb.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

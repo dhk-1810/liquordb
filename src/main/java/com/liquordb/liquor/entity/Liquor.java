@@ -7,7 +7,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -49,8 +51,8 @@ public class Liquor {
     @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
-    @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL)
-    private List<LiquorTag> liquorTags;
+    @OneToMany(mappedBy = "liquor")
+    private Set<LiquorTag> liquorTags = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

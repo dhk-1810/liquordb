@@ -3,15 +3,18 @@ package com.liquordb.user.dto;
 import com.liquordb.liquor.dto.LiquorSummaryDto;
 import com.liquordb.review.dto.CommentResponseDto;
 import com.liquordb.review.dto.ReviewResponseDto;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 /**
  * 유저 마이페이지 응답 DTO입니다.
  */
-@Data
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 @Builder
 public class UserMyPageResponseDto {
     private Long userId;

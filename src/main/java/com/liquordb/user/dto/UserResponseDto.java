@@ -1,14 +1,13 @@
 package com.liquordb.user.dto;
 
 import com.liquordb.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 @Builder
 public class UserResponseDto {
     private Long id;

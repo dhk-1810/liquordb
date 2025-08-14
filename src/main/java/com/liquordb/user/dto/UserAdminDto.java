@@ -2,15 +2,19 @@ package com.liquordb.user.dto;
 
 import com.liquordb.user.entity.User;
 import com.liquordb.user.entity.UserStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+/**
+ * AdminUserController, AdminUserService에서 사용하는 Response DTO입니다.
+ */
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
+@Builder
 public class UserAdminDto {
     private Long id;
     private String email;
@@ -18,14 +22,14 @@ public class UserAdminDto {
     private LocalDateTime createdAt;
     private UserStatus status;
 
-    // Entity 객체를 DTO 객체로 변환해주는 함수
+    // Entity 객체 -> DTO 객체 변환 메서드
     public static UserAdminDto from(User user) {
-        UserAdminDto dto = new UserAdminDto();
-        dto.setId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setNickname(user.getNickname());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setStatus(user.getStatus());
-        return dto;
+        return UserAdminDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .createdAt(user.getCreatedAt())
+                .status(user.getStatus())
+                .build();
     }
 }

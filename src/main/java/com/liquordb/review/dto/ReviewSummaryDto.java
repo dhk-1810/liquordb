@@ -1,17 +1,17 @@
 package com.liquordb.review.dto;
 
 import com.liquordb.review.entity.Review;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
-@Builder
+/**
+ * 리뷰 요약 Response DTO입니다
+ */
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ReviewSummaryDto {
     private Long id;            // 리뷰 ID
     private String title;       // 리뷰 제목

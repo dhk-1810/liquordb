@@ -17,13 +17,9 @@ public class ReportController {
 
     private final ReportService reportService;
 
-
     @PostMapping
-    public ResponseEntity<String> report(
-            @RequestBody ReportRequestDto dto,
-            @AuthenticationPrincipal User user
-    ) {
-        reportService.report(user, dto.getTargetId(), dto.getTargetType(), dto.getReason());
+    public ResponseEntity<String> createReport(@RequestBody ReportRequestDto dto) {
+        reportService.report(dto);
         return ResponseEntity.ok("신고가 접수되었습니다.");
     }
 }

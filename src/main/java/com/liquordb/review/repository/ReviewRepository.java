@@ -20,7 +20,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findAllByLiquorId(Long liquorId);
 
     // 특정 유저가 남긴 리뷰 개수
-    long countByUserId(Long userId);
+    Long countByUserId(Long userId);
 
     // 특정 유저가 남긴 리뷰 목록
     List<Review> findByUserId(Long userId);

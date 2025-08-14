@@ -1,7 +1,7 @@
 package com.liquordb.tag.mapper;
 
-import com.liquordb.liquor.dto.TagRequestDto;
-import com.liquordb.liquor.dto.TagResponseDto;
+import com.liquordb.tag.dto.TagRequestDto;
+import com.liquordb.tag.dto.TagResponseDto;
 import com.liquordb.tag.entity.Tag;
 
 public class TagMapper {
