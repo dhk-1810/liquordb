@@ -24,8 +24,4 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 특정 유저가 남긴 리뷰 목록
     List<Review> findByUserId(Long userId);
-
-    // 특정 유저가 남긴 리뷰id 목록 - 마이페이지에서 사용
-    @Query("SELECT DISTINCT r.liquor.id FROM Review r WHERE r.user.id = :userId")
-    List<Long> findDistinctLiquorIdsByUserId(@Param("userId") Long userId);
 }

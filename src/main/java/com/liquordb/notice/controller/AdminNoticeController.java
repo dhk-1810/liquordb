@@ -14,20 +14,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/admin/notices")
 public class AdminNoticeController {
 
     private final NoticeService noticeService;
 
     // 공지사항 등록
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<NoticeResponseDto> createNotice(@RequestBody NoticeRequestDto dto) {
         return ResponseEntity.ok(noticeService.createNotice(dto));
     }
 
     // 공지사항 수정
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long id,
                                                           @RequestBody NoticeRequestDto dto) {
@@ -35,7 +34,6 @@ public class AdminNoticeController {
     }
 
     // 공지사항 삭제
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotice(@PathVariable Long id) {
         noticeService.deleteNotice(id);

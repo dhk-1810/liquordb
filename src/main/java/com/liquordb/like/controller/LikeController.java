@@ -15,19 +15,12 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    // 좋아요 누르기
-    @PostMapping("/{userId}")
-    public ResponseEntity<LikeResponseDto> like(@PathVariable Long userId,
-                                                @RequestBody LikeRequestDto request) {
-        return ResponseEntity.ok(likeService.like(userId, request));
-    }
-
-    // 좋아요 취소
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> unlike(@PathVariable Long userId,
-                                       @RequestBody LikeRequestDto request) {
-        likeService.unlike(userId, request);
-        return ResponseEntity.noContent().build();
+    // 좋아요 토글 (누르기/취소)
+    @PostMapping("/{userId}/toggle")
+    public ResponseEntity<LikeResponseDto> toggleLike(@PathVariable Long userId,
+                                                            @RequestBody LikeRequestDto request) {
+        LikeResponseDto response = likeService.toggleLike(userId, request);
+        return ResponseEntity.ok(response);
     }
 
     // 좋아요 카운트 (주류, 리뷰, 댓글)

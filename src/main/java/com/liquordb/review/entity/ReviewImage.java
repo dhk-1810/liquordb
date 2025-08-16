@@ -9,8 +9,7 @@ import lombok.*;
  * 사진은 0장 이상 5장 이하 업로드 가능합니다.
  */
 @Entity
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -1,8 +1,5 @@
 package com.liquordb.tag.service;
 
-import com.liquordb.liquor.dto.LiquorSummaryDto;
-import com.liquordb.liquor.repository.LiquorRepository;
-import com.liquordb.liquor.repository.LiquorTagRepository;
 import com.liquordb.tag.dto.TagRequestDto;
 import com.liquordb.tag.dto.TagResponseDto;
 import com.liquordb.tag.entity.Tag;
@@ -20,8 +17,6 @@ import java.util.stream.Collectors;
 public class TagService {
 
     private final TagRepository tagRepository;
-    private final LiquorTagRepository liquorTagRepository;
-    private final LiquorRepository liquorRepository;
 
     // 특정 주류에 연결된 태그 이름 목록 반환
     @Transactional(readOnly = true)
@@ -42,22 +37,6 @@ public class TagService {
             return allTags;
         }
         return allTags.subList(0, 10);
-    }
-
-    // 태그 이름으로 주류 검색
-    @Transactional(readOnly = true)
-    public List<LiquorSummaryDto> getLiquorsByTagName(String tagName) {
-        // 태그 이름으로 태그 ID 찾기
-        List<Long> liquorIds = liquorTagRepository.findLiquorIdsByTagName(tagName);
-
-        if (liquorIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 주류 엔티티 찾아 DTO로 변환
-        return liquorRepository.findAllById(liquorIds).stream()
-                .map(LiquorSummaryDto::from)
-                .toList();
     }
 
     /**

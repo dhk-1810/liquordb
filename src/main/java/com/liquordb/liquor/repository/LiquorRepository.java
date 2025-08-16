@@ -75,24 +75,7 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long> {
     """)
     List<LiquorSummaryDto> findAllWithCategoryAndCounts();
 
-
     // 삭제되지 않은 주류 단건 조회
     Optional<Liquor> findByIdAndIsDeletedFalse(Long id);
 
-    // 태그로 주류 검색
-    @Query("""
-    SELECT new com.liquordb.liquor.dto.LiquorSummaryDto(
-        l.id, l.name, l.type, l.subcategory, l.imageUrl,
-        COUNT(DISTINCT r.id), COUNT(DISTINCT li.id)
-    )
-    FROM Liquor l
-    LEFT JOIN l.reviews r
-    LEFT JOIN l.likes li
-    JOIN l.tags t
-    JOIN l.liquorTags lt
-    JOIN lt.tag t
-    WHERE t.name = :tagName
-    GROUP BY l.id, l.name, l.type, l.subcategory, l.imageUrl
-    """)
-    List<LiquorSummaryDto> findSummaryByTagName(@Param("tagName") String tagName);
 }

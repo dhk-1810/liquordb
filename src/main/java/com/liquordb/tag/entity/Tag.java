@@ -1,6 +1,7 @@
 package com.liquordb.tag.entity;
 
 import com.liquordb.liquor.entity.LiquorTag;
+import com.liquordb.user.entity.UserTag;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Tag {
+
     @Id
     @Column
     private Long id;
@@ -25,6 +27,6 @@ public class Tag {
     @OneToMany(mappedBy = "tag")
     private Set<LiquorTag> liquorTags = new HashSet<>();
 
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
-    private List<UserTagPreference> userTagPreferences = new ArrayList<>();
+    @OneToMany(mappedBy = "tag")
+    private Set<UserTag> userTags = new HashSet<>();
 }

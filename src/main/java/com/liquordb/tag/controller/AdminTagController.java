@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin/tags")
 @RequiredArgsConstructor
 public class AdminTagController {
@@ -17,7 +18,6 @@ public class AdminTagController {
 
     // 태그 등록
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TagResponseDto> createTag(@RequestBody TagRequestDto requestDto) {
         TagResponseDto createdTag = tagService.createTag(requestDto);
         return ResponseEntity.ok(createdTag);
@@ -25,7 +25,6 @@ public class AdminTagController {
 
     // 태그 이름 변경
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TagResponseDto> updateTag(@PathVariable Long id,
                                                     @RequestBody TagRequestDto requestDto) {
         TagResponseDto updatedTag = tagService.renameTag(id, requestDto);
@@ -34,7 +33,6 @@ public class AdminTagController {
 
     // 태그 삭제
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
         tagService.deleteTag(id);
         return ResponseEntity.noContent().build();

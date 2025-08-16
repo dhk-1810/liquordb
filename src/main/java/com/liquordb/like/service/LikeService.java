@@ -1,6 +1,5 @@
 package com.liquordb.like.service;
 
-import com.liquordb.liquor.entity.Liquor;
 import com.liquordb.liquor.repository.LiquorRepository;
 import com.liquordb.review.repository.CommentRepository;
 import com.liquordb.like.dto.LikeRequestDto;
@@ -28,47 +27,44 @@ public class LikeService {
     private final CommentRepository commentRepository;
     private final LiquorRepository liquorRepository;
 
-    // 좋아요 누르기
+    // 좋아요 토글 (누르기/취소)
     @Transactional
-    public LikeResponseDto like(Long userId, LikeRequestDto request) {
+    public LikeResponseDto toggleLike(Long userId, LikeRequestDto request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
 
         validateTargetExists(request.getTargetId(), request.getTargetType());
 
         Optional<Like> existing = likeRepository.findByUserIdAndTargetIdAndTargetType(
                 userId, request.getTargetId(), request.getTargetType());
 
-        if (existing.isPresent()) {
-            throw new IllegalStateException("Already liked");
+        if (existing.isPresent()) { // 이미 좋아요 → 취소
+            likeRepository.delete(existing.get());
+            return LikeResponseDto.builder()
+                    .id(existing.get().getId())
+                    .userId(userId)
+                    .targetId(request.getTargetId())
+                    .targetType(request.getTargetType())
+                    .likedAt(null) // 좋아요 해제니까 null
+                    .build();
+        } else { // 좋아요 추가
+            Like like = Like.builder()
+                    .user(user)
+                    .targetId(request.getTargetId())
+                    .targetType(request.getTargetType())
+                    .likedAt(LocalDateTime.now())
+                    .build();
+
+            Like saved = likeRepository.save(like);
+
+            return LikeResponseDto.builder()
+                    .id(saved.getId())
+                    .userId(userId)
+                    .targetId(saved.getTargetId())
+                    .targetType(saved.getTargetType())
+                    .likedAt(saved.getLikedAt())
+                    .build();
         }
-
-        Like like = Like.builder()
-                .user(user)
-                .targetId(request.getTargetId())
-                .targetType(request.getTargetType())
-                .likedAt(LocalDateTime.now())
-                .build();
-
-        Like saved = likeRepository.save(like);
-
-        return LikeResponseDto.builder()
-                .id(saved.getId())
-                .userId(userId)
-                .targetId(saved.getTargetId())
-                .targetType(saved.getTargetType())
-                .likedAt(saved.getLikedAt())
-                .build();
-    }
-
-    // 좋아요 취소
-    @Transactional
-    public void unlike(Long userId, LikeRequestDto request) {
-        Like like = likeRepository.findByUserIdAndTargetIdAndTargetType(
-                userId, request.getTargetId(), request.getTargetType()
-        ).orElseThrow(() -> new IllegalArgumentException("Like not found"));
-
-        likeRepository.delete(like);
     }
 
     // 좋아요 카운트
@@ -77,11 +73,12 @@ public class LikeService {
         return likeRepository.countByTargetIdAndTargetType(targetId, type);
     }
 
+    // 검증
     private void validateTargetExists(Long targetId, LikeTargetType type) {
         switch (type) {
             case LIQUOR -> {
                 if (!liquorRepository.existsById(targetId)) {
-                    throw new RuntimeException("Liquor not found");
+                    throw new RuntimeException("존재하지 않는 주류입니다.");
                 }
             }
             case REVIEW -> {

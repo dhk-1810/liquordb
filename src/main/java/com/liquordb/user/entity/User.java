@@ -19,8 +19,7 @@ import java.util.Set;
 @Builder
 public class User {
 
-    // DB상 ID
-    @Id
+    @Id // DB상 ID
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

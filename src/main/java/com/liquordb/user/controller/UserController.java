@@ -52,8 +52,13 @@ public class UserController {
     public ResponseEntity<UserMyPageResponseDto> getMyPage(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "false") boolean showAllTags) {
-        return ResponseEntity.ok(userService.getMyPageInfo(userId, showAllTags));
+
+        UserMyPageResponseDto myPage = userService.getMyPageInfo(userId, showAllTags);
+
+        // 프론트는 myPage.getStatus()가 WARNED이면 팝업 표시 가능
+        return ResponseEntity.ok(myPage);
     }
+
 
     @PutMapping("/update") // 회원정보 수정 (프로필사진, 닉네임)
     public ResponseEntity<String> updateUser(@AuthenticationPrincipal User currentUser,

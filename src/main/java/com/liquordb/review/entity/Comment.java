@@ -44,9 +44,6 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User user;
 
-//    @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL)
-//    private List<Like> likes;
-
     @PrePersist // JPA(EntityManager)가 엔티티를 DB에 저장(Persist)하기 "바로 직전에 자동 호출되는 메서드"에 붙이는 어노테이션.
     public void onCreate() {
         createdAt = LocalDateTime.now();

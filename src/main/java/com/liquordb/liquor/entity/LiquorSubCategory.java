@@ -16,5 +16,5 @@ public class LiquorSubCategory {
     private String name; // 예: 페일에일, 바이젠, 스카치
 
     @Enumerated(EnumType.STRING)
-    private LiquorCategory type; // 대분류: BEER, WHISKEY 등
+    private LiquorCategory type; // 대분류: BEER, WHISKY 등
 }

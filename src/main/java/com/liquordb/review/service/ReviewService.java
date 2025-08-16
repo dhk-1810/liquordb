@@ -1,16 +1,23 @@
 package com.liquordb.review.service;
 
 import com.liquordb.liquor.entity.Liquor;
+import com.liquordb.liquor.entity.LiquorCategory;
 import com.liquordb.liquor.repository.LiquorRepository;
 import com.liquordb.review.dto.ReviewRequestDto;
 import com.liquordb.review.dto.ReviewResponseDto;
+import com.liquordb.review.dto.reviewdetaildto.BeerReviewDetailDto;
+import com.liquordb.review.dto.reviewdetaildto.WhiskyReviewDetailDto;
+import com.liquordb.review.dto.reviewdetaildto.WineReviewDetailDto;
 import com.liquordb.review.entity.Review;
 import com.liquordb.review.entity.ReviewImage;
+import com.liquordb.review.entity.reviewdetail.BeerReviewDetail;
+import com.liquordb.review.entity.reviewdetail.ReviewDetail;
+import com.liquordb.review.entity.reviewdetail.WhiskyReviewDetail;
+import com.liquordb.review.entity.reviewdetail.WineReviewDetail;
+import com.liquordb.review.repository.ReviewDetailRepository;
 import com.liquordb.review.repository.ReviewImageRepository;
 import com.liquordb.review.repository.ReviewRepository;
-import com.liquordb.user.UserValidator;
 import com.liquordb.user.entity.User;
-import com.liquordb.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +32,8 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
-    private final UserRepository userRepository;
     private final LiquorRepository liquorRepository;
-    private final UserValidator userValidator;
+    private final ReviewDetailRepository reviewDetailRepository;
 
     // 리뷰 등록
     @Transactional
@@ -40,12 +46,57 @@ public class ReviewService {
                 .user(user)
                 .liquor(liquor)
                 .rating(dto.getRating())
+                .title(dto.getTitle())
+                .content(dto.getContent())
                 .build();
 
         reviewRepository.save(review);
 
-        List<ReviewImage> images = Optional.ofNullable(dto.getImageUrls())
-                .orElse(Collections.emptyList()).stream()
+        // 주종별 디테일 저장
+        ReviewDetail detail = switch (liquor.getCategory()) {
+            case BEER -> {
+                BeerReviewDetailDto detailDto = dto.getBeerDetail();
+                yield (detailDto != null) ? BeerReviewDetail.builder()
+                        .review(review)
+                        .aroma(detailDto.getAroma())
+                        .taste(detailDto.getTaste())
+                        .headRetention(detailDto.getHeadRetention())
+                        .look(detailDto.getLook())
+                        .build() : null;
+            }
+            case WINE -> {
+                WineReviewDetailDto detailDto = dto.getWineDetail();
+                yield (detailDto != null) ? WineReviewDetail.builder()
+                        .review(review)
+                        .sweetness(detailDto.getSweetness())
+                        .acidity(detailDto.getAcidity())
+                        .body(detailDto.getBody())
+                        .tannin(detailDto.getTannin())
+                        .build() : null;
+            }
+            case WHISKY -> {
+                WhiskyReviewDetailDto detailDto = dto.getWhiskyDetail();
+                yield (detailDto != null) ? WhiskyReviewDetail.builder()
+                        .review(review)
+                        .aroma(detailDto.getAroma())
+                        .taste(detailDto.getTaste())
+                        .finish(detailDto.getFinish())
+                        .body(detailDto.getBody())
+                        .build() : null;
+            }
+            default -> null;
+        };
+
+        if (detail != null) {
+            review.setDetail(detail);  // 연관관계 주입
+            reviewDetailRepository.save(detail); // 단일 repository
+        }
+
+        // 이미지 업로드 (addImageUrls 사용)
+        List<String> imagesToAdd = Optional.ofNullable(dto.getAddImageUrls())
+                .orElse(Collections.emptyList());
+
+        List<ReviewImage> images = imagesToAdd.stream()
                 .map(url -> ReviewImage.builder()
                         .review(review)
                         .imageUrl(url)
@@ -72,28 +123,54 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다."));
 
-        // 작성자 본인만 수정 가능
+        // 작성자 확인
         if (!review.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("리뷰를 수정할 권한이 없습니다.");
         }
 
-        // 내용 수정
+        // 공통 필드 수정
         review.setRating(dto.getRating());
         review.setTitle(dto.getTitle());
         review.setContent(dto.getContent());
 
-        // 이미지 수정
-        reviewImageRepository.deleteAll(review.getImages()); // 기존 이미지 삭제
+        // 기존 이미지 제거 / 새 이미지 추가
+        List<String> imagesToAdd = Optional.ofNullable(dto.getAddImageUrls()).orElse(Collections.emptyList());
+        List<String> imagesToRemove = Optional.ofNullable(dto.getRemoveImageUrls()).orElse(Collections.emptyList());
 
-        List<ReviewImage> newImages = Optional.ofNullable(dto.getImageUrls())
-                .orElse(Collections.emptyList()).stream()
-                .map(url -> ReviewImage.builder()
+        review.getImages().removeIf(img -> imagesToRemove.contains(img.getImageUrl()));
+
+        imagesToAdd.forEach(url -> review.getImages().add(
+                ReviewImage.builder()
                         .review(review)
                         .imageUrl(url)
-                        .build())
-                .toList();
+                        .build()
+        ));
 
-        reviewImageRepository.saveAll(newImages);
+        // 주종별 디테일 수정
+        ReviewDetail detail = review.getDetail();
+        if (detail instanceof BeerReviewDetail beerDetail && dto.getBeerDetail() != null) {
+            beerDetail.setAroma(dto.getBeerDetail().getAroma());
+            beerDetail.setTaste(dto.getBeerDetail().getTaste());
+            beerDetail.setHeadRetention(dto.getBeerDetail().getHeadRetention());
+            beerDetail.setLook(dto.getBeerDetail().getLook());
+        } else if (detail instanceof WineReviewDetail wineDetail && dto.getWineDetail() != null) {
+            wineDetail.setBody(dto.getWineDetail().getBody());
+            wineDetail.setSweetness(dto.getWineDetail().getSweetness());
+            wineDetail.setAcidity(dto.getWineDetail().getAcidity());
+            wineDetail.setTannin(dto.getWineDetail().getTannin());
+        } else if (detail instanceof WhiskyReviewDetail whiskyDetail && dto.getWhiskyDetail() != null) {
+            whiskyDetail.setAroma(dto.getWhiskyDetail().getAroma());
+            whiskyDetail.setTaste(dto.getWhiskyDetail().getTaste());
+            whiskyDetail.setFinish(dto.getWhiskyDetail().getFinish());
+            whiskyDetail.setBody(dto.getWhiskyDetail().getBody());
+        }
+
+        reviewRepository.save(review);
+
+        // DTO로 변환 후 반환
+        List<String> imageUrls = review.getImages().stream()
+                .map(ReviewImage::getImageUrl)
+                .toList();
 
         return ReviewResponseDto.builder()
                 .id(review.getId())
@@ -102,7 +179,7 @@ public class ReviewService {
                 .rating(review.getRating())
                 .title(review.getTitle())
                 .content(review.getContent())
-                .imageUrls(newImages.stream().map(ReviewImage::getImageUrl).toList())
+                .imageUrls(imageUrls)
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
                 .build();

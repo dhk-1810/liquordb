@@ -1,6 +1,8 @@
 package com.liquordb.review.dto;
 
-import com.liquordb.review.dto.detaildto.ReviewDetailDto;
+import com.liquordb.review.dto.reviewdetaildto.BeerReviewDetailDto;
+import com.liquordb.review.dto.reviewdetaildto.WhiskyReviewDetailDto;
+import com.liquordb.review.dto.reviewdetaildto.WineReviewDetailDto;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
@@ -22,6 +24,13 @@ public class ReviewRequestDto {
 
     @NotBlank(message = "내용을 입력해주세요.")
     private String content;
-    private ReviewDetailDto detail;
-    private List<String> imageUrls; // 선택
+
+    // 주종별 디테일 정보
+    private BeerReviewDetailDto beerDetail;
+    private WineReviewDetailDto wineDetail;
+    private WhiskyReviewDetailDto whiskyDetail;
+
+    // 이미지 추가/삭제 리스트
+    private List<String> addImageUrls;
+    private List<String> removeImageUrls;
 }

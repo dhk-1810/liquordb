@@ -38,7 +38,7 @@ public class LiquorService {
             return liquorRepository.findAllWithCategoryAndCounts();
         } else if (type != null && subcategory == null) {
             return liquorRepository.findSummaryByType(type); // 대분류로 필터링
-        } else /* (type == null && subcategory != null) */ {
+        } else /* (subcategory != null) */ {
             return liquorRepository.findSummaryBySubcategory(subcategory); // 소분류로 필터링
         }
     }
@@ -48,23 +48,7 @@ public class LiquorService {
         return liquorRepository.findSummaryByNameContaining(keyword);
     }
 
-    // 3. 유저가 리뷰 남긴 주류 목록 - 마이페이지
-    public List<LiquorSummaryDto> getLiquorsReviewedByUser(Long userId) {
-        List<Long> liquorIds = reviewRepository.findDistinctLiquorIdsByUserId(userId);
-        return liquorRepository.findAllById(liquorIds).stream()
-                .map(LiquorSummaryDto::from)
-                .toList();
-    }
-
-    // 4. 유저가 댓글 남긴 주류 목록 - 마이페이지
-    public List<LiquorSummaryDto> getLiquorsCommentedByUser(Long userId) {
-        List<Long> liquorIds = commentRepository.findDistinctLiquorIdsByUserId(userId);
-        return liquorRepository.findAllById(liquorIds).stream()
-                .map(LiquorSummaryDto::from)
-                .toList();
-    }
-
-    // 5. 주류 상세 페이지
+    // 3. 주류 상세 페이지
     @Transactional(readOnly = true)
     public LiquorResponseDto getLiquorDetail(Long liquorId, Long currentUserId) {
 

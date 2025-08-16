@@ -1,15 +1,12 @@
-package com.liquordb.review.dto.detaildto;
+package com.liquordb.review.dto.reviewdetaildto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BeerReviewDetailDto implements ReviewDetailDto {
+public class BeerReviewDetailDto {
     private Double aroma; // 향 평가
     private Double taste; // 맛 평가
     private Double headRetention; // 거품 지속력

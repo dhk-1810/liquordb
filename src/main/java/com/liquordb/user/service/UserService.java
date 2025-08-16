@@ -6,6 +6,7 @@ import com.liquordb.liquor.dto.LiquorSummaryDto;
 import com.liquordb.liquor.repository.LiquorRepository;
 import com.liquordb.liquor.repository.LiquorTagRepository;
 import com.liquordb.review.dto.CommentResponseDto;
+import com.liquordb.review.dto.ReviewResponseDto;
 import com.liquordb.review.dto.ReviewSummaryDto;
 import com.liquordb.tag.service.TagService;
 import com.liquordb.user.dto.*;
@@ -118,12 +119,12 @@ public class UserService {
         User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        Long reviewCount = reviewRepository.countByUserId(userId);
-        Long commentCount = commentRepository.countByUserId(userId);
+        long reviewCount = reviewRepository.countByUserId(userId);
+        long commentCount = commentRepository.countByUserId(userId);
 
-        Long likedLiquorCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.LIQUOR);
-        Long likedReviewCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.REVIEW);
-        Long likedCommentCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.COMMENT);
+        long likedLiquorCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.LIQUOR);
+        long likedReviewCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.REVIEW);
+        long likedCommentCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.COMMENT);
 
         // 리뷰 작성 목록
         List<ReviewSummaryDto> reviewList = reviewRepository.findByUserId(userId).stream()
@@ -165,8 +166,10 @@ public class UserService {
                 .filter(Objects::nonNull)
                 .toList();
 
+        //
         // 등록한(=선호하는) 태그 목록
         List<String> preferredTags = tagService.getPreferredTagsForUser(userId, showAllTags);
+
 
         return UserMyPageResponseDto.builder()
                 .userId(user.getId())
@@ -178,6 +181,11 @@ public class UserService {
                 .likedLiquorCount(likedLiquorCount)
                 .likedReviewCount(likedReviewCount)
                 .likedCommentCount(likedCommentCount)
+                .likedLiquors(likedLiquors)
+                .likedReviews(likedReviews)
+                .likedComments(likedComments)
+                .reviewList(reviewList)
+                .commentList(commentList)
                 .preferredTags(preferredTags)
                 .build();
     }
@@ -271,3 +279,4 @@ public class UserService {
         }
     }
 }
+
