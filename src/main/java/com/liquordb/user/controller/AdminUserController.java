@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 관리자용 유저 컨트롤러 클래스입니다.
  */
-@Controller
+@RestController
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
