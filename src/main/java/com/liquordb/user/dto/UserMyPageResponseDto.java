@@ -21,7 +21,6 @@ public class UserMyPageResponseDto {
     private Long userId;
     private String email;
     private String nickname;
-    private String level;
 
     private long likedLiquorCount;     // 주류 좋아요 수
     private long likedReviewCount;     // 리뷰 좋아요 수

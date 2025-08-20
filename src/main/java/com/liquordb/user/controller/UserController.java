@@ -79,11 +79,4 @@ public class UserController {
         List<LiquorSummaryDto> liquors = userService.getLiquorsByUserPreferredTags(userId);
         return ResponseEntity.ok(liquors);
     }
-
-    // 유저 레벨 업데이트 (리뷰 수 기준)
-    @PostMapping("/{userId}/level-up")
-    public ResponseEntity<Void> updateUserLevel(@PathVariable Long userId) {
-        userService.updateUserLevel(userId);
-        return ResponseEntity.ok().build();
-    }
 }

@@ -49,10 +49,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserTag> userTags = new HashSet<>();
 
-    @OneToOne
-    @JoinColumn(name = "user_level_id")
-    private UserLevel userLevel;
-
     private UserStatus status;
 
     // 활동 제한 해제 일시

@@ -6,14 +6,11 @@ import com.liquordb.liquor.dto.LiquorSummaryDto;
 import com.liquordb.liquor.repository.LiquorRepository;
 import com.liquordb.liquor.repository.LiquorTagRepository;
 import com.liquordb.review.dto.CommentResponseDto;
-import com.liquordb.review.dto.ReviewResponseDto;
 import com.liquordb.review.dto.ReviewSummaryDto;
 import com.liquordb.tag.service.TagService;
 import com.liquordb.user.dto.*;
 import com.liquordb.user.entity.User;
-import com.liquordb.user.entity.UserLevel;
 import com.liquordb.user.entity.UserStatus;
-import com.liquordb.user.repository.UserLevelRepository;
 import com.liquordb.user.repository.UserRepository;
 import com.liquordb.review.repository.ReviewRepository;
 import com.liquordb.review.repository.CommentRepository;
@@ -44,7 +41,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserTagRepository userTagRepository;
-    private final UserLevelRepository userLevelRepository;
     private final LiquorTagRepository liquorTagRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
@@ -175,7 +171,6 @@ public class UserService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-                .level(user.getUserLevel().getName())
                 .reviewCount(reviewCount)
                 .commentCount(commentCount)
                 .likedLiquorCount(likedLiquorCount)
@@ -262,21 +257,6 @@ public class UserService {
                 .map(LiquorSummaryDto::from)
                 .distinct()
                 .toList();
-    }
-
-    // 유저 레벨업
-    @Transactional
-    public void updateUserLevel(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
-        Long reviewCount = reviewRepository.countByUserId(userId);
-
-        // 조건을 만족하는 레벨 목록 중 가장 높은 레벨 선택
-        List<UserLevel> levels = userLevelRepository.findApplicableLevels(reviewCount);
-        if (!levels.isEmpty()) {
-            user.setUserLevel(levels.get(0));
-        }
     }
 }
 
