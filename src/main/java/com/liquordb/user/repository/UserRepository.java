@@ -13,13 +13,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 전체 유저 조회 (관리자용)
     List<User> findAll();
-    Optional<User> findByIdAndIsDeletedFalse(Long id);
+    Optional<User> findByIdAndStatusNot(Long id, UserStatus status);
 
     // 가입된 사용자의 User객체 반환
-    Optional<User> findByEmailAndIsDeletedFalse(String email);
+    Optional<User> findByEmailAndStatusNot(String email, UserStatus status);
 
     // 이미 가입된 이메일인지 확인 (회원가입 시)
-    boolean existsByEmailAndIsDeletedFalse(String email);
+    boolean existsByEmailAndStatusNot(String email, UserStatus status);
 
     @Query("""
         SELECT u FROM User u

@@ -6,8 +6,9 @@ import com.liquordb.liquor.dto.LiquorRequestDto;
 import com.liquordb.liquor.dto.LiquorResponseDto;
 import com.liquordb.liquor.dto.LiquorSummaryDto;
 import com.liquordb.liquor.entity.Liquor;
-import com.liquordb.liquor.entity.LiquorSubCategory;
+import com.liquordb.liquor.entity.LiquorSubcategory;
 import com.liquordb.liquor.entity.LiquorCategory;
+import com.liquordb.liquor.entity.LiquorSubcategory;
 import com.liquordb.liquor.repository.LiquorRepository;
 import com.liquordb.review.dto.ReviewResponseDto;
 import com.liquordb.review.repository.CommentRepository;
@@ -31,13 +32,13 @@ public class LiquorService {
     private final TagService tagService;
 
     // 1. 주류 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
-    public List<LiquorSummaryDto> getLiquorsByFilters(LiquorCategory type, LiquorSubCategory subcategory) {
+    public List<LiquorSummaryDto> getLiquorsByFilters(LiquorCategory category, LiquorSubcategory subcategory) {
         List<LiquorSummaryDto> liquors;
 
-        if (type == null && subcategory == null) { // 전체 주류 조회
+        if (category == null && subcategory == null) { // 전체 주류 조회
             return liquorRepository.findAllWithCategoryAndCounts();
-        } else if (type != null && subcategory == null) {
-            return liquorRepository.findSummaryByType(type); // 대분류로 필터링
+        } else if (category != null && subcategory == null) {
+            return liquorRepository.findSummaryByCategory(category); // 대분류로 필터링
         } else /* (subcategory != null) */ {
             return liquorRepository.findSummaryBySubcategory(subcategory); // 소분류로 필터링
         }
@@ -53,7 +54,7 @@ public class LiquorService {
     public LiquorResponseDto getLiquorDetail(Long liquorId, Long currentUserId) {
 
         // 주류 정보 조회 (삭제되지 않은 것만)
-        Liquor liquor = liquorRepository.findByIdAndIsDeletedFalse(liquorId)
+        Liquor liquor = liquorRepository.findByIdAndIsHiddenFalse(liquorId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주류를 찾을 수 없습니다."));
 
         // 리뷰 평균 점수 및 개수
@@ -76,7 +77,7 @@ public class LiquorService {
                 .id(liquor.getId())
                 .name(liquor.getName())
                 .category(liquor.getCategory())
-                .subcategory(liquor.getSubCategory())
+                .subcategory(liquor.getSubcategory())
                 .country(liquor.getCountry())
                 .manufacturer(liquor.getManufacturer())
                 .abv(liquor.getAbv())
@@ -101,7 +102,7 @@ public class LiquorService {
         Liquor liquor = Liquor.builder()
                 .name(dto.getName())
                 .category(dto.getCategory())
-                .subCategory(dto.getSubcategory())
+                .subcategory(dto.getSubcategory())
                 .country(dto.getCountry())
                 .manufacturer(dto.getManufacturer())
                 .abv(dto.getAbv())

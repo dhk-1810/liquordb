@@ -53,7 +53,7 @@ public class UserService {
 
     // 회원가입
     public UserResponseDto register(UserRegisterRequestDto dto) {
-        if (userRepository.existsByEmailAndIsDeletedFalse(dto.getEmail())) {
+        if (userRepository.existsByEmailAndStatusNot(dto.getEmail(), UserStatus.WITHDRAWN)) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
@@ -74,7 +74,7 @@ public class UserService {
         String email = dto.getEmail();
         String pw = dto.getPassword();
 
-        User user = userRepository.findByEmailAndIsDeletedFalse(email)
+        User user = userRepository.findByEmailAndStatusNot(email, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
 
         if (!passwordEncoder.matches(pw, user.getPassword())) {
@@ -86,7 +86,7 @@ public class UserService {
 
     // 비밀번호 찾기 (임시 비밀번호 발급)
     public void findPasswordAndSend(UserFindPasswordRequestDto dto) {
-        User user = userRepository.findByEmailAndIsDeletedFalse(dto.getEmail())
+        User user = userRepository.findByEmailAndStatusNot(dto.getEmail(), UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 사용자가 없습니다."));
 
         String tempPassword = UUID.randomUUID().toString().substring(0, 8);
@@ -112,7 +112,7 @@ public class UserService {
 
     // 마이페이지
     public UserMyPageResponseDto getMyPageInfo(Long userId, boolean showAllTags) {
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
         long reviewCount = reviewRepository.countByUserId(userId);
@@ -187,7 +187,7 @@ public class UserService {
 
     // 회원정보수정 (프사, 닉네임)
     public void updateUser(Long userId, UserUpdateRequestDto dto) {
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
 
         if (dto.getNickname() != null) {
@@ -204,7 +204,7 @@ public class UserService {
 
     // 비밀번호 재설정
     public void updatePassword(Long userId, UserUpdatePasswordDto dto) {
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
 
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {

@@ -2,10 +2,8 @@ package com.liquordb.liquor.controller;
 
 import com.liquordb.liquor.dto.LiquorResponseDto;
 import com.liquordb.liquor.dto.LiquorSummaryDto;
-import com.liquordb.liquor.entity.Liquor;
-import com.liquordb.liquor.entity.LiquorSubCategory;
+import com.liquordb.liquor.entity.LiquorSubcategory;
 import com.liquordb.liquor.entity.LiquorCategory;
-import com.liquordb.liquor.repository.LiquorRepository;
 import com.liquordb.liquor.service.LiquorService;
 import com.liquordb.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +30,7 @@ public class LiquorController {
     @GetMapping
     public ResponseEntity<List<LiquorSummaryDto>> getLiquorsByFilters(
             @RequestParam(required = false) LiquorCategory type,
-            @RequestParam(required = false) LiquorSubCategory subcategory) {
+            @RequestParam(required = false) LiquorSubcategory subcategory) {
         return ResponseEntity.ok(liquorService.getLiquorsByFilters(type, subcategory));
     }
 

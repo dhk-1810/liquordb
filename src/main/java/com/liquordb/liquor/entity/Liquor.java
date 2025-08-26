@@ -1,5 +1,6 @@
 package com.liquordb.liquor.entity;
 
+import com.liquordb.like.entity.Like;
 import com.liquordb.liquor.dto.LiquorRequestDto;
 import com.liquordb.review.entity.Review;
 import jakarta.persistence.*;
@@ -35,7 +36,7 @@ public class Liquor {
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private LiquorSubCategory subCategory; // 주종 소분류
+    private LiquorSubcategory subcategory; // 주종 소분류
 
     private String country; // 제조국
     private String manufacturer; // 제조사
@@ -76,7 +77,7 @@ public class Liquor {
     public void updateFromDto(LiquorRequestDto dto) {
         this.name = dto.getName();
         this.category = dto.getCategory();
-        this.subCategory = dto.getSubcategory();
+        this.subcategory = dto.getSubcategory();
         this.imageUrl = dto.getImageUrl();
     }
 }

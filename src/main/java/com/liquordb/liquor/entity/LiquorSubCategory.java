@@ -7,7 +7,7 @@ import jakarta.persistence.*;
  */
 
 @Entity
-public class LiquorSubCategory {
+public class LiquorSubcategory {
 
     @Id
     @GeneratedValue
@@ -16,5 +16,5 @@ public class LiquorSubCategory {
     private String name; // 예: 페일에일, 바이젠, 스카치
 
     @Enumerated(EnumType.STRING)
-    private LiquorCategory type; // 대분류: BEER, WHISKY 등
+    private LiquorCategory category; // 대분류: BEER, WHISKY 등
 }

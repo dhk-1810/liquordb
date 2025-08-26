@@ -37,7 +37,7 @@ public class User {
 
     private String profileImageUrl;
 
-    @Enumerated(EnumType.STRING) //
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

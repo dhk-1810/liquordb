@@ -19,6 +19,7 @@ public class Like {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     private Long targetId; // Liquor의 Id, Review의 Id, Comment의 Id

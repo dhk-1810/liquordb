@@ -1,6 +1,7 @@
 package com.liquordb.user.service;
 
 import com.liquordb.user.entity.User;
+import com.liquordb.user.entity.UserStatus;
 import com.liquordb.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -56,7 +57,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         // 이메일로 유저 조회 또는 새로 생성
-        User user = userRepository.findByEmailAndIsDeletedFalse(email)
+        User user = userRepository.findByEmailAndStatusNot(email, UserStatus.WITHDRAWN)
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email(email)
                         .nickname(name != null ? name : "noname")
