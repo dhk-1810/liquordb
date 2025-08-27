@@ -1,14 +1,13 @@
 package com.liquordb.liquor.service;
 
 import com.liquordb.like.entity.LikeTargetType;
-import com.liquordb.like.repository.LikeRepository;
+import com.liquordb.like.repository.LiquorLikeRepository;
 import com.liquordb.liquor.dto.LiquorRequestDto;
 import com.liquordb.liquor.dto.LiquorResponseDto;
 import com.liquordb.liquor.dto.LiquorSummaryDto;
 import com.liquordb.liquor.entity.Liquor;
 import com.liquordb.liquor.entity.LiquorSubcategory;
 import com.liquordb.liquor.entity.LiquorCategory;
-import com.liquordb.liquor.entity.LiquorSubcategory;
 import com.liquordb.liquor.repository.LiquorRepository;
 import com.liquordb.review.dto.ReviewResponseDto;
 import com.liquordb.review.repository.CommentRepository;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LiquorService {
 
-    private final LikeRepository likeRepository;
+    private final LiquorLikeRepository liquorLikeRepository;
     private final LiquorRepository liquorRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
@@ -65,10 +64,10 @@ public class LiquorService {
                 .toList();
 
         // 좋아요 개수
-        long likeCount = likeRepository.countByTargetIdAndTargetType(liquorId, LikeTargetType.LIQUOR);
+        long likeCount = liquorLikeRepository.countByLiquorId(liquorId);
 
         // 유저별 좋아요 여부
-        boolean likedByMe = likeRepository.existsByUserIdAndTargetIdAndTargetType(currentUserId, liquorId, LikeTargetType.LIQUOR);
+        boolean likedByMe = liquorLikeRepository.existsByUserIdAndLiquorId(currentUserId, liquorId);
 
         // 태그 정보
         List<String> tags = tagService.getTagsForLiquor(liquorId);

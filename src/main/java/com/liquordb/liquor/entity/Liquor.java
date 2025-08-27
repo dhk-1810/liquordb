@@ -1,16 +1,13 @@
 package com.liquordb.liquor.entity;
 
-import com.liquordb.like.entity.Like;
+import com.liquordb.like.entity.LiquorLike;
 import com.liquordb.liquor.dto.LiquorRequestDto;
 import com.liquordb.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -48,6 +45,9 @@ public class Liquor {
     private String imageUrl; // 대표 이미지 사진 저장경로
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LiquorLike> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL)
     private List<Review> reviews;

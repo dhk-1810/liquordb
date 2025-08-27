@@ -1,6 +1,8 @@
 package com.liquordb.user.service;
 
-import com.liquordb.like.entity.LikeTargetType;
+import com.liquordb.like.repository.CommentLikeRepository;
+import com.liquordb.like.repository.LiquorLikeRepository;
+import com.liquordb.like.repository.ReviewLikeRepository;
 import com.liquordb.liquor.dto.LiquorSummaryDto;
 
 import com.liquordb.liquor.repository.LiquorRepository;
@@ -14,7 +16,6 @@ import com.liquordb.user.entity.UserStatus;
 import com.liquordb.user.repository.UserRepository;
 import com.liquordb.review.repository.ReviewRepository;
 import com.liquordb.review.repository.CommentRepository;
-import com.liquordb.like.repository.LikeRepository;
 
 import com.liquordb.user.repository.UserTagRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,11 +45,12 @@ public class UserService {
     private final LiquorTagRepository liquorTagRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
-    private final LikeRepository likeRepository;
     private final LiquorRepository liquorRepository;
+    private final LiquorLikeRepository liquorLikeRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     private final TagService tagService;
-    private final UserService userService;
     private final FileUploadService fileUploadService;
 
     // 회원가입
@@ -94,7 +96,7 @@ public class UserService {
         userRepository.save(user);
 
         // 이메일 전송
-        userService.sendTempPassword(user.getEmail(), tempPassword);
+        sendTempPassword(user.getEmail(), tempPassword);
     }
 
     // 회원 탈퇴 (soft delete)
@@ -118,9 +120,9 @@ public class UserService {
         long reviewCount = reviewRepository.countByUserId(userId);
         long commentCount = commentRepository.countByUserId(userId);
 
-        long likedLiquorCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.LIQUOR);
-        long likedReviewCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.REVIEW);
-        long likedCommentCount = likeRepository.countByUserIdAndTargetType(userId, LikeTargetType.COMMENT);
+        long likedLiquorCount = liquorLikeRepository.countByUserId(userId);
+        long likedReviewCount = reviewLikeRepository.countByUserId(userId);
+        long likedCommentCount = commentLikeRepository.countByUserId(userId);
 
         // 리뷰 작성 목록
         List<ReviewSummaryDto> reviewList = reviewRepository.findByUserId(userId).stream()
@@ -131,32 +133,32 @@ public class UserService {
         List<CommentResponseDto> commentList = commentRepository.findByUserId(userId).stream()
                 .map(comment -> CommentResponseDto.from(
                         comment,
-                        likeRepository.countByTargetIdAndTargetType(comment.getId(), LikeTargetType.COMMENT)
+                        commentLikeRepository.countByCommentId(comment.getId())
                 ))
                 .toList();
 
         // 좋아요한 주류 목록
-        List<LiquorSummaryDto> likedLiquors = likeRepository.findByUserIdAndTargetType(userId, LikeTargetType.LIQUOR).stream()
-                .map(like -> liquorRepository.findById(like.getTargetId())
+        List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUserId(userId).stream()
+                .map(like -> liquorRepository.findById(like.getLiquor().getId())
                         .map(LiquorSummaryDto::from)
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .toList();
 
         // 좋아요한 리뷰 목록
-        List<ReviewSummaryDto> likedReviews = likeRepository.findByUserIdAndTargetType(userId, LikeTargetType.REVIEW).stream()
-                .map(like -> reviewRepository.findById(like.getTargetId())
+        List<ReviewSummaryDto> likedReviews = reviewLikeRepository.findByUserId(userId).stream()
+                .map(like -> reviewRepository.findById(like.getReview().getId())
                         .map(ReviewSummaryDto::from)
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .toList();
 
         // 좋아요한 댓글 목록 (likeCount 포함)
-        List<CommentResponseDto> likedComments = likeRepository.findByUserIdAndTargetType(userId, LikeTargetType.COMMENT).stream()
-                .map(like -> commentRepository.findById(like.getTargetId())
+        List<CommentResponseDto> likedComments = commentLikeRepository.findByUserId(userId).stream()
+                .map(like -> commentRepository.findById(like.getComment().getId())
                         .map(comment -> CommentResponseDto.from(
                                 comment,
-                                likeRepository.countByTargetIdAndTargetType(comment.getId(), LikeTargetType.COMMENT)
+                                commentLikeRepository.countByCommentId(comment.getId())
                         ))
                         .orElse(null))
                 .filter(Objects::nonNull)

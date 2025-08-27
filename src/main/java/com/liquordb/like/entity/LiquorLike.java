@@ -1,5 +1,6 @@
 package com.liquordb.like.entity;
 
+import com.liquordb.liquor.entity.Liquor;
 import com.liquordb.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,8 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "likes")
-public class Like {
+@Table(name = "liquor_likes")
+public class LiquorLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +23,11 @@ public class Like {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private Long targetId; // Liquor의 Id, Review의 Id, Comment의 Id
+    @ManyToOne
+    @JoinColumn(name = "liquor_id")
+    private Liquor liquor;
 
-    @Enumerated(EnumType.STRING)
-    private LikeTargetType targetType; // Liquor, Review, Comment
-
+    @Column(nullable = false, updatable = false)
     private LocalDateTime likedAt;
 
     @PrePersist

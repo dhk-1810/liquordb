@@ -1,6 +1,8 @@
 package com.liquordb.user.entity;
 
-import com.liquordb.like.entity.Like;
+import com.liquordb.like.entity.CommentLike;
+import com.liquordb.like.entity.LiquorLike;
+import com.liquordb.like.entity.ReviewLike;
 import com.liquordb.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,7 +46,13 @@ public class User {
     private List<Review> reviews;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes = new ArrayList<>();
+    private List<LiquorLike> liquorLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewLike> reviewLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLike> commentLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserTag> userTags = new HashSet<>();

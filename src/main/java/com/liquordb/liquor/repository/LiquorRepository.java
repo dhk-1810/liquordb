@@ -22,12 +22,12 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long> {
             sc.name,
             l.imageUrl,
             COUNT(DISTINCT r.id),
-            COUNT(DISTINCT lk.id)
+            COUNT(DISTINCT ll.id)
         )
         FROM Liquor l
         JOIN l.subcategory sc
         LEFT JOIN l.reviews r
-        LEFT JOIN Like lk ON lk.targetType = com.liquordb.like.entity.LikeTargetType.LIQUOR AND lk.targetId = l.id
+        LEFT JOIN LiquorLike ll ON ll.liquor = l
         GROUP BY l.id, l.name, l.category, sc.name, l.imageUrl
     """)
     List<LiquorSummaryDto> findAllWithCategoryAndCounts();
@@ -41,12 +41,12 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long> {
             sc.name,
             l.imageUrl,
             COUNT(DISTINCT r.id),
-            COUNT(DISTINCT lk.id)
+            COUNT(DISTINCT ll.id)
         )
         FROM Liquor l
         JOIN l.subcategory sc
         LEFT JOIN l.reviews r
-        LEFT JOIN Like lk ON lk.targetType = com.liquordb.like.entity.LikeTargetType.LIQUOR AND lk.targetId = l.id
+        LEFT JOIN LiquorLike ll ON ll.liquor = l
         WHERE l.name LIKE %:keyword%
         GROUP BY l.id, l.name, l.category, sc.name, l.imageUrl
     """)
@@ -61,12 +61,12 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long> {
             sc.name,
             l.imageUrl,
             COUNT(DISTINCT r.id),
-            COUNT(DISTINCT lk.id)
+            COUNT(DISTINCT ll.id)
         )
         FROM Liquor l
         JOIN l.subcategory sc
         LEFT JOIN l.reviews r
-        LEFT JOIN Like lk ON lk.targetType = com.liquordb.like.entity.LikeTargetType.LIQUOR AND lk.targetId = l.id
+        LEFT JOIN LiquorLike ll ON ll.liquor = l
         WHERE l.category = :category
         GROUP BY l.id, l.name, l.category, sc.name, l.imageUrl
     """)
@@ -81,11 +81,11 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long> {
             l.subcategory.name,
             l.imageUrl,
             COUNT(DISTINCT r.id),
-            COUNT(DISTINCT lk.id)
+            COUNT(DISTINCT ll.id)
         )
         FROM Liquor l
         LEFT JOIN l.reviews r
-        LEFT JOIN Like lk ON lk.targetType = com.liquordb.like.entity.LikeTargetType.LIQUOR AND lk.targetId = l.id
+        LEFT JOIN LiquorLike ll ON ll.liquor = l
         WHERE l.subcategory = :subcategory
         GROUP BY l.id, l.name, l.subcategory.category, l.subcategory.name, l.imageUrl
     """)

@@ -1,11 +1,13 @@
 package com.liquordb.review.entity;
 
-import com.liquordb.like.entity.Like;
+import com.liquordb.like.entity.CommentLike;
+import com.liquordb.like.entity.LiquorLike;
 import com.liquordb.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,6 +31,9 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "review_id")
     private Review review;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLike> likes = new ArrayList<>();
 
     @Column(nullable = false)
     private boolean isHidden = false;

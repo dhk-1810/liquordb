@@ -37,13 +37,15 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+
                 // 일반 폼 로그인 설정
-                .formLogin(FormLoginConfigurer::disable) // 비활성화할 수도 있음
-                //.formLogin(form -> form
-                //    .loginPage("/login") // 커스텀 로그인 페이지
-                //    .defaultSuccessUrl("/") // 로그인 성공 시 리다이렉트 경로
-                //    .permitAll()
-                //)
+                // .formLogin(FormLoginConfigurer::disable) // 비활성화하기
+
+                .formLogin(form -> form
+                    .loginPage("/login") // 커스텀 로그인 페이지
+                    .defaultSuccessUrl("/") // 로그인 성공 시 리다이렉트 경로
+                    .permitAll()
+                )
 
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
@@ -51,13 +53,6 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                )
-
-                // 관리 기능은 관리자 계정만 접근 가능
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").permitAll()
-                        .anyRequest().authenticated()
                 );
 
         return http.build();

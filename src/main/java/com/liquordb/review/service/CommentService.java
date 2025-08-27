@@ -1,7 +1,7 @@
 package com.liquordb.review.service;
 
 import com.liquordb.like.entity.LikeTargetType;
-import com.liquordb.like.repository.LikeRepository;
+import com.liquordb.like.repository.CommentLikeRepository;
 import com.liquordb.review.dto.CommentRequestDto;
 import com.liquordb.review.dto.CommentResponseDto;
 import com.liquordb.review.entity.Comment;
@@ -21,7 +21,6 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
-    private final LikeRepository likeRepository;
 
     // 댓글 생성
     public void createComment(User user, CommentRequestDto dto) {
@@ -69,10 +68,5 @@ public class CommentService {
     public List<CommentResponseDto> getCommentsByReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow();
         return commentRepository.findAllByReviewAndIsDeletedFalse(review);
-    }
-
-    public CommentResponseDto getCommentDto(Comment comment) {
-        long likeCount = likeRepository.countByTargetIdAndTargetType(comment.getId(), LikeTargetType.COMMENT);
-        return CommentResponseDto.from(comment, likeCount);
     }
 }

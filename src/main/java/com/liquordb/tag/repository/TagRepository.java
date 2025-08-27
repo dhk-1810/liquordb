@@ -14,6 +14,6 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<Tag> findTagsByLiquorId(@Param("liquorId") Long liquorId);
 
     // 특정 유저가 선호하는 태그 조회
-    @Query("SELECT t FROM Tag t JOIN t.userTagPreferences ut WHERE ut.user.id = :userId")
+    @Query("SELECT t FROM Tag t JOIN t.userTags ut WHERE ut.user.id = :userId")
     List<Tag> findTagsByUserId(@Param("userId") Long userId);
 }

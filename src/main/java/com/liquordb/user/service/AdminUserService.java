@@ -1,7 +1,9 @@
 package com.liquordb.user.service;
 
 import com.liquordb.like.entity.LikeTargetType;
-import com.liquordb.like.repository.LikeRepository;
+import com.liquordb.like.repository.CommentLikeRepository;
+import com.liquordb.like.repository.LiquorLikeRepository;
+import com.liquordb.like.repository.ReviewLikeRepository;
 import com.liquordb.review.dto.CommentResponseDto;
 import com.liquordb.review.dto.ReviewResponseDto;
 import com.liquordb.review.repository.CommentRepository;
@@ -26,7 +28,7 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
-    private final LikeRepository likeRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     // 유저 조회 - 전체 또는 검색
     public List<UserAdminDto> searchUsers(String keyword, UserStatus status) {
@@ -53,7 +55,7 @@ public class AdminUserService {
     public List<CommentResponseDto> getUserComments(Long userId) {
         return commentRepository.findByUserId(userId).stream()
                 .map(comment -> {
-                    long likeCount = likeRepository.countByTargetIdAndTargetType(comment.getId(), LikeTargetType.COMMENT);
+                    long likeCount = commentLikeRepository.countByCommentId(comment.getId());
                     return CommentResponseDto.from(comment, likeCount);
                 })
                 .toList();

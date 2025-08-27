@@ -1,5 +1,6 @@
 package com.liquordb.review.entity;
 
+import com.liquordb.like.entity.ReviewLike;
 import com.liquordb.liquor.entity.Liquor;
 import com.liquordb.review.entity.reviewdetail.ReviewDetail;
 import com.liquordb.user.entity.User;
@@ -7,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,6 +39,9 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewLike> likes = new ArrayList<>();
 
     @OneToOne(mappedBy = "review", cascade = CascadeType.ALL)
     private ReviewDetail detail;
