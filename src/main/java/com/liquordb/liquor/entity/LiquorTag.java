@@ -1,8 +1,12 @@
 package com.liquordb.liquor.entity;
 
 import com.liquordb.tag.entity.Tag;
+import com.liquordb.user.entity.User;
+import com.liquordb.user.entity.UserTagId;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 주류-태그 간 다대다 관계 처리 위한 클래스입니다.
@@ -13,7 +17,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@IdClass(LiquorTagId.class)
+@IdClass(LiquorTag.class)
 public class LiquorTag {
 
     @Id
@@ -25,6 +29,17 @@ public class LiquorTag {
     @ManyToOne
     @JoinColumn(name = "tag_id")
     private Tag tag;
+
+
+    @EmbeddedId
+    private LiquorTagId id;
+
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
 
 

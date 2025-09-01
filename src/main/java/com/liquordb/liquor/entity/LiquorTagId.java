@@ -3,9 +3,7 @@ package com.liquordb.liquor.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.MapsId;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -14,20 +12,19 @@ import java.util.Objects;
  * LiquorTag에서 사용하는 복합 키 정의 클래스입니다.
  */
 
-@Data
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
+@EqualsAndHashCode
 public class LiquorTagId implements Serializable {
     private Long liquor;
     private Long tag;
 
-    public LiquorTagId() {}
-
-    public LiquorTagId(Long liquor, Long tag) {
-        this.liquor = liquor;
-        this.tag = tag;
-    }
-
     // JPA에서 복합키 클래스는 equals()와 hashCode()를 꼭 직접 구현해야 함.
+
+    /*
+    @EqualsAndHashCode로 대체
 
     @Override
     public boolean equals(Object o) {
@@ -42,4 +39,5 @@ public class LiquorTagId implements Serializable {
     public int hashCode() {
         return Objects.hash(liquor, tag);
     }
+     */
 }

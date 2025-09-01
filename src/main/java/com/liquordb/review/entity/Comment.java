@@ -1,7 +1,6 @@
 package com.liquordb.review.entity;
 
 import com.liquordb.like.entity.CommentLike;
-import com.liquordb.like.entity.LiquorLike;
 import com.liquordb.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
