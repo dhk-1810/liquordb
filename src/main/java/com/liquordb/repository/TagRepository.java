@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
@@ -15,5 +16,5 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 
     // 특정 유저가 선호하는 태그 조회
     @Query("SELECT t FROM Tag t JOIN t.userTags ut WHERE ut.user.id = :userId")
-    List<Tag> findTagsByUserId(@Param("userId") Long userId);
+    List<Tag> findTagsByUserId(@Param("userId") UUID userId);
 }

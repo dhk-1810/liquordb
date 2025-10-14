@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.Comment;
+import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentRepository;
 import com.liquordb.entity.Review;
 import com.liquordb.repository.ReviewRepository;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +24,7 @@ public class CommentService {
     private final ReviewRepository reviewRepository;
 
     // 댓글 생성
-    public void createComment(User user, CommentRequestDto dto) {
+    public void create(User user, CommentRequestDto dto) {
         Review review = reviewRepository.findById(dto.getReviewId())
                 .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
 
@@ -44,7 +47,7 @@ public class CommentService {
 
     // 댓글 삭제 (소프트 삭제)
     @Transactional
-    public void deleteComment(Long commentId, Long userId) {
+    public void delete(Long commentId, UUID userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
@@ -65,6 +68,10 @@ public class CommentService {
     // 특정 리뷰의 댓글 전체 조회
     public List<CommentResponseDto> getCommentsByReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow();
-        return commentRepository.findAllByReviewAndIsDeletedFalse(review);
+        List<Comment> comments = commentRepository.findAllByReviewAndIsDeletedFalse(review);
+
+        return comments.stream()
+                .map(CommentMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

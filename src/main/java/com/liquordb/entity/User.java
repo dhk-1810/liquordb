@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
@@ -17,10 +14,10 @@ import java.util.Set;
 @Builder
 public class User {
 
-    @Id // DB상 ID
+    @Id
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 100)
     private String email; // 로그인은 DB상 ID가 아닌 이메일 또는 닉네임으로 함.
@@ -38,22 +35,23 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LiquorLike> liquorLikes = new ArrayList<>();
+    private Set<LiquorLike> liquorLikes = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReviewLike> reviewLikes = new ArrayList<>();
+    private Set<ReviewLike> reviewLikes = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentLike> commentLikes = new ArrayList<>();
+    private Set<CommentLike> commentLikes = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserTag> userTags = new HashSet<>();
-
-    private UserStatus status;
 
     // 활동 제한 해제 일시
     @Column
@@ -68,7 +66,7 @@ public class User {
 
     // 유저 활동 제한 (댓글, 리뷰 작성)
     public void restrict() {
-        this.status = UserStatus.BANNED;
+        this.status = UserStatus.RESTRICTED;
     }
 
     @PrePersist

@@ -45,10 +45,10 @@ public class Liquor {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LiquorLike> likes = new ArrayList<>();
+    private Set<LiquorLike> likes = new HashSet<>();
 
     @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL)
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "liquor")
     private Set<LiquorTag> liquorTags = new HashSet<>();
@@ -56,7 +56,6 @@ public class Liquor {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
         if (averageRating == null) averageRating = 0.0;
     }
 

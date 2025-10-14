@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

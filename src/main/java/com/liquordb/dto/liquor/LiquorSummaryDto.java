@@ -5,9 +5,9 @@ import com.liquordb.entity.LiquorCategory;
 import lombok.*;
 
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LiquorSummaryDto {
     private Long id;
     private String name;

@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 관리자용 유저 컨트롤러 클래스입니다.
@@ -37,7 +38,7 @@ public class AdminUserController {
 
     // 유저별 리뷰 조회
     @GetMapping("/{userId}/reviews")
-    public String userReviews(@PathVariable Long userId, Model model) {
+    public String userReviews(@PathVariable UUID userId, Model model) {
         List<ReviewResponseDto> reviews = adminUserService.getUserReviews(userId);
         model.addAttribute("reviews", reviews);
         return "admin/user-reviews";
@@ -45,7 +46,7 @@ public class AdminUserController {
 
     // 유저별 댓글 조회
     @GetMapping("/{userId}/comments")
-    public String userComments(@PathVariable Long userId, Model model) {
+    public String userComments(@PathVariable UUID userId, Model model) {
         List<CommentResponseDto> comments = adminUserService.getUserComments(userId);
         model.addAttribute("comments", comments);
         return "admin/user-comments";
@@ -53,7 +54,7 @@ public class AdminUserController {
 
     // 유저 이용제한 처리
     @PostMapping("/{userId}/restrict")
-    public String restrictUser(@PathVariable Long userId,
+    public String restrictUser(@PathVariable UUID userId,
                                @RequestParam String period) {
         adminUserService.restrictUser(userId, period);
         return "redirect:/admin/users";

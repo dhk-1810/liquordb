@@ -3,7 +3,7 @@ package com.liquordb.controller;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.service.ReviewService;
-import com.liquordb.user.UserValidator;
+import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

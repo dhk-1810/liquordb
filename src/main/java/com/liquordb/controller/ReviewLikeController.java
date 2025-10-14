@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/review-likes")
 @RequiredArgsConstructor
@@ -15,7 +17,7 @@ public class ReviewLikeController {
 
     // 리뷰 좋아요 토글 (누르기/취소)
     @PostMapping("/{userId}/toggle")
-    public ResponseEntity<ReviewLikeResponseDto> toggleLike(@PathVariable Long userId,
+    public ResponseEntity<ReviewLikeResponseDto> toggleLike(@PathVariable UUID userId,
                                                             @RequestParam Long reviewId) {
         ReviewLikeResponseDto response = reviewLikeService.toggleLike(userId, reviewId);
         return ResponseEntity.ok(response);

@@ -40,16 +40,17 @@ public class Comment {
     private Comment parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL) // 대댓글
-    private List<Comment> replies;
+    private List<Comment> replies = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @PrePersist // JPA(EntityManager)가 엔티티를 DB에 저장(Persist)하기 "바로 직전에 자동 호출되는 메서드"에 붙이는 어노테이션.
+    @PrePersist // JPA(EntityManager)가 엔티티를 DB에 처음 저장(Persist=영속화)하기 바로 직전에 자동 호출
     public void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
+    @PreUpdate
     public void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

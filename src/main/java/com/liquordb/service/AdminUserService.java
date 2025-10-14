@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 관리자용 유저서비스 클래스입니다.
@@ -42,14 +43,14 @@ public class AdminUserService {
     }
 
     // 리뷰 조회
-    public List<ReviewResponseDto> getUserReviews(Long userId) {
+    public List<ReviewResponseDto> getUserReviews(UUID userId) {
         return reviewRepository.findByUserId(userId).stream()
                 .map(ReviewResponseDto::from)  // 정적 메서드 또는 생성자 필요
                 .toList();
     }
 
     // 댓글 조회
-    public List<CommentResponseDto> getUserComments(Long userId) {
+    public List<CommentResponseDto> getUserComments(UUID userId) {
         return commentRepository.findByUserId(userId).stream()
                 .map(comment -> {
                     long likeCount = commentLikeRepository.countByCommentId(comment.getId());
@@ -59,7 +60,7 @@ public class AdminUserService {
     }
 
     // 유저 이용제한
-    public void restrictUser(Long userId, String period) {
+    public void restrictUser(UUID userId, String period) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 

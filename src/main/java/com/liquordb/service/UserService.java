@@ -99,7 +99,7 @@ public class UserService {
     }
 
     // 회원 탈퇴 (soft delete)
-    public void deleteUser(Long userId) {
+    public void deleteUser(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -112,7 +112,7 @@ public class UserService {
     }
 
     // 마이페이지
-    public UserMyPageResponseDto getMyPageInfo(Long userId, boolean showAllTags) {
+    public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
@@ -187,7 +187,7 @@ public class UserService {
     }
 
     // 회원정보수정 (프사, 닉네임)
-    public void updateUser(Long userId, UserUpdateRequestDto dto) {
+    public void update(UUID userId, UserUpdateRequestDto dto) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
 
@@ -204,7 +204,7 @@ public class UserService {
     }
 
     // 비밀번호 재설정
-    public void updatePassword(Long userId, UserUpdatePasswordDto dto) {
+    public void updatePassword(UUID userId, UserUpdatePasswordDto dto) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
 

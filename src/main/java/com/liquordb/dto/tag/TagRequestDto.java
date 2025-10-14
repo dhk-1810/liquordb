@@ -2,9 +2,10 @@ package com.liquordb.dto.tag;
 
 import lombok.*;
 
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class TagRequestDto {
     private String name;
 }

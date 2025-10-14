@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 유저 컨트롤러 클래스입니다.
@@ -41,14 +42,14 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}") // 회원 탈퇴
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/mypage/{userId}") // 마이페이지
     public ResponseEntity<UserMyPageResponseDto> getMyPage(
-            @PathVariable Long userId,
+            @PathVariable UUID userId,
             @RequestParam(defaultValue = "false") boolean showAllTags) {
 
         UserMyPageResponseDto myPage = userService.getMyPageInfo(userId, showAllTags);
@@ -59,9 +60,9 @@ public class UserController {
 
 
     @PutMapping("/update") // 회원정보 수정 (프로필사진, 닉네임)
-    public ResponseEntity<String> updateUser(@AuthenticationPrincipal User currentUser,
+    public ResponseEntity<String> update(@AuthenticationPrincipal User currentUser,
                                              @ModelAttribute UserUpdateRequestDto dto) {
-        userService.updateUser(currentUser.getId(), dto);
+        userService.update(currentUser.getId(), dto);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
     }
 

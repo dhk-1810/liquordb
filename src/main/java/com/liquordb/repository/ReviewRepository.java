@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
@@ -20,8 +21,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findAllByLiquorId(Long liquorId);
 
     // 특정 유저가 남긴 리뷰 개수
-    Long countByUserId(Long userId);
+    Long countByUserId(UUID userId);
 
     // 특정 유저가 남긴 리뷰 목록
-    List<Review> findByUserId(Long userId);
+    List<Review> findByUserId(UUID userId);
 }

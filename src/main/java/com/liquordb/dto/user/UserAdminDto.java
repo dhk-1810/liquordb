@@ -5,6 +5,7 @@ import com.liquordb.entity.UserStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * AdminUserController, AdminUserService에서 사용하는 Response DTO입니다.
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @Builder
 public class UserAdminDto {
-    private Long id;
+    private UUID id;
     private String email;
     private String nickname;
     private LocalDateTime createdAt;

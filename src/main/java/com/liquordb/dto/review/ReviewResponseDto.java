@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
@@ -14,7 +15,7 @@ import java.util.List;
 @Builder
 public class ReviewResponseDto {
     private Long id;
-    private Long userId;
+    private UUID userId;
     private Long liquorId;
     private Double rating;
     private String title;

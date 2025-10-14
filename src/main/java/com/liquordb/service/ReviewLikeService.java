@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public class ReviewLikeService {
 
     // 좋아요 토글 (누르기/취소)
     @Transactional
-    public ReviewLikeResponseDto toggleLike(Long userId, Long reviewId) {
+    public ReviewLikeResponseDto toggleLike(UUID userId, Long reviewId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
 
@@ -63,7 +64,7 @@ public class ReviewLikeService {
     }
 
     // ?
-    private ReviewLikeResponseDto buildResponse(Long id, Long userId, Long reviewId, LocalDateTime likedAt) {
+    private ReviewLikeResponseDto buildResponse(Long id, UUID userId, Long reviewId, LocalDateTime likedAt) {
         return ReviewLikeResponseDto.builder()
                 .id(id)
                 .userId(userId)

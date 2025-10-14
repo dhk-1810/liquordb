@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +28,7 @@ public class TagService {
 
     // 특정 유저의 선호 태그 목록 반환 (10개 제한 여부 선택 가능)
     @Transactional(readOnly = true)
-    public List<String> getPreferredTagsForUser(Long userId, boolean showAll) {
+    public List<String> getPreferredTagsForUser(UUID userId, boolean showAll) {
         List<String> allTags = tagRepository.findTagsByUserId(userId).stream()
                 .map(Tag::getName)
                 .collect(Collectors.toList());

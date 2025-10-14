@@ -6,6 +6,7 @@ import com.liquordb.dto.review.ReviewSummaryDto;
 import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 유저 마이페이지 응답 DTO입니다.
@@ -17,7 +18,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class UserMyPageResponseDto {
-    private Long userId;
+    private UUID userId;
     private String email;
     private String nickname;
 

@@ -2,9 +2,10 @@ package com.liquordb.dto.liquor;
 
 import lombok.*;
 
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LiquorTagRequestDto {
     private Long liquorId;
     private Long tagId;

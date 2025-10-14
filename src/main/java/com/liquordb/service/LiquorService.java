@@ -45,7 +45,7 @@ public class LiquorService {
 
     // 3. 주류 상세 페이지
     @Transactional(readOnly = true)
-    public LiquorResponseDto getLiquorDetail(Long liquorId, Long currentUserId) {
+    public LiquorResponseDto getLiquorDetail(Long liquorId, UUID currentUserId) {
 
         // 주류 정보 조회 (삭제되지 않은 것만)
         Liquor liquor = liquorRepository.findByIdAndIsHiddenFalse(liquorId)

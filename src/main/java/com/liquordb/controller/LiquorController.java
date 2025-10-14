@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 유저용 주류 컨트롤러입니다.
@@ -49,7 +50,7 @@ public class LiquorController {
     public ResponseEntity<LiquorResponseDto> getLiquorDetail(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails != null ? userDetails.getUserId() : null; // 좋아요
+        UUID userId = userDetails != null ? userDetails.getUserId() : null; // 좋아요
         LiquorResponseDto dto = liquorService.getLiquorDetail(id, userId);
         return ResponseEntity.ok(dto);
     }

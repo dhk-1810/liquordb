@@ -8,12 +8,17 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, UUID> {
+
+    // 유저 단건 조회
+//    Optional<User> findById(UUID id);
 
     // 전체 유저 조회 (관리자용)
     List<User> findAll();
-    Optional<User> findByIdAndStatusNot(Long id, UserStatus status);
+
+    Optional<User> findByIdAndStatusNot(UUID id, UserStatus status);
 
     // 가입된 사용자의 User객체 반환
     Optional<User> findByEmailAndStatusNot(String email, UserStatus status);

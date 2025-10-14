@@ -12,6 +12,7 @@ import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class LikeMapper {
 
@@ -39,7 +40,7 @@ public class LikeMapper {
                 .build();
     }
 
-    public static LiquorLikeResponseDto toLiquorLikeResponseDto(Long id, Long userId, Long liquorId, LocalDateTime likedAt) {
+    public static LiquorLikeResponseDto toLiquorLikeResponseDto(Long id, UUID userId, Long liquorId, LocalDateTime likedAt) {
         return LiquorLikeResponseDto.builder()
                 .id(id)
                 .userId(userId)
@@ -48,7 +49,7 @@ public class LikeMapper {
                 .build();
     }
 
-    public static ReviewLikeResponseDto toReviewLikeResponseDto(Long id, Long userId, Long reviewId, LocalDateTime likedAt) {
+    public static ReviewLikeResponseDto toReviewLikeResponseDto(Long id, UUID userId, Long reviewId, LocalDateTime likedAt) {
         return ReviewLikeResponseDto.builder()
                 .id(id)
                 .userId(userId)
@@ -57,7 +58,7 @@ public class LikeMapper {
                 .build();
     }
 
-    public static CommentLikeResponseDto toCommentLikeResponseDto(Long id, Long userId, Long commentId, LocalDateTime likedAt) {
+    public static CommentLikeResponseDto toCommentLikeResponseDto(Long id, UUID userId, Long commentId, LocalDateTime likedAt) {
         return CommentLikeResponseDto.builder()
                 .id(id)
                 .userId(userId)

@@ -3,6 +3,8 @@ package com.liquordb.dto.user;
 import com.liquordb.entity.User;
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -10,7 +12,7 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class UserResponseDto {
-    private Long id;
+    private UUID id;
     private String email;
     private String nickname;
     private String profileImageUrl;

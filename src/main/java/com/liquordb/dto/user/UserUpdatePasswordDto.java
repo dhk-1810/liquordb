@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
+@Builder
 public class UserUpdatePasswordDto {
     private String currentPassword;
     private String newPassword;

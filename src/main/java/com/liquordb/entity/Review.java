@@ -6,7 +6,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter @Setter
@@ -38,7 +40,7 @@ public class Review {
     private Liquor liquor;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReviewLike> likes = new ArrayList<>();
+    private Set<ReviewLike> likes = new HashSet<>();
 
     @OneToOne(mappedBy = "review", cascade = CascadeType.ALL)
     private ReviewDetail detail;
@@ -55,7 +57,6 @@ public class Review {
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 /**
  * 로그인 응답 DTO입니다.
  */
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserLoginResponseDto {
-    private Long id;
+    private UUID id;
     private String email;
     private String nickname;
     private User.Role role;

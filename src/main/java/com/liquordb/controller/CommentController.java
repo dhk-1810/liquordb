@@ -3,7 +3,7 @@ package com.liquordb.controller;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.service.CommentService;
-import com.liquordb.user.UserValidator;
+import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class CommentController {
             @AuthenticationPrincipal User user
     ) {
         userValidator.validateCanPost(user);
-        commentService.createComment(user, dto);
+        commentService.create(user, dto);
         return ResponseEntity.ok("댓글이 등록되었습니다.");
     }
 
@@ -36,7 +36,7 @@ public class CommentController {
     public ResponseEntity<String> deleteComment(
             @PathVariable Long commentId,
             @AuthenticationPrincipal User user) {
-        commentService.deleteComment(commentId, user.getId());
+        commentService.delete(commentId, user.getId());
         return ResponseEntity.ok("댓글이 삭제되었습니다.");
     }
 

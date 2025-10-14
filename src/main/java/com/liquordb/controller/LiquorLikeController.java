@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/liquor-likes")
 @RequiredArgsConstructor
@@ -15,7 +17,7 @@ public class LiquorLikeController {
 
     // 주류 좋아요 토글 (누르기/취소)
     @PostMapping("/{userId}/toggle")
-    public ResponseEntity<LiquorLikeResponseDto> toggleLike(@PathVariable Long userId,
+    public ResponseEntity<LiquorLikeResponseDto> toggleLike(@PathVariable UUID userId,
                                                             @RequestBody Long liquorId) {
         LiquorLikeResponseDto response = liquorLikeService.toggleLike(userId, liquorId);
         return ResponseEntity.ok(response);

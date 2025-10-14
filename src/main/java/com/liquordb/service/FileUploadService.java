@@ -20,8 +20,6 @@ import java.util.UUID;
 @Slf4j
 public class FileUploadService {
 
-    private final String uploadDir = "uploads/"; // 프로젝트 루트 아래 uploads 폴더에 저장
-
     public String upload(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("파일이 없습니다.");
@@ -29,6 +27,8 @@ public class FileUploadService {
 
         try {
             // 디렉토리 없으면 생성
+            // 프로젝트 루트 아래 uploads 폴더에 저장
+            String uploadDir = "uploads/";
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);

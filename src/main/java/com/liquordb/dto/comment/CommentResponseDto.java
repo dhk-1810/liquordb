@@ -4,6 +4,7 @@ import com.liquordb.entity.Comment;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
@@ -14,7 +15,7 @@ public class CommentResponseDto {
     private Long id;                 // 댓글 ID
     private Long reviewId;           // 리뷰 ID
     private Long parentId;           // 부모 댓글 ID (없으면 null)
-    private Long userId;             // 작성자 ID
+    private UUID userId;             // 작성자 ID
     private String nickname;         // 작성자 닉네임
     private String content;          // 댓글 내용
     private boolean isDeleted;       // 삭제 여부

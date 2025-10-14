@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class WhiskyReviewDetailDto {
-
     private Double aroma;    // 향
     private Double taste;    // 맛
     private Double finish;   // 여운

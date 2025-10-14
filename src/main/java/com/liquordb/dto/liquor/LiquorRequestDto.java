@@ -8,7 +8,7 @@ import lombok.*;
  * 주류 하나에 대한 요청 DTO입니다.
  */
 
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
