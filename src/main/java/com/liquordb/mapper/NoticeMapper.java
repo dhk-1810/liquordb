@@ -2,6 +2,7 @@ package com.liquordb.mapper;
 
 import com.liquordb.dto.notice.NoticeRequestDto;
 import com.liquordb.dto.notice.NoticeResponseDto;
+import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
 
 public class NoticeMapper {
@@ -21,6 +22,14 @@ public class NoticeMapper {
                 .content(notice.getContent())
                 .createdAt(notice.getCreatedAt())
                 .updatedAt(notice.getUpdatedAt())
+                // .isPinned(notice.isPinned())
+                .build();
+    }
+
+    public static NoticeSummaryDto toSummaryDto(Notice notice) {
+        return NoticeSummaryDto.builder()
+                .title(notice.getTitle())
+                .createdAt(notice.getCreatedAt())
                 .isPinned(notice.isPinned())
                 .build();
     }

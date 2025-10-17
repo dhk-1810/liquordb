@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 @IdClass(UserTagId.class)
 public class UserTag {
 
+    @EmbeddedId
+    private UserTagId id;
+
     @Id
     @ManyToOne
     @JoinColumn(name = "user_id")

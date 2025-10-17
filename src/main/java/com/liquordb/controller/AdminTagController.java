@@ -18,23 +18,23 @@ public class AdminTagController {
 
     // 태그 등록
     @PostMapping
-    public ResponseEntity<TagResponseDto> createTag(@RequestBody TagRequestDto requestDto) {
-        TagResponseDto createdTag = tagService.createTag(requestDto);
+    public ResponseEntity<TagResponseDto> create(@RequestBody TagRequestDto requestDto) {
+        TagResponseDto createdTag = tagService.create(requestDto);
         return ResponseEntity.ok(createdTag);
     }
 
     // 태그 이름 변경
     @PutMapping("/{id}")
-    public ResponseEntity<TagResponseDto> updateTag(@PathVariable Long id,
-                                                    @RequestBody TagRequestDto requestDto) {
-        TagResponseDto updatedTag = tagService.renameTag(id, requestDto);
+    public ResponseEntity<TagResponseDto> update(@PathVariable Long id,
+                                                 @RequestBody TagRequestDto requestDto) {
+        TagResponseDto updatedTag = tagService.rename(id, requestDto);
         return ResponseEntity.ok(updatedTag);
     }
 
     // 태그 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
-        tagService.deleteTag(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        tagService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -24,7 +24,7 @@ public class ReviewResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Entity 객체를 DTO 객체로 변환해주는 함수
+    // DTO 변환
     public static ReviewResponseDto from(Review review) {
         List<String> imageUrls = review.getImages() != null
                 ? review.getImages().stream()

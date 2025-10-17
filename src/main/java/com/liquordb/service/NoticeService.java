@@ -2,12 +2,15 @@ package com.liquordb.service;
 
 import com.liquordb.dto.notice.NoticeRequestDto;
 import com.liquordb.dto.notice.NoticeResponseDto;
+import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
+import com.liquordb.exception.NotFoundException;
+import com.liquordb.mapper.NoticeMapper;
 import com.liquordb.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
+import java.util.List;
 
 import static com.liquordb.mapper.NoticeMapper.*;
 
@@ -18,26 +21,41 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
 
     // 공지사항 등록
-    public NoticeResponseDto createNotice(NoticeRequestDto dto) {
+    public NoticeResponseDto create(NoticeRequestDto dto) {
         Notice notice = toEntity(dto);
         noticeRepository.save(notice);
         return toDto(notice);
     }
 
     // 공지사항 수정
-    public NoticeResponseDto updateNotice(Long id, NoticeRequestDto dto) {
+    public NoticeResponseDto update(Long id, NoticeRequestDto dto) {
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("공지사항을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 공지사항입니다."));
         notice.setTitle(dto.getTitle());
         notice.setContent(dto.getContent());
         notice.setPinned(dto.isPinned());
         return toDto(notice);
     }
 
+    // 공지사항 단건 조회
+    public NoticeResponseDto findById(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 공지사항입니다."));
+        return NoticeMapper.toDto(notice);
+    }
+
+    // 공지사항 목록 조회
+    public List<NoticeSummaryDto> findAll() {
+        return noticeRepository.findAll().stream()
+                .map(NoticeMapper::toSummaryDto)
+                .toList();
+    }
+
+
     // 공지사항 삭제
-    public void deleteNotice(Long id) {
+    public void delete(Long id) {
         if (!noticeRepository.existsById(id)) {
-            throw new NoSuchElementException("공지사항이 존재하지 않습니다.");
+            throw new NotFoundException("공지사항이 존재하지 않습니다.");
         }
         noticeRepository.deleteById(id);
     }

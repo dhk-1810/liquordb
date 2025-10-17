@@ -1,7 +1,11 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.review.ReviewLikeResponseDto;
+import com.liquordb.dto.review.ReviewResponseDto;
+import com.liquordb.dto.review.ReviewSummaryDto;
 import com.liquordb.entity.ReviewLike;
+import com.liquordb.exception.NotFoundException;
+import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.entity.Review;
 import com.liquordb.repository.ReviewRepository;
@@ -12,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -26,10 +32,10 @@ public class ReviewLikeService {
     @Transactional
     public ReviewLikeResponseDto toggleLike(UUID userId, Long reviewId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
 
         ReviewLike existing = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
                 .orElse(null);
@@ -63,7 +69,17 @@ public class ReviewLikeService {
         return reviewLikeRepository.countByReviewId(reviewId);
     }
 
-    // ?
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> getReviewSummaryDtosByUserId(UUID userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+
+        return reviewLikeRepository.findByUserAndReviewIsHiddenFalse(user).stream()
+                .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))
+                .toList();
+    }
+
+    // DTO 빌드
     private ReviewLikeResponseDto buildResponse(Long id, UUID userId, Long reviewId, LocalDateTime likedAt) {
         return ReviewLikeResponseDto.builder()
                 .id(id)

@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * 관리자 공지사항 Entity입니다.
+ * 공지사항 Entity입니다.
  */
 
 @Entity
@@ -19,6 +19,9 @@ public class Notice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User author;
 
     @Column(nullable = false)
     private String title;

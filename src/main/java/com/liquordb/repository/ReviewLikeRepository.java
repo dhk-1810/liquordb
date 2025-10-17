@@ -1,6 +1,7 @@
 package com.liquordb.repository;
 
 import com.liquordb.entity.ReviewLike;
+import com.liquordb.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,10 +13,10 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
     long countByReviewId(Long reviewId);
 
     // 유저가 좋아요 누른 리뷰 개수 - 마이페이지에서 사용
-    long countByUserId(UUID userId);
+    long countByUserAndReviewIsHiddenFalse(User user);
 
     // 유저가 좋이요 누른 리뷰 목록 - 마이페이지에서 사용
-    List<ReviewLike> findByUserId(UUID userId);
+    List<ReviewLike> findByUserAndReviewIsHiddenFalse(User user);
 
     // 유저가 리뷰에 좋아요 눌렀는지 확인 (눌렀는지 여부만)
     boolean existsByUserIdAndReviewId(UUID userId, Long reviewId);

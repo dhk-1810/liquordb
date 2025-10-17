@@ -13,8 +13,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class LiquorTagId implements Serializable {
-    private Long liquor;
-    private Long tag;
+    private Long liquorId;
+    private Long tagId;
 
     // JPA에서 복합키 클래스는 equals()와 hashCode()를 꼭 직접 구현해야 함.
 

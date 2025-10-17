@@ -2,6 +2,7 @@ package com.liquordb.dto.user;
 
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
+import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.ReviewSummaryDto;
 import lombok.*;
 
@@ -32,7 +33,7 @@ public class UserMyPageResponseDto {
     private List<CommentResponseDto> commentList; // 작성 댓글 목록
 
     private List<LiquorSummaryDto> likedLiquors;     // 좋아요 누른 주류 목록
-    private List<ReviewSummaryDto> likedReviews;    // 좋아요 누른 리뷰 목록
+    private List<ReviewResponseDto> likedReviews;    // 좋아요 누른 리뷰 목록
     private List<CommentResponseDto> likedComments;  // 좋아요 누른 댓글 목록
 
     private List<String> preferredTags;

@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 @IdClass(LiquorTag.class)
 public class LiquorTag {
 
+    @EmbeddedId
+    private LiquorTagId id;
+
     @Id
     @ManyToOne
     @JoinColumn(name = "liquor_id")
@@ -26,10 +29,6 @@ public class LiquorTag {
     @ManyToOne
     @JoinColumn(name = "tag_id")
     private Tag tag;
-
-
-    @EmbeddedId
-    private LiquorTagId id;
 
     private LocalDateTime createdAt;
 

@@ -1,5 +1,9 @@
 package com.liquordb.service;
 
+import com.liquordb.dto.liquor.LiquorTagResponseDto;
+import com.liquordb.entity.User;
+import com.liquordb.exception.NotFoundException;
+import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
@@ -11,6 +15,8 @@ import com.liquordb.repository.LiquorRepository;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,79 +26,53 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LiquorService {
 
-    private final LiquorLikeRepository liquorLikeRepository;
     private final LiquorRepository liquorRepository;
-    private final ReviewRepository reviewRepository;
-    private final TagService tagService;
 
-    // 1. 주류 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
-    public List<LiquorSummaryDto> getLiquorsByFilters(LiquorCategory category, LiquorSubcategory subcategory) {
-        List<LiquorSummaryDto> liquors;
+    // 1. 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
+    @Transactional(readOnly = true)
+    public Page<LiquorSummaryDto> getLiquorsByFilters(User user, // 조회하는 사람, null 허용.
+                                                      Pageable pageable,
+                                                      LiquorCategory category, // 주류 대분류
+                                                      LiquorSubcategory subcategory) { // 주류 소분류
 
         if (category == null && subcategory == null) { // 전체 주류 조회
-            return liquorRepository.findAllWithCategoryAndCounts();
-        } else if (category != null && subcategory == null) {
-            return liquorRepository.findSummaryByCategory(category); // 대분류로 필터링
-        } else /* (subcategory != null) */ {
-            return liquorRepository.findSummaryBySubcategory(subcategory); // 소분류로 필터링
+            return liquorRepository.findAllByIsHiddenFalse(pageable)
+                    .map(liquor -> LiquorMapper.toSummaryDto(liquor, user));
+        }
+        else if (category != null && subcategory == null) {
+            return liquorRepository.findByCategoryAndIsHiddenFalse(pageable, category)
+                    .map(liquor -> LiquorMapper.toSummaryDto(liquor, user)); // 대분류로 필터링
+        }
+        else /* (subcategory != null) */ {
+            return liquorRepository.findBySubcategoryAndIsHiddenFalse(pageable, subcategory)
+                    .map(liquor -> LiquorMapper.toSummaryDto(liquor, user)); // 소분류로 필터링
         }
     }
 
-    // 2. 주류 검색 (이름으로)
-    public List<LiquorSummaryDto> searchLiquorsByName(String keyword) {
-        return liquorRepository.findSummaryByNameContaining(keyword);
+    // 2. 주류 목록 검색 (이름으로)
+    @Transactional(readOnly = true)
+    public Page<LiquorSummaryDto> searchLiquorsByName(User user, Pageable pageable, String keyword) {
+        return liquorRepository.findByNameContainingAndIsHiddenFalse(pageable, keyword)
+                .map(liquor -> LiquorMapper.toSummaryDto(liquor, user));
     }
 
     // 3. 주류 상세 페이지
     @Transactional(readOnly = true)
-    public LiquorResponseDto getLiquorDetail(Long liquorId, UUID currentUserId) {
+    public LiquorResponseDto getLiquorDetail(Long liquorId, User user) {
 
         // 주류 정보 조회 (삭제되지 않은 것만)
         Liquor liquor = liquorRepository.findByIdAndIsHiddenFalse(liquorId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 주류를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
 
-        // 리뷰 평균 점수 및 개수
-        double avgRating = reviewRepository.getAverageRatingByLiquorId(liquorId);
-        int reviewCount = reviewRepository.countByLiquorId(liquorId);
-        List<ReviewResponseDto> reviews = reviewRepository.findAllByLiquorId(liquorId).stream()
-                .map(ReviewResponseDto::from)
-                .toList();
-
-        // 좋아요 개수
-        long likeCount = liquorLikeRepository.countByLiquorId(liquorId);
-
-        // 유저별 좋아요 여부
-        boolean likedByMe = liquorLikeRepository.existsByUserIdAndLiquorId(currentUserId, liquorId);
-
-        // 태그 정보
-        List<String> tags = tagService.getTagsForLiquor(liquorId);
-
-        return LiquorResponseDto.builder()
-                .id(liquor.getId())
-                .name(liquor.getName())
-                .category(liquor.getCategory())
-                .subcategory(liquor.getSubcategory())
-                .country(liquor.getCountry())
-                .manufacturer(liquor.getManufacturer())
-                .abv(liquor.getAbv())
-                .isDiscontinued(liquor.isDiscontinued())
-                .imageUrl(liquor.getImageUrl())
-                .averageRating(avgRating)
-                .reviewCount(reviewCount)
-                .reviews(reviews)
-                .likeCount(likeCount)
-                .likedByMe(likedByMe)
-                .tags(tags)
-                .build();
+        return LiquorMapper.toDto(liquor, user);
     }
-
 
     /**
      * 이하는 관리자용 메서드들입니다.
      */
 
     // 주류 등록
-    public void createLiquor(LiquorRequestDto dto) {
+    public LiquorResponseDto create(LiquorRequestDto dto) {
         Liquor liquor = Liquor.builder()
                 .name(dto.getName())
                 .category(dto.getCategory())
@@ -102,26 +82,29 @@ public class LiquorService {
                 .abv(dto.getAbv())
                 .imageUrl(dto.getImageUrl())
                 .build();
-        liquorRepository.save(liquor);
+        return LiquorMapper.toDto(liquorRepository.save(liquor), null);
     }
 
     // 주류 수정
-    public void updateLiquor(Long id, LiquorRequestDto dto) {
+    public LiquorResponseDto update(Long id, LiquorRequestDto dto) {
         Liquor liquor = liquorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Liquor not found"));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
         liquor.updateFromDto(dto);
+        return LiquorMapper.toDto(liquorRepository.save(liquor), null);
     }
 
     // 주류 숨기기
     public void toggleHidden(Long id) {
         Liquor liquor = liquorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Liquor not found"));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
         liquor.setHidden(!liquor.isHidden());
     }
 
     // 주류 삭제
-    public void deleteLiquor(Long id) {
-        liquorRepository.deleteById(id);
+    public void delete(Long id) {
+        Liquor liquor = liquorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
+        liquorRepository.delete(liquor);
     }
 
 }

@@ -24,7 +24,7 @@ public class ReportService {
     private static final int REPORT_THRESHOLD = 3;
 
     // 신고 생성
-    public void report(ReportRequestDto dto) {
+    public void create(ReportRequestDto dto) {
         // 중복 신고 방지
         boolean exists = reportRepository.existsByTargetTypeAndTargetIdAndUserId(
                 dto.getTargetType(),
@@ -32,7 +32,7 @@ public class ReportService {
                 dto.getUserId()
         );
         if (exists) {
-            throw new RuntimeException("이미 신고한 대상입니다.");
+            throw new IllegalArgumentException("이미 신고한 대상입니다.");
         }
 
         // 신고 저장

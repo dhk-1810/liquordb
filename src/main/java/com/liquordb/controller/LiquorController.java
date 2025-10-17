@@ -5,7 +5,6 @@ import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.entity.LiquorCategory;
 import com.liquordb.service.LiquorService;
-import com.liquordb.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,7 +37,7 @@ public class LiquorController {
     // 2. 주류 검색 (이름으로)
     @GetMapping("/search")
     public ResponseEntity<Map<String, Object>> searchLiquors(@RequestParam String keyword) {
-        List<LiquorSummaryDto> result = liquorService.searchLiquorsByName(keyword);
+        List<LiquorSummaryDto> result = liquorService.searchLiquorsByName(, keyword);
         Map<String, Object> response = new HashMap<>();
         response.put("count", result.size());
         response.put("liquors", result);

@@ -22,14 +22,14 @@ public class AdminLiquorController {
     // 주류 추가
     @PostMapping
     public ResponseEntity<Void> createLiquor(@RequestBody LiquorRequestDto requestDto) {
-        liquorService.createLiquor(requestDto);
+        liquorService.create(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 주류 수정
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateLiquor(@PathVariable Long id, @RequestBody LiquorRequestDto requestDto) {
-        liquorService.updateLiquor(id, requestDto);
+        liquorService.update(id, requestDto);
         return ResponseEntity.ok().build();
     }
 
@@ -43,7 +43,7 @@ public class AdminLiquorController {
     // 주류 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLiquor(@PathVariable Long id) {
-        liquorService.deleteLiquor(id);
+        liquorService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

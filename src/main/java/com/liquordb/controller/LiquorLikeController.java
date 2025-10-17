@@ -26,7 +26,7 @@ public class LiquorLikeController {
     // 주류 좋아요 카운트
     @GetMapping("/liquor-count")
     public ResponseEntity<Long> countLikes(@RequestParam Long liquorId) {
-        long count = liquorLikeService.liquorCountLikes(liquorId);
+        long count = liquorLikeService.countByLiquorIdAndLikedTrue(liquorId);
         return ResponseEntity.ok(count);
     }
 }

@@ -23,20 +23,20 @@ public class AdminNoticeController {
     // 공지사항 등록
     @PostMapping
     public ResponseEntity<NoticeResponseDto> createNotice(@RequestBody NoticeRequestDto dto) {
-        return ResponseEntity.ok(noticeService.createNotice(dto));
+        return ResponseEntity.ok(noticeService.create(dto));
     }
 
     // 공지사항 수정
     @PutMapping("/{id}")
     public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long id,
                                                           @RequestBody NoticeRequestDto dto) {
-        return ResponseEntity.ok(noticeService.updateNotice(id, dto));
+        return ResponseEntity.ok(noticeService.update(id, dto));
     }
 
     // 공지사항 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotice(@PathVariable Long id) {
-        noticeService.deleteNotice(id);
+        noticeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

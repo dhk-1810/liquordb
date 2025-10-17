@@ -23,7 +23,10 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false; // 사용자가 삭제
+
+    @Column(nullable = false)
+    private boolean isHidden = false; // 신고 접수로 숨김처리
 
     @ManyToOne
     @JoinColumn(name = "review_id")
@@ -31,9 +34,6 @@ public class Comment {
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentLike> likes = new ArrayList<>();
-
-    @Column(nullable = false)
-    private boolean isHidden = false;
 
     @ManyToOne
     @JoinColumn(name = "parent_id") // 대댓글 기능 구현. self-referencing

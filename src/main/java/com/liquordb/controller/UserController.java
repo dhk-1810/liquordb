@@ -3,6 +3,7 @@ package com.liquordb.controller;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.User;
+import com.liquordb.service.LiquorTagService;
 import com.liquordb.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final LiquorTagService liquorTagService;
 
     @PostMapping("/register") // 회원가입
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterRequestDto dto) {
@@ -43,7 +45,7 @@ public class UserController {
 
     @DeleteMapping("/{id}") // 회원 탈퇴
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        userService.deleteUser(id);
+        userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -74,8 +76,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/preferred-liquors") // 선호 태그 기반 주류 추천
-    public ResponseEntity<List<LiquorSummaryDto>> getPreferredLiquors(@PathVariable Long userId) {
-        List<LiquorSummaryDto> liquors = userService.getLiquorsByUserPreferredTags(userId);
+    public ResponseEntity<List<LiquorSummaryDto>> getPreferredLiquors(@PathVariable UUID userId) {
+        List<LiquorSummaryDto> liquors = liquorTagService.getLiquorsByUserTags(userId);
         return ResponseEntity.ok(liquors);
     }
 }

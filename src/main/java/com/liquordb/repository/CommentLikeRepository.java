@@ -1,6 +1,8 @@
 package com.liquordb.repository;
 
+import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.CommentLike;
+import com.liquordb.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,14 +14,16 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     long countByCommentId(Long commentId);
 
     // 유저가 좋아요 댓글 개수 - 마이페이지에서 사용
-    long countByUserId(UUID user_id);
+    long countByUserAndCommentIsHiddenFalse(User user);
 
     // 유저가 좋이요 누른 댓글 목록  - 마이페이지에서 사용
-    List<CommentLike> findByUserId(UUID user_id);
+    List<CommentLike> findByUserAndCommentIsHiddenFalse(User user);
 
     // 유저가 특정 댓글에 좋아요 눌렀는지 확인 (눌렀는지 여부만)
     boolean existsByUserIdAndCommentId (UUID userId, Long commentId);
 
     // 유저가 특정 댓글에 좋아요 눌렀는지 확인 (Like 객체 전체 반환)
     Optional<CommentLike> findByUserIdAndCommentId(UUID userId, Long commentId);
+
+    UUID user(User user);
 }

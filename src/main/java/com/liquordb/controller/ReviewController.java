@@ -21,36 +21,36 @@ public class ReviewController {
 
     // 리뷰 등록
     @PostMapping
-    public ResponseEntity<?> createReview(
+    public ResponseEntity<?> create(
             @RequestBody @Valid ReviewRequestDto requestDto,
             @AuthenticationPrincipal User user
     ) {
 
         userValidator.validateCanPost(user);
-        ReviewResponseDto response = reviewService.createReview(user, requestDto);
+        ReviewResponseDto response = reviewService.create(user, requestDto);
         return ResponseEntity.ok(response);
     }
 
     // 리뷰 수정
     @PutMapping("/{reviewId}")
-    public ResponseEntity<?> updateReview(
+    public ResponseEntity<?> update(
             @PathVariable Long reviewId,
             @RequestBody @Valid ReviewRequestDto requestDto,
             @AuthenticationPrincipal User user
     ) {
         userValidator.validateCanPost(user);
-        ReviewResponseDto response = reviewService.updateReview(reviewId, user, requestDto);
+        ReviewResponseDto response = reviewService.update(reviewId, user, requestDto);
         return ResponseEntity.ok(response);
     }
 
     // 리뷰 삭제
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<?> deleteReview(
+    public ResponseEntity<?> delete(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal User user
     ) {
         userValidator.validateCanPost(user);
-        reviewService.deleteReview(reviewId, user);
+        reviewService.delete(reviewId, user);
         return ResponseEntity.noContent().build();
     }
 }

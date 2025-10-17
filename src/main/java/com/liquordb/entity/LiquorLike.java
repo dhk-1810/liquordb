@@ -25,6 +25,9 @@ public class LiquorLike {
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
 
+    @Column(nullable = false)
+    private boolean liked;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime likedAt;
 

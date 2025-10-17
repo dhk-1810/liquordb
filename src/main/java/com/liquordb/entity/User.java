@@ -38,8 +38,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LiquorLike> liquorLikes = new HashSet<>();
@@ -53,12 +56,16 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserTag> userTags = new HashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    private List<Notice> notice = new ArrayList<>();
+
     // 활동 제한 해제 일시
     @Column
     private LocalDateTime restrictedUntil;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime withdrawnAt; // soft delete 시각
 
     public enum Role {
         USER, ADMIN // 유저 계정, 관리자 계정
