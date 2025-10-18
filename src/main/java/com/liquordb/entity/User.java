@@ -38,6 +38,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
+    private int reportCount; // 신고된 건수
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 

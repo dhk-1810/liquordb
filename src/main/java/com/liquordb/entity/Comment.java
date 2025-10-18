@@ -42,6 +42,9 @@ public class Comment {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL) // 대댓글
     private List<Comment> replies = new ArrayList<>();
 
+    @OneToMany(mappedBy = "comment")
+    private List<Report> reports = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
