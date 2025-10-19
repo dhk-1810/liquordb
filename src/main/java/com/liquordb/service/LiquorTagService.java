@@ -71,6 +71,9 @@ public class LiquorTagService {
                 .toList();
     }
 
+    /**
+     * 관리자용
+     */
     // 주류에 태그 추가
     public LiquorTagResponseDto addLiquorTag(LiquorTagRequestDto requestDto) {
 

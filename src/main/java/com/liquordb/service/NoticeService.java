@@ -10,6 +10,7 @@ import com.liquordb.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.liquordb.mapper.NoticeMapper.*;
@@ -31,10 +32,20 @@ public class NoticeService {
     public NoticeResponseDto update(Long id, NoticeRequestDto dto) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 공지사항입니다."));
-        notice.setTitle(dto.getTitle());
-        notice.setContent(dto.getContent());
-        notice.setPinned(dto.isPinned());
+        if (dto.getTitle() != null) notice.setTitle(dto.getTitle());
+        if (dto.getContent() != null) notice.setContent(dto.getContent());
         return toDto(notice);
+    }
+
+    // 고정 토글
+    public NoticeResponseDto togglePin(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 공지사항입니다."));
+        notice.setPinned(!notice.isPinned());
+        if (notice.isPinned()) {
+            notice.setPinnedAt(LocalDateTime.now());
+        }
+        return NoticeMapper.toDto(noticeRepository.save(notice));
     }
 
     // 공지사항 단건 조회
@@ -50,7 +61,6 @@ public class NoticeService {
                 .map(NoticeMapper::toSummaryDto)
                 .toList();
     }
-
 
     // 공지사항 삭제
     public void delete(Long id) {

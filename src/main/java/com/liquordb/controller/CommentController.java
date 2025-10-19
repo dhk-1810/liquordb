@@ -1,11 +1,15 @@
 package com.liquordb.controller;
 
+import com.liquordb.PageResponse;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
+import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.service.CommentService;
 import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/comments")
+@RequestMapping("api/comments")
 public class CommentController {
 
     private final CommentService commentService;
@@ -22,7 +26,7 @@ public class CommentController {
 
     // 댓글 작성
     @PostMapping
-    public ResponseEntity<String> createComment(
+    public ResponseEntity<String> create(
             @RequestBody CommentRequestDto dto,
             @AuthenticationPrincipal User user
     ) {
@@ -31,19 +35,31 @@ public class CommentController {
         return ResponseEntity.ok("댓글이 등록되었습니다.");
     }
 
+    // 특정 리뷰의 댓글 조회
+    @GetMapping("/review/{reviewId}")
+    public ResponseEntity<PageResponse<CommentResponseDto>> getByReview(@PathVariable Long reviewId,
+                                                                                Pageable pageable) {
+        PageResponse<CommentResponseDto> comments = commentService.getCommentsByReview(reviewId, pageable);
+        return ResponseEntity.ok(comments);
+    }
+
+    // 댓글 수정
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<CommentResponseDto> update(@PathVariable Long commentId,
+                                                     @RequestBody CommentUpdateRequestDto dto,
+                                                     @AuthenticationPrincipal User user){
+        CommentResponseDto response = commentService.update(user, commentId, dto);
+        return ResponseEntity.ok(response);
+    }
+
     // 댓글 삭제
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<String> deleteComment(
+    public ResponseEntity<String> delete(
             @PathVariable Long commentId,
             @AuthenticationPrincipal User user) {
         commentService.delete(commentId, user.getId());
         return ResponseEntity.ok("댓글이 삭제되었습니다.");
     }
 
-    // 특정 리뷰의 댓글 조회
-    @GetMapping("/review/{reviewId}")
-    public ResponseEntity<List<CommentResponseDto>> getCommentsByReview(@PathVariable Long reviewId) {
-        List<CommentResponseDto> comments = commentService.getCommentsByReview(reviewId);
-        return ResponseEntity.ok(comments);
-    }
+
 }

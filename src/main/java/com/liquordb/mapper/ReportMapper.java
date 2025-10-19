@@ -24,7 +24,7 @@ public class ReportMapper {
                 .targetId(report.getTargetId())
                 .targetType(report.getTargetType())
                 .reason(report.getReason())
-                .isValid(report.isValid())
+                .isApproved(report.isApproved())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

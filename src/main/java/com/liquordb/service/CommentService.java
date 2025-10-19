@@ -1,7 +1,9 @@
 package com.liquordb.service;
 
+import com.liquordb.PageResponse;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
+import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.CommentMapper;
@@ -48,6 +50,24 @@ public class CommentService {
         return CommentMapper.toDto(commentRepository.save(comment));
     }
 
+    // 댓글 수정
+    @Transactional
+    public CommentResponseDto update(User user, Long commentId, CommentUpdateRequestDto dto) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("권한이 없습니다. 댓글 수정은 댓글 작성자만 가능합니다.");
+        }
+
+        if (comment.isDeleted()) {
+            throw new IllegalStateException("삭제된 댓글은 수정할 수 없습니다.");
+        }
+
+        comment.setContent(dto.getContent());
+        return CommentMapper.toDto(commentRepository.save(comment));
+    }
+
     // 댓글 삭제 (소프트 삭제)
     @Transactional
     public CommentResponseDto delete(Long commentId, UUID userId) {
@@ -64,15 +84,14 @@ public class CommentService {
 
     // 특정 리뷰의 댓글 전체 조회
     @Transactional(readOnly = true)
-    public List<CommentResponseDto> getCommentsByReview(Pageable pageable, Long reviewId) {
+    public PageResponse<CommentResponseDto> getCommentsByReview(Long reviewId, Pageable pageable) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
 
-        Page<Comment> comments = commentRepository.findAllByReviewAndIsDeletedFalse(pageable, review);
+        Page<Comment> commentPage = commentRepository.findAllByReviewAndIsDeletedFalse(review, pageable);
+        Page<CommentResponseDto> dtoPage = commentPage.map(CommentMapper::toDto);
 
-        return comments.stream()
-                .map(CommentMapper::toDto)
-                .toList();
+        return PageResponse.from(dtoPage);
     }
 
     @Transactional(readOnly = true)

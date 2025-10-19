@@ -12,5 +12,4 @@ import lombok.*;
 public class NoticeRequestDto {
     private String title;
     private String content;
-    private boolean isPinned;
 }

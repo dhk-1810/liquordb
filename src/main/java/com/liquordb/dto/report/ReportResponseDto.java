@@ -17,7 +17,7 @@ public class ReportResponseDto {
     private ReportTargetType targetType;
     private Long userId;
     private String reason;
-    private boolean isValid;
+    private boolean isApproved;
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt;
 }

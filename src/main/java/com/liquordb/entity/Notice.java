@@ -33,6 +33,7 @@ public class Notice {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime pinnedAt; // 공지목록에서 조회시 사용
 
     @PrePersist
     protected void onCreate() {
