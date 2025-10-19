@@ -31,6 +31,9 @@ public class Review {
     @Column(nullable = false)
     private boolean isHidden = false;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -56,6 +59,8 @@ public class Review {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime hiddenAt;
+    private LocalDateTime deletedAt;
 
     @PrePersist
     public void onCreate() {

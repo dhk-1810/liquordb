@@ -10,15 +10,12 @@ import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 
-import com.liquordb.repository.LiquorRepository;
-import com.liquordb.repository.LiquorTagRepository;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.review.ReviewSummaryDto;
 import com.liquordb.repository.UserRepository;
 import com.liquordb.repository.ReviewRepository;
 import com.liquordb.repository.CommentRepository;
 
-import com.liquordb.repository.UserTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -29,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 일반 유저 서비스 클래스입니다.
@@ -41,11 +37,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
-    private final UserTagRepository userTagRepository;
-    private final LiquorTagRepository liquorTagRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
-    private final LiquorRepository liquorRepository;
     private final LiquorLikeRepository liquorLikeRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
@@ -206,8 +199,13 @@ public class UserService {
     // 비밀번호 재설정
     @Transactional
     public void updatePassword(UUID userId, UserUpdatePasswordDto dto) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("유저가 존재하지 않습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+
+        // 민감한 변경이므로 UserStatus 체크.
+        if (user.getStatus().equals(UserStatus.WITHDRAWN) || user.getStatus().equals(UserStatus.BANNED)) {
+            throw new IllegalArgumentException("탈퇴 처리된 유저입니다.");
+        }
 
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
@@ -217,10 +215,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // 비밀번호 찾기 (임시 비밀번호 전송)
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    // 생성된 비밀번호를 이메일로 발송
     public void sendTempPassword(String toEmail, String tempPassword) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
@@ -254,16 +252,16 @@ public class UserService {
     }
 
     // 유저 조회 - 전체 또는 검색
-    public List<UserAdminDto> searchUsers(String keyword, UserStatus status) {
+    public List<UserResponseDto> searchUsers(String keyword, UserStatus status) {
         if ((keyword == null || keyword.isBlank()) && status == null) {
             return userRepository.findAll().stream()
-                    .map(UserAdminDto::from)
+                    .map(UserResponseDto::from)
                     .toList();
         }
 
         // 조건 검색이 가능하도록 사용자 정의 메서드 또는 Specification 사용
         return userRepository.search(keyword, status).stream()
-                .map(UserAdminDto::from)
+                .map(UserResponseDto::from)
                 .toList();
     }
 

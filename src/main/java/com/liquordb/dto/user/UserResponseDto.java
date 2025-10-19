@@ -1,8 +1,10 @@
 package com.liquordb.dto.user;
 
 import com.liquordb.entity.User;
+import com.liquordb.entity.UserStatus;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -16,6 +18,8 @@ public class UserResponseDto {
     private String email;
     private String nickname;
     private String profileImageUrl;
+    private LocalDateTime createdAt;
+    private UserStatus status;
     private String role;
 
     public static UserResponseDto from(User user) {

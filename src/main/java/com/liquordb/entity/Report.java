@@ -39,6 +39,7 @@ public class Report {
 
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt; // 승인되면
+    private LocalDateTime rejectedAt; // 각하되면
 
     @PrePersist
     public void onCreate() {

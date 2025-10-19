@@ -26,56 +26,61 @@ public class UserController {
     private final UserService userService;
     private final LiquorTagService liquorTagService;
 
-    @PostMapping("/register") // 회원가입
+    // 회원가입
+    @PostMapping("/register")
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterRequestDto dto) {
         UserResponseDto response = userService.register(dto);
         return ResponseEntity.ok(response); // 상태 코드 200 OK + 본문 포함
     }
 
-    @PostMapping("/login") // 로그인
+    // 로그인
+    @PostMapping("/login")
     public ResponseEntity<UserLoginResponseDto> login(@RequestBody UserLoginRequestDto dto) {
         return ResponseEntity.ok(userService.login(dto));
     }
 
-    @PostMapping("/find-password") // 임시 비번 전송
+    // 임시 비번 전송
+    @PostMapping("/find-password")
     public ResponseEntity<String> findPassword(@RequestBody UserFindPasswordRequestDto request) {
         userService.findPasswordAndSend(request);
         return ResponseEntity.ok("이메일로 임시 비밀번호를 전송했습니다.");
     }
 
-    @DeleteMapping("/{id}") // 회원 탈퇴
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        userService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/mypage/{userId}") // 마이페이지
-    public ResponseEntity<UserMyPageResponseDto> getMyPage(
-            @PathVariable UUID userId,
-            @RequestParam(defaultValue = "false") boolean showAllTags) {
-
-        UserMyPageResponseDto myPage = userService.getMyPageInfo(userId, showAllTags);
-
-        // 프론트는 myPage.getStatus()가 WARNED이면 팝업 표시 가능
-        return ResponseEntity.ok(myPage);
-    }
-
-
-    @PutMapping("/update") // 회원정보 수정 (프로필사진, 닉네임)
-    public ResponseEntity<String> update(@AuthenticationPrincipal User currentUser,
-                                             @ModelAttribute UserUpdateRequestDto dto) {
-        userService.update(currentUser.getId(), dto);
-        return ResponseEntity.ok("회원 정보가 수정되었습니다.");
-    }
-
-    @PutMapping("/update-password") // 비밀번호 재설정
+    // 비밀번호 재설정
+    @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal User currentUser,
                                                  @RequestBody UserUpdatePasswordDto dto) {
         userService.updatePassword(currentUser.getId(), dto);
         return ResponseEntity.ok("비밀번호가 변경되었습니다.");
     }
 
-    @GetMapping("/{userId}/preferred-liquors") // 선호 태그 기반 주류 추천
+    // 회원정보 수정 (프로필사진, 닉네임)
+    @PutMapping("/update")
+    public ResponseEntity<String> update(@AuthenticationPrincipal User currentUser,
+                                         @ModelAttribute UserUpdateRequestDto dto) {
+        userService.update(currentUser.getId(), dto);
+        return ResponseEntity.ok("회원 정보가 수정되었습니다.");
+    }
+
+    // 회원 탈퇴
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 마이페이지
+    @GetMapping("/mypage")
+    public ResponseEntity<UserMyPageResponseDto> getMyPage(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam(defaultValue = "false") boolean showAllTags) {
+
+        UserMyPageResponseDto myPage = userService.getMyPageInfo(currentUser.getId(), showAllTags);
+        return ResponseEntity.ok(myPage);
+    }
+
+    // 선호 태그 기반 주류 추천
+    @GetMapping("/{userId}/preferred-liquors")
     public ResponseEntity<List<LiquorSummaryDto>> getPreferredLiquors(@PathVariable UUID userId) {
         List<LiquorSummaryDto> liquors = liquorTagService.getLiquorsByUserTags(userId);
         return ResponseEntity.ok(liquors);

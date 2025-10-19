@@ -18,5 +18,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     long countByUserAndIsHiddenFalse(User user);
 
     // 특정 유저가 작성한 댓글 조회 (삭제한 댓글은 제외)
-    Page<Comment> findByUserIdAndIsDeletedFalse(Pageable pageable, UUID UserId);
+    Page<Comment> findByUserIdAndIsHiddenFalseAndIsDeletedFalse(Pageable pageable, UUID UserId);
 }

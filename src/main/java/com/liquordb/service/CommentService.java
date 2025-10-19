@@ -95,9 +95,9 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponseDto> getCommentsByUser(Pageable pageable, UUID userId) {
+    public List<CommentResponseDto> findByUserIdAndIsHiddenAndIsDeletedFalse(UUID userId, Pageable pageable) {
 
-        Page<Comment> comments = commentRepository.findByUserIdAndIsDeletedFalse(pageable, userId);
+        Page<Comment> comments = commentRepository.findByUserIdAndIsHiddenFalseAndIsDeletedFalse(pageable, userId);
 
         return comments.stream()
                 .map(CommentMapper::toDto)

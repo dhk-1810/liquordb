@@ -29,5 +29,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // 좋아요 누른 리뷰 개수
     long countByUserAndIsHiddenFalse(User user);
 
-
+    // 관리자용
+    Page<Review> findAllByIsHiddenFalseAndIsDeletedFalse(Pageable pageable);
+    Page<Review> findByIsHiddenTrue(Pageable pageable);
+    Page<Review> findByIsDeletedTrue(Pageable pageable);
 }
