@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class Liquor {
 
     @Id
-    @Column(name = "liquor_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -52,6 +52,11 @@ public class Liquor {
 
     @OneToMany(mappedBy = "liquor")
     private Set<LiquorTag> liquorTags = new HashSet<>();
+
+    // 주종 대분류
+    public enum LiquorCategory {
+        BEER, WINE, WHISKY, OTHER
+    }
 
     @PrePersist
     protected void onCreate() {

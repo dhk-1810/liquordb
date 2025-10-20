@@ -1,7 +1,8 @@
 package com.liquordb.service;
 
+import com.liquordb.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
-import com.liquordb.entity.Liquor;
+import com.liquordb.entity.*;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.ReviewDetailMapper;
 import com.liquordb.mapper.ReviewMapper;
@@ -11,13 +12,10 @@ import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.reviewdetaildto.BeerReviewDetailDto;
 import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewDetailDto;
 import com.liquordb.dto.review.reviewdetaildto.WineReviewDetailDto;
-import com.liquordb.entity.Review;
-import com.liquordb.entity.ReviewImage;
 import com.liquordb.entity.reviewdetail.BeerReviewDetail;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
 import com.liquordb.entity.reviewdetail.WhiskyReviewDetail;
 import com.liquordb.entity.reviewdetail.WineReviewDetail;
-import com.liquordb.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -93,7 +91,7 @@ public class ReviewService {
     // 유저에 따른 리뷰 조회
     @Transactional(readOnly = true)
     public Page<ReviewResponseDto> findAllByUserId(Pageable pageable, UUID userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
         return reviewRepository.findAllByUserIdAndIsHiddenFalse(pageable, userId)
                 .map(ReviewMapper::toDto);
@@ -145,5 +143,19 @@ public class ReviewService {
         }
 
         reviewRepository.delete(review);
+    }
+
+    /**
+     * 관리자용
+     */
+
+    // 유저ID, 리뷰 조회
+    @Transactional(readOnly = true)
+    public PageResponse<ReviewResponseDto> findAllByOptionalFilters(UUID userId, Review.ReviewStatus status, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+        Page<ReviewResponseDto> page = reviewRepository.findAllByOptionalFilters(userId, status, pageable)
+                .map(ReviewMapper::toDto);
+        return PageResponse.from(page);
     }
 }

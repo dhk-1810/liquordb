@@ -10,11 +10,11 @@ import jakarta.persistence.*;
 public class LiquorSubcategory {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name; // 예: 페일에일, 바이젠, 스카치
 
     @Enumerated(EnumType.STRING)
-    private LiquorCategory category; // 대분류: BEER, WHISKY 등
+    private Liquor.LiquorCategory category; // 대분류: BEER, WHISKY 등
 }

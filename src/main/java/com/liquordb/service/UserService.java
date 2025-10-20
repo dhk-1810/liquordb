@@ -111,7 +111,7 @@ public class UserService {
     // 회원 탈퇴 (soft delete)
     @Transactional
     public void delete(UUID userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
 
         if (user.getStatus() == UserStatus.WITHDRAWN) {
@@ -127,7 +127,7 @@ public class UserService {
     @Transactional
     public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         if (user.getStatus().equals(UserStatus.WITHDRAWN)
@@ -199,7 +199,7 @@ public class UserService {
     // 비밀번호 재설정
     @Transactional
     public void updatePassword(UUID userId, UserUpdatePasswordDto dto) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         // 민감한 변경이므로 UserStatus 체크.
@@ -267,7 +267,7 @@ public class UserService {
 
     // 유저 이용제한
     public void restrictUser(UUID userId, String period) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
         long days = switch (period) {

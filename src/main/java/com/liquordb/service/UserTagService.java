@@ -1,10 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.tag.UserTagRequestDto;
-import com.liquordb.entity.Tag;
-import com.liquordb.entity.User;
-import com.liquordb.entity.UserTag;
-import com.liquordb.entity.UserTagId;
+import com.liquordb.entity.*;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.repository.TagRepository;
 import com.liquordb.repository.UserRepository;
@@ -29,7 +26,7 @@ public class UserTagService {
     // 선호하는 태그로 추가
     @Transactional
     public UserTag create(UserTagRequestDto dto) {
-        User user = userRepository.findById(dto.getUserId())
+        User user = userRepository.findByIdAndStatusNot(dto.getUserId(), UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
         Tag tag = tagRepository.findById(dto.getTagId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 태그입니다."));
@@ -54,7 +51,7 @@ public class UserTagService {
     // 선호하는 태그에서 삭제
     @Transactional
     public void deleteByUserIdAndTagId(UserTagRequestDto dto) {
-        User user = userRepository.findById(dto.getUserId())
+        User user = userRepository.findByIdAndStatusNot(dto.getUserId(), UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
         Tag tag = tagRepository.findById(dto.getTagId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 태그입니다."));

@@ -18,7 +18,7 @@ public class CommentResponseDto {
     private UUID userId;             // 작성자 ID
     private String nickname;         // 작성자 닉네임
     private String content;          // 댓글 내용
-    private boolean isDeleted;       // 삭제 여부
+    private Comment.CommentStatus status;       // 게시/숨김/삭제
     private long likeCount;           // 좋아요 수
     private LocalDateTime createdAt; // 생성 시각
     private LocalDateTime updatedAt; // 수정 시각
@@ -31,7 +31,7 @@ public class CommentResponseDto {
                 .userId(comment.getUser().getId())
                 .nickname(comment.getUser().getNickname())
                 .content(comment.getContent())
-                .isDeleted(comment.getIsDeleted())
+                .status(comment.getStatus())
                 .likeCount(likeCount)
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())

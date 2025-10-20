@@ -13,7 +13,7 @@ public class CommentMapper {
                     .reviewId(comment.getReview().getId())
                     .parentId(comment.getParent().getId())
                     .content(comment.getContent())
-                    .isDeleted(comment.getIsDeleted())
+                    .status(comment.getStatus())
                     .likeCount(comment.getLikes().size())
                     .createdAt(comment.getCreatedAt())
                     .updatedAt(comment.getUpdatedAt())

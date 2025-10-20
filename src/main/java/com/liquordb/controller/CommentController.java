@@ -8,13 +8,10 @@ import com.liquordb.service.CommentService;
 import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,9 +34,9 @@ public class CommentController {
 
     // 특정 리뷰의 댓글 조회
     @GetMapping("/review/{reviewId}")
-    public ResponseEntity<PageResponse<CommentResponseDto>> getByReview(@PathVariable Long reviewId,
-                                                                                Pageable pageable) {
-        PageResponse<CommentResponseDto> comments = commentService.getCommentsByReview(reviewId, pageable);
+    public ResponseEntity<PageResponse<CommentResponseDto>> findByReviewId(@PathVariable Long reviewId,
+                                                                           Pageable pageable) {
+        PageResponse<CommentResponseDto> comments = commentService.findByReviewId(reviewId, pageable);
         return ResponseEntity.ok(comments);
     }
 

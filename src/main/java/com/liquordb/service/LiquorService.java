@@ -1,19 +1,14 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.liquor.LiquorTagResponseDto;
 import com.liquordb.entity.User;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.LiquorMapper;
-import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.entity.LiquorCategory;
 import com.liquordb.repository.LiquorRepository;
-import com.liquordb.dto.review.ReviewResponseDto;
-import com.liquordb.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +27,7 @@ public class LiquorService {
     @Transactional(readOnly = true)
     public Page<LiquorSummaryDto> getLiquorsByFilters(User user, // 조회하는 사람, null 허용.
                                                       Pageable pageable,
-                                                      LiquorCategory category, // 주류 대분류
+                                                      Liquor.LiquorCategory category, // 주류 대분류
                                                       LiquorSubcategory subcategory) { // 주류 소분류
 
         if (category == null && subcategory == null) { // 전체 주류 조회

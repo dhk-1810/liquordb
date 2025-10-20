@@ -3,7 +3,7 @@ package com.liquordb.controller;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.entity.LiquorCategory;
+import com.liquordb.entity.Liquor;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ public class LiquorController {
     // 1. 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
     public ResponseEntity<List<LiquorSummaryDto>> getLiquorsByFilters(
-            @RequestParam(required = false) LiquorCategory type,
+            @RequestParam(required = false) Liquor.LiquorCategory type,
             @RequestParam(required = false) LiquorSubcategory subcategory) {
         return ResponseEntity.ok(liquorService.getLiquorsByFilters(type, subcategory));
     }

@@ -55,7 +55,7 @@ public class LiquorTagService {
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getLiquorsByUserTags(UUID userId) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         List<UserTag> userTags = userTagRepository.findByUserId(userId);

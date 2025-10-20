@@ -16,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,10 +30,7 @@ public class Review {
     private String content;
 
     @Column(nullable = false)
-    private boolean isHidden = false;
-
-    @Column(nullable = false)
-    private boolean isDeleted = false;
+    private ReviewStatus status = ReviewStatus.ACTIVE;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -61,6 +59,10 @@ public class Review {
     private LocalDateTime updatedAt;
     private LocalDateTime hiddenAt;
     private LocalDateTime deletedAt;
+
+    public enum ReviewStatus {
+        ACTIVE, HIDDEN, DELETED
+    }
 
     @PrePersist
     public void onCreate() {

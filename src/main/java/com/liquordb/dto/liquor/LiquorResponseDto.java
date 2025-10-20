@@ -1,10 +1,8 @@
 package com.liquordb.dto.liquor;
 
 import com.liquordb.dto.review.ReviewResponseDto;
-import com.liquordb.entity.LiquorCategory;
+import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.entity.LiquorTag;
-import com.liquordb.entity.Tag;
 import lombok.*;
 
 import java.util.List;
@@ -21,7 +19,7 @@ import java.util.Set;
 public class LiquorResponseDto {
     private Long id;
     private String name;
-    private LiquorCategory category;
+    private Liquor.LiquorCategory category;
     private LiquorSubcategory subcategory;
     private String country;
     private String manufacturer;

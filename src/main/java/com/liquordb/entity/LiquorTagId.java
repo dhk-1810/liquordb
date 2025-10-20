@@ -13,6 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class LiquorTagId implements Serializable {
+
     private Long liquorId;
     private Long tagId;
 

@@ -1,14 +1,10 @@
 package com.liquordb.repository;
 
-import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.entity.LiquorCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -21,7 +17,7 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long> {
     Page<Liquor> findByNameContainingAndIsHiddenFalse(Pageable pageable, String keyword);
 
     // 대분류로 필터링
-    Page<Liquor> findByCategoryAndIsHiddenFalse(Pageable pageable, LiquorCategory liquorCategory);
+    Page<Liquor> findByCategoryAndIsHiddenFalse(Pageable pageable, Liquor.LiquorCategory liquorCategory);
 
     // 소분류로 필터링
     Page<Liquor> findBySubcategoryAndIsHiddenFalse(Pageable pageable, LiquorSubcategory liquorSubcategory);

@@ -15,15 +15,14 @@ import java.util.List;
 public class Comment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String content;
 
     @Column(nullable = false)
-    private boolean isDeleted = false; // 사용자가 삭제
-
-    @Column(nullable = false)
-    private boolean isHidden = false; // 신고 접수로 숨김처리
+    @Enumerated(EnumType.STRING)
+    private CommentStatus status = CommentStatus.ACTIVE; // 기본값은 ACTIVE
 
     @ManyToOne
     @JoinColumn(name = "review_id")
@@ -50,6 +49,10 @@ public class Comment {
     private LocalDateTime updatedAt;
     private LocalDateTime hiddenAt;
     private LocalDateTime deletedAt;
+
+    public enum CommentStatus {
+        ACTIVE, HIDDEN, DELETED
+    }
 
     @PrePersist // JPA(EntityManager)가 엔티티를 DB에 처음 저장(Persist=영속화)하기 바로 직전에 자동 호출
     public void onCreate() {

@@ -1,6 +1,6 @@
 package com.liquordb.dto.liquor;
 
-import com.liquordb.entity.LiquorCategory;
+import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
 import lombok.*;
 
@@ -14,7 +14,7 @@ import lombok.*;
 @Builder
 public class LiquorRequestDto {
     private String name;
-    private LiquorCategory category;
+    private Liquor.LiquorCategory category;
     private LiquorSubcategory subcategory;
     private String country;
     private String manufacturer;

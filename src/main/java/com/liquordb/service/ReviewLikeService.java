@@ -4,6 +4,7 @@ import com.liquordb.dto.review.ReviewLikeResponseDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.ReviewSummaryDto;
 import com.liquordb.entity.ReviewLike;
+import com.liquordb.entity.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.ReviewLikeRepository;
@@ -31,7 +32,7 @@ public class ReviewLikeService {
     // 좋아요 토글 (누르기/취소)
     @Transactional
     public ReviewLikeResponseDto toggleLike(UUID userId, Long reviewId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         Review review = reviewRepository.findById(reviewId)
@@ -71,7 +72,7 @@ public class ReviewLikeService {
 
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getReviewSummaryDtosByUserId(UUID userId){
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         return reviewLikeRepository.findByUserAndReviewIsHiddenFalse(user).stream()

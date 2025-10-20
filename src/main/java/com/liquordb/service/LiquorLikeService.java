@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.liquor.LiquorLikeResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorLike;
+import com.liquordb.entity.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.repository.LiquorLikeRepository;
@@ -31,7 +32,7 @@ public class LiquorLikeService {
     @Transactional
     public LiquorLikeResponseDto toggleLike(UUID userId, Long liquorId) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         Liquor liquor = liquorRepository.findById(liquorId)
@@ -65,7 +66,7 @@ public class LiquorLikeService {
     // 유저가 좋아요 누른 주류 목록
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getLiquorSummaryDtosByUserId(UUID userId){
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
         return liquorLikeRepository.findByUserIdAndLiquorIsHiddenFalse(userId)
                 .stream()

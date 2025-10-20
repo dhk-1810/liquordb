@@ -4,7 +4,7 @@ import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.reviewdetaildto.BeerReviewDetailDto;
 import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewDetailDto;
 import com.liquordb.dto.review.reviewdetaildto.WineReviewDetailDto;
-import com.liquordb.entity.LiquorCategory;
+import com.liquordb.entity.Liquor;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.reviewdetail.BeerReviewDetail;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
@@ -13,7 +13,7 @@ import com.liquordb.entity.reviewdetail.WineReviewDetail;
 
 public class ReviewDetailMapper {
 
-    public static ReviewDetail toEntity(LiquorCategory category, ReviewRequestDto dto, Review review) {
+    public static ReviewDetail toEntity(Liquor.LiquorCategory category, ReviewRequestDto dto, Review review) {
         return switch (category) {
             case BEER -> toBeerDetail(dto.getBeerDetail(), review);
             case WHISKY -> toWhiskyDetail(dto.getWhiskyDetail(), review);

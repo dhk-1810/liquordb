@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.comment.CommentLikeResponseDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.CommentLike;
+import com.liquordb.entity.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentLikeRepository;
@@ -28,7 +29,7 @@ public class CommentLikeService {
     // 좋아요 토글 (누르기/취소)
     @Transactional
     public CommentLikeResponseDto toggleLike(UUID userId, Long commentId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         Comment comment = commentRepository.findById(commentId)
@@ -76,7 +77,7 @@ public class CommentLikeService {
     // 유저가 좋아요 누른 댓글 조회
     @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentSummaryDtosByUserId(UUID userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
         return commentLikeRepository.findByUserAndCommentIsHiddenFalse(user).stream()
                 .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))

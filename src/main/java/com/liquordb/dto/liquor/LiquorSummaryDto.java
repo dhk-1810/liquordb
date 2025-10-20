@@ -1,7 +1,5 @@
 package com.liquordb.dto.liquor;
 
-import com.liquordb.entity.Liquor;
-import com.liquordb.entity.LiquorCategory;
 import lombok.*;
 
 @Getter
