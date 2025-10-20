@@ -20,7 +20,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByUserIdAndStatus(UUID userId, Comment.CommentStatus statuses, Pageable pageable);
 
     // 특정 유저가 작성한 댓글 수
-    long countByUserAndSuaFalse(User user);
+    long countByUserAndStatus(User user, Comment.CommentStatus status);
 
     // 관리자용 - 유저ID나 상태로 리뷰 목록 조회
     @Query("""

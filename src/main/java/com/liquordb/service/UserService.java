@@ -5,6 +5,7 @@ import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.CommentMapper;
+import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.repository.ReviewLikeRepository;
@@ -67,7 +68,7 @@ public class UserService {
                 .role(User.Role.USER)
                 .build();
 
-        return UserResponseDto.from(userRepository.save(user));
+        return UserMapper.toDto(userRepository.save(user));
     }
 
     // 로그인
@@ -136,8 +137,8 @@ public class UserService {
         }
 
         // N+1 문제 방지 위해 리포지토리 메서드 사용.
-        long reviewCount = reviewRepository.countByUserAndIsHiddenFalse(user);
-        long commentCount = commentRepository.countByUserAndIsHiddenFalse(user);
+        long reviewCount = reviewRepository.countByUserAndStatus(user, Review.ReviewStatus.ACTIVE);
+        long commentCount = commentRepository.countByUserAndStatus(user, Comment.CommentStatus.ACTIVE);
         long likedLiquorCount = liquorLikeRepository.countByUserAndLiquorIsHiddenFalse(user);
         long likedReviewCount = reviewLikeRepository.countByUserAndReviewIsHiddenFalse(user);
         long likedCommentCount = commentLikeRepository.countByUserAndCommentIsHiddenFalse(user);
@@ -248,25 +249,25 @@ public class UserService {
                 .role(User.Role.ADMIN)
                 .build();
 
-        return UserResponseDto.from(userRepository.save(user));
+        return UserMapper.toDto(userRepository.save(user));
     }
 
     // 유저 조회 - 전체 또는 검색
     public List<UserResponseDto> searchUsers(String keyword, UserStatus status) {
         if ((keyword == null || keyword.isBlank()) && status == null) {
             return userRepository.findAll().stream()
-                    .map(UserResponseDto::from)
+                    .map(UserMapper::toDto)
                     .toList();
         }
 
         // 조건 검색이 가능하도록 사용자 정의 메서드 또는 Specification 사용
         return userRepository.search(keyword, status).stream()
-                .map(UserResponseDto::from)
+                .map(UserMapper::toDto)
                 .toList();
     }
 
     // 유저 이용제한
-    public void restrictUser(UUID userId, String period) {
+    public UserResponseDto restrictUser(UUID userId, String period) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
@@ -287,7 +288,7 @@ public class UserService {
             user.setStatus(UserStatus.WARNED);  // 경고 상태 부여
         }
 
-        userRepository.save(user);
+        return UserMapper.toDto(userRepository.save(user));
     }
 }
 

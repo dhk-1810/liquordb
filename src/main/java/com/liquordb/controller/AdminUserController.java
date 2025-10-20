@@ -30,20 +30,17 @@ public class AdminUserController {
 
     // 유저 전체 조회 및 검색
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> userList(@RequestParam(required = false) String keyword,
+    public ResponseEntity<List<UserResponseDto>> userList(@RequestParam(required = false) String keyword, // 닉네임 또는 이메일 검색어
                                                           @RequestParam(required = false) UserStatus status) {
         List<UserResponseDto> users = userService.searchUsers(keyword, status);
-//        model.addAttribute("users", users);
-//        model.addAttribute("keyword", keyword);
-//        model.addAttribute("status", status);
         return ResponseEntity.ok(users);
     }
 
     // 유저 이용제한 처리
     @PostMapping("/{userId}/restrict")
-    public ResponseEntity<> restrictUser(@PathVariable UUID userId,
+    public ResponseEntity<UserResponseDto> restrictUser(@PathVariable UUID userId,
                                @RequestParam String period) {
-        userService.restrictUser(userId, period);
-        return ;
+        UserResponseDto user = userService.restrictUser(userId, period);
+        return ResponseEntity.ok(user);
     }
 }

@@ -10,7 +10,6 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @EqualsAndHashCode
 @Builder
 public class UserResponseDto {
@@ -22,12 +21,4 @@ public class UserResponseDto {
     private UserStatus status;
     private String role;
 
-    public static UserResponseDto from(User user) {
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .nickname(user.getNickname())
-                .role(user.getRole().name())
-                .build();
-    }
 }

@@ -28,7 +28,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findAllByUserIdAndIsHiddenFalse(Pageable pageable, UUID userId);
 
     // 좋아요 누른 리뷰 개수
-    long countByUserAndIsHiddenFalse(User user);
+    long countByUserAndStatus(User user, Review.ReviewStatus status);
 
 
     // 관리자용 - 유저ID나 상태로 리뷰 목록 조회
