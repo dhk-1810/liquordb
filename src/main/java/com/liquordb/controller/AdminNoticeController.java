@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @RestController
-@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/api/admin/notices")
+@RequestMapping("/admin/notices")
+@RequiredArgsConstructor
 public class AdminNoticeController {
 
     private final NoticeService noticeService;
@@ -31,6 +31,12 @@ public class AdminNoticeController {
     public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long id,
                                                           @RequestBody NoticeRequestDto dto) {
         return ResponseEntity.ok(noticeService.update(id, dto));
+    }
+
+    // 고정 토글
+    @PutMapping("{id}")
+    public ResponseEntity<NoticeResponseDto> togglePin(@PathVariable Long id){
+        return ResponseEntity.ok(noticeService.togglePin(id));
     }
 
     // 공지사항 삭제

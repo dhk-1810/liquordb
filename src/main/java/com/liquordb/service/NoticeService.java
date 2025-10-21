@@ -21,6 +21,23 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
 
+    // 공지사항 단건 조회
+    public NoticeResponseDto findById(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 공지사항입니다."));
+        return NoticeMapper.toDto(notice);
+    }
+
+    // 공지사항 목록 조회
+    public List<NoticeSummaryDto> findAll() {
+        return noticeRepository.findAll().stream()
+                .map(NoticeMapper::toSummaryDto)
+                .toList();
+    }
+
+    /**
+     * 관리자용
+     */
     // 공지사항 등록
     public NoticeResponseDto create(NoticeRequestDto dto) {
         Notice notice = toEntity(dto);
@@ -46,20 +63,6 @@ public class NoticeService {
             notice.setPinnedAt(LocalDateTime.now());
         }
         return NoticeMapper.toDto(noticeRepository.save(notice));
-    }
-
-    // 공지사항 단건 조회
-    public NoticeResponseDto findById(Long id) {
-        Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 공지사항입니다."));
-        return NoticeMapper.toDto(notice);
-    }
-
-    // 공지사항 목록 조회
-    public List<NoticeSummaryDto> findAll() {
-        return noticeRepository.findAll().stream()
-                .map(NoticeMapper::toSummaryDto)
-                .toList();
     }
 
     // 공지사항 삭제

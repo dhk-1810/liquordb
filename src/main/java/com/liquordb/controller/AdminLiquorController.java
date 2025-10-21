@@ -1,6 +1,7 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.liquor.LiquorRequestDto;
+import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -8,12 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 관리자용 주류 관리 컨트롤러입니다.
- */
 @RestController
-@RequestMapping("/admin/liquors")
 @PreAuthorize("hasRole('ADMIN')")
+@RequestMapping("/admin/liquors")
 @RequiredArgsConstructor
 public class AdminLiquorController {
 
@@ -21,21 +19,21 @@ public class AdminLiquorController {
 
     // 주류 추가
     @PostMapping
-    public ResponseEntity<Void> createLiquor(@RequestBody LiquorRequestDto requestDto) {
+    public ResponseEntity<LiquorResponseDto> createLiquor(@RequestBody LiquorRequestDto requestDto) {
         liquorService.create(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 주류 수정
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateLiquor(@PathVariable Long id, @RequestBody LiquorRequestDto requestDto) {
+    public ResponseEntity<LiquorResponseDto> updateLiquor(@PathVariable Long id, @RequestBody LiquorRequestDto requestDto) {
         liquorService.update(id, requestDto);
         return ResponseEntity.ok().build();
     }
 
     // 주류 숨기기
     @PatchMapping("/{id}/hide")
-    public ResponseEntity<Void> toggleHidden(@PathVariable Long id) {
+    public ResponseEntity<LiquorResponseDto> toggleHidden(@PathVariable Long id) {
         liquorService.toggleHidden(id);
         return ResponseEntity.ok().build();
     }

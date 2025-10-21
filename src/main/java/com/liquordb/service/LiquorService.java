@@ -1,5 +1,6 @@
 package com.liquordb.service;
 
+import com.liquordb.PageResponse;
 import com.liquordb.entity.User;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.LiquorMapper;
@@ -25,30 +26,34 @@ public class LiquorService {
 
     // 1. 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
-    public Page<LiquorSummaryDto> getLiquorsByFilters(User user, // 조회하는 사람, null 허용.
-                                                      Pageable pageable,
-                                                      Liquor.LiquorCategory category, // 주류 대분류
-                                                      LiquorSubcategory subcategory) { // 주류 소분류
+    public PageResponse<LiquorSummaryDto> getLiquorsByFilters(User user, // 조회하는 사람, null 허용.
+                                                              Liquor.LiquorCategory category, // 주류 대분류
+                                                              LiquorSubcategory subcategory,
+                                                              Pageable pageable) { // 주류 소분류
 
         if (category == null && subcategory == null) { // 전체 주류 조회
-            return liquorRepository.findAllByIsHiddenFalse(pageable)
+            Page<LiquorSummaryDto> allLiquors = liquorRepository.findAllByIsHiddenFalse(pageable)
                     .map(liquor -> LiquorMapper.toSummaryDto(liquor, user));
+            return PageResponse.from(allLiquors);
         }
         else if (category != null && subcategory == null) {
-            return liquorRepository.findByCategoryAndIsHiddenFalse(pageable, category)
-                    .map(liquor -> LiquorMapper.toSummaryDto(liquor, user)); // 대분류로 필터링
+            Page<LiquorSummaryDto> categoryLiquors = liquorRepository.findByCategoryAndIsHiddenFalse(pageable, category)
+                    .map(liquor -> LiquorMapper.toSummaryDto(liquor, user));
+            return PageResponse.from(categoryLiquors); // 대분류로 필터링
         }
         else /* (subcategory != null) */ {
-            return liquorRepository.findBySubcategoryAndIsHiddenFalse(pageable, subcategory)
-                    .map(liquor -> LiquorMapper.toSummaryDto(liquor, user)); // 소분류로 필터링
+            Page<LiquorSummaryDto> subcategoryLiquors = liquorRepository.findBySubcategoryAndIsHiddenFalse(pageable, subcategory)
+                    .map(liquor -> LiquorMapper.toSummaryDto(liquor, user));
+            return PageResponse.from(subcategoryLiquors); // 소분류로 필터링
         }
     }
 
     // 2. 주류 목록 검색 (이름으로)
     @Transactional(readOnly = true)
-    public Page<LiquorSummaryDto> searchLiquorsByName(User user, Pageable pageable, String keyword) {
-        return liquorRepository.findByNameContainingAndIsHiddenFalse(pageable, keyword)
+    public PageResponse<LiquorSummaryDto> searchLiquorsByName(User user, String keyword, Pageable pageable) {
+        Page<LiquorSummaryDto> searchedLiquors = liquorRepository.findByNameContainingAndIsHiddenFalse(pageable, keyword)
                 .map(liquor -> LiquorMapper.toSummaryDto(liquor, user));
+        return PageResponse.from(searchedLiquors);
     }
 
     // 3. 주류 상세 페이지

@@ -1,11 +1,15 @@
 package com.liquordb.controller;
 
+import com.liquordb.PageResponse;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.entity.Liquor;
+import com.liquordb.entity.User;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,19 +32,21 @@ public class LiquorController {
 
     // 1. 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
-    public ResponseEntity<List<LiquorSummaryDto>> getLiquorsByFilters(
+    public ResponseEntity<PageResponse<LiquorSummaryDto>> getLiquorsByFilters(
+            @AuthenticationPrincipal User user,
             @RequestParam(required = false) Liquor.LiquorCategory type,
-            @RequestParam(required = false) LiquorSubcategory subcategory) {
-        return ResponseEntity.ok(liquorService.getLiquorsByFilters(type, subcategory));
+            @RequestParam(required = false) LiquorSubcategory subcategory,
+            Pageable pageable) {
+        PageResponse<LiquorSummaryDto> liquor = liquorService.getLiquorsByFilters(user, type, subcategory, pageable);
+        return ResponseEntity.ok(liquor);
     }
 
     // 2. 주류 검색 (이름으로)
     @GetMapping("/search")
-    public ResponseEntity<Map<String, Object>> searchLiquors(@RequestParam String keyword) {
-        List<LiquorSummaryDto> result = liquorService.searchLiquorsByName(, keyword);
-        Map<String, Object> response = new HashMap<>();
-        response.put("count", result.size());
-        response.put("liquors", result);
+    public ResponseEntity<PageResponse<LiquorSummaryDto>> searchLiquors(@AuthenticationPrincipal User user,
+                                                                        @RequestParam String keyword,
+                                                                        Pageable pageable) {
+        PageResponse<LiquorSummaryDto> response = liquorService.searchLiquorsByName(user, keyword, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -48,9 +54,9 @@ public class LiquorController {
     @GetMapping("/{id}")
     public ResponseEntity<LiquorResponseDto> getLiquorDetail(
             @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        UUID userId = userDetails != null ? userDetails.getUserId() : null; // 좋아요
-        LiquorResponseDto dto = liquorService.getLiquorDetail(id, userId);
+            @AuthenticationPrincipal User currentUser) {
+
+        LiquorResponseDto dto = liquorService.getLiquorDetail(id, currentUser);
         return ResponseEntity.ok(dto);
     }
 

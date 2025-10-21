@@ -53,7 +53,7 @@ public class UserService {
 
     // 회원가입
     @Transactional
-    public UserResponseDto register(UserRegisterRequestDto dto) {
+    public UserResponseDto register(UserRegisterRequestDto dto, User.Role role) {
 
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다."); // 강제 탈퇴(BANNED) 된 경우에도 여기서 예외.
@@ -65,7 +65,7 @@ public class UserService {
                 .email(dto.getEmail())
                 .password(encodedPassword)
                 .nickname(dto.getNickname())
-                .role(User.Role.USER)
+                .role(role)
                 .build();
 
         return UserMapper.toDto(userRepository.save(user));
@@ -233,24 +233,6 @@ public class UserService {
     /**
      * 관리자용 메서드
      */
-    // 관리자 회원가입
-    public UserResponseDto adminRegister(UserRegisterRequestDto dto) {
-
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중이거나 활동이 제한된 이메일입니다.");
-        }
-
-        String encodedPassword = passwordEncoder.encode(dto.getPassword());
-
-        User user = User.builder()
-                .email(dto.getEmail())
-                .password(encodedPassword)
-                .nickname(dto.getNickname())
-                .role(User.Role.ADMIN)
-                .build();
-
-        return UserMapper.toDto(userRepository.save(user));
-    }
 
     // 유저 조회 - 전체 또는 검색
     public List<UserResponseDto> searchUsers(String keyword, UserStatus status) {

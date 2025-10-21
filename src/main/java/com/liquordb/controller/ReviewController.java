@@ -21,11 +21,10 @@ public class ReviewController {
 
     // 리뷰 등록
     @PostMapping
-    public ResponseEntity<?> create(
+    public ResponseEntity<ReviewResponseDto> create(
             @RequestBody @Valid ReviewRequestDto requestDto,
             @AuthenticationPrincipal User user
     ) {
-
         userValidator.validateCanPost(user);
         ReviewResponseDto response = reviewService.create(user, requestDto);
         return ResponseEntity.ok(response);
@@ -33,7 +32,7 @@ public class ReviewController {
 
     // 리뷰 수정
     @PutMapping("/{reviewId}")
-    public ResponseEntity<?> update(
+    public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
             @RequestBody @Valid ReviewRequestDto requestDto,
             @AuthenticationPrincipal User user
@@ -50,7 +49,7 @@ public class ReviewController {
             @AuthenticationPrincipal User user
     ) {
         userValidator.validateCanPost(user);
-        reviewService.delete(reviewId, user);
+        reviewService.deleteByIdAndUser(reviewId, user);
         return ResponseEntity.noContent().build();
     }
 }

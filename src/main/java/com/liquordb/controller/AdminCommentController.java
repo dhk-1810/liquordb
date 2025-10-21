@@ -19,13 +19,13 @@ import java.util.UUID;
 
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("admin/comment")
+@RequestMapping("/admin/comments")
 @RequiredArgsConstructor
 public class AdminCommentController {
 
     private final CommentService commentService;
 
-    // 유저별 댓글 조회 - 상태 필터링 가능
+    // 유저별 댓글 조회 - 상태 필터 적용 가능
     @GetMapping("/{userId}")
     public ResponseEntity<PageResponse<CommentResponseDto>> findByUserIdAndStatus(@PathVariable UUID userId,
                                                                                   @RequestParam(required = false) Comment.CommentStatus status,

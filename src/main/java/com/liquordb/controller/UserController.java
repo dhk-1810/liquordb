@@ -27,10 +27,9 @@ public class UserController {
     private final LiquorTagService liquorTagService;
 
     // 회원가입
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterRequestDto dto) {
-        UserResponseDto response = userService.register(dto);
-        return ResponseEntity.ok(response); // 상태 코드 200 OK + 본문 포함
+        return ResponseEntity.ok(userService.register(dto, User.Role.USER)); // 상태 코드 200 OK + 본문 포함
     }
 
     // 로그인

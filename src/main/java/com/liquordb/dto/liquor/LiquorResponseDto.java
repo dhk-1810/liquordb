@@ -18,6 +18,7 @@ import java.util.Set;
 @Builder
 public class LiquorResponseDto {
     private Long id;
+    private boolean isHidden;
     private String name;
     private Liquor.LiquorCategory category;
     private LiquorSubcategory subcategory;
