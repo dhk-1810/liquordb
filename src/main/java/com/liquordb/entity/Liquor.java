@@ -21,7 +21,7 @@ public class Liquor {
     private Long id;
 
     @Column(nullable = false)
-    private boolean isHidden = false; // 숨기기 여부
+    private boolean isDeleted = false;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -43,6 +43,7 @@ public class Liquor {
     private String imageUrl; // 대표 이미지 사진 저장경로
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LiquorLike> likes = new HashSet<>();

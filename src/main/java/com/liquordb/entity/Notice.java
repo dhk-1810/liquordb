@@ -30,9 +30,11 @@ public class Notice {
     private String content;
 
     private boolean isPinned;
+    private boolean isDeleted;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
     private LocalDateTime pinnedAt; // 공지목록에서 조회시 사용
 
     @PrePersist

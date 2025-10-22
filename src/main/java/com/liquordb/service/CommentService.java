@@ -70,20 +70,6 @@ public class CommentService {
         return CommentMapper.toDto(commentRepository.save(comment));
     }
 
-    // 댓글 삭제 (소프트 삭제)
-    @Transactional
-    public CommentResponseDto delete(Long commentId, UUID userId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
-
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new IllegalStateException("본인이 작성한 댓글만 삭제할 수 있습니다.");
-        }
-
-        comment.setStatus(Comment.CommentStatus.DELETED);
-        return CommentMapper.toDto(commentRepository.save(comment));
-    }
-
     // 특정 리뷰의 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
     public PageResponse<CommentResponseDto> findByReviewId(Long reviewId, Pageable pageable) {
@@ -107,6 +93,21 @@ public class CommentService {
                 .map(CommentMapper::toDto)
                 .toList();
     }
+
+    // 댓글 삭제 (소프트 삭제)
+    @Transactional
+    public CommentResponseDto delete(Long commentId, UUID userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("본인이 작성한 댓글만 삭제할 수 있습니다."); // 신고접수시 관리자는 삭제 X, 숨김 O
+        }
+
+        comment.setStatus(Comment.CommentStatus.DELETED);
+        return CommentMapper.toDto(commentRepository.save(comment));
+    }
+
 
     /**
      * 관리자용

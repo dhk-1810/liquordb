@@ -3,6 +3,7 @@ package com.liquordb.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +20,11 @@ public class Tag {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name;
+
+    private boolean isDeleted;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "tag")
     private Set<LiquorTag> liquorTags = new HashSet<>();
