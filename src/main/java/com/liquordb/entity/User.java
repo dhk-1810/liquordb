@@ -29,8 +29,6 @@ public class User {
 
     private String socialProvider; // 소셜로그인 제공자 (google, kakao 등)
 
-    private String profileImageUrl;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -38,6 +36,9 @@ public class User {
     private UserStatus status;
 
     private int reportCount; // 신고된 건수
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Image profileImage;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();

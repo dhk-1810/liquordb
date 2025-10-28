@@ -59,10 +59,10 @@ public class ReviewService {
         List<String> imagesToAdd = Optional.ofNullable(dto.getAddImageUrls())
                 .orElse(Collections.emptyList());
 
-        List<ReviewImage> images = imagesToAdd.stream()
-                .map(url -> ReviewImage.builder()
+        List<Image> images = imagesToAdd.stream()
+                .map(path -> Image.builder()
                         .review(review)
-                        .imageUrl(url)
+                        .filePath(path)
                         .build())
                 .toList();
 
@@ -117,12 +117,12 @@ public class ReviewService {
         List<String> imagesToAdd = Optional.ofNullable(dto.getAddImageUrls()).orElse(Collections.emptyList());
         List<String> imagesToRemove = Optional.ofNullable(dto.getRemoveImageUrls()).orElse(Collections.emptyList());
 
-        review.getImages().removeIf(img -> imagesToRemove.contains(img.getImageUrl()));
+        review.getImages().removeIf(image -> imagesToRemove.contains(image.getFilePath()));
 
         imagesToAdd.forEach(url -> review.getImages().add(
-                ReviewImage.builder()
+                Image.builder()
                         .review(review)
-                        .imageUrl(url)
+                        .filePath(url)
                         .build()
         ));
 
