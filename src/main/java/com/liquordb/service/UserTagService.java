@@ -2,6 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.tag.UserTagRequestDto;
 import com.liquordb.entity.*;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.repository.TagRepository;
 import com.liquordb.repository.UserRepository;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

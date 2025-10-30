@@ -3,24 +3,20 @@ package com.liquordb.service;
 import com.liquordb.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.entity.*;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.ReviewDetailMapper;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
-import com.liquordb.dto.review.reviewdetaildto.BeerReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WineReviewDetailDto;
-import com.liquordb.entity.reviewdetail.BeerReviewDetail;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
-import com.liquordb.entity.reviewdetail.WhiskyReviewDetail;
-import com.liquordb.entity.reviewdetail.WineReviewDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,10 +28,10 @@ import java.util.UUID;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final ReviewImageRepository reviewImageRepository;
     private final LiquorRepository liquorRepository;
     private final UserRepository userRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
+    private final FileService fileService;
 
     // 리뷰 등록
     @Transactional
@@ -55,18 +51,11 @@ public class ReviewService {
         ReviewDetail detail = ReviewDetailMapper.toEntity(liquor.getCategory(), dto, review);
         review.setDetail(detail);
 
-        // 리뷰이미지 업로드 (addImageUrls 사용)
-        List<String> imagesToAdd = Optional.ofNullable(dto.getAddImageUrls())
-                .orElse(Collections.emptyList());
-
-        List<Image> images = imagesToAdd.stream()
-                .map(path -> Image.builder()
-                        .review(review)
-                        .filePath(path)
-                        .build())
-                .toList();
-
-        reviewImageRepository.saveAll(images);
+        // 리뷰이미지 업로드 및 저장
+        // fileService.upload 각각 수행
+        dto.getImages().forEach(file -> {
+            review.getImages().add(fileService.upload(file));
+        });
 
         return ReviewMapper.toDto(reviewRepository.save(review));
     }
@@ -114,17 +103,22 @@ public class ReviewService {
         review.setContent(dto.getContent());
 
         // 기존 이미지 제거 / 새 이미지 추가
-        List<String> imagesToAdd = Optional.ofNullable(dto.getAddImageUrls()).orElse(Collections.emptyList());
+        /*
+        List<String> imagesToAdd = Optional.ofNullable(dto.getImages()).orElse(Collections.emptyList());
         List<String> imagesToRemove = Optional.ofNullable(dto.getRemoveImageUrls()).orElse(Collections.emptyList());
+
+
 
         review.getImages().removeIf(image -> imagesToRemove.contains(image.getFilePath()));
 
         imagesToAdd.forEach(url -> review.getImages().add(
-                Image.builder()
+                File.builder()
                         .review(review)
                         .filePath(url)
                         .build()
         ));
+         */
+
 
         // 주종별 디테일 수정
         reviewDetailUpdater.updateDetail(review.getDetail(), dto);

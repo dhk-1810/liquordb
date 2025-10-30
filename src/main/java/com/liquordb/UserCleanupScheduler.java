@@ -1,7 +1,7 @@
 package com.liquordb;
 
 import com.liquordb.entity.User;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;

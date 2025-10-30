@@ -1,4 +1,4 @@
-package com.liquordb.entity;
+package com.liquordb.enums;
 
 public enum UserStatus {
     ACTIVE, // 기본

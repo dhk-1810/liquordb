@@ -1,7 +1,7 @@
 package com.liquordb.dto.review;
 
 import com.liquordb.entity.Review;
-import com.liquordb.entity.Image;
+import com.liquordb.entity.File;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class ReviewResponseDto {
     public static ReviewResponseDto from(Review review) {
         List<String> imageUrls = review.getImages() != null
                 ? review.getImages().stream()
-                .map(Image::getFilePath)
+                .map(File::getFilePath)
                 .toList()
                 : Collections.emptyList();
 

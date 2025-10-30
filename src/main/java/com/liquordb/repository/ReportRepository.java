@@ -1,7 +1,7 @@
 package com.liquordb.repository;
 
 import com.liquordb.entity.Report;
-import com.liquordb.entity.ReportTargetType;
+import com.liquordb.enums.ReportTargetType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {

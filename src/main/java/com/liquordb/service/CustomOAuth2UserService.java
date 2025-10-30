@@ -1,7 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.entity.User;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

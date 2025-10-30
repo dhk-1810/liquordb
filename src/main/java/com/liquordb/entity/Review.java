@@ -50,7 +50,7 @@ public class Review {
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Image> images;
+    private List<File> images;
 
     @OneToMany(mappedBy = "review")
     private List<Report> reports = new ArrayList<>();

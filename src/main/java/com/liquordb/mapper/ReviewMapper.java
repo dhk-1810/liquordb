@@ -4,10 +4,8 @@ import com.liquordb.entity.Liquor;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.entity.Review;
-import com.liquordb.entity.Image;
+import com.liquordb.entity.File;
 import com.liquordb.entity.User;
-
-import java.util.List;
 
 /**
  * 수동 Mapper 클래스입니다.
@@ -29,7 +27,7 @@ public class ReviewMapper {
                 .liquorId(review.getLiquor().getId())
                 .content(review.getContent())
                 .rating(review.getRating())
-                .imagePaths(review.getImages().stream().map(Image::getFilePath).toList())
+                .imagePaths(review.getImages().stream().map(File::getFilePath).toList())
                 .build();
     }
 }

@@ -3,6 +3,8 @@ package com.liquordb.service;
 import com.liquordb.dto.report.ReportRequestDto;
 import com.liquordb.dto.report.ReportResponseDto;
 import com.liquordb.entity.*;
+import com.liquordb.enums.ReportTargetType;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.ReportMapper;
 import com.liquordb.repository.CommentRepository;

@@ -3,7 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.liquor.LiquorLikeResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorLike;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.repository.LiquorLikeRepository;

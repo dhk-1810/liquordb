@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.mapper.UserMapper;
@@ -24,6 +25,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -46,14 +48,14 @@ public class UserService {
 
     private final UserTagService userTagService;
     private final LiquorLikeService liquorLikeService;
-    private final FileUploadService fileUploadService;
+    private final FileService fileService;
     private final JavaMailSender mailSender;
     private final ReviewLikeService reviewLikeService;
     private final CommentLikeService commentLikeService;
 
     // 회원가입
     @Transactional
-    public UserResponseDto register(UserRegisterRequestDto dto, User.Role role) {
+    public UserResponseDto register(UserRegisterRequestDto dto, MultipartFile profileImage, User.Role role) {
 
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다."); // 강제 탈퇴(BANNED) 된 경우에도 여기서 예외.
@@ -67,6 +69,10 @@ public class UserService {
                 .nickname(dto.getNickname())
                 .role(role)
                 .build();
+
+        if (profileImage != null) {
+            user.setProfileImage(fileService.upload(profileImage));
+        }
 
         return UserMapper.toDto(userRepository.save(user));
     }
@@ -190,8 +196,8 @@ public class UserService {
         }
 
         if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
-            String imageUrl = fileUploadService.upload(dto.getProfileImage());
-            user.setProfileImageUrl(imageUrl);
+            File profileImage = fileService.upload(dto.getProfileImage());
+            user.setProfileImage(profileImage);
         }
 
         userRepository.save(user);

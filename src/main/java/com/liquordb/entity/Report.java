@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.enums.ReportTargetType;
 import jakarta.persistence.*;
 import lombok.*;
 

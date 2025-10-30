@@ -1,7 +1,7 @@
 package com.liquordb;
 
 import com.liquordb.entity.User;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import org.springframework.stereotype.Component;
 
 @Component

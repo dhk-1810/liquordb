@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,7 +39,7 @@ public class User {
     private int reportCount; // 신고된 건수
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Image profileImage;
+    private File profileImage;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();

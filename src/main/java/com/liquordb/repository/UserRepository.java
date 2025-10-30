@@ -1,7 +1,7 @@
 package com.liquordb.repository;
 
 import com.liquordb.entity.User;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

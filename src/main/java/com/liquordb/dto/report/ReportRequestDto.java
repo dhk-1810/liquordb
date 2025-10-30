@@ -1,6 +1,6 @@
 package com.liquordb.dto.report;
 
-import com.liquordb.entity.ReportTargetType;
+import com.liquordb.enums.ReportTargetType;
 import lombok.*;
 
 @Getter

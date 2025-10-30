@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +29,11 @@ public class UserController {
 
     // 회원가입
     @PostMapping
-    public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterRequestDto dto) {
-        return ResponseEntity.ok(userService.register(dto, User.Role.USER)); // 상태 코드 200 OK + 본문 포함
+    public ResponseEntity<UserResponseDto> register(
+            @RequestBody UserRegisterRequestDto dto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+    ) {
+        return ResponseEntity.ok(userService.register(dto, profileImage, User.Role.USER)); // 상태 코드 200 OK + 본문 포함
     }
 
     // 로그인

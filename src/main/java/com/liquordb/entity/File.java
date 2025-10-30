@@ -14,15 +14,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Image {
+public class File {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String filePath;
     private String fileName;
     private String fileExtension;
-    private String filePath;
     private Long size;
 
     @ManyToOne(fetch = FetchType.LAZY)

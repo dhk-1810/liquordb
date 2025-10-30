@@ -1,7 +1,6 @@
 package com.liquordb.dto.user;
 
-import com.liquordb.entity.User;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;

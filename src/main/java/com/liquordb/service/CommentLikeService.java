@@ -3,7 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.comment.CommentLikeResponseDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.CommentLike;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentLikeRepository;

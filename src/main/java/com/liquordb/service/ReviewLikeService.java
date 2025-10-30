@@ -2,9 +2,8 @@ package com.liquordb.service;
 
 import com.liquordb.dto.review.ReviewLikeResponseDto;
 import com.liquordb.dto.review.ReviewResponseDto;
-import com.liquordb.dto.review.ReviewSummaryDto;
 import com.liquordb.entity.ReviewLike;
-import com.liquordb.entity.UserStatus;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.ReviewLikeRepository;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
