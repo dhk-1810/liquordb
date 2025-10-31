@@ -19,5 +19,5 @@ public class UserValidator {
         }
     }
 
-
+    // TODO 본인이 작성한 게시글인지
 }

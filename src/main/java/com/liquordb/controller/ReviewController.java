@@ -2,6 +2,7 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
+import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.service.ReviewService;
 import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
@@ -10,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,10 +27,11 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<ReviewResponseDto> create(
             @RequestBody @Valid ReviewRequestDto requestDto,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal User user,
+            @RequestPart(required = false) List<MultipartFile> images
     ) {
         userValidator.validateCanPost(user);
-        ReviewResponseDto response = reviewService.create(user, requestDto);
+        ReviewResponseDto response = reviewService.create(user, requestDto, images);
         return ResponseEntity.ok(response);
     }
 
@@ -34,11 +39,12 @@ public class ReviewController {
     @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
-            @RequestBody @Valid ReviewRequestDto requestDto,
-            @AuthenticationPrincipal User user
+            @RequestBody @Valid ReviewUpdateRequestDto request,
+            @AuthenticationPrincipal User user,
+            @RequestPart(required = false) List<MultipartFile> imagesToAdd
     ) {
         userValidator.validateCanPost(user);
-        ReviewResponseDto response = reviewService.update(reviewId, user, requestDto);
+        ReviewResponseDto response = reviewService.update(reviewId, user, request, imagesToAdd);
         return ResponseEntity.ok(response);
     }
 

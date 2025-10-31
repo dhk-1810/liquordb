@@ -2,6 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
+import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.NotFoundException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.plaf.multi.MultiListUI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +37,7 @@ public class ReviewService {
 
     // 리뷰 등록
     @Transactional
-    public ReviewResponseDto create(User user, ReviewRequestDto dto) {
+    public ReviewResponseDto create(User user, ReviewRequestDto dto, List<MultipartFile> images) {
 
         Liquor liquor = liquorRepository.findById(dto.getLiquorId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
@@ -52,8 +54,7 @@ public class ReviewService {
         review.setDetail(detail);
 
         // 리뷰이미지 업로드 및 저장
-        // fileService.upload 각각 수행
-        dto.getImages().forEach(file -> {
+        images.forEach(file -> {
             review.getImages().add(fileService.upload(file));
         });
 
@@ -88,7 +89,8 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewResponseDto update(Long reviewId, User user, ReviewRequestDto dto) {
+    public ReviewResponseDto update(Long reviewId, User user, ReviewUpdateRequestDto dto, List<MultipartFile> newImages) {
+
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
 
@@ -102,28 +104,36 @@ public class ReviewService {
         review.setTitle(dto.getTitle());
         review.setContent(dto.getContent());
 
-        // 기존 이미지 제거 / 새 이미지 추가
-        /*
-        List<String> imagesToAdd = Optional.ofNullable(dto.getImages()).orElse(Collections.emptyList());
-        List<String> imagesToRemove = Optional.ofNullable(dto.getRemoveImageUrls()).orElse(Collections.emptyList());
-
-
-
-        review.getImages().removeIf(image -> imagesToRemove.contains(image.getFilePath()));
-
-        imagesToAdd.forEach(url -> review.getImages().add(
-                File.builder()
-                        .review(review)
-                        .filePath(url)
-                        .build()
-        ));
-         */
-
+        removeImage(review, dto.getImageIdsToDelete());
+        addImage(review, newImages);
 
         // 주종별 디테일 수정
-        reviewDetailUpdater.updateDetail(review.getDetail(), dto);
+        // TODO reviewDetailUpdater.updateDetail(review.getDetail(), dto);
 
         return ReviewMapper.toDto(reviewRepository.save(review));
+    }
+
+    public void addImage(Review review, List<MultipartFile> images) {
+        if (images == null || images.isEmpty()) return;
+        images.forEach(image -> {
+            review.getImages().add(fileService.upload(image));
+        });
+    }
+
+    public void removeImage(Review review, List<Long> imageIdsToDelete) {
+        if (imageIdsToDelete == null || imageIdsToDelete.isEmpty()) return;
+
+        review.getImages().removeIf(image -> {
+            if (imageIdsToDelete.contains(image.getFilePath())) {
+                fileService.delete(image.getId()); // 실제 파일 삭제
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public void updateBeerReview(){
+
     }
 
     // 리뷰 삭제

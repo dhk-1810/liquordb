@@ -2,6 +2,7 @@ package com.liquordb.entity;
 
 import com.liquordb.enums.UserStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -20,12 +21,13 @@ public class User {
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 100)
+    @Email
     private String email; // 로그인은 DB상 ID가 아닌 이메일 또는 닉네임으로 함.
 
     @Column(nullable = false, unique = true, length = 30)
     private String nickname;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 100)
     private String password; // 소셜 로그인시에도 회원정보 수정을 위해 비밀번호 설정은 필요.
 
     private String socialProvider; // 소셜로그인 제공자 (google, kakao 등)

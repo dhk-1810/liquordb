@@ -3,9 +3,11 @@ package com.liquordb.dto.review;
 import com.liquordb.dto.review.reviewdetaildto.BeerReviewDetailDto;
 import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewDetailDto;
 import com.liquordb.dto.review.reviewdetaildto.WineReviewDetailDto;
-import lombok.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -14,14 +16,13 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewRequestDto {
+public class ReviewUpdateRequestDto {
     // userId는 JWT 토큰에서 뽑아내 서버에서 설정
-    private Long liquorId;
 
     @NotNull(message = "평점은 필수입니다.")
     private Double rating;
 
-    private String title; // 제목 겸 한줄평. 선택
+    private String title;
 
     @NotBlank(message = "내용을 입력해주세요.")
     private String content;
@@ -30,6 +31,9 @@ public class ReviewRequestDto {
     private BeerReviewDetailDto beerDetail;
     private WineReviewDetailDto wineDetail;
     private WhiskyReviewDetailDto whiskyDetail;
+
+    // 이미지 삭제 목록
+    private List<Long> imageIdsToDelete;
 
     // 추가할 이미지는 따로 파라미터로 받음.
 }

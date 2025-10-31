@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @Builder
 public class UserUpdateRequestDto {
+    private String email;
     private String nickname;
-    private MultipartFile profileImage;
+    private boolean deleteProfileImage;
 }

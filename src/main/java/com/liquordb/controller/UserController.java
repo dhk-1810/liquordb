@@ -60,8 +60,9 @@ public class UserController {
     // 회원정보 수정 (프로필사진, 닉네임)
     @PutMapping("/update")
     public ResponseEntity<String> update(@AuthenticationPrincipal User currentUser,
-                                         @ModelAttribute UserUpdateRequestDto dto) {
-        userService.update(currentUser.getId(), dto);
+                                         @ModelAttribute UserUpdateRequestDto dto,
+                                         @RequestPart MultipartFile profileImage) {
+        userService.update(currentUser.getId(), dto, profileImage);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
     }
 

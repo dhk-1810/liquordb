@@ -88,14 +88,11 @@ public class FileService {
     }
 
     @Transactional
-    public void delete(Long imageId, User user) {
+    public void delete(Long imageId) {
 
         File image = fileRepository.findById(imageId)
                 .orElseThrow(() -> new NotFoundException("파일을 찾을 수 없습니다."));
 
-        if (!image.getUser().equals(user)) {
-            throw new AccessDeniedException("본인이 업로드한 사진만 삭제할 수 있습니다.");
-        }
 
         // 로컬 파일 삭제
         Path filePath = Paths.get(uploadDir).resolve(image.getFilePath()).normalize();

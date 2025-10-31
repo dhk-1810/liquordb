@@ -187,16 +187,28 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
-    public void update(UUID userId, UserUpdateRequestDto dto) {
+    public void update(UUID userId, UserUpdateRequestDto dto, MultipartFile newProfileImage) {
+
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new NotFoundException("유저가 존재하지 않습니다."));
+
+        if (dto.getEmail() != null) {
+            if (!userRepository.existsByEmail(dto.getEmail())) {
+                user.setEmail(dto.getEmail());
+            }
+        }
 
         if (dto.getNickname() != null) {
             user.setNickname(dto.getNickname());
         }
 
-        if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
-            File profileImage = fileService.upload(dto.getProfileImage());
+        if (dto.isDeleteProfileImage()) {
+            fileService.delete(user.getProfileImage().getId());
+            user.setProfileImage(null);
+        }
+
+        if (newProfileImage != null && !newProfileImage.isEmpty()) {
+            File profileImage = fileService.upload(newProfileImage);
             user.setProfileImage(profileImage);
         }
 
