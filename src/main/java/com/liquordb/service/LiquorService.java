@@ -2,7 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.PageResponse;
 import com.liquordb.entity.User;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.LiquorNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -62,7 +63,7 @@ public class LiquorService {
 
         // 주류 정보 조회 (삭제되지 않은 것만)
         Liquor liquor = liquorRepository.findByIdAndIsHiddenFalse(liquorId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
+                .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
         return LiquorMapper.toDto(liquor, user);
     }
@@ -88,23 +89,18 @@ public class LiquorService {
     // 주류 수정
     public LiquorResponseDto update(Long id, LiquorRequestDto dto) {
         Liquor liquor = liquorRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
+                .orElseThrow(() -> new LiquorNotFoundException(id));
         liquor.updateFromDto(dto);
         return LiquorMapper.toDto(liquorRepository.save(liquor), null);
     }
 
-    // 주류 숨기기
-    public void toggleHidden(Long id) {
+    // 주류 삭제 (Soft Delete)
+    public void deleteById(Long id) {
         Liquor liquor = liquorRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
-        liquor.setHidden(!liquor.isHidden());
-    }
-
-    // 주류 삭제
-    public void delete(Long id) {
-        Liquor liquor = liquorRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
-        liquorRepository.delete(liquor);
+                .orElseThrow(() -> new LiquorNotFoundException(id));
+        liquor.setDeleted(true);
+        liquor.setDeletedAt(LocalDateTime.now());
+        liquorRepository.save(liquor);
     }
 
 }

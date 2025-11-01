@@ -5,7 +5,9 @@ import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.LiquorNotFoundException;
+import com.liquordb.exception.ReviewNotFoundException;
+import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.mapper.ReviewDetailMapper;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.swing.plaf.multi.MultiListUI;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +43,7 @@ public class ReviewService {
     public ReviewResponseDto create(User user, ReviewRequestDto dto, List<MultipartFile> images) {
 
         Liquor liquor = liquorRepository.findById(dto.getLiquorId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
+                .orElseThrow(() -> new LiquorNotFoundException(dto.getLiquorId()));
         Review review = Review.builder()
                 .user(user)
                 .liquor(liquor)
@@ -66,14 +69,14 @@ public class ReviewService {
     public ReviewResponseDto findById(Long id) {
         return reviewRepository.findById(id)
                 .map(ReviewMapper::toDto)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new ReviewNotFoundException(id));
     }
 
     // 주류에 따른 리뷰 조회
     @Transactional(readOnly = true)
     public Page<ReviewResponseDto> findAllByLiquorIdAndIsHiddenFalse(Pageable pageable, Long liquorId) {
         Liquor liquor = liquorRepository.findById(liquorId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new LiquorNotFoundException(liquorId));
         return reviewRepository.findAllByLiquorIdAndIsHiddenFalse(pageable, liquorId)
                 .map(ReviewMapper::toDto);
     }
@@ -82,7 +85,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public Page<ReviewResponseDto> findAllByUserId(Pageable pageable, UUID userId) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         return reviewRepository.findAllByUserIdAndIsHiddenFalse(pageable, userId)
                 .map(ReviewMapper::toDto);
     }
@@ -92,7 +95,7 @@ public class ReviewService {
     public ReviewResponseDto update(Long reviewId, User user, ReviewUpdateRequestDto dto, List<MultipartFile> newImages) {
 
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         // 작성자 확인
         if (!review.getUser().getId().equals(user.getId())) {
@@ -136,17 +139,19 @@ public class ReviewService {
 
     }
 
-    // 리뷰 삭제
+    // 리뷰 삭제 (Soft Delete)
     @Transactional
     public void deleteByIdAndUser(Long reviewId, User user) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+        Review review = reviewRepository.findById(reviewId) // TODO 삭제된것 빼고 조회
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         if (!review.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("리뷰를 삭제할 권한이 없습니다.");
         }
 
-        reviewRepository.delete(review);
+        review.setStatus(Review.ReviewStatus.DELETED);
+        review.setDeletedAt(LocalDateTime.now());
+        reviewRepository.save(review);
     }
 
     /**
@@ -157,7 +162,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public PageResponse<ReviewResponseDto> findAllByOptionalFilters(UUID userId, Review.ReviewStatus status, Pageable pageable) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         Page<ReviewResponseDto> page = reviewRepository.findAllByOptionalFilters(userId, status, pageable)
                 .map(ReviewMapper::toDto);
         return PageResponse.from(page);

@@ -5,7 +5,9 @@ import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.CommentNotFoundException;
+import com.liquordb.exception.ReviewNotFoundException;
+import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentRepository;
 import com.liquordb.entity.Review;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,12 +36,12 @@ public class CommentService {
     @Transactional
     public CommentResponseDto create(User user, CommentRequestDto dto) {
         Review review = reviewRepository.findById(dto.getReviewId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new ReviewNotFoundException(dto.getReviewId()));
 
         Comment parent = null;
         if (dto.getParentId() != null) { // 대댓글일 경우
             parent = commentRepository.findById(dto.getParentId())
-                    .orElseThrow(() -> new NotFoundException("존재하지 않는 부모댓글입니다."));
+                    .orElseThrow(() -> new CommentNotFoundException(dto.getParentId()));
         }
 
         Comment comment = Comment.builder()
@@ -56,7 +59,7 @@ public class CommentService {
     @Transactional
     public CommentResponseDto update(User user, Long commentId, CommentUpdateRequestDto dto) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
 
         if (!comment.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("권한이 없습니다. 댓글 수정은 댓글 작성자만 가능합니다.");
@@ -74,7 +77,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public PageResponse<CommentResponseDto> findByReviewId(Long reviewId, Pageable pageable) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         Page<Comment> commentPage
                 = commentRepository.findByReviewIdAndStatus(reviewId, Comment.CommentStatus.ACTIVE, pageable);
@@ -87,25 +90,26 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponseDto> findByUserIdAndStatus(UUID userId, Pageable pageable) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         Page<Comment> comments = commentRepository.findByUserIdAndStatus(userId, Comment.CommentStatus.ACTIVE, pageable);
         return comments.stream()
                 .map(CommentMapper::toDto)
                 .toList();
     }
 
-    // 댓글 삭제 (소프트 삭제)
+    // 댓글 삭제 (Soft Delete)
     @Transactional
-    public CommentResponseDto delete(Long commentId, UUID userId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+    public void deleteByIdAndUser(Long commentId, User user) {
+        Comment comment = commentRepository.findById(commentId) // TODO 삭제된것 빼고 조회
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!comment.getUser().getId().equals(user.getId())) {
             throw new IllegalStateException("본인이 작성한 댓글만 삭제할 수 있습니다."); // 신고접수시 관리자는 삭제 X, 숨김 O
         }
 
         comment.setStatus(Comment.CommentStatus.DELETED);
-        return CommentMapper.toDto(commentRepository.save(comment));
+        comment.setDeletedAt(LocalDateTime.now());
+        commentRepository.save(comment);
     }
 
 
@@ -117,7 +121,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public PageResponse<CommentResponseDto> findAllByOptionalFilters(UUID userId, Comment.CommentStatus status, Pageable pageable) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId.toString()));
         Page<CommentResponseDto> page = commentRepository.findAllByOptionalFilters(userId, status, pageable)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);

@@ -4,7 +4,7 @@ import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.CommentLikeRepository;
@@ -83,7 +83,7 @@ public class UserService {
         String password = dto.getPassword();
 
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new NotFoundException("잘못된 이메일입니다."));
+                .orElseThrow(() -> new UserNotFoundException(dto.getEmail()));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
@@ -105,7 +105,7 @@ public class UserService {
     @Transactional
     public void findPasswordAndSend(UserFindPasswordRequestDto dto) {
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new UserNotFoundException(dto.getEmail()));
 
         String tempPassword = UUID.randomUUID().toString().substring(0, 8);
         user.setPassword(passwordEncoder.encode(tempPassword));
@@ -117,9 +117,9 @@ public class UserService {
 
     // 회원 탈퇴 (soft delete)
     @Transactional
-    public void delete(UUID userId) {
+    public void deleteById(UUID userId) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (user.getStatus() == UserStatus.WITHDRAWN) {
             throw new IllegalStateException("이미 탈퇴한 사용자입니다.");
@@ -135,7 +135,7 @@ public class UserService {
     public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
 
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (user.getStatus().equals(UserStatus.WITHDRAWN)
                 || user.getStatus().equals(UserStatus.BANNED)) {
@@ -190,7 +190,7 @@ public class UserService {
     public void update(UUID userId, UserUpdateRequestDto dto, MultipartFile newProfileImage) {
 
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (dto.getEmail() != null) {
             if (!userRepository.existsByEmail(dto.getEmail())) {
@@ -219,7 +219,7 @@ public class UserService {
     @Transactional
     public void updatePassword(UUID userId, UserUpdatePasswordDto dto) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 민감한 변경이므로 UserStatus 체크.
         if (user.getStatus().equals(UserStatus.WITHDRAWN) || user.getStatus().equals(UserStatus.BANNED)) {
