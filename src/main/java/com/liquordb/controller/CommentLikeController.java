@@ -26,7 +26,7 @@ public class CommentLikeController {
     // 댓글 좋아요 카운트
     @GetMapping("/count")
     public ResponseEntity<Long> countLikes(@RequestParam Long commentId) {
-        long count = commentLikeService.countLikes(commentId);
+        long count = commentLikeService.countByCommentId(commentId);
         return ResponseEntity.ok(count);
     }
 }

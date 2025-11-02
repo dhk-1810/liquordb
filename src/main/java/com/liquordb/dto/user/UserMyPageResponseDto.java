@@ -4,6 +4,7 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.ReviewSummaryDto;
+import com.liquordb.dto.tag.TagResponseDto;
 import lombok.*;
 
 import java.util.List;
@@ -36,5 +37,5 @@ public class UserMyPageResponseDto {
     private List<ReviewResponseDto> likedReviews;    // 좋아요 누른 리뷰 목록
     private List<CommentResponseDto> likedComments;  // 좋아요 누른 댓글 목록
 
-    private List<String> preferredTags;
+    private List<TagResponseDto> preferredTags;
 }

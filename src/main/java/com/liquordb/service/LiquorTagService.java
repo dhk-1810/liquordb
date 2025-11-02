@@ -53,26 +53,6 @@ public class LiquorTagService {
                 .toList();
     }
 
-    // 유저가 선호하는 태그로 주류 목록 조회
-    @Transactional(readOnly = true)
-    public List<LiquorSummaryDto> getLiquorsByUserTags(UUID userId) {
-
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        List<UserTag> userTags = userTagRepository.findByUserId(userId);
-        List<Liquor> liquors = userTags.stream()
-                .flatMap(ut -> ut.getTag().getLiquorTags().stream()
-                        .map(LiquorTag::getLiquor))
-                .distinct()
-                .toList();
-
-        return liquors.stream()
-                .map(liquor -> LiquorMapper.toSummaryDto(liquor, user))
-                .distinct()
-                .toList();
-    }
-
     /**
      * 관리자용
      */

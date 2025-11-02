@@ -1,22 +1,18 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.review.ReviewResponseDto;
+import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.mapper.UserMapper;
-import com.liquordb.repository.CommentLikeRepository;
-import com.liquordb.repository.LiquorLikeRepository;
-import com.liquordb.repository.ReviewLikeRepository;
+import com.liquordb.repository.*;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.review.ReviewSummaryDto;
-import com.liquordb.repository.UserRepository;
-import com.liquordb.repository.ReviewRepository;
-import com.liquordb.repository.CommentRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -165,7 +161,7 @@ public class UserService {
         List<CommentResponseDto> likedComments = commentLikeService.getCommentSummaryDtosByUserId(userId);
 
         // 등록한(=선호하는) 태그 목록
-        List<String> preferredTags = userTagService.findTagNamesByUserId(userId);
+        List<TagResponseDto> preferredTags = userTagService.findByUserId(userId, true);
 
         return UserMyPageResponseDto.builder()
                 .userId(user.getId())

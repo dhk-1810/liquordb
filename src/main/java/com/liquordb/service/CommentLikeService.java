@@ -4,7 +4,8 @@ import com.liquordb.dto.comment.CommentLikeResponseDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.CommentLike;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.CommentNotFoundException;
+import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.entity.Comment;
@@ -30,10 +31,10 @@ public class CommentLikeService {
     @Transactional
     public CommentLikeResponseDto toggleLike(UUID userId, Long commentId) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
 
         Optional<CommentLike> optionalCommentLike
                 = commentLikeRepository.findByUserIdAndCommentId(userId, commentId);
@@ -78,7 +79,7 @@ public class CommentLikeService {
     @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentSummaryDtosByUserId(UUID userId) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         return commentLikeRepository.findByUserAndCommentIsHiddenFalse(user).stream()
                 .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))
                 .toList();

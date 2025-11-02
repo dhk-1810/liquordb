@@ -50,7 +50,7 @@ public class LiquorController {
         return ResponseEntity.ok(response);
     }
 
-    // 3. 특정 주류 조회
+    // 3. 주류 단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<LiquorResponseDto> getLiquorDetail(
             @PathVariable Long id,

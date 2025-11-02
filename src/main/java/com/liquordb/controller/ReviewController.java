@@ -36,7 +36,7 @@ public class ReviewController {
     }
 
     // 리뷰 수정
-    @PutMapping("/{reviewId}")
+    @PatchMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
             @RequestBody @Valid ReviewUpdateRequestDto request,

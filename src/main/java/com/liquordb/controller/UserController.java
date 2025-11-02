@@ -50,7 +50,7 @@ public class UserController {
     }
 
     // 비밀번호 재설정
-    @PutMapping("/update-password")
+    @PatchMapping("/update-password")
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal User currentUser,
                                                  @RequestBody UserUpdatePasswordDto dto) {
         userService.updatePassword(currentUser.getId(), dto);
@@ -83,10 +83,4 @@ public class UserController {
         return ResponseEntity.ok(myPage);
     }
 
-    // 선호 태그 기반 주류 추천
-    @GetMapping("/{userId}/preferred-liquors")
-    public ResponseEntity<List<LiquorSummaryDto>> getPreferredLiquors(@PathVariable UUID userId) {
-        List<LiquorSummaryDto> liquors = liquorTagService.getLiquorsByUserTags(userId);
-        return ResponseEntity.ok(liquors);
-    }
 }
