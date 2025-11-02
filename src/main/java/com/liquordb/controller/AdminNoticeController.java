@@ -27,14 +27,14 @@ public class AdminNoticeController {
     }
 
     // 공지사항 수정
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long id,
                                                           @RequestBody NoticeRequestDto dto) {
         return ResponseEntity.ok(noticeService.update(id, dto));
     }
 
     // 고정 토글
-    @PutMapping("{id}")
+    @PatchMapping("/{id}/pin")
     public ResponseEntity<NoticeResponseDto> togglePin(@PathVariable Long id){
         return ResponseEntity.ok(noticeService.togglePin(id));
     }

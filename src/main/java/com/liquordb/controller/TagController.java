@@ -15,12 +15,6 @@ public class TagController {
 
     private final TagService tagService;
 
-    // 특정 주류에 연결된 태그 이름 목록 반환
-    @GetMapping("/liquor/{liquorId}")
-    public ResponseEntity<List<String>> getTagsForLiquor(@PathVariable Long liquorId) {
-        return ResponseEntity.ok(tagService.getTagsForLiquor(liquorId));
-    }
-
     // 특정 유저의 태그 목록 조회
     @GetMapping("/user/{userId}")
     public List<String> getPreferredTags(

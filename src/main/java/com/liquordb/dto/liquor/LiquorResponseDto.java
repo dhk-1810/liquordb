@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 주류 하나에 대한 응답 DTO입니다.
+ * 주류 하나에 대한 응답 DTO
+ * 단일 조회 페이지에서 사용
  */
 
 @Getter
@@ -18,7 +19,6 @@ import java.util.Set;
 @Builder
 public class LiquorResponseDto {
     private Long id;
-    private boolean isHidden;
     private String name;
     private Liquor.LiquorCategory category;
     private LiquorSubcategory subcategory;

@@ -25,24 +25,17 @@ public class AdminLiquorController {
     }
 
     // 주류 수정
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<LiquorResponseDto> updateLiquor(@PathVariable Long id, @RequestBody LiquorRequestDto requestDto) {
         liquorService.update(id, requestDto);
         return ResponseEntity.ok().build();
     }
 
-    // 주류 숨기기
-    @PatchMapping("/{id}/hide")
-    public ResponseEntity<LiquorResponseDto> toggleHidden(@PathVariable Long id) {
-        liquorService.toggleHidden(id);
-        return ResponseEntity.ok().build();
-    }
-
-    // 주류 삭제
+    // 주류 삭제 (Soft Delete)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLiquor(@PathVariable Long id) {
-        liquorService.delete(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<LiquorResponseDto> toggleHidden(@PathVariable Long id) {
+        liquorService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }
 

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,9 +28,11 @@ public class AdminUserController {
 
     // 관리자 회원가입
     @PostMapping
-    public ResponseEntity<UserResponseDto> createAdmin(@RequestBody UserRegisterRequestDto dto) {
+    public ResponseEntity<UserResponseDto> createAdmin(@RequestBody UserRegisterRequestDto dto,
+                                                       @RequestPart(required = false) MultipartFile profileImage
+    ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.register(dto, null, User.Role.ADMIN));
+                .body(userService.register(dto, profileImage, User.Role.ADMIN));
     }
 
     // 유저 전체 조회 및 검색
@@ -41,9 +44,10 @@ public class AdminUserController {
     }
 
     // 유저 이용제한 처리
+    // TODO 검토
     @PostMapping("/{userId}/restrict")
     public ResponseEntity<UserResponseDto> restrictUser(@PathVariable UUID userId,
-                               @RequestParam String period) {
+                                                        @RequestParam String period) {
         UserResponseDto user = userService.restrictUser(userId, period);
         return ResponseEntity.ok(user);
     }

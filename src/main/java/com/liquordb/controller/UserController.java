@@ -58,7 +58,7 @@ public class UserController {
     }
 
     // 회원정보 수정 (프로필사진, 닉네임)
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<String> update(@AuthenticationPrincipal User currentUser,
                                          @ModelAttribute UserUpdateRequestDto dto,
                                          @RequestPart MultipartFile profileImage) {
@@ -69,7 +69,7 @@ public class UserController {
     // 회원 탈퇴
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        userService.delete(id);
+        userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 

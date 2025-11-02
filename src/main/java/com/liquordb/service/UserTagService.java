@@ -3,7 +3,8 @@ package com.liquordb.service;
 import com.liquordb.dto.tag.UserTagRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.TagNotFoundException;
+import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.repository.TagRepository;
 import com.liquordb.repository.UserRepository;
 import com.liquordb.repository.UserTagRepository;
@@ -21,15 +22,14 @@ public class UserTagService {
     private final UserRepository userRepository;
     private final UserTagRepository userTagRepository;
     private final TagRepository tagRepository;
-    private final ReportService reportService;
 
     // 선호하는 태그로 추가
     @Transactional
     public UserTag create(UserTagRequestDto dto) {
         User user = userRepository.findByIdAndStatusNot(dto.getUserId(), UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(dto.getUserId()));
         Tag tag = tagRepository.findById(dto.getTagId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 태그입니다."));
+                .orElseThrow(() -> new TagNotFoundException(dto.getTagId()));
         UserTagId id = new UserTagId(user.getId(), tag.getId());
         UserTag userTag = UserTag.builder()
                 .id(id)
@@ -52,9 +52,9 @@ public class UserTagService {
     @Transactional
     public void deleteByUserIdAndTagId(UserTagRequestDto dto) {
         User user = userRepository.findByIdAndStatusNot(dto.getUserId(), UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(dto.getUserId()));
         Tag tag = tagRepository.findById(dto.getTagId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 태그입니다."));
+                .orElseThrow(() -> new TagNotFoundException(dto.getTagId()));
         userTagRepository.deleteByUserIdAndTagId(user.getId(), tag.getId());
     }
 }

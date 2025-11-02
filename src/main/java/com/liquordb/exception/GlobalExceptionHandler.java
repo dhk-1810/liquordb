@@ -55,4 +55,36 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        ErrorResponse error = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                "잘못된 요청입니다.",
+                ex.getMessage()
+        );
+        log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
+        ErrorResponse error = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                "잘못된 요청입니다.",
+                ex.getMessage()
+        );
+        log.error("IllegalStateException: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        ErrorResponse error = ErrorResponse.of(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "서버 내부 오류가 발생했습니다.",
+                ex.getMessage()
+        );
+        log.error("Exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
 }

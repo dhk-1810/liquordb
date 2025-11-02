@@ -27,10 +27,14 @@ public class AdminCommentController {
 
     // 유저별 댓글 조회 - 상태 필터 적용 가능
     @GetMapping("/{userId}")
-    public ResponseEntity<PageResponse<CommentResponseDto>> findByUserIdAndStatus(@PathVariable UUID userId,
-                                                                                  @RequestParam(required = false) Comment.CommentStatus status,
-                                                                                  Pageable pageable) {
+    public ResponseEntity<PageResponse<CommentResponseDto>> findByUserIdAndStatus(
+            @PathVariable UUID userId,
+            @RequestParam(required = false) Comment.CommentStatus status,
+            Pageable pageable
+    ) {
         PageResponse<CommentResponseDto> comments = commentService.findAllByOptionalFilters(userId, status, pageable);
         return ResponseEntity.ok(comments);
     }
+
+    // TODO 신고 조치로 리뷰 숨김처리
 }

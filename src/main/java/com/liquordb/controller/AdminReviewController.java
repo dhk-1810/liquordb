@@ -22,11 +22,14 @@ public class AdminReviewController {
 
     // 리뷰 조회 - 유저 또는 상태 필터링 가능
     @GetMapping("/{userId}")
-    public ResponseEntity<PageResponse<ReviewResponseDto>> findByUserIdAndStatus(@PathVariable UUID userId,
-                                                                                 @RequestParam(required = false) Review.ReviewStatus status,
-                                                                                 Pageable pageable) {
+    public ResponseEntity<PageResponse<ReviewResponseDto>> findByUserIdAndStatus(
+            @PathVariable UUID userId,
+            @RequestParam(required = false) Review.ReviewStatus status,
+            Pageable pageable
+    ) {
         PageResponse<ReviewResponseDto> reviews = reviewService.findAllByOptionalFilters(userId, status, pageable);
         return ResponseEntity.ok(reviews);
     }
 
+    // TODO 신고 조치로 리뷰 숨김처리
 }

@@ -1,11 +1,14 @@
 package com.liquordb.service;
 
+import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.liquor.LiquorTagRequestDto;
 import com.liquordb.dto.liquor.LiquorTagResponseDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.LiquorNotFoundException;
+import com.liquordb.exception.TagNotFoundException;
+import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.LiquorTagMapper;
 import com.liquordb.repository.*;
@@ -14,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,24 +31,26 @@ public class LiquorTagService {
 
     // 태그 이름으로 주류 검색
     @Transactional(readOnly = true)
-    public List<Liquor> getLiquorsByTagName(String tagName) {
-        return liquorTagRepository.findLiquorsByTagName(tagName);
+    public List<LiquorResponseDto> getLiquorsByTagName(String tagName, User user) {
+        return liquorTagRepository.findLiquorsByTagName(tagName).stream()
+                .map(liquor -> LiquorMapper.toDto(liquor, user))
+                .toList();
     }
 
     // 태그 ID로 주류 검색
     @Transactional(readOnly = true)
-    public List<Liquor> getLiquorsByTagId(Long tagId) {
+    public List<LiquorResponseDto> getLiquorsByTagId(Long tagId, User user) {
         return liquorTagRepository.findLiquorByTagId(tagId).stream()
-                .map(LiquorTag::getLiquor)
+                .map(liquorTag -> LiquorMapper.toDto(liquorTag.getLiquor(), user))
                 .toList();
     }
 
     // 특정 주류에 연결된 태그 이름 목록 반환
     @Transactional(readOnly = true)
-    public Set<LiquorTagResponseDto> getTagResponseDtos(Long liquorId) {
+    public List<LiquorTagResponseDto> getTagsByLiquorId(Long liquorId) {
         return liquorTagRepository.findTagsByLiquorId(liquorId).stream()
                 .map(LiquorTagMapper::toDto)
-                .collect(Collectors.toSet());
+                .toList();
     }
 
     // 유저가 선호하는 태그로 주류 목록 조회
@@ -55,7 +58,7 @@ public class LiquorTagService {
     public List<LiquorSummaryDto> getLiquorsByUserTags(UUID userId) {
 
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         List<UserTag> userTags = userTagRepository.findByUserId(userId);
         List<Liquor> liquors = userTags.stream()
@@ -74,13 +77,13 @@ public class LiquorTagService {
      * 관리자용
      */
     // 주류에 태그 추가
-    public LiquorTagResponseDto addLiquorTag(LiquorTagRequestDto requestDto) {
+    public LiquorTagResponseDto addLiquorTag(LiquorTagRequestDto request) {
 
-        Liquor liquor = liquorRepository.findById(requestDto.getLiquorId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
+        Liquor liquor = liquorRepository.findById(request.getLiquorId())
+                .orElseThrow(() -> new LiquorNotFoundException(request.getLiquorId()));
 
-        Tag tag = tagRepository.findById(requestDto.getTagId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 태그입니다."));
+        Tag tag = tagRepository.findById(request.getTagId())
+                .orElseThrow(() -> new TagNotFoundException(request.getTagId()));
 
         LiquorTag liquorTag = LiquorTagMapper.toEntity(liquor, tag);
         liquorTagRepository.save(liquorTag);

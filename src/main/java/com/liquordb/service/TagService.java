@@ -3,17 +3,13 @@ package com.liquordb.service;
 import com.liquordb.dto.tag.TagRequestDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.Tag;
-import com.liquordb.exception.NotFoundException;
-import com.liquordb.mapper.TagMapper;
+import com.liquordb.exception.TagNotFoundException;
 import com.liquordb.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +37,7 @@ public class TagService {
     @Transactional
     public TagResponseDto rename(Long id, TagRequestDto dto){
         Tag tag = tagRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 태그입니다. ID=" + id));
+                .orElseThrow(() -> new TagNotFoundException(id));
         tag.setName(dto.getName()); // 이름 변경
         tagRepository.save(tag);
 
@@ -54,9 +50,10 @@ public class TagService {
     // 태그 삭제
     @Transactional
     public void delete(Long id) {
-        if (!tagRepository.existsById(id)) {
-            throw new NotFoundException("해당 ID의 태그가 존재하지 않습니다. ID=" + id);
-        }
-        tagRepository.deleteById(id);
+        Tag tag = tagRepository.findById(id)
+                .orElseThrow(() -> new TagNotFoundException(id));
+        tag.setDeleted(true);
+        tag.setDeletedAt(LocalDateTime.now());
+        tagRepository.save(tag);
     }
 }

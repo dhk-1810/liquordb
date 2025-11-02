@@ -24,7 +24,7 @@ public class AdminTagController {
     }
 
     // 태그 이름 변경
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<TagResponseDto> update(@PathVariable Long id,
                                                  @RequestBody TagRequestDto requestDto) {
         TagResponseDto updatedTag = tagService.rename(id, requestDto);
@@ -32,7 +32,7 @@ public class AdminTagController {
     }
 
     // 태그 삭제
-    @DeleteMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         tagService.delete(id);
         return ResponseEntity.noContent().build();
