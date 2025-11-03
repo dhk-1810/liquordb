@@ -70,13 +70,6 @@ public class Liquor {
         updatedAt = LocalDateTime.now();
     }
 
-    public List<String> getTags() {
-        if (liquorTags == null) return Collections.emptyList();
-        return liquorTags.stream()
-                .map(lt -> lt.getTag().getName())  // Tag의 name 필드
-                .collect(Collectors.toList());
-    }
-
     public void updateFromDto(LiquorRequestDto dto) {
         this.name = dto.getName();
         this.category = dto.getCategory();

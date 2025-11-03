@@ -88,7 +88,7 @@ public class CommentService {
 
     // 특정 유저가 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
-    public List<CommentResponseDto> findByUserIdAndStatus(UUID userId, Pageable pageable) {
+    public List<CommentResponseDto> findByUserId(UUID userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Page<Comment> comments = commentRepository.findByUserIdAndStatus(userId, Comment.CommentStatus.ACTIVE, pageable);
@@ -121,7 +121,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public PageResponse<CommentResponseDto> findAllByOptionalFilters(UUID userId, Comment.CommentStatus status, Pageable pageable) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId.toString()));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         Page<CommentResponseDto> page = commentRepository.findAllByOptionalFilters(userId, status, pageable)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);

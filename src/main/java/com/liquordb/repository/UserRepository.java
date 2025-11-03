@@ -31,4 +31,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         AND (:status IS NULL OR u.status = :status)
     """)
     List<User> search(@Param("keyword") String keyword, @Param("status") UserStatus status);
+
+    Optional<Object> findByIdAndStatusIs(UUID id, UserStatus status);
 }

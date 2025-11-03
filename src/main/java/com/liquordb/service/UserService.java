@@ -53,8 +53,13 @@ public class UserService {
     @Transactional
     public UserResponseDto register(UserRegisterRequestDto dto, MultipartFile profileImage, User.Role role) {
 
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다."); // 강제 탈퇴(BANNED) 된 경우에도 여기서 예외.
+        User existingUser = userRepository.findByEmail(dto.getEmail()).orElse(null);
+        if (existingUser != null && existingUser.getStatus().isActiveUser()) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        if (existingUser != null && existingUser.getStatus().equals(UserStatus.BANNED)) {
+            throw new IllegalArgumentException("신고 누적으로 강제 탈퇴되었습니다. 재가입 불가능합니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
@@ -89,10 +94,11 @@ public class UserService {
             throw new IllegalArgumentException("신고 누적으로 강제 탈퇴된 계정입니다. 서비스 이용이 불가능합니다.");
         }
 
-//        // TODO 계정 삭제 후 복귀한 유저 처리
-//        if (user.getStatus().equals(UserStatus.WITHDRAWN)) {
-//            user.setStatus(UserStatus.ACTIVE);
-//        }
+        // TODO 자발적으로 탈퇴했고 그 이메일로 재가입했으면 findByEmail 결과가 두개임. 개선필요.
+        if (user.getStatus().equals(UserStatus.WITHDRAWN)) {
+            throw new IllegalArgumentException("탈퇴 처리된 계정입니다. 재가입 시 ");
+        }
+
 
         return UserLoginResponseDto.from(user);
     }
@@ -101,7 +107,7 @@ public class UserService {
     @Transactional
     public void findPasswordAndSend(UserFindPasswordRequestDto dto) {
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new UserNotFoundException(dto.getEmail()));
+                .orElseThrow(() -> new UserNotFoundException(dto.getEmail())); //TODO 강제탈퇴도 접근 막아야함.
 
         String tempPassword = UUID.randomUUID().toString().substring(0, 8);
         user.setPassword(passwordEncoder.encode(tempPassword));
@@ -114,7 +120,7 @@ public class UserService {
     // 회원 탈퇴 (soft delete)
     @Transactional
     public void deleteById(UUID userId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함.
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (user.getStatus() == UserStatus.WITHDRAWN) {
@@ -130,7 +136,7 @@ public class UserService {
     @Transactional
     public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
 
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함.
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (user.getStatus().equals(UserStatus.WITHDRAWN)
@@ -185,7 +191,7 @@ public class UserService {
     @Transactional
     public void update(UUID userId, UserUpdateRequestDto dto, MultipartFile newProfileImage) {
 
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함.
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (dto.getEmail() != null) {
@@ -214,7 +220,7 @@ public class UserService {
     // 비밀번호 재설정
     @Transactional
     public void updatePassword(UUID userId, UserUpdatePasswordDto dto) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 민감한 변경이므로 UserStatus 체크.

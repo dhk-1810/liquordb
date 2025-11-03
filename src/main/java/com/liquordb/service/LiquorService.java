@@ -73,6 +73,7 @@ public class LiquorService {
      */
 
     // 주류 등록
+    @Transactional
     public LiquorResponseDto create(LiquorRequestDto dto) {
         Liquor liquor = Liquor.builder()
                 .name(dto.getName())
@@ -87,14 +88,17 @@ public class LiquorService {
     }
 
     // 주류 수정
+    @Transactional
     public LiquorResponseDto update(Long id, LiquorRequestDto dto) {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
         liquor.updateFromDto(dto);
+
         return LiquorMapper.toDto(liquorRepository.save(liquor), null);
     }
 
     // 주류 삭제 (Soft Delete)
+    @Transactional
     public void deleteById(Long id) {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));

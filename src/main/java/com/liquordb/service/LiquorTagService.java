@@ -1,14 +1,11 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.liquor.LiquorResponseDto;
-import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.liquor.LiquorTagRequestDto;
 import com.liquordb.dto.liquor.LiquorTagResponseDto;
 import com.liquordb.entity.*;
-import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.LiquorNotFoundException;
 import com.liquordb.exception.TagNotFoundException;
-import com.liquordb.exception.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.LiquorTagMapper;
 import com.liquordb.repository.*;
@@ -17,14 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class LiquorTagService {
 
-    private final UserRepository userRepository;
-    private final UserTagRepository userTagRepository;
     private final LiquorRepository liquorRepository;
     private final TagRepository tagRepository;
     private final LiquorTagRepository liquorTagRepository;
