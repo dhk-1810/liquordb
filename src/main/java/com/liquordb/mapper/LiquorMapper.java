@@ -1,5 +1,6 @@
 package com.liquordb.mapper;
 
+import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.liquor.LiquorTagResponseDto;
@@ -66,6 +67,18 @@ public class LiquorMapper {
                 .reviewCount(liquor.getReviews().size())
                 .likeCount(liquor.getLikes().size())
                 .likedByMe(likedByMe)
+                .build();
+    }
+
+    public static Liquor toEntity(LiquorRequestDto request) {
+        return Liquor.builder()
+                .name(request.getName())
+                .category(request.getCategory())
+                .subcategory(request.getSubcategory())
+                .country(request.getCountry())
+                .manufacturer(request.getManufacturer())
+                .abv(request.getAbv())
+                .imageUrl(request.getImageUrl())
                 .build();
     }
 }

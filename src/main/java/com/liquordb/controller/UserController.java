@@ -1,6 +1,5 @@
 package com.liquordb.controller;
 
-import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.User;
 import com.liquordb.service.LiquorTagService;
@@ -11,7 +10,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -25,7 +23,6 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-    private final LiquorTagService liquorTagService;
 
     // 회원가입
     @PostMapping
@@ -33,7 +30,7 @@ public class UserController {
             @RequestBody UserRegisterRequestDto dto,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ) {
-        return ResponseEntity.ok(userService.register(dto, profileImage, User.Role.USER)); // 상태 코드 200 OK + 본문 포함
+        return ResponseEntity.ok(userService.register(dto, profileImage, User.Role.USER));
     }
 
     // 로그인
@@ -42,10 +39,10 @@ public class UserController {
         return ResponseEntity.ok(userService.login(dto));
     }
 
-    // 임시 비번 전송
+    // 비밀번호 찾기 - 재설정 링크 전송
     @PostMapping("/find-password")
     public ResponseEntity<String> findPassword(@RequestBody UserFindPasswordRequestDto request) {
-        userService.findPasswordAndSend(request);
+        // userService.sendPasswordResetLink(request);
         return ResponseEntity.ok("이메일로 임시 비밀번호를 전송했습니다.");
     }
 
@@ -69,7 +66,7 @@ public class UserController {
     // 회원 탈퇴
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        userService.deleteById(id);
+        userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 

@@ -4,7 +4,8 @@ import com.liquordb.dto.review.ReviewLikeResponseDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.entity.ReviewLike;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.ReviewNotFoundException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.entity.Review;
@@ -31,10 +32,10 @@ public class ReviewLikeService {
     @Transactional
     public ReviewLikeResponseDto toggleLike(UUID userId, Long reviewId) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         ReviewLike existing = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
                 .orElse(null);
@@ -71,7 +72,7 @@ public class ReviewLikeService {
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getReviewSummaryDtosByUserId(UUID userId){
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         return reviewLikeRepository.findByUserAndReviewIsHiddenFalse(user).stream()
                 .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))

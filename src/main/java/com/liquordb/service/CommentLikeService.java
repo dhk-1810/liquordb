@@ -5,7 +5,7 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.CommentLike;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.CommentNotFoundException;
-import com.liquordb.exception.UserNotFoundException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.entity.Comment;

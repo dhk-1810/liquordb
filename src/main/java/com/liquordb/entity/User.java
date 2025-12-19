@@ -10,7 +10,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "user")
-@Getter @Setter
+@Getter @Setter // Setter 대체 필요
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -66,19 +66,20 @@ public class User {
 
     // 활동 제한 해제 일시
     @Column
-    private LocalDateTime restrictedUntil;
+    private LocalDateTime suspendedUntil;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime withdrawnAt; // soft delete 시각
+    private LocalDateTime withdrawnAt;
 
     public enum Role {
         USER, ADMIN // 유저 계정, 관리자 계정
     }
 
     // 유저 활동 제한 (댓글, 리뷰 작성)
-    public void restrict() {
-        this.status = UserStatus.RESTRICTED;
+    public void suspend() {
+        this.status = UserStatus.SUSPENDED;
+        this.suspendedUntil = LocalDateTime.now(); // TODO 구체적 정지기간 정해야함
     }
 
     @PrePersist

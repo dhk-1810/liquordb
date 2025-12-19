@@ -57,7 +57,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         // 이메일로 유저 조회 또는 새로 생성
-        User user = userRepository.findByEmailAndStatusNot(email, UserStatus.WITHDRAWN)
+        User user = userRepository.findByEmailAndStatusNot(email, UserStatus.BANNED)
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email(email)
                         .nickname(name != null ? name : "noname")

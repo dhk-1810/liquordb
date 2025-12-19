@@ -18,6 +18,12 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    @Column(nullable = false)
+//    private boolean isHidden = false;
+//
+//    @Column(nullable = false)
+//    private boolean isDeleted = false;
+
     private String content;
 
     @Column(nullable = false)
@@ -51,7 +57,9 @@ public class Comment {
     private LocalDateTime deletedAt;
 
     public enum CommentStatus {
-        ACTIVE, HIDDEN, DELETED
+        ACTIVE,
+        HIDDEN, // 신고 누적시 자동 숨김처리. 관리자 복구 전까지 유효.
+        DELETED // 작성자 스스로 삭제
     }
 
     @PrePersist // JPA(EntityManager)가 엔티티를 DB에 처음 저장(Persist=영속화)하기 바로 직전에 자동 호출
@@ -61,4 +69,28 @@ public class Comment {
 
     @PreUpdate
     public void onUpdate() { updatedAt = LocalDateTime.now(); }
+
+    public void hide(LocalDateTime deletedAt) {
+        if (this.status == CommentStatus.HIDDEN) return;
+        this.status = CommentStatus.HIDDEN;
+        this.hiddenAt = deletedAt;
+    }
+
+    public void unhide(){
+        if (this.status != CommentStatus.HIDDEN) return;
+        this.status = CommentStatus.ACTIVE;
+        this.hiddenAt = null;
+    }
+
+    public void softDelete(LocalDateTime deletedAt) {
+        if (this.status == CommentStatus.DELETED) return;
+        this.status = CommentStatus.DELETED;
+        this.deletedAt = deletedAt;
+    }
+
+    public void restore(){
+        if (this.status != CommentStatus.DELETED) return;
+        this.status = CommentStatus.ACTIVE;
+        this.deletedAt = null;
+    }
 }

@@ -39,7 +39,7 @@ public class AdminUserController {
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> userList(@RequestParam(required = false) String keyword, // 닉네임 또는 이메일 검색어
                                                           @RequestParam(required = false) UserStatus status) {
-        List<UserResponseDto> users = userService.searchUsers(keyword, status);
+        List<UserResponseDto> users = userService.getUsers(keyword, status);
         return ResponseEntity.ok(users);
     }
 

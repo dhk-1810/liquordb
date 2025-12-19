@@ -5,8 +5,13 @@ import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.UserNotFoundException;
+import com.liquordb.exception.user.BannedUserException;
+import com.liquordb.exception.user.EmailAlreadyExistsException;
+import com.liquordb.exception.user.LoginFailedException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
+import com.liquordb.mapper.LiquorMapper;
+import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
@@ -15,14 +20,13 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.review.ReviewSummaryDto;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -43,92 +47,63 @@ public class UserService {
     private final CommentLikeRepository commentLikeRepository;
 
     private final UserTagService userTagService;
-    private final LiquorLikeService liquorLikeService;
     private final FileService fileService;
     private final JavaMailSender mailSender;
-    private final ReviewLikeService reviewLikeService;
-    private final CommentLikeService commentLikeService;
 
     // 회원가입
     @Transactional
-    public UserResponseDto register(UserRegisterRequestDto dto, MultipartFile profileImage, User.Role role) {
+    public UserResponseDto register(UserRegisterRequestDto request, MultipartFile profileImage, User.Role role) {
 
-        User existingUser = userRepository.findByEmail(dto.getEmail()).orElse(null);
-        if (existingUser != null && existingUser.getStatus().isActiveUser()) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        String email = request.getEmail();
+        User existingUser = userRepository.findByEmail(email)
+                .orElse(null);
+
+        if (existingUser != null) {
+            if (existingUser.getStatus().isActiveUser()) {
+                throw new EmailAlreadyExistsException(email);
+            }
+            if (existingUser.getStatus().equals(UserStatus.BANNED)) {
+                throw new BannedUserException(email);
+            }
         }
 
-        if (existingUser != null && existingUser.getStatus().equals(UserStatus.BANNED)) {
-            throw new IllegalArgumentException("신고 누적으로 강제 탈퇴되었습니다. 재가입 불가능합니다.");
-        }
-
-        String encodedPassword = passwordEncoder.encode(dto.getPassword());
-
-        User user = User.builder()
-                .email(dto.getEmail())
-                .password(encodedPassword)
-                .nickname(dto.getNickname())
-                .role(role)
-                .build();
-
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        User user = UserMapper.toEntity(request, encodedPassword, role);
         if (profileImage != null) {
             user.setProfileImage(fileService.upload(profileImage));
         }
+        userRepository.save(user);
 
-        return UserMapper.toDto(userRepository.save(user));
+        return UserMapper.toDto(user);
     }
 
     // 로그인
     @Transactional
     public UserLoginResponseDto login(UserLoginRequestDto dto) {
-        String password = dto.getPassword();
+        String email = dto.getEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(LoginFailedException::new);
 
-        User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new UserNotFoundException(dto.getEmail()));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new LoginFailedException();
         }
 
         if (user.getStatus().equals(UserStatus.BANNED)) {
-            throw new IllegalArgumentException("신고 누적으로 강제 탈퇴된 계정입니다. 서비스 이용이 불가능합니다.");
+            throw new BannedUserException(email);
         }
-
-        // TODO 자발적으로 탈퇴했고 그 이메일로 재가입했으면 findByEmail 결과가 두개임. 개선필요.
-        if (user.getStatus().equals(UserStatus.WITHDRAWN)) {
-            throw new IllegalArgumentException("탈퇴 처리된 계정입니다. 재가입 시 ");
-        }
-
 
         return UserLoginResponseDto.from(user);
     }
 
-    // 비밀번호 찾기 (임시 비밀번호 발급)
-    @Transactional
-    public void findPasswordAndSend(UserFindPasswordRequestDto dto) {
-        User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new UserNotFoundException(dto.getEmail())); //TODO 강제탈퇴도 접근 막아야함.
-
-        String tempPassword = UUID.randomUUID().toString().substring(0, 8);
-        user.setPassword(passwordEncoder.encode(tempPassword));
-        userRepository.save(user);
-
-        // 이메일 전송
-        sendTempPassword(user.getEmail(), tempPassword);
-    }
-
     // 회원 탈퇴 (soft delete)
     @Transactional
-    public void deleteById(UUID userId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함.
+    public void delete(UUID userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-
-        if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new IllegalStateException("이미 탈퇴한 사용자입니다.");
-        }
 
         user.setStatus(UserStatus.WITHDRAWN);
         user.setWithdrawnAt(LocalDateTime.now());
+        user.setEmail(user.getEmail() + LocalDate.now().toString());
         userRepository.save(user);
     }
 
@@ -136,13 +111,8 @@ public class UserService {
     @Transactional
     public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
 
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함.
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-
-        if (user.getStatus().equals(UserStatus.WITHDRAWN)
-                || user.getStatus().equals(UserStatus.BANNED)) {
-            throw new IllegalArgumentException("계정이 비활성화된 유저입니다.");
-        }
 
         // N+1 문제 방지 위해 리포지토리 메서드 사용.
         long reviewCount = reviewRepository.countByUserAndStatus(user, Review.ReviewStatus.ACTIVE);
@@ -162,12 +132,18 @@ public class UserService {
                 .toList();
 
         // 좋아요한 주류, 리뷰, 댓글 목록
-        List<LiquorSummaryDto> likedLiquors = liquorLikeService.getLiquorSummaryDtosByUserId(userId);
-        List<ReviewResponseDto> likedReviews = reviewLikeService.getReviewSummaryDtosByUserId(userId);
-        List<CommentResponseDto> likedComments = commentLikeService.getCommentSummaryDtosByUserId(userId);
+        List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUserIdAndLiquorIsHiddenFalse(userId).stream()
+                .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), user))
+                .toList();
+        List<ReviewResponseDto> likedReviews = reviewLikeRepository.findByUserAndReviewIsHiddenFalse(user).stream()
+                .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))
+                .toList();
+        List<CommentResponseDto> likedComments = commentLikeRepository.findByUserAndCommentIsHiddenFalse(user).stream()
+                .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))
+                .toList();
 
         // 등록한(=선호하는) 태그 목록
-        List<TagResponseDto> preferredTags = userTagService.findByUserId(userId, true);
+        List<TagResponseDto> preferredTags = userTagService.findByUserId(userId, showAllTags);
 
         return UserMyPageResponseDto.builder()
                 .userId(user.getId())
@@ -191,12 +167,13 @@ public class UserService {
     @Transactional
     public void update(UUID userId, UserUpdateRequestDto dto, MultipartFile newProfileImage) {
 
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함.
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (dto.getEmail() != null) {
-            if (!userRepository.existsByEmail(dto.getEmail())) {
-                user.setEmail(dto.getEmail());
+        String email = dto.getEmail();
+        if (email != null) {
+            if (!userRepository.existsByEmail(email)) {
+                user.setEmail(email);
             }
         }
 
@@ -217,16 +194,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // 비밀번호 재설정
+    // 비밀번호 재설정 (마이페이지)
     @Transactional
     public void updatePassword(UUID userId, UserUpdatePasswordDto dto) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN) //TODO 강제탈퇴도 접근 막아야함
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-
-        // 민감한 변경이므로 UserStatus 체크.
-        if (user.getStatus().equals(UserStatus.WITHDRAWN) || user.getStatus().equals(UserStatus.BANNED)) {
-            throw new IllegalArgumentException("탈퇴 처리된 유저입니다.");
-        }
 
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
@@ -236,26 +208,68 @@ public class UserService {
         userRepository.save(user);
     }
 
+    // TODO 나중에 구현
+    /*
+    // 비밀번호 찾기 - 재설정 링크 전송
+    @Transactional
+    public void sendPasswordResetLink(UserFindPasswordRequestDto dto) {
+        String email = dto.getEmail();
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null || user.getStatus().equals(UserStatus.BANNED)) {
+            return;
+        }
+
+        String resetToken = UUID.randomUUID().toString();
+
+        // TODO Redis에 저장
+        user.updatePasswordResetToken(resetToken, LocalDateTime.now().plusMinutes(30));
+
+        // 4. 재설정 페이지 URL 생성 및 전송
+        String resetLink = "https://your-service.com/password/reset?token=" + resetToken;
+        mail.sendResetLink(user.getEmail(), resetLink);
+    }
+
+    // 비밀번호 재설정 (찾기 후)
+    @Transactional
+    public void resetPasswordByToken(String token, String newPassword) {
+        // 1. 토큰으로 유저 찾기 (유효 시간 검증 포함)
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new InvalidTokenException("유효하지 않거나 만료된 토큰입니다."));
+
+        // 2. 토큰 만료 시간 체크 (엔터티 내부 로직 권장)
+        if (user.isResetTokenExpired()) {
+            throw new InvalidTokenException("만료된 토큰입니다.");
+        }
+
+        // 3. 비밀번호 변경 및 토큰 초기화 (재사용 방지)
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.clearResetToken(); // 다시는 이 토큰으로 접근 못하게 비움
+
+        userRepository.save(user);
+    }
+
+
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    // 생성된 비밀번호를 이메일로 발송
-    public void sendTempPassword(String toEmail, String tempPassword) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setFrom(fromEmail);
-        message.setSubject("임시 비밀번호 안내");
-        message.setText("임시 비밀번호는 다음과 같습니다: " + tempPassword);
-
-        mailSender.send(message);
-    }
-
+//    // 생성된 비밀번호를 이메일로 발송
+//    public void sendTempPassword(String toEmail, String tempPassword) {
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(toEmail);
+//        message.setFrom(fromEmail);
+//        message.setSubject("임시 비밀번호 안내");
+//        message.setText("임시 비밀번호는 다음과 같습니다: " + tempPassword);
+//
+//        mailSender.send(message);
+//    }
+*/
     /**
      * 관리자용 메서드
      */
 
     // 유저 조회 - 전체 또는 검색
-    public List<UserResponseDto> searchUsers(String keyword, UserStatus status) {
+    public List<UserResponseDto> getUsers(String keyword, UserStatus status) {
         if ((keyword == null || keyword.isBlank()) && status == null) {
             return userRepository.findAll().stream()
                     .map(UserMapper::toDto)
@@ -270,8 +284,8 @@ public class UserService {
 
     // 유저 이용제한
     public UserResponseDto restrictUser(UUID userId, String period) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+        User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         long days = switch (period) {
             case "WARNING" -> 0;
@@ -284,10 +298,8 @@ public class UserService {
         };
 
         if (days > 0) {
-            user.setRestrictedUntil(LocalDateTime.now().plusDays(days));
-            user.setStatus(UserStatus.RESTRICTED);
-        } else {
-            user.setStatus(UserStatus.WARNED);  // 경고 상태 부여
+            user.setSuspendedUntil(LocalDateTime.now().plusDays(days));
+            user.setStatus(UserStatus.SUSPENDED);
         }
 
         return UserMapper.toDto(userRepository.save(user));

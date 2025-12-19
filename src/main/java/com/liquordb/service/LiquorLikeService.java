@@ -4,7 +4,8 @@ import com.liquordb.dto.liquor.LiquorLikeResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorLike;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.LiquorNotFoundException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.entity.Liquor;
@@ -33,10 +34,10 @@ public class LiquorLikeService {
     public LiquorLikeResponseDto toggleLike(UUID userId, Long liquorId) {
 
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         Liquor liquor = liquorRepository.findById(liquorId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 주류입니다."));
+                .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
         Optional<LiquorLike> optionalLiquorLike = liquorLikeRepository
                 .findByUserIdAndLiquorId(user.getId(), liquor.getId());
@@ -67,7 +68,7 @@ public class LiquorLikeService {
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getLiquorSummaryDtosByUserId(UUID userId){
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 유저입니다."));
         return liquorLikeRepository.findByUserIdAndLiquorIsHiddenFalse(userId)
                 .stream()
                 .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), user))

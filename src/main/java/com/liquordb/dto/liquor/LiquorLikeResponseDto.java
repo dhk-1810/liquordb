@@ -10,7 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class LiquorLikeResponseDto {
-    // private Long id;                    // 좋아요 ID -> 딱히 쓸모가 없음.
+    private Long id;                    // 좋아요 ID - 딱히 쓸모가 없음. 삭제?
     private boolean liked;
     private UUID userId;                // 좋아요 누른 유저 ID
     private Long liquorId;              // 대상 주류 ID

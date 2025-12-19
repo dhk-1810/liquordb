@@ -73,4 +73,30 @@ public class Review {
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public void hide(LocalDateTime deletedAt) {
+        if (this.status == ReviewStatus.HIDDEN) return;
+        this.status = ReviewStatus.HIDDEN;
+        this.hiddenAt = deletedAt;
+    }
+
+    public void unhide(){
+        if (this.status != ReviewStatus.HIDDEN) return;
+        this.status = ReviewStatus.ACTIVE;
+        this.hiddenAt = null;
+    }
+
+    public void softDelete(LocalDateTime deletedAt) {
+        if (this.status == ReviewStatus.DELETED) return;
+        this.status = ReviewStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
+        // 연관 댓글 삭제는 서비스단에서 수행.
+    }
+
+    public void restore(){
+        if (this.status != ReviewStatus.DELETED) return;
+        this.status = ReviewStatus.ACTIVE;
+        this.deletedAt = null;
+        // 연관 댓글 복구는 서비스단에서 수행.
+    }
 }

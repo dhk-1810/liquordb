@@ -6,7 +6,7 @@ import com.liquordb.dto.tag.UserTagRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.TagNotFoundException;
-import com.liquordb.exception.UserNotFoundException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.TagRepository;

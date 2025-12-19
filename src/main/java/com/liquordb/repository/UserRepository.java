@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     Optional<User> findByIdAndStatusNot(UUID id, UserStatus status);
     Optional<User> findByEmailAndStatusNot(String email, UserStatus status);
+    Optional<User> findByIdAndStatus(UUID id, UserStatus status);
 
     // 탈퇴된 회원 정보 삭제 시 사용.
     List<User> findAllByStatusAndWithdrawnAtBefore(UserStatus status, LocalDateTime withdrawnAt);
@@ -32,5 +33,4 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     """)
     List<User> search(@Param("keyword") String keyword, @Param("status") UserStatus status);
 
-    Optional<Object> findByIdAndStatusIs(UUID id, UserStatus status);
 }

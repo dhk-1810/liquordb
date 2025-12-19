@@ -7,7 +7,8 @@ import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.exception.CommentNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
-import com.liquordb.exception.UserNotFoundException;
+import com.liquordb.exception.user.UnauthorizedUserException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentRepository;
 import com.liquordb.entity.Review;
@@ -99,19 +100,18 @@ public class CommentService {
 
     // 댓글 삭제 (Soft Delete)
     @Transactional
-    public void deleteByIdAndUser(Long commentId, User user) {
-        Comment comment = commentRepository.findById(commentId) // TODO 삭제된것 빼고 조회
+    public void deleteByIdAndUser(Long commentId, User requestUser) {
+        Comment comment = commentRepository.findByIdAndStatus_Active(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-        if (!comment.getUser().getId().equals(user.getId())) {
-            throw new IllegalStateException("본인이 작성한 댓글만 삭제할 수 있습니다."); // 신고접수시 관리자는 삭제 X, 숨김 O
+        UUID requestUserId = requestUser.getId();
+        if (!comment.getUser().getId().equals(requestUserId)) {
+            throw new UnauthorizedUserException(requestUserId);
         }
 
-        comment.setStatus(Comment.CommentStatus.DELETED);
-        comment.setDeletedAt(LocalDateTime.now());
+        comment.softDelete(LocalDateTime.now());
         commentRepository.save(comment);
     }
-
 
     /**
      * 관리자용
@@ -125,5 +125,21 @@ public class CommentService {
         Page<CommentResponseDto> page = commentRepository.findAllByOptionalFilters(userId, status, pageable)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);
+    }
+
+    // 댓글 수동 숨기기 처리 (신고 누적 시 숨기기 처리는 자동)
+    @Transactional
+    public void hide(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+        comment.hide(LocalDateTime.now());
+    }
+
+    // 댓글 숨기기 해제
+    @Transactional
+    public void unhide(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+        comment.unhide();
     }
 }

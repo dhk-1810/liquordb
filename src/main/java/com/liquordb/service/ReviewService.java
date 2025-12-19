@@ -7,7 +7,8 @@ import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.LiquorNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
-import com.liquordb.exception.UserNotFoundException;
+import com.liquordb.exception.user.UnauthorizedUserException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewDetailMapper;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
@@ -21,11 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.plaf.multi.MultiListUI;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,6 +35,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService;
+    private final CommentRepository commentRepository;
 
     // 리뷰 등록
     @Transactional
@@ -141,16 +140,18 @@ public class ReviewService {
 
     // 리뷰 삭제 (Soft Delete)
     @Transactional
-    public void deleteByIdAndUser(Long reviewId, User user) {
-        Review review = reviewRepository.findById(reviewId) // TODO 삭제된것 빼고 조회
+    public void deleteByIdAndUser(Long reviewId, User requestUser) {
+        Review review = reviewRepository.findByIdAndStatus_Active(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
-        if (!review.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("리뷰를 삭제할 권한이 없습니다.");
+        UUID requestUserId = requestUser.getId();
+        if (!review.getUser().getId().equals(requestUser.getId())) {
+            throw new UnauthorizedUserException(requestUserId);
         }
-
+        LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
+        commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);
         review.setStatus(Review.ReviewStatus.DELETED);
-        review.setDeletedAt(LocalDateTime.now());
+        review.setDeletedAt(reviewDeletedAt);
         reviewRepository.save(review);
     }
 

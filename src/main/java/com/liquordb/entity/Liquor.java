@@ -70,10 +70,25 @@ public class Liquor {
         updatedAt = LocalDateTime.now();
     }
 
-    public void updateFromDto(LiquorRequestDto dto) {
-        this.name = dto.getName();
-        this.category = dto.getCategory();
-        this.subcategory = dto.getSubcategory();
-        this.imageUrl = dto.getImageUrl();
+    public void updateFromDto(LiquorRequestDto request) {
+        this.name = request.getName();
+        this.category = request.getCategory();
+        this.subcategory = request.getSubcategory();
+        this.imageUrl = request.getImageUrl();
+    }
+
+    public void softDelete(LocalDateTime deletedAt) {
+        if (this.isDeleted) return;
+        this.isDeleted = true;
+        this.deletedAt = deletedAt;
+        // 연관 리뷰 삭제는 서비스단에서 수행.
+        // 리뷰 좋아요는 soft delete 대신 조회만 안되게 처리.
+    }
+
+    public void restore() {
+        if (!this.isDeleted) return;
+        this.isDeleted = false;
+        this.deletedAt = null;
+        // 연관 리뷰 복구는 서비스단에서 수행.
     }
 }
