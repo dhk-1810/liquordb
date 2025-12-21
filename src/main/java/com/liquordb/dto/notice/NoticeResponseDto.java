@@ -1,24 +1,21 @@
 package com.liquordb.dto.notice;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 /**
- * 공지사항 정보를 응답으로 내려줄 때 사용하는 DTO입니다.
+ * 공지사항 단건 조회 응답
  */
-
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class NoticeResponseDto {
-    private Long id;
-    private String title;
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+public record NoticeResponseDto (
+        Long id,
+        String title,
+        String content,
+        String authorNickname,
+        boolean isPinned,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+) {
+
 }

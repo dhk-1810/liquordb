@@ -5,7 +5,10 @@ import com.liquordb.dto.report.ReportResponseDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.ReportTargetType;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.NotFoundException;
+import com.liquordb.exception.comment.CommentNotFoundException;
+import com.liquordb.exception.ReportNotFoundException;
+import com.liquordb.exception.ReviewNotFoundException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReportMapper;
 import com.liquordb.repository.CommentRepository;
 import com.liquordb.repository.ReportRepository;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,35 +28,45 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final ReportMapper reportMapper;
 
     private static final int REPORT_THRESHOLD = 3;
-    private final UserRepository userRepository;
 
     // 신고 생성
-    public ReportResponseDto create(ReportRequestDto dto) {
+    public ReportResponseDto create(UUID requestUserId, ReportRequestDto request) {
+
+        User requestUser = userRepository.findById(requestUserId)
+                .orElseThrow(() -> new UserNotFoundException(requestUserId));
+
         // 중복 신고 방지
         boolean exists = reportRepository.existsByTargetTypeAndTargetIdAndUserId(
-                dto.getTargetType(),
-                dto.getTargetId(),
-                dto.getUserId()
+                request.targetType(),
+                request.targetId(),
+                requestUserId
         );
         if (exists) {
             throw new IllegalArgumentException("이미 신고한 대상입니다.");
         }
 
         // 신고 저장
-        Report report = reportRepository.save(ReportMapper.toEntity(dto));
+        Report report;
+        if (request.targetType().equals(ReportTargetType.REVIEW)) {
+            report = reportRepository.save(reportMapper.toReviewReportEntity(request, requestUser));
+        } else {
+            report = reportRepository.save(reportMapper.toCommentReportEntity(request, requestUser));
+        }
 
         // 누적 신고 수 확인 + 조건 충족시 숨기기 처리
         long count = reportRepository.countByTargetTypeAndTargetId(
-                dto.getTargetType(),
-                dto.getTargetId()
+                request.targetType(),
+                request.targetId()
         );
         if (count >= REPORT_THRESHOLD) {
-            hideTarget(dto.getTargetId(), dto.getTargetType());
+            hideTarget(request.targetId(), request.targetType());
         }
 
-        return ReportMapper.toDto(report);
+        return reportMapper.toDto(report);
     }
 
     // 자동 숨기기 처리 (3건 이상 신고 접수되면)
@@ -60,14 +74,14 @@ public class ReportService {
         switch (targetType) {
             case REVIEW -> {
                 Review review = reviewRepository.findById(targetId)
-                        .orElseThrow(() -> new NotFoundException("리뷰를 찾을 수 없습니다."));
-                review.setHidden(true); // hidden 필드가 boolean 타입이라고 가정
+                        .orElseThrow(() -> new ReviewNotFoundException(targetId));
+                review.hide(LocalDateTime.now());
                 reviewRepository.save(review);
             }
             case COMMENT -> {
                 Comment comment = commentRepository.findById(targetId)
-                        .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
-                comment.setHidden(true); // hidden 필드가 boolean 타입이라고 가정
+                        .orElseThrow(() -> new CommentNotFoundException(targetId));
+                comment.hide(LocalDateTime.now());
                 commentRepository.save(comment);
             }
         }
@@ -77,13 +91,12 @@ public class ReportService {
      * 관리자용
      */
     // 신고 승인.
-    // TODO 신고 누적건수에 따라 유저활동을 경고, 일시제한, 영구제한함.
+    // TODO 신고 누적건수에 따라 유저활동을 일시제한, 영구제한함.
     @Transactional
     public ReportResponseDto approveById(Long id) {
         Report report = reportRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 신고입니다."));
-        report.setApproved(true);
-        report.setApprovedAt(LocalDateTime.now());
+                .orElseThrow(() -> new ReportNotFoundException(id));
+        report.approve();
 
         User user = switch (report.getTargetType()) {
             case COMMENT -> report.getComment().getUser();
@@ -91,32 +104,30 @@ public class ReportService {
             default -> throw new IllegalArgumentException("지원하지 않는 신고 대상 타입입니다.");
         };
 
-
         if (user.getReportCount() >= 5) {
             user.setStatus(UserStatus.BANNED);
         } else if (user.getReportCount() >= 3) {
-            user.setStatus(UserStatus.RESTRICTED);
-        } else {
-            user.setStatus(UserStatus.WARNED);
+            user.setStatus(UserStatus.SUSPENDED);
         }
 
         reportRepository.save(report);
         userRepository.save(user);
-        return ReportMapper.toDto(report);
+        return reportMapper.toDto(report);
     }
 
     // 신고 반려
     public ReportResponseDto rejectById(Long id) {
         Report report = reportRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 신고입니다."));
-        if (report.getTargetType() == ReportTargetType.COMMENT) {
-            report.getComment().setHidden(false);
-        } else {
-            report.getReview().setHidden(false);
-        }
-        report.setApproved(false);
-        reportRepository.save(report);
-        return ReportMapper.toDto(report);
-    }
+                .orElseThrow(() -> new ReportNotFoundException(id));
 
+        if (report.getTargetType() == ReportTargetType.COMMENT) {
+            report.getComment().unhide();
+        } else {
+            report.getReview().unhide();
+        }
+        report.reject();
+
+        reportRepository.save(report);
+        return reportMapper.toDto(report);
+    }
 }

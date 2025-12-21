@@ -1,12 +1,11 @@
 package com.liquordb.dto.tag;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class TagResponseDto {
-    private Long id;
-    private String name;
+public record TagResponseDto (
+        Long id,
+        String name
+){
+
 }

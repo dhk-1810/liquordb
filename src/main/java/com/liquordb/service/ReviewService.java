@@ -39,21 +39,12 @@ public class ReviewService {
 
     // 리뷰 등록
     @Transactional
-    public ReviewResponseDto create(User user, ReviewRequestDto dto, List<MultipartFile> images) {
+    public ReviewResponseDto create(User user, ReviewRequestDto request, List<MultipartFile> images) {
 
-        Liquor liquor = liquorRepository.findById(dto.getLiquorId())
-                .orElseThrow(() -> new LiquorNotFoundException(dto.getLiquorId()));
-        Review review = Review.builder()
-                .user(user)
-                .liquor(liquor)
-                .rating(dto.getRating())
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .build();
+        Liquor liquor = liquorRepository.findById(request.liquorId())
+                .orElseThrow(() -> new LiquorNotFoundException(request.liquorId()));
 
-        // 주종별 디테일 저장
-        ReviewDetail detail = ReviewDetailMapper.toEntity(liquor.getCategory(), dto, review);
-        review.setDetail(detail);
+        Review review = ReviewMapper.toEntity(request, user, liquor);
 
         // 리뷰이미지 업로드 및 저장
         images.forEach(file -> {
@@ -91,22 +82,21 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewResponseDto update(Long reviewId, User user, ReviewUpdateRequestDto dto, List<MultipartFile> newImages) {
+    public ReviewResponseDto update(Long reviewId, User requestUser,
+                                    ReviewUpdateRequestDto request, List<MultipartFile> newImages) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         // 작성자 확인
-        if (!review.getUser().getId().equals(user.getId())) {
+        if (!review.getUser().getId().equals(requestUser.getId())) {
             throw new IllegalArgumentException("리뷰를 수정할 권한이 없습니다.");
         }
 
         // 공통 필드 수정
-        review.setRating(dto.getRating());
-        review.setTitle(dto.getTitle());
-        review.setContent(dto.getContent());
+        review.update(request);
 
-        removeImage(review, dto.getImageIdsToDelete());
+        removeImage(review, request.imageIdsToDelete());
         addImage(review, newImages);
 
         // 주종별 디테일 수정
@@ -150,8 +140,7 @@ public class ReviewService {
         }
         LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
         commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);
-        review.setStatus(Review.ReviewStatus.DELETED);
-        review.setDeletedAt(reviewDeletedAt);
+        review.softDelete(reviewDeletedAt);
         reviewRepository.save(review);
     }
 
@@ -159,7 +148,7 @@ public class ReviewService {
      * 관리자용
      */
 
-    // 유저ID, 리뷰 조회
+    // 전체 리뷰 조회
     @Transactional(readOnly = true)
     public PageResponse<ReviewResponseDto> findAllByOptionalFilters(UUID userId, Review.ReviewStatus status, Pageable pageable) {
         User user = userRepository.findById(userId)

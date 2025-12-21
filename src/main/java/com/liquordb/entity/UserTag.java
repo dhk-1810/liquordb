@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.dto.tag.UserTagRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,23 +11,18 @@ import java.time.LocalDateTime;
  */
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @IdClass(UserTagId.class)
 public class UserTag {
 
-    @EmbeddedId
-    private UserTagId id;
-
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
@@ -35,5 +31,19 @@ public class UserTag {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private UserTag(User user, Tag tag) {
+        this.user = user;
+        this.tag = tag;
+    }
+
+    public static UserTag create(User requestUser, Tag tag) {
+        return UserTag.builder()
+                .user(requestUser)
+                .tag(tag)
+                .build();
+
     }
 }

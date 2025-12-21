@@ -1,15 +1,19 @@
 package com.liquordb.dto.notice;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 /**
- * 클라이언트가 공지사항을 등록하거나 수정할 때 서버로 보내는 데이터를 담는 DTO입니다.
+ * 공지사항 등록, 수정 시 사용
  */
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class NoticeRequestDto {
-    private String title;
-    private String content;
+public record NoticeRequestDto (
+
+        @NotBlank(message = "제목은 공백일 수 없습니다.")
+        String title,
+
+        @NotBlank(message = "내용은 공백일 수 없습니다.")
+        String content
+){
+
 }

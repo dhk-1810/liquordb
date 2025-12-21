@@ -1,35 +1,32 @@
 package com.liquordb.dto.review;
 
-import com.liquordb.dto.review.reviewdetaildto.BeerReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WineReviewDetailDto;
+import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
+import com.liquordb.entity.Liquor;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+/**
+ * 리뷰 생성 요청 DTO
+ */
+@Builder
+public record ReviewRequestDto (
 
-// 리뷰 생성, 수정 요청 DTO
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ReviewRequestDto {
-    // userId는 JWT 토큰에서 뽑아내 서버에서 설정
-    private Long liquorId;
+        @NotNull(message = "리뷰 대상 주류 ID는 필수입니다.")
+        Long liquorId,
 
-    @NotNull(message = "평점은 필수입니다.")
-    private Double rating;
+        @NotNull(message = "평점은 필수입니다.")
+        Double rating,
 
-    private String title; // 제목 겸 한줄평. 선택
+        String title,
 
-    @NotBlank(message = "내용을 입력해주세요.")
-    private String content;
+        @NotBlank(message = "내용을 입력해주세요.")
+        String content,
 
-    // 주종별 디테일 정보
-    private BeerReviewDetailDto beerDetail;
-    private WineReviewDetailDto wineDetail;
-    private WhiskyReviewDetailDto whiskyDetail;
+        Liquor.LiquorCategory category,
 
-    // 추가할 이미지는 따로 파라미터로 받음.
+        ReviewDetailRequest reviewDetailRequest
+
+){
+
 }

@@ -48,6 +48,8 @@ public class UserService {
 
     private final UserTagService userTagService;
     private final FileService fileService;
+    private final CommentMapper commentMapper;
+
     private final JavaMailSender mailSender;
 
     // 회원가입
@@ -123,12 +125,12 @@ public class UserService {
 
         // 리뷰 작성 목록
         List<ReviewSummaryDto> createdReviews = user.getReviews().stream()
-                .map(ReviewSummaryDto::from)
+                .map(ReviewMapper::toSummaryDto)
                 .toList();
 
         // 댓글 작성 목록
         List<CommentResponseDto> createdComments = user.getComments().stream()
-                .map(CommentMapper::toDto)
+                .map(commentMapper::toDto)
                 .toList();
 
         // 좋아요한 주류, 리뷰, 댓글 목록
@@ -139,7 +141,7 @@ public class UserService {
                 .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))
                 .toList();
         List<CommentResponseDto> likedComments = commentLikeRepository.findByUserAndCommentIsHiddenFalse(user).stream()
-                .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))
+                .map(commentLike -> commentMapper.toDto(commentLike.getComment()))
                 .toList();
 
         // 등록한(=선호하는) 태그 목록

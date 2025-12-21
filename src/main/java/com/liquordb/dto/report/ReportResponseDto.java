@@ -1,23 +1,22 @@
 package com.liquordb.dto.report;
 
+import com.liquordb.entity.Report;
 import com.liquordb.enums.ReportTargetType;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class ReportResponseDto {
-    private Long targetId;
-    private ReportTargetType targetType;
-    private Long userId;
-    private String reason;
-    private boolean isApproved;
-    private LocalDateTime createdAt;
-    private LocalDateTime approvedAt;
+public record ReportResponseDto (
+        Long targetId, // TODO 분리?
+        ReportTargetType targetType,
+        UUID requestUserId,
+        String reason,
+        Report.ReportStatus status,
+        LocalDateTime createdAt,
+        LocalDateTime approvedAt,
+        LocalDateTime rejectedAt
+){
+
 }

@@ -2,10 +2,12 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.notice.NoticeRequestDto;
 import com.liquordb.dto.notice.NoticeResponseDto;
+import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -22,8 +24,10 @@ public class AdminNoticeController {
 
     // 공지사항 등록
     @PostMapping
-    public ResponseEntity<NoticeResponseDto> createNotice(@RequestBody NoticeRequestDto dto) {
-        return ResponseEntity.ok(noticeService.create(dto));
+    public ResponseEntity<NoticeResponseDto> createNotice(@RequestBody NoticeRequestDto dto,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(noticeService.create(dto, null)); // TODO 수정 필요
     }
 
     // 공지사항 수정

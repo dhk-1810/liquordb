@@ -1,10 +1,9 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.review.ReviewRequestDto;
-import com.liquordb.dto.review.reviewdetaildto.BeerReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WineReviewDetailDto;
-import com.liquordb.entity.Liquor;
+import com.liquordb.dto.review.reviewdetaildto.BeerReviewRequestDto;
+import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
+import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewRequestDto;
+import com.liquordb.dto.review.reviewdetaildto.WineReviewRequestDto;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.reviewdetail.BeerReviewDetail;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
@@ -13,42 +12,36 @@ import com.liquordb.entity.reviewdetail.WineReviewDetail;
 
 public class ReviewDetailMapper {
 
-    public static ReviewDetail toEntity(Liquor.LiquorCategory category, ReviewRequestDto dto, Review review) {
-        return switch (category) {
-            case BEER -> toBeerDetail(dto.getBeerDetail(), review);
-            case WHISKY -> toWhiskyDetail(dto.getWhiskyDetail(), review);
-            case WINE -> toWineDetail(dto.getWineDetail(), review);
-            default -> null;
-        };
-    }
+    public static ReviewDetail toEntity(ReviewDetailRequest request, Review review) {
+        if (request instanceof BeerReviewRequestDto beer) {
+            return BeerReviewDetail.builder()
+                    .review(review)
+                    .aroma(beer.aroma())
+                    .taste(beer.taste())
+                    .headRetention(beer.headRetention())
+                    .look(beer.look())
+                    .build();
+        }
 
-    public static BeerReviewDetail toBeerDetail(BeerReviewDetailDto dto, Review review) {
-        return BeerReviewDetail.builder()
-                .review(review)
-                .aroma(dto.getAroma())
-                .taste(dto.getTaste())
-                .headRetention(dto.getHeadRetention())
-                .look(dto.getLook())
-                .build();
-    }
+        if (request instanceof WhiskyReviewRequestDto whisky) {
+            return WhiskyReviewDetail.builder()
+                    .review(review)
+                    .aroma(whisky.aroma())
+                    .taste(whisky.taste())
+                    .finish(whisky.finish())
+                    .body(whisky.body())
+                    .build();
+        }
 
-    public static WhiskyReviewDetail toWhiskyDetail(WhiskyReviewDetailDto dto, Review review) {
-        return WhiskyReviewDetail.builder()
-                .review(review)
-                .aroma(dto.getAroma())
-                .taste(dto.getTaste())
-                .finish(dto.getFinish())
-                .body(dto.getBody())
-                .build();
-    }
-
-    public static WineReviewDetail toWineDetail(WineReviewDetailDto dto, Review review) {
-        return WineReviewDetail.builder()
-                .review(review)
-                .sweetness(dto.getSweetness())
-                .acidity(dto.getAcidity())
-                .body(dto.getBody())
-                .tannin(dto.getTannin())
-                .build();
+        if (request instanceof WineReviewRequestDto wine) {
+            return WineReviewDetail.builder()
+                    .review(review)
+                    .sweetness(wine.sweetness())
+                    .acidity(wine.acidity())
+                    .body(wine.body())
+                    .tannin(wine.tannin())
+                    .build();
+        }
+        throw new IllegalArgumentException("지원하지 않는 리뷰 상세 타입입니다: " + request.getClass().getSimpleName());
     }
 }

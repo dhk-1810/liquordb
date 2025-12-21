@@ -1,19 +1,15 @@
 package com.liquordb.entity;
 
+import com.liquordb.dto.notice.NoticeRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 
-/**
- * 공지사항 Entity입니다.
- */
-
 @Entity
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notice {
 
     @Id
@@ -29,13 +25,12 @@ public class Notice {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private boolean isPinned;
+    private boolean isPinned = false;
     private boolean isDeleted;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
-    private LocalDateTime pinnedAt; // 공지목록에서 조회시 사용
 
     @PrePersist
     protected void onCreate() {
@@ -46,4 +41,41 @@ public class Notice {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void update(NoticeRequestDto request) {
+        if (request.title() != null) {
+            this.title = request.title();
+        }
+        if (this.content != null) {
+            this.content = request.content();
+        }
+        if (this.title != null || this.content != null){
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    public void togglePin(){
+        this.isPinned = !this.isPinned;
+    }
+
+    public void softDelete(){
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Notice(User author, String title, String content, boolean isPinned) {
+        this.author = author;
+        this.title = title;
+        this.content = content;
+    }
+
+    public static Notice create(User author, String title, String content){
+        return Notice.builder()
+                .author(author)
+                .title(title)
+                .content(content)
+                .build();
+    }
+
 }

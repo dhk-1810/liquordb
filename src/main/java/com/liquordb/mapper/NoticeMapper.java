@@ -4,15 +4,12 @@ import com.liquordb.dto.notice.NoticeRequestDto;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
+import com.liquordb.entity.User;
 
 public class NoticeMapper {
 
-    public static Notice toEntity(NoticeRequestDto dto) {
-        return Notice.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .isPinned(dto.isPinned())
-                .build();
+    public static Notice toEntity(NoticeRequestDto request, User author) {
+        return Notice.create(author, request.title(), request.content());
     }
 
     public static NoticeResponseDto toDto(Notice notice) {
@@ -20,9 +17,10 @@ public class NoticeMapper {
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
+                .authorNickname(notice.getAuthor().getNickname())
                 .createdAt(notice.getCreatedAt())
                 .updatedAt(notice.getUpdatedAt())
-                // .isPinned(notice.isPinned())
+                .isPinned(notice.isPinned())
                 .build();
     }
 

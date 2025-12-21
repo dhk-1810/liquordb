@@ -1,9 +1,6 @@
 package com.liquordb;
 
 import com.liquordb.dto.review.ReviewRequestDto;
-import com.liquordb.dto.review.reviewdetaildto.BeerReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewDetailDto;
-import com.liquordb.dto.review.reviewdetaildto.WineReviewDetailDto;
 import com.liquordb.entity.reviewdetail.BeerReviewDetail;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
 import com.liquordb.entity.reviewdetail.WhiskyReviewDetail;

@@ -9,7 +9,7 @@ import lombok.*;
 
 @Entity
 @DiscriminatorValue("BEER")
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

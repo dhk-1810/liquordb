@@ -22,7 +22,7 @@ public class User {
 
     @Column(nullable = false, unique = true, length = 100)
     @Email
-    private String email; // 로그인은 DB상 ID가 아닌 이메일 또는 닉네임으로 함.
+    private String email; // 로그인은 이메일로만 가능.
 
     @Column(nullable = false, unique = true, length = 30)
     private String nickname;
@@ -41,7 +41,7 @@ public class User {
     private int reportCount; // 신고된 건수
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private File profileImage;
+    private File profileImage; // TODO S3에 저장
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();

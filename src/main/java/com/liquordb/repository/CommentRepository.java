@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    //
+    // 댓글 단건 조회
     Optional<Comment> findByIdAndStatus_Active(Long id);
 
     // 특정 리뷰에 달린 댓글 조회 (삭제되지 않은 댓글만)
@@ -31,9 +31,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 관리자용 - 유저ID나 상태로 리뷰 목록 조회
     @Query("""
-    SELECT c FROM Comment c
-    WHERE (:userId IS NULL OR c.user.id = :userId)
-    AND (:status IS NULL OR c.status = :status)
+        SELECT c FROM Comment c
+        WHERE (:userId IS NULL OR c.user.id = :userId)
+        AND (:status IS NULL OR c.status = :status)
     """)
     Page<Comment> findAllByOptionalFilters(
             @Param("userId") UUID userId,
@@ -45,15 +45,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // 리뷰 연관 댓글 soft delete (Bulk Update)
     @Modifying(clearAutomatically = true)
     @Query("""
-        UPDATE Comment c SET c.isDeleted = true, c.deletedAt = :reviewDeletedAt
-        WHERE c.review = :review AND c.isDeleted = false
+        UPDATE Comment c SET c.status = Comment.CommentStatus.DELETED, c.deletedAt = :reviewDeletedAt
+        WHERE c.review = :review AND c.status != Comment.CommentStatus.DELETED
     """)
     void softDeleteCommentsByReview(@Param("review") Review review, @Param("reviewDeletedAt") LocalDateTime reviewDeletedAt);
 
     // 리뷰 연관 댓글 restore (Bulk Update)
     @Modifying(clearAutomatically = true)
     @Query("""
-         UPDATE Comment c SET c.isDeleted = false, c.deletedAt = null
+         UPDATE Comment c SET c.status = Comment.CommentStatus.ACTIVE, c.deletedAt = null
          WHERE c.review = :review AND c.deletedAt = :reviewDeletedAt
     """)
     void restoreCommentsByReview(@Param("review") Review review, @Param("reviewDeletedAt") LocalDateTime reviewDeletedAt);
@@ -61,16 +61,18 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // 주류 연관 댓글 soft delete (Bulk Update)
     @Modifying(clearAutomatically = true)
     @Query("""
-        UPDATE Comment c SET c.isDeleted = true, c.deletedAt = :liquorDeletedAt
-        WHERE c.review.id in (SELECT r.id FROM Review r WHERE r.liquor = :liquor) AND c.isDeleted = false
+        UPDATE Comment c SET c.status = Comment.CommentStatus.DELETED, c.deletedAt = :liquorDeletedAt
+        WHERE c.review.id in (SELECT r.id FROM Review r WHERE r.liquor = :liquor)
+            AND c.status != Comment.CommentStatus.DELETED
     """)
     void softDeleteCommentsByLiquor(@Param("liquor") Liquor liquor, @Param("liquorDeletedAt") LocalDateTime liquorDeletedAt);
 
     // 주류 연관 댓글 restore (Bulk Update)
     @Modifying(clearAutomatically = true)
     @Query("""
-         UPDATE Comment c SET c.isDeleted = false, c.deletedAt = null
-         WHERE c.review.id in (SELECT r.id FROM Review r WHERE r.liquor = :liquor) AND c.deletedAt = :liquorDeletedAt
+         UPDATE Comment c SET c.status = Comment.CommentStatus.ACTIVE, c.deletedAt = null
+         WHERE c.review.id in (SELECT r.id FROM Review r WHERE r.liquor = :liquor)
+             AND c.deletedAt = :liquorDeletedAt
     """)
     void restoreCommentsByLiquor(@Param("liquor") Liquor liquor, @Param("liquorDeletedAt") LocalDateTime liquorDeletedAt);
 

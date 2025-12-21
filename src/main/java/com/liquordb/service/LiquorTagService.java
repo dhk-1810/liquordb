@@ -5,7 +5,7 @@ import com.liquordb.dto.liquor.LiquorTagRequestDto;
 import com.liquordb.dto.liquor.LiquorTagResponseDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.LiquorNotFoundException;
-import com.liquordb.exception.TagNotFoundException;
+import com.liquordb.exception.tag.TagNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.LiquorTagMapper;
 import com.liquordb.repository.*;

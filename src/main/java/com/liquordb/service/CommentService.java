@@ -5,7 +5,7 @@ import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
-import com.liquordb.exception.CommentNotFoundException;
+import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
 import com.liquordb.exception.user.UnauthorizedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
@@ -32,46 +32,43 @@ public class CommentService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
+    private final CommentMapper commentMapper;
 
     // 댓글 생성
     @Transactional
-    public CommentResponseDto create(User user, CommentRequestDto dto) {
-        Review review = reviewRepository.findById(dto.getReviewId())
-                .orElseThrow(() -> new ReviewNotFoundException(dto.getReviewId()));
+    public CommentResponseDto create(User requestUser, CommentRequestDto request) {
 
+        Long reviewId = request.reviewId();
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        Long parentId = request.parentId();
         Comment parent = null;
-        if (dto.getParentId() != null) { // 대댓글일 경우
-            parent = commentRepository.findById(dto.getParentId())
-                    .orElseThrow(() -> new CommentNotFoundException(dto.getParentId()));
+        if (parentId != null) { // 대댓글일 경우
+            parent = commentRepository.findById(parentId)
+                    .orElseThrow(() -> new CommentNotFoundException(parentId));
         }
 
-        Comment comment = Comment.builder()
-                .user(user)
-                .review(review)
-                .parent(parent)
-                .content(dto.getContent())
-                .status(Comment.CommentStatus.ACTIVE)
-                .build();
-
-        return CommentMapper.toDto(commentRepository.save(comment));
+        Comment comment = commentMapper.toEntity(requestUser, request);
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 
     // 댓글 수정
     @Transactional
-    public CommentResponseDto update(User user, Long commentId, CommentUpdateRequestDto dto) {
+    public CommentResponseDto update(User user, Long commentId, CommentUpdateRequestDto request) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("권한이 없습니다. 댓글 수정은 댓글 작성자만 가능합니다.");
+            throw new UnauthorizedUserException(user.getId());
         }
 
         if (comment.getStatus().equals(Comment.CommentStatus.DELETED)) {
             throw new IllegalStateException("삭제된 댓글은 수정할 수 없습니다.");
         }
 
-        comment.setContent(dto.getContent());
-        return CommentMapper.toDto(commentRepository.save(comment));
+        comment.update(request);
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 
     // 특정 리뷰의 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
@@ -82,7 +79,7 @@ public class CommentService {
 
         Page<Comment> commentPage
                 = commentRepository.findByReviewIdAndStatus(reviewId, Comment.CommentStatus.ACTIVE, pageable);
-        Page<CommentResponseDto> dtoPage = commentPage.map(CommentMapper::toDto);
+        Page<CommentResponseDto> dtoPage = commentPage.map(commentMapper::toDto);
 
         return PageResponse.from(dtoPage);
     }
@@ -94,7 +91,7 @@ public class CommentService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Page<Comment> comments = commentRepository.findByUserIdAndStatus(userId, Comment.CommentStatus.ACTIVE, pageable);
         return comments.stream()
-                .map(CommentMapper::toDto)
+                .map(commentMapper::toDto)
                 .toList();
     }
 
@@ -123,7 +120,7 @@ public class CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Page<CommentResponseDto> page = commentRepository.findAllByOptionalFilters(userId, status, pageable)
-                .map(CommentMapper::toDto);
+                .map(commentMapper::toDto);
         return PageResponse.from(page);
     }
 

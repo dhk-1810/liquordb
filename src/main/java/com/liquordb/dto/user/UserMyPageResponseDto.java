@@ -11,31 +11,28 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 유저 마이페이지 응답 DTO입니다.
+ * 유저 마이페이지 응답 DTO
  */
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@EqualsAndHashCode
 @Builder
-public class UserMyPageResponseDto {
-    private UUID userId;
-    private String email;
-    private String nickname;
+public record UserMyPageResponseDto (
+        UUID userId,
+        String email,
+        String nickname,
 
-    private long likedLiquorCount;     // 주류 좋아요 수
-    private long likedReviewCount;     // 리뷰 좋아요 수
-    private long likedCommentCount;    // 댓글 좋아요 수
-    private long reviewCount;          // 작성 리뷰 수
-    private long commentCount;         // 작성 댓글 수
+        long likedLiquorCount,     // 주류 좋아요 수
+        long likedReviewCount,     // 리뷰 좋아요 수
+        long likedCommentCount,    // 댓글 좋아요 수
+        long reviewCount,          // 작성 리뷰 수
+        long commentCount,         // 작성 댓글 수
 
-    private List<ReviewSummaryDto> reviewList; // 작성한 리뷰 목록
-    private List<CommentResponseDto> commentList; // 작성 댓글 목록
+        List<ReviewSummaryDto> reviewList, // 작성한 리뷰 목록
+        List<CommentResponseDto> commentList, // 작성 댓글 목록
 
-    private List<LiquorSummaryDto> likedLiquors;     // 좋아요 누른 주류 목록
-    private List<ReviewResponseDto> likedReviews;    // 좋아요 누른 리뷰 목록
-    private List<CommentResponseDto> likedComments;  // 좋아요 누른 댓글 목록
+        List<LiquorSummaryDto> likedLiquors,     // 좋아요 누른 주류 목록
+        List<ReviewResponseDto> likedReviews,    // 좋아요 누른 리뷰 목록
+        List<CommentResponseDto> likedComments,  // 좋아요 누른 댓글 목록
 
-    private List<TagResponseDto> preferredTags;
+        List<TagResponseDto> preferredTags
+){
+
 }

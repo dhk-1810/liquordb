@@ -1,5 +1,7 @@
 package com.liquordb.entity;
 
+import com.liquordb.dto.review.ReviewRequestDto;
+import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,10 +13,8 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Review {
 
     @Id
@@ -74,10 +74,22 @@ public class Review {
         updatedAt = LocalDateTime.now();
     }
 
-    public void hide(LocalDateTime deletedAt) {
+    public void update(ReviewUpdateRequestDto request) {
+        if (request.rating() != null) {
+            this.rating = request.rating();
+        }
+        if (request.title() != null) {
+            this.title = request.title();
+        }
+        if (request.content() != null) {
+            this.content = request.content();
+        }
+    }
+
+    public void hide(LocalDateTime hiddenAt) {
         if (this.status == ReviewStatus.HIDDEN) return;
         this.status = ReviewStatus.HIDDEN;
-        this.hiddenAt = deletedAt;
+        this.hiddenAt = hiddenAt;
     }
 
     public void unhide(){
@@ -98,5 +110,28 @@ public class Review {
         this.status = ReviewStatus.ACTIVE;
         this.deletedAt = null;
         // 연관 댓글 복구는 서비스단에서 수행.
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Review (Double rating, String title, String content,
+                    User user, Liquor liquor, ReviewDetail detail
+    ){
+        this.rating = rating;
+        this.title = title;
+        this.content = content;
+        this.user = user;
+        this.liquor = liquor;
+        this.detail = detail;
+    }
+
+    public static Review create(ReviewRequestDto request, User user, Liquor liquor) {
+        return Review.builder()
+                .rating(request.rating())
+                .title(request.title())
+                .content(request.content())
+                .user(user)
+                .liquor(liquor)
+                .detail(request.reviewDetailRequest())
+                .build();
     }
 }

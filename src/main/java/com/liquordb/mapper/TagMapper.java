@@ -9,10 +9,8 @@ import com.liquordb.entity.Tag;
 import java.util.Set;
 
 public class TagMapper {
-    public static Tag toEntity(TagRequestDto dto) {
-        return Tag.builder()
-                .name(dto.getName())
-                .build();
+    public static Tag toEntity(TagRequestDto request) {
+        return Tag.create(request.name());
     }
 
     public static TagResponseDto toDto(Tag tag) {

@@ -9,19 +9,17 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 /**
- * 로그인 응답 DTO입니다.
+ * 로그인 응답 DTO
  */
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class UserLoginResponseDto {
-    private UUID id;
-    private String email;
-    private String nickname;
-    private User.Role role;
+public record UserLoginResponseDto (
+        UUID id,
+        String email,
+        String nickname,
+        User.Role role
+){
 
-    public static UserLoginResponseDto from(User user) {
+    public static UserLoginResponseDto from(User user) { // TODO 필요한가?
         return UserLoginResponseDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())

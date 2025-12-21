@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,21 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    @Column(nullable = false)
-//    private boolean isHidden = false;
-//
-//    @Column(nullable = false)
-//    private boolean isDeleted = false;
 
     private String content;
 
@@ -34,15 +27,15 @@ public class Comment {
     @JoinColumn(name = "review_id")
     private Review review;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_id") // 대댓글 기능 구현. self-referencing
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id") // 대댓글 기능. self-referencing
     private Comment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<Comment> replies = new ArrayList<>();
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentLike> likes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL) // 대댓글
-    private List<Comment> replies = new ArrayList<>();
 
     @OneToMany(mappedBy = "comment")
     private List<Report> reports = new ArrayList<>();
@@ -70,6 +63,10 @@ public class Comment {
     @PreUpdate
     public void onUpdate() { updatedAt = LocalDateTime.now(); }
 
+    public void update(CommentUpdateRequestDto request) {
+        this.content = request.content();
+    }
+
     public void hide(LocalDateTime deletedAt) {
         if (this.status == CommentStatus.HIDDEN) return;
         this.status = CommentStatus.HIDDEN;
@@ -92,5 +89,22 @@ public class Comment {
         if (this.status != CommentStatus.DELETED) return;
         this.status = CommentStatus.ACTIVE;
         this.deletedAt = null;
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    public Comment(String content, Review review, Comment parent, User user){
+        this.content = content;
+        this.review = review;
+        this.parent = parent;
+        this.user = user;
+    }
+
+    public static Comment create(String content, Review review, Comment parent, User user) {
+        return Comment.builder()
+                .content(content)
+                .review(review)
+                .parent(parent)
+                .user(user)
+                .build();
     }
 }

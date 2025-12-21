@@ -5,12 +5,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Report {
 
     @Id
@@ -21,30 +20,73 @@ public class Report {
     @Column(nullable = false)
     private ReportTargetType targetType; // REVIEW 또는 COMMENT
 
-    @Column(nullable = false)
-    private Long targetId; // // 리뷰 ID 또는 댓글 ID
-
-    // TODO Comment랑 Review를 양방향매핑으로 쓰는게 RDB 차원에서 적절할듯
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id")
     private Review review;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
     private Comment comment;
 
     @Column(nullable = false)
-    private Long userId; // 신고 넣은 유저
+    private UUID requestUserId; // 단순한 정보 표기에 가깝기 떄문에 연관관계 대신 id만 사용
 
     private String reason;
 
-    private boolean isApproved; // 관리자 검토 후 유효성 판단
+    private ReportStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt; // 승인되면
-    private LocalDateTime rejectedAt; // 각하되면
+    private LocalDateTime rejectedAt; // 반려되면
+
+    public enum ReportStatus {
+        PENDING,
+        APPROVED,
+        REJECTED
+    }
 
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    public void approve(){
+        if (status != ReportStatus.PENDING) return;
+        this.status = ReportStatus.APPROVED;
+        this.approvedAt = LocalDateTime.now();
+    }
+
+    public void reject(){
+        if (status != ReportStatus.PENDING) return;
+        this.status = ReportStatus.REJECTED;
+        this.rejectedAt = LocalDateTime.now();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE) // 내부에서만 사용 가능
+    private Report(ReportTargetType targetType, Review review, Comment comment, UUID requestUserId, String reason) {
+        this.targetType = targetType;
+        this.review = review;
+        this.comment = comment;
+        this.requestUserId = requestUserId;
+        this.reason = reason;
+    }
+
+    public static Report createReviewReport(Review review, UUID requestUserId, String reason) {
+        return Report.builder()
+                .targetType(ReportTargetType.REVIEW)
+                .review(review)
+                .requestUserId(requestUserId)
+                .reason(reason)
+                .build();
+    }
+
+    public static Report createCommentReport(Comment comment, UUID requestUserId, String reason) {
+        return Report.builder()
+                .targetType(ReportTargetType.COMMENT)
+                .comment(comment)
+                .requestUserId(requestUserId)
+                .reason(reason)
+                .build();
     }
 
 }

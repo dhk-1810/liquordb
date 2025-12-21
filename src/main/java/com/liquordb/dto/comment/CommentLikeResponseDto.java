@@ -1,20 +1,16 @@
 package com.liquordb.dto.comment;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class CommentLikeResponseDto {
-    private Long id;                    // 좋아요 ID
-    private UUID userId;                // 좋아요 누른 유저 ID
-    private Long commentId;              // 대상 댓글 ID
-    private LocalDateTime likedAt;      // 좋아요 누른 시각
+public record CommentLikeResponseDto (
+        Long id,             // 좋아요 ID
+        UUID userId,                // 좋아요 누른 유저 ID
+        Long commentId,              // 대상 댓글 ID
+        LocalDateTime likedAt      // 좋아요 누른 시각
+){
+
 }

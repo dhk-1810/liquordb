@@ -5,13 +5,12 @@ import lombok.*;
 /**
  * 회원가입 요청 DTO입니다.
  */
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class UserRegisterRequestDto {
-    private String email;
-    private String password;
-    private String nickname;
+public record UserRegisterRequestDto (
+        String email,
+        String password,
+        String nickname
+){
+
 }
 

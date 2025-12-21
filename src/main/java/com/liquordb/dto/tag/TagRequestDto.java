@@ -1,11 +1,13 @@
 package com.liquordb.dto.tag;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class TagRequestDto {
-    private String name;
+public record TagRequestDto (
+
+        @NotBlank(message = "태그 이름은 공백일 수 없습니다.")
+        String name
+){
+
 }

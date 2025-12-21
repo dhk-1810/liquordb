@@ -1,5 +1,6 @@
-package com.liquordb.exception;
+package com.liquordb.exception.comment;
 
+import com.liquordb.exception.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 

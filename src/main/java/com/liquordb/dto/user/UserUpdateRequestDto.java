@@ -4,14 +4,13 @@ import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 유저 회원정보 변경 DTO입니다.
+ * 유저 회원정보 수정 DTO
  */
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class UserUpdateRequestDto {
-    private String email;
-    private String nickname;
-    private boolean deleteProfileImage;
+public record UserUpdateRequestDto (
+        String email,
+        String nickname,
+        boolean deleteProfileImage
+){
+
 }

@@ -49,15 +49,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // 주류 연관 리뷰 soft delete (Bulk Update)
     @Modifying(clearAutomatically = true)
     @Query("""
-        UPDATE Review r SET r.isDeleted = true, r.deletedAt = :liquorDeletedAt
-        WHERE r.liquor = :liquor AND r.isDeleted = false
+        UPDATE Review r SET r.status = Review.ReviewStatus.DELETED, r.deletedAt = :liquorDeletedAt
+        WHERE r.liquor = :liquor AND r.status != Review.ReviewStatus.DELETED
     """)
     void softDeleteReviewsByLiquor(@Param("liquor") Liquor liquor,  @Param("liquorDeletedAt") LocalDateTime liquorDeletedAt);
 
     // 주류 연관 리뷰 restore (Bulk Update)
     @Modifying(clearAutomatically = true)
     @Query("""
-         UPDATE Review r SET r.isDeleted = false, r.deletedAt = null
+         UPDATE Review r SET r.status = Review.ReviewStatus.ACTIVE, r.deletedAt = null
          WHERE r.liquor = :liquor AND r.deletedAt = :deletedAt
     """)
     void restoreReviewsByLiquor(@Param("liquor") Liquor liquor);

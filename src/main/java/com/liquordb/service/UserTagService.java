@@ -5,7 +5,8 @@ import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.tag.UserTagRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.TagNotFoundException;
+import com.liquordb.exception.tag.TagNotFoundException;
+import com.liquordb.exception.tag.UserTagAlreadyExistsException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.TagMapper;
@@ -27,19 +28,20 @@ public class UserTagService {
     private final UserTagRepository userTagRepository;
     private final TagRepository tagRepository;
 
-    // 선호하는 태그로 추가
+    // 선호하는 태그로 등록
     @Transactional
-    public UserTag create(UserTagRequestDto dto) {
-        User user = userRepository.findByIdAndStatusNot(dto.getUserId(), UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new UserNotFoundException(dto.getUserId()));
-        Tag tag = tagRepository.findById(dto.getTagId())
-                .orElseThrow(() -> new TagNotFoundException(dto.getTagId()));
-        UserTagId id = new UserTagId(user.getId(), tag.getId());
-        UserTag userTag = UserTag.builder()
-                .id(id)
-                .user(user)
-                .tag(tag)
-                .build();
+    public UserTag add(User requestUser, UserTagRequestDto request) {
+//        User user = userRepository.findByIdAndStatusNot(user.getId(), UserStatus.BANNED)
+//                .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
+
+        Tag tag = tagRepository.findById(request.tagId())
+                .orElseThrow(() -> new TagNotFoundException(request.tagId()));
+
+        if (userTagRepository.existsUserTagByUserAndTag_Id(requestUser, request.tagId())) {
+            throw new UserTagAlreadyExistsException(request.tagId());
+        }
+
+        UserTag userTag = UserTag.create(requestUser, tag);
         return userTagRepository.save(userTag);
     }
 
@@ -76,11 +78,9 @@ public class UserTagService {
 
     // 선호하는 태그에서 삭제
     @Transactional
-    public void deleteByUserIdAndTagId(UserTagRequestDto dto) {
-        User user = userRepository.findByIdAndStatusNot(dto.getUserId(), UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new UserNotFoundException(dto.getUserId()));
-        Tag tag = tagRepository.findById(dto.getTagId())
-                .orElseThrow(() -> new TagNotFoundException(dto.getTagId()));
-        userTagRepository.deleteByUserIdAndTagId(user.getId(), tag.getId());
+    public void deleteByUserIdAndTagId(User requestUser, UserTagRequestDto request) {
+        Tag tag = tagRepository.findById(request.tagId())
+                .orElseThrow(() -> new TagNotFoundException(request.tagId()));
+        userTagRepository.deleteByUserIdAndTagId(requestUser.getId(), tag.getId());
     }
 }

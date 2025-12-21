@@ -1,13 +1,12 @@
 package com.liquordb.dto.comment;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class CommentRequestDto {
-    private Long reviewId;
-    private Long parentId;
-    private String content;
+public record CommentRequestDto (
+        Long reviewId,
+        Long parentId,
+        String content
+){
+
 }

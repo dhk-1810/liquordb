@@ -1,5 +1,6 @@
 package com.liquordb.exception;
 
+import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

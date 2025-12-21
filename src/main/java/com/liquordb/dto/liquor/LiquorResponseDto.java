@@ -9,30 +9,29 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 주류 하나에 대한 응답 DTO
+ * 주류 응답 DTO
  * 단일 조회 페이지에서 사용
  */
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class LiquorResponseDto {
-    private Long id;
-    private String name;
-    private Liquor.LiquorCategory category;
-    private LiquorSubcategory subcategory;
-    private String country;
-    private String manufacturer;
-    private double abv;
-    private boolean isDiscontinued; // 단종 여부
-    private String imageUrl;
+public record LiquorResponseDto (
+    Long id,
+    String name,
+    Liquor.LiquorCategory category,
+    LiquorSubcategory subcategory,
+    String country,
+    String manufacturer,
+    double abv,
+    boolean isDiscontinued, // 단종 여부
+    String imageUrl,
 
-    private double averageRating;
-    private int reviewCount;
-    private List<ReviewResponseDto> reviews;
-    private Set<LiquorTagResponseDto> tags;
+    double averageRating,
+    int reviewCount,
+    List<ReviewResponseDto> reviews,
+    Set<LiquorTagResponseDto> tags,
 
-    private long likeCount;
-    private boolean likedByMe;
+    long likeCount,
+    boolean likedByMe
+) {
+
 }

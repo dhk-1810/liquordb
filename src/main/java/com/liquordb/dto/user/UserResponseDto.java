@@ -6,18 +6,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
 @Builder
-public class UserResponseDto {
-    private UUID id;
-    private String email;
-    private String nickname;
-    private String profileImageUrl;
-    private LocalDateTime createdAt;
-    private UserStatus status;
-    private String role;
+public record UserResponseDto (
+        UUID id,
+        String email,
+        String nickname,
+        String profileImageUrl,
+        LocalDateTime createdAt,
+        UserStatus status,
+        String role
+){
 
 }
