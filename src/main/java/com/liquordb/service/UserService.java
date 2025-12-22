@@ -56,7 +56,7 @@ public class UserService {
     @Transactional
     public UserResponseDto register(UserRegisterRequestDto request, MultipartFile profileImage, User.Role role) {
 
-        String email = request.getEmail();
+        String email = request.email();
         User existingUser = userRepository.findByEmail(email)
                 .orElse(null);
 
@@ -69,7 +69,7 @@ public class UserService {
             }
         }
 
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.password());
         User user = UserMapper.toEntity(request, encodedPassword, role);
         if (profileImage != null) {
             user.setProfileImage(fileService.upload(profileImage));
@@ -82,11 +82,11 @@ public class UserService {
     // 로그인
     @Transactional
     public UserLoginResponseDto login(UserLoginRequestDto dto) {
-        String email = dto.getEmail();
+        String email = dto.email();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(LoginFailedException::new);
 
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
             throw new LoginFailedException();
         }
 
@@ -167,23 +167,23 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
-    public void update(UUID userId, UserUpdateRequestDto dto, MultipartFile newProfileImage) {
+    public void update(UUID userId, UserUpdateRequestDto request, MultipartFile newProfileImage) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        String email = dto.getEmail();
+        String email = request.email();
         if (email != null) {
             if (!userRepository.existsByEmail(email)) {
                 user.setEmail(email);
             }
         }
 
-        if (dto.getNickname() != null) {
-            user.setNickname(dto.getNickname());
+        if (request.nickname() != null) {
+            user.setNickname(request.nickname());
         }
 
-        if (dto.isDeleteProfileImage()) {
+        if (request.deleteProfileImage()) {
             fileService.delete(user.getProfileImage().getId());
             user.setProfileImage(null);
         }
@@ -202,11 +202,11 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
 
-        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
         userRepository.save(user);
     }
 

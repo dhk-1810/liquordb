@@ -30,68 +30,23 @@ public class CommentLikeService {
     // 좋아요 토글 (누르기/취소)
     @Transactional
     public CommentLikeResponseDto toggleLike(UUID userId, Long commentId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.BANNED)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-        Optional<CommentLike> optionalCommentLike
-                = commentLikeRepository.findByUserIdAndCommentId(userId, commentId);
+        CommentLike existingCommentLike = commentLikeRepository.findByUserIdAndCommentId(userId, commentId)
+                .orElse(null);
 
-        if (optionalCommentLike.isPresent()) {
-            commentLikeRepository.delete(optionalCommentLike.get());
-            return buildResponse(
-                    null, // TODO
-                    userId,
-                    commentId,
-                    null);
+        if (existingCommentLike != null) {
+            commentLikeRepository.delete(existingCommentLike);
+            return null;
         } else {
-            CommentLike newLike = CommentLike.builder()
-                    .user(user)
-                    .comment(comment)
-                    .likedAt(LocalDateTime.now())
-                    .build();
-
-            CommentLike saved = commentLikeRepository.save(newLike);
-
-            return buildResponse(
-                    saved.getId(),
-                    userId,
-                    commentId,
-                    saved.getLikedAt());
+            CommentLike newLike = CommentLike.create(user, comment);
+            commentLikeRepository.save(newLike);
+            return CommentLikeResponseDto.toDto(newLike);
         }
     }
 
-    // 특정 댓글에 달린 좋아요 수
-    @Transactional(readOnly = true)
-    public long countByCommentId(Long commentId) {
-        return commentLikeRepository.countByCommentId(commentId);
-    }
-
-    // 특정 유저가 좋아요 누른 댓글 수
-    @Transactional(readOnly = true)
-    public long countByUserId(User user) {
-        return commentLikeRepository.countByUserAndCommentIsHiddenFalse(user);
-    }
-
-    // 유저가 좋아요 누른 댓글 조회
-    @Transactional(readOnly = true)
-    public List<CommentResponseDto> getCommentSummaryDtosByUserId(UUID userId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        return commentLikeRepository.findByUserAndCommentIsHiddenFalse(user).stream()
-                .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))
-                .toList();
-    }
-
-    // DTO 생성
-    private CommentLikeResponseDto buildResponse(Long id, UUID userId, Long commentId, LocalDateTime likedAt) {
-        return CommentLikeResponseDto.builder()
-                .id(id)
-                .userId(userId)
-                .commentId(commentId)
-                .likedAt(likedAt)
-                .build();
-    }
 }

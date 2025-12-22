@@ -32,57 +32,23 @@ public class LiquorLikeService {
     // 좋아요 토글 (누르기/취소)
     @Transactional
     public LiquorLikeResponseDto toggleLike(UUID userId, Long liquorId) {
-
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Liquor liquor = liquorRepository.findById(liquorId)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
-        Optional<LiquorLike> optionalLiquorLike = liquorLikeRepository
-                .findByUserIdAndLiquorId(user.getId(), liquor.getId());
+        LiquorLike existingLiquorLike = liquorLikeRepository
+                .findByUserIdAndLiquorId(user.getId(), liquor.getId()).orElse(null);
 
-        if (optionalLiquorLike.isPresent()) { // 이미 좋아요 눌려있으면 취소
-            liquorLikeRepository.delete(optionalLiquorLike.get());
-            return buildResponse(userId, liquorId, false, null);
+        if (existingLiquorLike != null) {
+            liquorLikeRepository.delete(existingLiquorLike);
+            return null;
         } else {
-            LiquorLike newLike = LiquorLike.builder()
-                            .user(user)
-                            .liquor(liquor)
-                            .likedAt(LocalDateTime.now())
-                            .build();
-
-            LiquorLike saved = liquorLikeRepository.save(newLike);
-
-            return buildResponse(userId, liquorId, true, saved.getLikedAt());
+            LiquorLike liquorLike = LiquorLike.create(user, liquor);
+            liquorLikeRepository.save(liquorLike);
+            return LiquorLikeResponseDto.toDto(liquorLike);
         }
     }
 
-    // 좋아요 카운트
-    @Transactional(readOnly = true)
-    public long countByLiquorIdAndLikedTrue(Long liquorId) {
-        return liquorLikeRepository.countByLiquorIdAndLikedTrue(liquorId);
-    }
-
-    // 유저가 좋아요 누른 주류 목록
-    @Transactional(readOnly = true)
-    public List<LiquorSummaryDto> getLiquorSummaryDtosByUserId(UUID userId){
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 유저입니다."));
-        return liquorLikeRepository.findByUserIdAndLiquorIsHiddenFalse(userId)
-                .stream()
-                .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), user))
-                .toList();
-    }
-
-    // DTO build
-    private LiquorLikeResponseDto buildResponse(UUID userId, Long liquorId, boolean liked, LocalDateTime likedAt) {
-        return LiquorLikeResponseDto.builder()
-                // .id(id)
-                .userId(userId)
-                .liquorId(liquorId)
-                .liked(liked)
-                .likedAt(likedAt)
-                .build();
-    }
 }

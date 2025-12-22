@@ -53,11 +53,11 @@ public class LiquorTagService {
     // 주류에 태그 추가
     public LiquorTagResponseDto addLiquorTag(LiquorTagRequestDto request) {
 
-        Liquor liquor = liquorRepository.findById(request.getLiquorId())
-                .orElseThrow(() -> new LiquorNotFoundException(request.getLiquorId()));
+        Liquor liquor = liquorRepository.findById(request.liquorId())
+                .orElseThrow(() -> new LiquorNotFoundException(request.liquorId()));
 
-        Tag tag = tagRepository.findById(request.getTagId())
-                .orElseThrow(() -> new TagNotFoundException(request.getTagId()));
+        Tag tag = tagRepository.findById(request.tagId())
+                .orElseThrow(() -> new TagNotFoundException(request.tagId()));
 
         LiquorTag liquorTag = LiquorTagMapper.toEntity(liquor, tag);
         liquorTagRepository.save(liquorTag);

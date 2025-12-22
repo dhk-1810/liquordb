@@ -1,11 +1,13 @@
 package com.liquordb.controller;
 
 import com.liquordb.PageResponse;
+import com.liquordb.dto.liquor.LiquorLikeResponseDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.User;
+import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class LiquorController {
 
     private final LiquorService liquorService;
+    private final LiquorLikeService liquorLikeService;
 
     // 1. 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
@@ -58,6 +61,14 @@ public class LiquorController {
 
         LiquorResponseDto dto = liquorService.getLiquorDetail(id, currentUser);
         return ResponseEntity.ok(dto);
+    }
+
+    // 주류 좋아요 토글 (누르기/취소)
+    @PostMapping("/{liquorId}/like")
+    public ResponseEntity<LiquorLikeResponseDto> toggleLike(@PathVariable Long liquorId,
+                                                            @RequestParam UUID userId) {
+        LiquorLikeResponseDto response = liquorLikeService.toggleLike(userId, liquorId);
+        return ResponseEntity.ok(response);
     }
 
 }

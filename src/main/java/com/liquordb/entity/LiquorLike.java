@@ -6,10 +6,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "liquor_likes")
 public class LiquorLike {
 
@@ -34,5 +32,18 @@ public class LiquorLike {
     @PrePersist
     public void onCreate() {
         likedAt = LocalDateTime.now();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    public LiquorLike(User user, Liquor liquor) {
+        this.user = user;
+        this.liquor = liquor;
+    }
+
+    public static LiquorLike create(User user, Liquor liquor) {
+        return LiquorLike.builder()
+                .user(user)
+                .liquor(liquor)
+                .build();
     }
 }

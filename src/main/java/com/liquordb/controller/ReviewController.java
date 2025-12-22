@@ -1,11 +1,14 @@
 package com.liquordb.controller;
 
+import com.liquordb.dto.review.ReviewLikeResponseDto;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
+import com.liquordb.service.ReviewLikeService;
 import com.liquordb.service.ReviewService;
 import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
+import com.liquordb.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ import java.util.List;
 public class ReviewController {
 
     private ReviewService reviewService;
+    private ReviewLikeService reviewLikeService;
     private UserValidator userValidator;
 
     // 리뷰 등록
@@ -50,12 +55,19 @@ public class ReviewController {
 
     // 리뷰 삭제
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<?> delete(
-            @PathVariable Long reviewId,
-            @AuthenticationPrincipal User user
-    ) {
+    public ResponseEntity<?> delete(@PathVariable Long reviewId, @AuthenticationPrincipal User user) {
         userValidator.validateCanPost(user);
         reviewService.deleteByIdAndUser(reviewId, user);
         return ResponseEntity.noContent().build();
     }
+
+    // 리뷰 좋아요
+    // TODO 유저 인증정보
+    @PostMapping("/{reviewId}/like")
+    public ResponseEntity<ReviewLikeResponseDto> toggleLike(@PathVariable Long reviewId,
+                                                            @RequestParam UUID userId) {
+        ReviewLikeResponseDto response = reviewLikeService.toggleLike(userId, reviewId);
+        return ResponseEntity.ok(response);
+    }
+
 }
