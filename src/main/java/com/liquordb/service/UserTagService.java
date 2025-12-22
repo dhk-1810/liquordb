@@ -30,9 +30,9 @@ public class UserTagService {
 
     // 선호하는 태그로 등록
     @Transactional
-    public UserTag add(User requestUser, UserTagRequestDto request) {
-//        User user = userRepository.findByIdAndStatusNot(user.getId(), UserStatus.BANNED)
-//                .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
+    public UserTag add(UserTagRequestDto request, User requestUser) {
+
+        // TODO BANNED된 유저 처리?
 
         Tag tag = tagRepository.findById(request.tagId())
                 .orElseThrow(() -> new TagNotFoundException(request.tagId()));

@@ -21,19 +21,19 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/reviews")
+@RequestMapping("/api/reviews")
 public class ReviewController {
 
-    private ReviewService reviewService;
-    private ReviewLikeService reviewLikeService;
-    private UserValidator userValidator;
+    private final ReviewService reviewService;
+    private final ReviewLikeService reviewLikeService;
+    private final UserValidator userValidator;
 
     // 리뷰 등록
     @PostMapping
     public ResponseEntity<ReviewResponseDto> create(
-            @RequestBody @Valid ReviewRequestDto requestDto,
-            @AuthenticationPrincipal User user,
-            @RequestPart(required = false) List<MultipartFile> images
+            @RequestPart @Valid ReviewRequestDto requestDto,
+            @RequestPart(required = false) List<MultipartFile> images,
+            @AuthenticationPrincipal User user
     ) {
         userValidator.validateCanPost(user);
         ReviewResponseDto response = reviewService.create(user, requestDto, images);
@@ -44,9 +44,9 @@ public class ReviewController {
     @PatchMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
-            @RequestBody @Valid ReviewUpdateRequestDto request,
-            @AuthenticationPrincipal User user,
-            @RequestPart(required = false) List<MultipartFile> imagesToAdd
+            @RequestPart @Valid ReviewUpdateRequestDto request,
+            @RequestPart(required = false) List<MultipartFile> imagesToAdd,
+            @AuthenticationPrincipal User user
     ) {
         userValidator.validateCanPost(user);
         ReviewResponseDto response = reviewService.update(reviewId, user, request, imagesToAdd);
@@ -55,7 +55,7 @@ public class ReviewController {
 
     // 리뷰 삭제
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<?> delete(@PathVariable Long reviewId, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> delete(@PathVariable Long reviewId, @AuthenticationPrincipal User user) {
         userValidator.validateCanPost(user);
         reviewService.deleteByIdAndUser(reviewId, user);
         return ResponseEntity.noContent().build();

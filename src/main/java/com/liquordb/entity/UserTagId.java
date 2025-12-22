@@ -10,6 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class UserTagId implements Serializable {
+
     private UUID userId;
     private Long tagId;
 }

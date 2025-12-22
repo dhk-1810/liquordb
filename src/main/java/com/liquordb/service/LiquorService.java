@@ -1,6 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.PageResponse;
+import com.liquordb.dto.liquor.LiquorUpdateRequestDto;
 import com.liquordb.entity.User;
 import com.liquordb.exception.LiquorNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
@@ -85,10 +86,10 @@ public class LiquorService {
 
     // 주류 수정
     @Transactional
-    public LiquorResponseDto update(Long id, LiquorRequestDto request) {
+    public LiquorResponseDto update(Long id, LiquorUpdateRequestDto request) {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
-        liquor.updateFromDto(request);
+        liquor.updateFromDto(request.isDiscontinued(), request.deleteImage());
         return LiquorMapper.toDto(liquorRepository.save(liquor), null);
     }
 

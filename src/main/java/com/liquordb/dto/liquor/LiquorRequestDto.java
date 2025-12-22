@@ -4,9 +4,6 @@ import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
 import lombok.*;
 
-/**
- * 주류 생성 요청 DTO
- */
 @Builder
 public record LiquorRequestDto (
     String name,

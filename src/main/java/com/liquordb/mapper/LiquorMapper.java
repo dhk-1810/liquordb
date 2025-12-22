@@ -3,8 +3,8 @@ package com.liquordb.mapper;
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
-import com.liquordb.dto.liquor.LiquorTagResponseDto;
 import com.liquordb.dto.review.ReviewResponseDto;
+import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.User;
 
@@ -20,8 +20,8 @@ public class LiquorMapper {
                 .map(ReviewMapper::toDto)
                 .toList();
 
-        Set<LiquorTagResponseDto> tagDtos = liquor.getLiquorTags().stream()
-                .map(TagMapper::toLiquorTagDto)
+        Set<TagResponseDto> tagDtos = liquor.getLiquorTags().stream()
+                .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
 
         boolean likedByMe = false;
@@ -71,14 +71,13 @@ public class LiquorMapper {
     }
 
     public static Liquor toEntity(LiquorRequestDto request) {
-        return Liquor.builder()
-                .name(request.getName())
-                .category(request.getCategory())
-                .subcategory(request.getSubcategory())
-                .country(request.getCountry())
-                .manufacturer(request.getManufacturer())
-                .abv(request.getAbv())
-                .imageUrl(request.getImageUrl())
-                .build();
+        return Liquor.create(
+                request.name(),
+                request.category(),
+                request.subcategory(),
+                request.country(),
+                request.manufacturer(),
+                request.abv(),
+                request.imageUrl());
     }
 }

@@ -21,10 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * 유저용 주류 컨트롤러입니다.
- */
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/liquors")
@@ -33,7 +29,7 @@ public class LiquorController {
     private final LiquorService liquorService;
     private final LiquorLikeService liquorLikeService;
 
-    // 1. 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
+    // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
     public ResponseEntity<PageResponse<LiquorSummaryDto>> getLiquorsByFilters(
             @AuthenticationPrincipal User user,
@@ -44,7 +40,7 @@ public class LiquorController {
         return ResponseEntity.ok(liquor);
     }
 
-    // 2. 주류 검색 (이름으로)
+    // 주류 검색 (이름으로)
     @GetMapping("/search")
     public ResponseEntity<PageResponse<LiquorSummaryDto>> searchLiquors(@AuthenticationPrincipal User user,
                                                                         @RequestParam String keyword,
@@ -53,13 +49,13 @@ public class LiquorController {
         return ResponseEntity.ok(response);
     }
 
-    // 3. 주류 단건 조회
-    @GetMapping("/{id}")
+    // 주류 단건 조회
+    @GetMapping("/{liquorId}")
     public ResponseEntity<LiquorResponseDto> getLiquorDetail(
-            @PathVariable Long id,
+            @PathVariable Long liquorId,
             @AuthenticationPrincipal User currentUser) {
 
-        LiquorResponseDto dto = liquorService.getLiquorDetail(id, currentUser);
+        LiquorResponseDto dto = liquorService.getLiquorDetail(liquorId, currentUser);
         return ResponseEntity.ok(dto);
     }
 

@@ -1,12 +1,10 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.liquor.LiquorTagResponseDto;
 import com.liquordb.dto.tag.TagRequestDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.LiquorTag;
 import com.liquordb.entity.Tag;
-
-import java.util.Set;
+import com.liquordb.entity.UserTag;
 
 public class TagMapper {
     public static Tag toEntity(TagRequestDto request) {
@@ -20,12 +18,18 @@ public class TagMapper {
                 .build();
     }
 
-    public static LiquorTagResponseDto toLiquorTagDto(LiquorTag liquorTag) {
-        return LiquorTagResponseDto.builder()
-                .id(liquorTag.getId())
-                .liquorId(liquorTag.getLiquor().getId())
-                .tagId(liquorTag.getTag().getId())
-                .tagName(liquorTag.getTag().getName())
+    //TODO N+1 문제 해결 필요
+    public static TagResponseDto toDto(LiquorTag liquorTag) {
+        return TagResponseDto.builder()
+                .id(liquorTag.getTag().getId())
+                .name(liquorTag.getTag().getName())
+                .build();
+    }
+
+    public static TagResponseDto toDto(UserTag userTag) {
+        return TagResponseDto.builder()
+                .id(userTag.getTag().getId())
+                .name(userTag.getTag().getName())
                 .build();
     }
 }

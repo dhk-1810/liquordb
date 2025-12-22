@@ -1,6 +1,5 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.tag.UserTagRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +8,6 @@ import java.time.LocalDateTime;
 /**
  * 유저-태그 간 다대다 관계 처리 위한 클래스입니다.
  */
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,6 +42,6 @@ public class UserTag {
                 .user(requestUser)
                 .tag(tag)
                 .build();
-
     }
+
 }

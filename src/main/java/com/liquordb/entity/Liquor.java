@@ -1,19 +1,15 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.liquor.LiquorRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "liquor")
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Liquor {
 
     @Id
@@ -40,6 +36,7 @@ public class Liquor {
 
     @Column(nullable = false)
     private boolean isDiscontinued; // 단종 여부
+
     private String imageUrl; // 대표 이미지 사진 저장경로
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -70,11 +67,9 @@ public class Liquor {
         updatedAt = LocalDateTime.now();
     }
 
-    public void updateFromDto(LiquorRequestDto request) {
-        this.name = request.getName();
-        this.category = request.getCategory();
-        this.subcategory = request.getSubcategory();
-        this.imageUrl = request.getImageUrl();
+    public void updateFromDto(Boolean isDiscontinued, Boolean deleteImage) {
+        if (isDiscontinued == null) this.isDiscontinued = false;
+        if (deleteImage == null) imageUrl = null; // TODO 개선필요
     }
 
     public void softDelete(LocalDateTime deletedAt) {
@@ -91,4 +86,31 @@ public class Liquor {
         this.deletedAt = null;
         // 연관 리뷰 복구는 서비스단에서 수행.
     }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Liquor(String name, LiquorCategory category, LiquorSubcategory subcategory,
+                   String country, String manufacturer, Double abv, String imageUrl){
+        this.name = name;
+        this.category = category;
+        this.subcategory = subcategory;
+        this.country = country;
+        this.manufacturer = manufacturer;
+        this.abv = abv;
+        this.imageUrl = imageUrl; // TODO 개선필요
+    }
+
+    public static Liquor create(String name, LiquorCategory category, LiquorSubcategory subcategory,
+                         String country, String manufacturer, Double abv, String imageUrl) {
+        return Liquor.builder()
+                .name(name)
+                .category(category)
+                .subcategory(subcategory)
+                .country(country)
+                .manufacturer(manufacturer)
+                .abv(abv)
+                .imageUrl(imageUrl)
+                .build();
+    }
+
+
 }

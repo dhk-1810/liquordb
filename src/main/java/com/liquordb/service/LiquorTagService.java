@@ -1,8 +1,8 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.liquor.LiquorResponseDto;
-import com.liquordb.dto.liquor.LiquorTagRequestDto;
-import com.liquordb.dto.liquor.LiquorTagResponseDto;
+import com.liquordb.dto.tag.LiquorTagRequestDto;
+import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.LiquorNotFoundException;
 import com.liquordb.exception.tag.TagNotFoundException;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
 public class LiquorTagService {
 
@@ -41,7 +40,7 @@ public class LiquorTagService {
 
     // 특정 주류에 연결된 태그 이름 목록 반환
     @Transactional(readOnly = true)
-    public List<LiquorTagResponseDto> getTagsByLiquorId(Long liquorId) {
+    public List<TagResponseDto> getTagsByLiquorId(Long liquorId) {
         return liquorTagRepository.findTagsByLiquorId(liquorId).stream()
                 .map(LiquorTagMapper::toDto)
                 .toList();
@@ -51,7 +50,7 @@ public class LiquorTagService {
      * 관리자용
      */
     // 주류에 태그 추가
-    public LiquorTagResponseDto addLiquorTag(LiquorTagRequestDto request) {
+    public TagResponseDto addLiquorTag(LiquorTagRequestDto request) {
 
         Liquor liquor = liquorRepository.findById(request.liquorId())
                 .orElseThrow(() -> new LiquorNotFoundException(request.liquorId()));

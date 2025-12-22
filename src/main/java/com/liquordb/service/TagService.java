@@ -19,7 +19,7 @@ public class TagService {
     private final TagRepository tagRepository;
 
     /**
-     * 이하는 관리자용 메서드임.
+     * 이하는 관리자용 메서드
      */
     // 태그 등록
     @Transactional
