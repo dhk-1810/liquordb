@@ -23,9 +23,6 @@ public record ReviewUpdateRequestDto (
 
         // 주종별 디테일 정보
         ReviewDetail reviewDetail,
-//        BeerReviewDetailDto beerDetail,
-//        WineReviewDetailDto wineDetail,
-//        WhiskyReviewDetailDto whiskyDetail,
 
         // 삭제할 이미지 목록 (File 객체의 ID)
         List<Long> imageIdsToDelete

@@ -19,12 +19,4 @@ public record UserLoginResponseDto (
         User.Role role
 ){
 
-    public static UserLoginResponseDto from(User user) { // TODO 필요한가?
-        return UserLoginResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .nickname(user.getNickname())
-                .role(user.getRole())
-                .build();
-    }
 }

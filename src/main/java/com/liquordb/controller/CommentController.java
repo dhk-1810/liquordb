@@ -9,7 +9,7 @@ import com.liquordb.service.CommentLikeService;
 import com.liquordb.service.CommentService;
 import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
-import com.liquordb.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/comments")
+@RequestMapping("/api")
 public class CommentController {
 
     private final CommentService commentService;
@@ -29,12 +29,13 @@ public class CommentController {
     private final UserValidator userValidator;
 
     // 댓글 작성
-    @PostMapping
-    public ResponseEntity<CommentResponseDto> create(@RequestBody CommentRequestDto request,
+    @PostMapping("/reviews/{reviewId}/comments")
+    public ResponseEntity<CommentResponseDto> create(@PathVariable Long reviewId,
+                                                     @RequestBody @Valid CommentRequestDto request,
                                                      @AuthenticationPrincipal User user
     ) {
         userValidator.validateCanPost(user);
-        CommentResponseDto response = commentService.create(user, request);
+        CommentResponseDto response = commentService.create(user, reviewId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -49,7 +50,7 @@ public class CommentController {
     // 댓글 수정
     @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponseDto> update(@PathVariable Long commentId,
-                                                     @RequestBody CommentUpdateRequestDto request,
+                                                     @RequestBody @Valid CommentUpdateRequestDto request,
                                                      @AuthenticationPrincipal User user){
         CommentResponseDto response = commentService.update(user, commentId, request);
         return ResponseEntity.ok(response);

@@ -1,5 +1,6 @@
 package com.liquordb.dto.user;
 
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,8 +9,12 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Builder
 public record UserUpdateRequestDto (
+
+        @Email(message = "이메일 형식이 올바르지 않습니다.")
         String email,
+
         String nickname,
+
         boolean deleteProfileImage
 ){
 

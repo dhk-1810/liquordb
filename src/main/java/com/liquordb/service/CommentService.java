@@ -36,15 +36,14 @@ public class CommentService {
 
     // 댓글 생성
     @Transactional
-    public CommentResponseDto create(User requestUser, CommentRequestDto request) {
+    public CommentResponseDto create(User requestUser, Long reviewId, CommentRequestDto request) {
 
-        Long reviewId = request.reviewId();
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         Long parentId = request.parentId();
         Comment parent = null;
-        if (parentId != null) { // 대댓글일 경우
+        if (parentId != null) { // 답글일 경우
             parent = commentRepository.findById(parentId)
                     .orElseThrow(() -> new CommentNotFoundException(parentId));
         }

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 단일 조회 페이지에서 사용
+ * 단건 조회 시 표시할 상세 정보
  */
 @Builder
 public record LiquorResponseDto (

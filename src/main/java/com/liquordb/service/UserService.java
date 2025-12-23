@@ -81,7 +81,7 @@ public class UserService {
 
     // 로그인
     @Transactional
-    public UserLoginResponseDto login(UserLoginRequestDto dto) {
+    public UserResponseDto login(UserLoginRequestDto dto) {
         String email = dto.email();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(LoginFailedException::new);
@@ -94,7 +94,7 @@ public class UserService {
             throw new BannedUserException(email);
         }
 
-        return UserLoginResponseDto.from(user);
+        return UserMapper.toDto(user);
     }
 
     // 회원 탈퇴 (soft delete)

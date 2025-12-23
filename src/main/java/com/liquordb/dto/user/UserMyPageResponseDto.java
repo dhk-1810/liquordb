@@ -19,18 +19,18 @@ public record UserMyPageResponseDto (
         String email,
         String nickname,
 
-        long likedLiquorCount,     // 주류 좋아요 수
-        long likedReviewCount,     // 리뷰 좋아요 수
-        long likedCommentCount,    // 댓글 좋아요 수
-        long reviewCount,          // 작성 리뷰 수
-        long commentCount,         // 작성 댓글 수
+        long likedLiquorCount,
+        long likedReviewCount,
+        long likedCommentCount,
+        long reviewCount,
+        long commentCount,
 
-        List<ReviewSummaryDto> reviewList, // 작성한 리뷰 목록
-        List<CommentResponseDto> commentList, // 작성 댓글 목록
+        List<ReviewSummaryDto> reviewList,
+        List<CommentResponseDto> commentList,
 
-        List<LiquorSummaryDto> likedLiquors,     // 좋아요 누른 주류 목록
-        List<ReviewResponseDto> likedReviews,    // 좋아요 누른 리뷰 목록
-        List<CommentResponseDto> likedComments,  // 좋아요 누른 댓글 목록
+        List<LiquorSummaryDto> likedLiquors,
+        List<ReviewResponseDto> likedReviews,
+        List<CommentResponseDto> likedComments,
 
         List<TagResponseDto> preferredTags
 ){

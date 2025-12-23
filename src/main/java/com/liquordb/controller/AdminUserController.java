@@ -15,9 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * 관리자용 유저 컨트롤러 클래스입니다.
- */
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin/users")

@@ -40,7 +40,7 @@ public class TagService {
     }
 
     // 태그 전체 목록 조회
-    // TODO 페이지네이션
+    // TODO 페이지네이션, 검색
     @Transactional(readOnly = true)
     public List<TagResponseDto> findAll() {
         List<Tag> tags = tagRepository.findAllByIsDeletedFalse();

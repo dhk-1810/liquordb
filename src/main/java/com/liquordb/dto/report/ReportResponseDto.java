@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Builder
 public record ReportResponseDto (
-        Long targetId, // TODO 분리?
+        Long targetId,
         ReportTargetType targetType,
         UUID requestUserId,
         String reason,

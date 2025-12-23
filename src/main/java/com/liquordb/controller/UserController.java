@@ -12,11 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
-/**
- * 유저 컨트롤러 클래스입니다.
- * 유저 회원가입, 로그인, 아이디 찾기, 비밀번호 찾기, 회원 탈퇴, 마이페이지 조회, 선호 태그 기반 주류 추천 기능을 지원합니다.
- */
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")

@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
  */
 @Builder
 public record ReviewSummaryDto (
-        Long id,            // 리뷰 ID
-        String title,       // 리뷰 제목
-        String content,     // 리뷰 내용 (요약)
-        double score,       // 평점
-        String liquorName,  // 주류 이름
-        LocalDateTime createdDate // 작성일
+        Long id,
+        String title,
+        String content,     // TODO 리뷰 내용 한줄만 가져와야함.
+        double score,
+        String liquorName,
+        LocalDateTime createdDate
 ) {
 
 

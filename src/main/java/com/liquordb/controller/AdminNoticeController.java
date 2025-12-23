@@ -10,10 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 관리자용 공지사항 컨트롤러입니다.
- */
-
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin/notices")

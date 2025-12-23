@@ -2,7 +2,9 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
+import com.liquordb.dto.liquor.LiquorUpdateRequestDto;
 import com.liquordb.service.LiquorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +21,15 @@ public class AdminLiquorController {
 
     // 주류 추가
     @PostMapping
-    public ResponseEntity<LiquorResponseDto> createLiquor(@RequestBody LiquorRequestDto requestDto) {
-        liquorService.create(requestDto);
+    public ResponseEntity<LiquorResponseDto> createLiquor(@RequestBody @Valid LiquorRequestDto request) {
+        liquorService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 주류 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<LiquorResponseDto> updateLiquor(@PathVariable Long id, @RequestBody LiquorRequestDto requestDto) {
-        liquorService.update(id, requestDto);
+    public ResponseEntity<LiquorResponseDto> updateLiquor(@PathVariable Long id, @RequestBody LiquorUpdateRequestDto request) {
+        liquorService.update(id, request);
         return ResponseEntity.ok().build();
     }
 

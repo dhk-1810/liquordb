@@ -16,9 +16,9 @@ public class UserMapper {
 
     public static User toEntity(UserRegisterRequestDto request, String encodedPassword, User.Role role){
         return User.builder()
-                .email(request.getEmail())
+                .email(request.email())
                 .password(encodedPassword)
-                .nickname(request.getNickname())
+                .nickname(request.nickname())
                 .role(role)
                 .build();
     }

@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/liquors")
+@RequiredArgsConstructor
 public class LiquorController {
 
     private final LiquorService liquorService;
