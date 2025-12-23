@@ -7,6 +7,7 @@ import jakarta.persistence.*;
  */
 
 @Entity
+@Table(name = "liquor_subcategories")
 public class LiquorSubcategory {
 
     @Id

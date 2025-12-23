@@ -15,6 +15,7 @@ import java.util.Set;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "reviews")
 public class Review {
 
     @Id
@@ -55,6 +56,8 @@ public class Review {
     @OneToMany(mappedBy = "review")
     private List<Report> reports = new ArrayList<>();
 
+    private long likeCount = 0;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime hiddenAt;
@@ -72,6 +75,29 @@ public class Review {
     @PreUpdate
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Review (Double rating, String title, String content,
+                    User user, Liquor liquor, ReviewDetail detail
+    ){
+        this.rating = rating;
+        this.title = title;
+        this.content = content;
+        this.user = user;
+        this.liquor = liquor;
+        this.detail = detail;
+    }
+
+    public static Review create(ReviewRequestDto request, ReviewDetail reviewDetail, Liquor liquor, User user) {
+        return Review.builder()
+                .rating(request.rating())
+                .title(request.title())
+                .content(request.content())
+                .user(user)
+                .liquor(liquor)
+                .detail(reviewDetail)
+                .build();
     }
 
     public void update(ReviewUpdateRequestDto request) {
@@ -112,26 +138,12 @@ public class Review {
         // 연관 댓글 복구는 서비스단에서 수행.
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
-    private Review (Double rating, String title, String content,
-                    User user, Liquor liquor, ReviewDetail detail
-    ){
-        this.rating = rating;
-        this.title = title;
-        this.content = content;
-        this.user = user;
-        this.liquor = liquor;
-        this.detail = detail;
+    public void increaseLikeCount() {
+        this.likeCount++;
     }
 
-    public static Review create(ReviewRequestDto request, User user, Liquor liquor) {
-        return Review.builder()
-                .rating(request.rating())
-                .title(request.title())
-                .content(request.content())
-                .user(user)
-                .liquor(liquor)
-                .detail(request.reviewDetailRequest())
-                .build();
+    public void decreaseLikeCount() {
+        if (likeCount <= 0) return;
+        this.likeCount--;
     }
 }

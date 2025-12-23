@@ -11,6 +11,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "comments")
 public class Comment {
 
     @Id

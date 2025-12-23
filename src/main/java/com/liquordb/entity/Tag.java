@@ -12,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "tags")
 public class Tag {
 
     @Id

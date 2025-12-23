@@ -9,11 +9,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
-@Table(name = "user")
-@Getter @Setter // Setter 대체 필요
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "users")
 public class User {
 
     @Id
@@ -36,9 +34,9 @@ public class User {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    private UserStatus status = UserStatus.ACTIVE;
 
-    private int reportCount; // 신고된 건수
+    private int reportCount = 0; // 신고된 건수
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private File profileImage; // TODO S3에 저장
@@ -94,4 +92,31 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private User(String email, String nickname, String password, String socialProvider, Role role, File profileImage) {
+        this.email = email;
+        this.nickname = nickname;
+        this.password = password;
+        this.socialProvider = socialProvider;
+        this.role = role;
+        this.profileImage = profileImage;
+    }
+
+    public static User create(String email, String nickname, String password, String socialProvider, Role role, File profileImage){
+        return User.builder()
+                .email(email)
+                .nickname(nickname)
+                .password(password)
+                .socialProvider(socialProvider)
+                .role(role)
+                .profileImage(profileImage)
+                .build();
+    }
+
+    public void incraseReportCount() {
+        if (this.reportCount <= 0) return;
+        this.reportCount++;
+    }
+
 }

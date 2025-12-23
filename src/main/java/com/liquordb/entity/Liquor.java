@@ -9,7 +9,7 @@ import java.util.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "liquor")
+@Table(name = "liquors")
 public class Liquor {
 
     @Id
@@ -38,12 +38,12 @@ public class Liquor {
     private boolean isDiscontinued; // 단종 여부
 
     private String imageUrl; // 대표 이미지 사진 저장경로
+    private long likeCount = 0;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<LiquorLike> likes = new HashSet<>();
 
     @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL)
     private List<Review> reviews = new ArrayList<>();
@@ -67,6 +67,31 @@ public class Liquor {
         updatedAt = LocalDateTime.now();
     }
 
+    @Builder(access = AccessLevel.PRIVATE)
+    private Liquor(String name, LiquorCategory category, LiquorSubcategory subcategory,
+                   String country, String manufacturer, Double abv, String imageUrl){
+        this.name = name;
+        this.category = category;
+        this.subcategory = subcategory;
+        this.country = country;
+        this.manufacturer = manufacturer;
+        this.abv = abv;
+        this.imageUrl = imageUrl; // TODO 개선필요
+    }
+
+    public static Liquor create(String name, LiquorCategory category, LiquorSubcategory subcategory,
+                                String country, String manufacturer, Double abv, String imageUrl) {
+        return Liquor.builder()
+                .name(name)
+                .category(category)
+                .subcategory(subcategory)
+                .country(country)
+                .manufacturer(manufacturer)
+                .abv(abv)
+                .imageUrl(imageUrl)
+                .build();
+    }
+
     public void updateFromDto(Boolean isDiscontinued, Boolean deleteImage) {
         if (isDiscontinued == null) this.isDiscontinued = false;
         if (deleteImage == null) imageUrl = null; // TODO 개선필요
@@ -87,30 +112,13 @@ public class Liquor {
         // 연관 리뷰 복구는 서비스단에서 수행.
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
-    private Liquor(String name, LiquorCategory category, LiquorSubcategory subcategory,
-                   String country, String manufacturer, Double abv, String imageUrl){
-        this.name = name;
-        this.category = category;
-        this.subcategory = subcategory;
-        this.country = country;
-        this.manufacturer = manufacturer;
-        this.abv = abv;
-        this.imageUrl = imageUrl; // TODO 개선필요
+    public void increaseLikeCount() {
+        this.likeCount++;
     }
 
-    public static Liquor create(String name, LiquorCategory category, LiquorSubcategory subcategory,
-                         String country, String manufacturer, Double abv, String imageUrl) {
-        return Liquor.builder()
-                .name(name)
-                .category(category)
-                .subcategory(subcategory)
-                .country(country)
-                .manufacturer(manufacturer)
-                .abv(abv)
-                .imageUrl(imageUrl)
-                .build();
+    public void decreaseLikeCount() {
+        if (likeCount <= 0) return;
+        this.likeCount--;
     }
-
 
 }

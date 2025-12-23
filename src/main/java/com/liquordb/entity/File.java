@@ -4,16 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 /**
- * 이미지파일 엔터티입니다.
- * 프로필 사진, 리뷰 이미지로 사용합니다.
- * 메타데이터와 경로만 저장하며, 실제 파일은 로컬에 저장합니다.
- * 리뷰에 사진은 0장 이상 6장 이하 업로드 가능합니다.
+ * 파일 메타데이터 엔터티
  */
 @Entity
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "files")
 public class File {
 
     @Id
@@ -32,4 +28,25 @@ public class File {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private File(String filePath, String fileName, String fileExtension, Long size, Review review, User user) {
+        this.filePath = filePath;
+        this.fileName = fileName;
+        this.fileExtension = fileExtension;
+        this.size = size;
+        this.review = review;
+        this.user = user;
+    }
+
+    public static File create(String filePath, String fileName, String fileExtension, Long size, Review review, User user){
+        return File.builder()
+                .filePath(filePath)
+                .fileName(fileName)
+                .fileExtension(fileExtension)
+                .size(size)
+                .review(review)
+                .user(user)
+                .build();
+    }
 }

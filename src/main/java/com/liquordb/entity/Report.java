@@ -10,6 +10,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "reports")
 public class Report {
 
     @Id

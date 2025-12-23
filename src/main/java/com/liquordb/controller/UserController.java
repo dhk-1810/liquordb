@@ -30,14 +30,13 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponseDto> login(@RequestBody UserLoginRequestDto dto) {
+    public ResponseEntity<UserResponseDto> login(@RequestBody UserLoginRequestDto dto) {
         return ResponseEntity.ok(userService.login(dto));
     }
 
     // 비밀번호 찾기 - 재설정 링크 전송
     @PostMapping("/find-password")
     public ResponseEntity<String> findPassword(@RequestBody UserFindPasswordRequestDto request) {
-        // userService.sendPasswordResetLink(request);
         return ResponseEntity.ok("이메일로 임시 비밀번호를 전송했습니다.");
     }
 

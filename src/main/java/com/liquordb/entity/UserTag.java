@@ -6,11 +6,12 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * 유저-태그 간 다대다 관계 처리 위한 클래스입니다.
+ * 유저-태그 간 다대다 관계 처리 위한 엔터티
  */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "user_tags")
 @IdClass(UserTagId.class)
 public class UserTag {
 
