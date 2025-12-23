@@ -5,10 +5,7 @@ import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.user.BannedUserException;
-import com.liquordb.exception.user.EmailAlreadyExistsException;
-import com.liquordb.exception.user.LoginFailedException;
-import com.liquordb.exception.user.UserNotFoundException;
+import com.liquordb.exception.user.*;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.ReviewMapper;
@@ -22,6 +19,7 @@ import com.liquordb.dto.review.ReviewSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,9 +28,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/**
- * 일반 유저 서비스 클래스입니다.
- */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -51,6 +46,7 @@ public class UserService {
     private final CommentMapper commentMapper;
 
     private final JavaMailSender mailSender;
+    private final OAuth2UserService oAuth2UserService;
 
     // 회원가입
     @Transactional
@@ -103,11 +99,12 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        user.setStatus(UserStatus.WITHDRAWN);
-        user.setWithdrawnAt(LocalDateTime.now());
-        user.setEmail(user.getEmail() + LocalDate.now().toString());
+        user.withdraw();
+        user.update(user.getEmail() + LocalDate.now(), null);
         userRepository.save(user);
     }
+
+    // TODO 계정 복구
 
     // 마이페이지
     @Transactional
@@ -173,14 +170,13 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         String email = request.email();
-        if (email != null) {
-            if (!userRepository.existsByEmail(email)) {
-                user.setEmail(email);
-            }
+        if (email != null && !userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistsException(email);
         }
 
-        if (request.nickname() != null) {
-            user.setNickname(request.nickname());
+        String nickname = request.nickname();
+        if (nickname != null && !userRepository.existsByNickname(nickname)) {
+            throw new NicknameAlreadyExistsException(nickname);
         }
 
         if (request.deleteProfileImage()) {
@@ -206,7 +202,7 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
 
-        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+        user.updatePassword(passwordEncoder.encode(dto.newPassword()));
         userRepository.save(user);
     }
 
@@ -286,7 +282,7 @@ public class UserService {
 
     // 유저 이용제한
     public UserResponseDto restrictUser(UUID userId, String period) {
-        User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
+        User user = userRepository.findActiveOrSuspendedUser(userId, List.of(UserStatus.ACTIVE, UserStatus.SUSPENDED))
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         long days = switch (period) {
@@ -300,8 +296,7 @@ public class UserService {
         };
 
         if (days > 0) {
-            user.setSuspendedUntil(LocalDateTime.now().plusDays(days));
-            user.setStatus(UserStatus.SUSPENDED);
+            user.suspend(LocalDateTime.now().plusDays(days));
         }
 
         return UserMapper.toDto(userRepository.save(user));

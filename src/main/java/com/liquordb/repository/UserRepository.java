@@ -22,8 +22,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     // 탈퇴된 회원 정보 삭제 시 사용.
     List<User> findAllByStatusAndWithdrawnAtBefore(UserStatus status, LocalDateTime withdrawnAt);
 
-    // 이미 가입된 이메일인지 확인 (회원가입 시)
     boolean existsByEmail(String email);
+    boolean existsByNickname(String nickname);
+
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.status IN :statuses")
+    Optional<User> findActiveOrSuspendedUser(@Param("id") UUID id,
+                                             @Param("statuses") List<UserStatus> statuses);
+
+    boolean existsByNicknameAndStatusNot_Banned(String email, LocalDateTime withdrawnAt);
 
     // 유저 검색. 검색어 없으면 전체 조회 (관리자용)
     @Query("""

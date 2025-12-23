@@ -26,7 +26,7 @@ public class User {
     private String nickname;
 
     @Column(nullable = false, length = 100)
-    private String password; // 소셜 로그인시에도 회원정보 수정을 위해 비밀번호 설정은 필요.
+    private String password;
 
     private String socialProvider; // 소셜로그인 제공자 (google, kakao 등)
 
@@ -74,12 +74,6 @@ public class User {
         USER, ADMIN // 유저 계정, 관리자 계정
     }
 
-    // 유저 활동 제한 (댓글, 리뷰 작성)
-    public void suspend() {
-        this.status = UserStatus.SUSPENDED;
-        this.suspendedUntil = LocalDateTime.now(); // TODO 구체적 정지기간 정해야함
-    }
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -114,9 +108,56 @@ public class User {
                 .build();
     }
 
+    public void update(String email, String nickname){
+        if (email != null) {
+            this.email = email;
+        }
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void setProfileImage(File profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void deleteProfileImage() {
+        this.profileImage = null;
+    }
+
     public void incraseReportCount() {
         if (this.reportCount <= 0) return;
         this.reportCount++;
     }
+
+    public void withdraw() {
+        if (!this.status.isActiveUser()) return;
+        this.status = UserStatus.WITHDRAWN;
+        this.withdrawnAt = LocalDateTime.now();
+    }
+
+    public void restore() {
+        if (this.status.isActiveUser()) return;
+        if (LocalDateTime.now().isBefore(this.suspendedUntil)) {
+            this.status = UserStatus.SUSPENDED;
+        } else {
+            this.status = UserStatus.ACTIVE;
+        }
+    }
+
+    // 유저 활동 제한 (댓글, 리뷰 작성)
+    public void suspend(LocalDateTime suspendedUntil) {
+        this.status = UserStatus.SUSPENDED;
+        this.suspendedUntil = suspendedUntil;
+    }
+    public void lift() {
+        this.status = UserStatus.ACTIVE;
+    }
+
+
 
 }
