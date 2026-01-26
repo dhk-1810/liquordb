@@ -41,20 +41,17 @@ public class Review {
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ReviewLike> likes = new HashSet<>();
+//    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<ReviewLike> likes = new HashSet<>();
 
     @OneToOne(mappedBy = "review", cascade = CascadeType.ALL)
     private ReviewDetail detail;
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+//    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
+//    private List<Comment> comments;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> images;
-
-    @OneToMany(mappedBy = "review")
-    private List<Report> reports = new ArrayList<>();
 
     private long likeCount = 0;
 
@@ -77,7 +74,7 @@ public class Review {
         updatedAt = LocalDateTime.now();
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     private Review (Double rating, String title, String content,
                     User user, Liquor liquor, ReviewDetail detail
     ){

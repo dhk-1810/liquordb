@@ -281,7 +281,9 @@ public class UserService {
     }
 
     // 유저 이용제한
+    // TODO ReportService로 옮기기. 신고 승인시 자동 처리.
     public UserResponseDto restrictUser(UUID userId, String period) {
+
         User user = userRepository.findActiveOrSuspendedUser(userId, List.of(UserStatus.ACTIVE, UserStatus.SUSPENDED))
                 .orElseThrow(() -> new UserNotFoundException(userId));
 

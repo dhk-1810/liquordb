@@ -30,16 +30,9 @@ public class SecurityConfig {
 
                 // URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/", "/login/**", "/oauth2/**", "/signup", "/api/users/**"
-                        ).permitAll()
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/signup", "/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
-
-                // 일반 폼 로그인 설정
-                // .formLogin(FormLoginConfigurer::disable) // 비활성화하기
-
                 .formLogin(form -> form
                     .loginPage("/login") // 커스텀 로그인 페이지
                     .defaultSuccessUrl("/") // 로그인 성공 시 리다이렉트 경로

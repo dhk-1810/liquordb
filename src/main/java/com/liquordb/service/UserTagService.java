@@ -32,8 +32,6 @@ public class UserTagService {
     @Transactional
     public UserTag add(UserTagRequestDto request, User requestUser) {
 
-        // TODO BANNED된 유저 처리?
-
         Tag tag = tagRepository.findById(request.tagId())
                 .orElseThrow(() -> new TagNotFoundException(request.tagId()));
 

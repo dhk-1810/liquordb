@@ -35,15 +35,11 @@ public class Comment {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Comment> replies = new ArrayList<>();
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentLike> likes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "comment")
-    private List<Report> reports = new ArrayList<>();
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    private long likeCount = 0;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -63,6 +59,23 @@ public class Comment {
 
     @PreUpdate
     public void onUpdate() { updatedAt = LocalDateTime.now(); }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    public Comment(String content, Review review, Comment parent, User user){
+        this.content = content;
+        this.review = review;
+        this.parent = parent;
+        this.user = user;
+    }
+
+    public static Comment create(String content, Review review, Comment parent, User user) {
+        return Comment.builder()
+                .content(content)
+                .review(review)
+                .parent(parent)
+                .user(user)
+                .build();
+    }
 
     public void update(CommentUpdateRequestDto request) {
         this.content = request.content();
@@ -92,20 +105,12 @@ public class Comment {
         this.deletedAt = null;
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
-    public Comment(String content, Review review, Comment parent, User user){
-        this.content = content;
-        this.review = review;
-        this.parent = parent;
-        this.user = user;
+    public void increaseLikeCount() {
+        this.likeCount++;
     }
 
-    public static Comment create(String content, Review review, Comment parent, User user) {
-        return Comment.builder()
-                .content(content)
-                .review(review)
-                .parent(parent)
-                .user(user)
-                .build();
+    public void decreaseLikeCount() {
+        if (likeCount <= 0) return;
+        this.likeCount--;
     }
 }
