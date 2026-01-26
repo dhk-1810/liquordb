@@ -59,9 +59,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserTag> userTags = new HashSet<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<Notice> notice = new ArrayList<>();
-
     // 활동 제한 해제 일시
     @Column
     private LocalDateTime suspendedUntil;

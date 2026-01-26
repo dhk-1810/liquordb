@@ -63,7 +63,7 @@ public class Report {
         this.rejectedAt = LocalDateTime.now();
     }
 
-    @Builder(access = AccessLevel.PRIVATE) // 내부에서만 사용 가능
+    @Builder
     private Report(ReportTargetType targetType, Review review, Comment comment, UUID requestUserId, String reason) {
         this.targetType = targetType;
         this.review = review;

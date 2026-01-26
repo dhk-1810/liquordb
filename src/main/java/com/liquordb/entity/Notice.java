@@ -64,8 +64,8 @@ public class Notice {
         this.deletedAt = LocalDateTime.now();
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
-    private Notice(User author, String title, String content, boolean isPinned) {
+    @Builder
+    private Notice(User author, String title, String content) {
         this.author = author;
         this.title = title;
         this.content = content;
