@@ -28,12 +28,6 @@ public class Tag {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy = "tag")
-    private Set<LiquorTag> liquorTags = new HashSet<>();
-
-    @OneToMany(mappedBy = "tag")
-    private Set<UserTag> userTags = new HashSet<>();
-
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
@@ -59,7 +53,7 @@ public class Tag {
         this.deletedAt = null;
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     private Tag(String name) {
         this.name = name;
     }

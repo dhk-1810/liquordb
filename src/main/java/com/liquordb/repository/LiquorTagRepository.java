@@ -2,14 +2,12 @@ package com.liquordb.repository;
 
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorTag;
-import com.liquordb.entity.LiquorTagId;
-import com.liquordb.entity.Tag;
+import com.liquordb.entity.id.LiquorTagId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * 주류-태그 연결 저장소입니다.

@@ -29,11 +29,12 @@ public class Comment {
     private Review review;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id") // 대댓글 기능. self-referencing
+    @JoinColumn(name = "parent_id") // self-referencing
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<Comment> replies = new ArrayList<>();
+    // 부모 댓글 삭제 시 자식 댓글들은 남겨둠
+//    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+//    private List<Comment> replies = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -60,7 +61,7 @@ public class Comment {
     @PreUpdate
     public void onUpdate() { updatedAt = LocalDateTime.now(); }
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     public Comment(String content, Review review, Comment parent, User user){
         this.content = content;
         this.review = review;

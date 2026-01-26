@@ -1,4 +1,4 @@
-package com.liquordb.entity;
+package com.liquordb.entity.id;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -11,10 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class ReviewLikeId implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    private UUID user;
-    private Long review;
+    private UUID userId;
+    private Long reviewId;
 }
 

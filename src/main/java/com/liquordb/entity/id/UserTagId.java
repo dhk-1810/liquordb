@@ -1,16 +1,15 @@
-package com.liquordb.entity;
+package com.liquordb.entity.id;
 
 import lombok.*;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-@Getter
+@Getter // TODO Getter 필요한가?
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
 public class UserTagId implements Serializable {
-
     private UUID userId;
     private Long tagId;
 }

@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.entity.id.ReviewLikeId;
 import jakarta.persistence.*;
 import lombok.*;
 

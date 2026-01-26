@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "liquor_tags")
 @IdClass(LiquorTag.class)
+@Table(name = "liquor_tags")
 public class LiquorTag {
 
     @Id
@@ -32,7 +32,7 @@ public class LiquorTag {
         createdAt = LocalDateTime.now();
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     private LiquorTag(Liquor liquor, Tag tag) {
         this.liquor = liquor;
         this.tag = tag;

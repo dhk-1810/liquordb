@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.entity.id.UserTagId;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,8 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user_tags")
 @IdClass(UserTagId.class)
+@Table(name = "user_tags")
 public class UserTag {
 
     @Id
@@ -32,7 +33,7 @@ public class UserTag {
         createdAt = LocalDateTime.now();
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     private UserTag(User user, Tag tag) {
         this.user = user;
         this.tag = tag;

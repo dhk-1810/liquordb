@@ -23,19 +23,10 @@ public class CommentLike {
     @JoinColumn(name = "comment_id")
     private Comment comment;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime likedAt;
-
-    @PrePersist
-    public void onCreate() {
-        likedAt = LocalDateTime.now();
-    }
-
-    @Builder(access = AccessLevel.PRIVATE)
-    public CommentLike(User user, Comment comment, LocalDateTime likedAt) {
+    @Builder
+    public CommentLike(User user, Comment comment) {
         this.user = user;
         this.comment = comment;
-        this.likedAt = likedAt;
     }
 
     public static CommentLike create(User user, Comment comment) {
