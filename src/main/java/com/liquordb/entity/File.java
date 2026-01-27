@@ -29,7 +29,7 @@ public class File {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     private File(String filePath, String fileName, String fileExtension, Long size, Review review, User user) {
         this.filePath = filePath;
         this.fileName = fileName;

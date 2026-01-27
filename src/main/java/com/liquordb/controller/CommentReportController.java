@@ -1,0 +1,30 @@
+package com.liquordb.controller;
+
+import com.liquordb.dto.report.CommentReportRequestDto;
+import com.liquordb.dto.report.CommentReportResponseDto;
+import com.liquordb.security.CustomUserDetails;
+import com.liquordb.service.CommentReportService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/reports/comments")
+public class CommentReportController {
+
+    private final CommentReportService commentReportService;
+
+    @PostMapping
+    public ResponseEntity<CommentReportResponseDto> create(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                           @RequestBody @Valid CommentReportRequestDto request) {
+        CommentReportResponseDto response = commentReportService.create(userDetails.getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+}

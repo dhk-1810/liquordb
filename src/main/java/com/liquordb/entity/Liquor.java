@@ -44,13 +44,6 @@ public class Liquor {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
-
-    @OneToMany(mappedBy = "liquor", cascade = CascadeType.ALL)
-    private List<Review> reviews = new ArrayList<>();
-
-    @OneToMany(mappedBy = "liquor")
-    private Set<LiquorTag> liquorTags = new HashSet<>();
-
     // 주종 대분류
     public enum LiquorCategory {
         BEER, WINE, WHISKY, OTHER
@@ -67,7 +60,7 @@ public class Liquor {
         updatedAt = LocalDateTime.now();
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     private Liquor(String name, LiquorCategory category, LiquorSubcategory subcategory,
                    String country, String manufacturer, Double abv, String imageUrl){
         this.name = name;

@@ -4,8 +4,6 @@ import com.liquordb.entity.id.LiquorLikeId;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @IdClass(LiquorLikeId.class)

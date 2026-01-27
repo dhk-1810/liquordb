@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 /**
  * 주종 소분류 클래스입니다.
  */
-
 @Entity
 @Table(name = "liquor_subcategories")
 public class LiquorSubcategory {

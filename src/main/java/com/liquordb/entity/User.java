@@ -126,7 +126,7 @@ public class User {
         this.profileImage = null;
     }
 
-    public void incraseReportCount() {
+    public void increaseReportCount() {
         if (this.reportCount <= 0) return;
         this.reportCount++;
     }
@@ -151,6 +151,7 @@ public class User {
         this.status = UserStatus.SUSPENDED;
         this.suspendedUntil = suspendedUntil;
     }
+
     public void lift() {
         this.status = UserStatus.ACTIVE;
     }

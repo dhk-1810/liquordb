@@ -1,22 +1,17 @@
 package com.liquordb.dto.report;
 
-import com.liquordb.entity.Report;
-import com.liquordb.enums.ReportTargetType;
-import lombok.Builder;
+import com.liquordb.enums.ReportStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
-public record ReportResponseDto (
-        Long targetId,
-        ReportTargetType targetType,
+public record ReviewReportResponseDto (
+        Long reviewId,
         UUID requestUserId,
         String reason,
-        Report.ReportStatus status,
+        ReportStatus status,
         LocalDateTime createdAt,
         LocalDateTime approvedAt,
         LocalDateTime rejectedAt
 ){
-
 }
