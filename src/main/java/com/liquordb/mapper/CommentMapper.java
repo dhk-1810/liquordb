@@ -47,7 +47,7 @@ public class CommentMapper {
                     .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                     .content(comment.getContent())
                     .status(comment.getStatus())
-                    .likeCount(comment.getLikes() != null ? comment.getLikes().size() : 0)
+                    .likeCount(comment.getLikeCount())
                     .createdAt(comment.getCreatedAt())
                     .updatedAt(comment.getUpdatedAt())
                     .build();

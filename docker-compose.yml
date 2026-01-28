@@ -1,0 +1,48 @@
+services:
+  # --- Backend (Spring Boot) ---
+  backend:
+    build: .
+    image: liquordb-backend:latest
+    networks:
+      liquordb-network:
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    env_file:
+      - .env
+    depends_on:
+      - postgres-db
+    working_dir: /backend
+    volumes:
+      - backend_uploads:/backend/uploads # 업로드 파일 영속성 확보
+
+  # --- Infrastructure ---
+  mysql-db:
+    image: mysql:8.0
+    networks:
+      liquordb-network:
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    env_file:
+      - .env
+    volumes:
+      - mysql_data:/mysql_data:/var/lib/mysql # 데이터 영속성 보장
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql # 초기 스키마 설정
+
+networks:
+  liquordb-network:
+    driver: bridge
+
+volumes:
+  backend_uploads:
+  mysql_data:
