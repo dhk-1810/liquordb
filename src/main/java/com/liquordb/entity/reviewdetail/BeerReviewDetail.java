@@ -22,4 +22,11 @@ public class BeerReviewDetail extends ReviewDetail {
     @OneToOne
     @JoinColumn(name = "review_id")
     private Review review;
+
+    public void update(Double aroma, Double taste, Double headRetention, Double look) {
+        this.aroma = aroma;
+        this.taste = taste;
+        this.headRetention = headRetention;
+        this.look = look;
+    }
 }

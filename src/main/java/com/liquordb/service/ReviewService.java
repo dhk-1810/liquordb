@@ -90,7 +90,7 @@ public class ReviewService {
 
         // 작성자 확인
         if (!review.getUser().getId().equals(requestUser.getId())) {
-            throw new IllegalArgumentException("리뷰를 수정할 권한이 없습니다.");
+            throw new IllegalArgumentException("리뷰를 수정할 권한이 없습니다."); // TODO 커스텀예외
         }
 
         // 공통 필드 수정
@@ -100,7 +100,7 @@ public class ReviewService {
         addImage(review, newImages);
 
         // 주종별 디테일 수정
-        // TODO reviewDetailUpdater.updateDetail(review.getDetail(), dto);
+        reviewDetailUpdater.updateDetail(review.getDetail(), request.detailRequest());
 
         return ReviewMapper.toDto(reviewRepository.save(review));
     }

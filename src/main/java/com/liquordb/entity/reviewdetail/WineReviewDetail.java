@@ -9,7 +9,7 @@ import lombok.*;
 
 @Entity
 @DiscriminatorValue("WINE")
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -22,4 +22,11 @@ public class WineReviewDetail extends ReviewDetail {
     @OneToOne
     @JoinColumn(name = "review_id")
     private Review review;
+
+    public void update(Double sweetness, Double acidity, Double body, Double tannin) {
+        this.sweetness = sweetness;
+        this.acidity = acidity;
+        this.body = body;
+        this.tannin = tannin;
+    }
 }
