@@ -42,7 +42,7 @@ public class CommentMapper {
             return CommentResponseDto.builder()
                     .id(comment.getId())
                     .userId(comment.getUser().getId())
-                    .nickname(comment.getUser().getNickname())
+                    .username(comment.getUser().getUsername())
                     .reviewId(comment.getReview().getId())
                     .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                     .content(comment.getContent())

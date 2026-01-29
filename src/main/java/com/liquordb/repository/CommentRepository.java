@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 특정 유저가 작성한 댓글 수
     long countByUserAndStatus(User user, Comment.CommentStatus status);
+
+    // 특정 유저가 작성한 댓글
+    List<Comment> findAllByUser_Id(UUID userId);
 
     // 관리자용 - 유저ID나 상태로 리뷰 목록 조회
     @Query("""

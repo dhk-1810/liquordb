@@ -12,7 +12,7 @@ public record CommentResponseDto (
         Long reviewId,
         Long parentId,
         UUID userId,
-        String nickname,
+        String username,
         String content,
         Comment.CommentStatus status,
         long likeCount,

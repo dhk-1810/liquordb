@@ -17,7 +17,7 @@ import java.util.UUID;
 public record UserMyPageResponseDto (
         UUID userId,
         String email,
-        String nickname,
+        String username,
 
         long likedLiquorCount,
         long likedReviewCount,

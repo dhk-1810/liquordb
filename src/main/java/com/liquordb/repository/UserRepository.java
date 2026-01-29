@@ -23,18 +23,18 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findAllByStatusAndWithdrawnAtBefore(UserStatus status, LocalDateTime withdrawnAt);
 
     boolean existsByEmail(String email);
-    boolean existsByNickname(String nickname);
+    boolean existsByUsername(String username);
 
     @Query("SELECT u FROM User u WHERE u.id = :id AND u.status IN :statuses")
     Optional<User> findActiveOrSuspendedUser(@Param("id") UUID id,
                                              @Param("statuses") List<UserStatus> statuses);
 
-    boolean existsByNicknameAndStatusNot_Banned(String email, LocalDateTime withdrawnAt);
+    boolean existsByUsernameAndStatusNot_Banned(String email, LocalDateTime withdrawnAt);
 
     // 유저 검색. 검색어 없으면 전체 조회 (관리자용)
     @Query("""
         SELECT u FROM User u
-        WHERE (:keyword IS NULL OR u.email LIKE %:keyword% OR u.nickname LIKE %:keyword%)
+        WHERE (:keyword IS NULL OR u.email LIKE %:keyword% OR u.username LIKE %:keyword%)
         AND (:status IS NULL OR u.status = :status)
     """)
     List<User> search(@Param("keyword") String keyword, @Param("status") UserStatus status);

@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -23,7 +24,7 @@ public class User {
     private String email; // 로그인은 이메일로만 가능.
 
     @Column(nullable = false, unique = true, length = 30)
-    private String nickname;
+    private String username;
 
     @Column(nullable = false, length = 100)
     private String password;
@@ -41,23 +42,23 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private File profileImage; // TODO S3에 저장
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<LiquorLike> liquorLikes = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ReviewLike> reviewLikes = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CommentLike> commentLikes = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserTag> userTags = new HashSet<>();
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Review> reviews = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Comment> comments = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<LiquorLike> liquorLikes = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<ReviewLike> reviewLikes = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<CommentLike> commentLikes = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<UserTag> userTags = new HashSet<>();
 
     // 활동 제한 해제 일시
     @Column
@@ -67,9 +68,6 @@ public class User {
     private LocalDateTime updatedAt;
     private LocalDateTime withdrawnAt;
 
-    public enum Role {
-        USER, ADMIN // 유저 계정, 관리자 계정
-    }
 
     @PrePersist
     protected void onCreate() {
@@ -84,20 +82,20 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
-    private User(String email, String nickname, String password, String socialProvider, Role role, File profileImage) {
+    @Builder
+    private User(String email, String username, String password, String socialProvider, Role role, File profileImage) {
         this.email = email;
-        this.nickname = nickname;
+        this.username = username;
         this.password = password;
         this.socialProvider = socialProvider;
         this.role = role;
         this.profileImage = profileImage;
     }
 
-    public static User create(String email, String nickname, String password, String socialProvider, Role role, File profileImage){
+    public static User create(String email, String username, String password, String socialProvider, Role role, File profileImage){
         return User.builder()
                 .email(email)
-                .nickname(nickname)
+                .username(username)
                 .password(password)
                 .socialProvider(socialProvider)
                 .role(role)
@@ -105,12 +103,12 @@ public class User {
                 .build();
     }
 
-    public void update(String email, String nickname){
+    public void update(String email, String username){
         if (email != null) {
             this.email = email;
         }
-        if (nickname != null) {
-            this.nickname = nickname;
+        if (username != null) {
+            this.username = username;
         }
     }
 

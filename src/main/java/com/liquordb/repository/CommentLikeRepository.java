@@ -14,10 +14,10 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     long countByCommentId(Long commentId);
 
     // 유저가 좋아요 댓글 개수 - 마이페이지에서 사용
-    long countByUserAndCommentIsHiddenFalse(User user);
+    long countByUser_IdAndCommentIsHiddenFalse(UUID userId);
 
     // 유저가 좋이요 누른 댓글 목록  - 마이페이지에서 사용
-    List<CommentLike> findByUserAndCommentIsHiddenFalse(User user);
+    List<CommentLike> findByUser_IdAndCommentIsHiddenFalse(UUID userId);
 
     // 유저가 특정 댓글에 좋아요 눌렀는지 확인 (눌렀는지 여부만)
     boolean existsByUserIdAndCommentId (UUID userId, Long commentId);

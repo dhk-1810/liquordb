@@ -60,7 +60,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         User user = userRepository.findByEmailAndStatusNot(email, UserStatus.BANNED)
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email(email)
-                        .nickname(name != null ? name : "noname")
+                        .username(name != null ? name : "noname")
                         .role(User.Role.USER)
                         .build()
                 ));

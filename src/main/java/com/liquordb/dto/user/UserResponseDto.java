@@ -1,5 +1,6 @@
 package com.liquordb.dto.user;
 
+import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import lombok.*;
 
@@ -10,11 +11,11 @@ import java.util.UUID;
 public record UserResponseDto (
         UUID id,
         String email,
-        String nickname,
+        String username,
         String profileImageUrl,
         LocalDateTime createdAt,
         UserStatus status,
-        String role
+        Role role
 ){
 
 }

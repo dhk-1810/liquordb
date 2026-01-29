@@ -4,6 +4,7 @@ import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
+import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
 import com.liquordb.mapper.CommentMapper;
@@ -18,6 +19,7 @@ import com.liquordb.dto.review.ReviewSummaryDto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.stereotype.Service;
@@ -50,7 +52,7 @@ public class UserService {
 
     // 회원가입
     @Transactional
-    public UserResponseDto register(UserRegisterRequestDto request, MultipartFile profileImage, User.Role role) {
+    public UserResponseDto register(UserRegisterRequestDto request, MultipartFile profileImage, Role role) {
 
         String email = request.email();
         User existingUser = userRepository.findByEmail(email)
@@ -108,38 +110,41 @@ public class UserService {
 
     // 마이페이지
     @Transactional
+    // TODO @PreAuthorize()
     public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        // N+1 문제 방지 위해 리포지토리 메서드 사용.
-        long reviewCount = reviewRepository.countByUserAndStatus(user, Review.ReviewStatus.ACTIVE);
-        long commentCount = commentRepository.countByUserAndStatus(user, Comment.CommentStatus.ACTIVE);
-        long likedLiquorCount = liquorLikeRepository.countByUserAndLiquorIsHiddenFalse(user);
-        long likedReviewCount = reviewLikeRepository.countByUserAndReviewIsHiddenFalse(user);
-        long likedCommentCount = commentLikeRepository.countByUserAndCommentIsHiddenFalse(user);
-
         // 리뷰 작성 목록
-        List<ReviewSummaryDto> createdReviews = user.getReviews().stream()
+        List<ReviewSummaryDto> createdReviews
+                = reviewRepository.findAllByUser_IdAndStatus(userId, Review.ReviewStatus.ACTIVE)
+                .stream()
                 .map(ReviewMapper::toSummaryDto)
                 .toList();
 
         // 댓글 작성 목록
-        List<CommentResponseDto> createdComments = user.getComments().stream()
+        List<CommentResponseDto> createdComments = commentRepository.findAllByUser_Id(userId).stream()
                 .map(commentMapper::toDto)
                 .toList();
 
         // 좋아요한 주류, 리뷰, 댓글 목록
-        List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUserIdAndLiquorIsHiddenFalse(userId).stream()
+        List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUser_IdAndLiquorIsHiddenFalse(userId).stream()
                 .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), user))
                 .toList();
-        List<ReviewResponseDto> likedReviews = reviewLikeRepository.findByUserAndReviewIsHiddenFalse(user).stream()
+        List<ReviewResponseDto> likedReviews = reviewLikeRepository.findByUser_IdAndReviewIsHiddenFalse(userId).stream()
                 .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))
                 .toList();
-        List<CommentResponseDto> likedComments = commentLikeRepository.findByUserAndCommentIsHiddenFalse(user).stream()
+        List<CommentResponseDto> likedComments = commentLikeRepository.findByUser_IdAndCommentIsHiddenFalse(userId).stream()
                 .map(commentLike -> commentMapper.toDto(commentLike.getComment()))
                 .toList();
+
+        long reviewCount = createdReviews.size();
+        long commentCount = createdComments.size();
+        long likedLiquorCount = likedLiquors.size();
+        long likedReviewCount = likedReviews.size();
+        long likedCommentCount = likedComments.size();
+
 
         // 등록한(=선호하는) 태그 목록
         List<TagResponseDto> preferredTags = userTagService.findByUserId(userId, showAllTags);
@@ -147,7 +152,7 @@ public class UserService {
         return UserMyPageResponseDto.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
-                .nickname(user.getNickname())
+                .username(user.getUsername())
                 .reviewCount(reviewCount)
                 .commentCount(commentCount)
                 .likedLiquorCount(likedLiquorCount)
@@ -164,6 +169,7 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
+    // TODO @PreAuthorize()
     public void update(UUID userId, UserUpdateRequestDto request, MultipartFile newProfileImage) {
 
         User user = userRepository.findById(userId)
@@ -174,9 +180,9 @@ public class UserService {
             throw new EmailAlreadyExistsException(email);
         }
 
-        String nickname = request.nickname();
-        if (nickname != null && !userRepository.existsByNickname(nickname)) {
-            throw new NicknameAlreadyExistsException(nickname);
+        String username = request.username();
+        if (username != null && !userRepository.existsByUsername(username)) {
+            throw new UsernameAlreadyExistsException(username);
         }
 
         if (request.deleteProfileImage()) {

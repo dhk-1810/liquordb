@@ -3,22 +3,23 @@ package com.liquordb.mapper;
 import com.liquordb.dto.user.UserRegisterRequestDto;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
+import com.liquordb.enums.Role;
 
 public class UserMapper {
     public static UserResponseDto toDto(User user){
         return UserResponseDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .nickname(user.getNickname())
-                .role(user.getRole().name())
+                .username(user.getUsername())
+                .role(user.getRole())
                 .build();
     }
 
-    public static User toEntity(UserRegisterRequestDto request, String encodedPassword, User.Role role){
+    public static User toEntity(UserRegisterRequestDto request, String encodedPassword, Role role){
         return User.builder()
                 .email(request.email())
                 .password(encodedPassword)
-                .nickname(request.nickname())
+                .username(request.username())
                 .role(role)
                 .build();
     }

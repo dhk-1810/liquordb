@@ -1,17 +1,20 @@
 package com.liquordb.service;
 
+import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
 import com.liquordb.exception.user.UserNotFoundException;
+import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.UserRepository;
 import com.liquordb.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -20,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UserNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
-
-        return new CustomUserDetails(user); // 엔터티를 커스텀 객체로 변환해서 반환
+        UserResponseDto dto = UserMapper.toDto(user);
+        return new CustomUserDetails(user.getId(), dto, user.getPassword());
     }
 }

@@ -12,7 +12,7 @@ public record NoticeResponseDto (
         Long id,
         String title,
         String content,
-        String authorNickname,
+        String authorUsername,
         boolean isPinned,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

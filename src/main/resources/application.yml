@@ -1,13 +1,7 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/liquordb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-    username: root
-    password: Hhhickam@22
-
   jpa:
     hibernate:
-      ddl-auto: update   # (개발용) create, create-drop, update, validate, none 중 선택
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -59,8 +53,6 @@ spring:
 
 server:
   port: 8080
-
-
 
 logging:
   level:

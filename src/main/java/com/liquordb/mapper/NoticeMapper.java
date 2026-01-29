@@ -17,7 +17,7 @@ public class NoticeMapper {
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .authorNickname(notice.getAuthor().getNickname())
+                .authorUsername(notice.getAuthor().getUsername())
                 .createdAt(notice.getCreatedAt())
                 .updatedAt(notice.getUpdatedAt())
                 .isPinned(notice.isPinned())

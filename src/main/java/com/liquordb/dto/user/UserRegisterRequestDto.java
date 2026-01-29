@@ -23,7 +23,7 @@ public record UserRegisterRequestDto (
         String password,
 
         @NotBlank(message = "닉네임으로 공백은 사용할 수 없습니다.")
-        String nickname
+        String username
 ){
 
 }
