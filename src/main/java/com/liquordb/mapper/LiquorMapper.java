@@ -6,17 +6,30 @@ import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.Liquor;
+import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
+import com.liquordb.repository.LiquorLikeRepository;
+import com.liquordb.repository.LiquorRepository;
+import com.liquordb.repository.ReviewRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
+@RequiredArgsConstructor
 public class LiquorMapper {
 
-    public static LiquorResponseDto toDto(Liquor liquor, User user) { // User는 null 허용.
+    private final ReviewRepository reviewRepository;
+    private final LiquorLikeRepository liquorLikeRepository;
 
-        List<ReviewResponseDto> reviewResponseDtos = liquor.getReviews().stream()
+    public LiquorResponseDto toDto(Liquor liquor, User user) { // User는 null 허용.
+
+        List<ReviewResponseDto> reviewResponseDtos = reviewRepository
+                .findAllByLiquor_IdAndStatus(liquor.getId(), Review.ReviewStatus.ACTIVE)
+                .stream()
                 .map(ReviewMapper::toDto)
                 .toList();
 
@@ -26,12 +39,9 @@ public class LiquorMapper {
 
         boolean likedByMe = false;
         if (user != null) {
-            likedByMe = liquor.getLikes().stream()
-                    .anyMatch(like -> like.getUser().equals(user));
+            likedByMe = liquorLikeRepository
+                   .existsByUserIdAndLiquorId(user.getId(), liquorId);
         }
-        // 아래처럼 쓸수도 있음.
-//        boolean likedByMe = liquorLikeRepository
-//                .existsByUserIdAndLiquorId(user.getId(), liquorId);
 
         return LiquorResponseDto.builder()
                 .id(liquor.getId())
@@ -54,7 +64,7 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static LiquorSummaryDto toSummaryDto(Liquor liquor, User user){
+    public LiquorSummaryDto toSummaryDto(Liquor liquor, User user){
 
         boolean likedByMe = liquor.getLikes().stream()
                 .anyMatch(like -> like.getUser().equals(user));

@@ -1,6 +1,5 @@
 package com.liquordb.repository;
 
-import com.liquordb.entity.Comment;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
@@ -18,7 +17,7 @@ import java.util.UUID;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    Optional<Review> findByIdAndStatus_Active(Long id);
+    Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
 
     // 리뷰 평균 평점
     // TODO 생성, 수정, 삭제시에 알아서 변경되게 할까싶음
@@ -29,8 +28,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByIdAndIsHiddenFalse(Long id);
 
     // 특정 주류, 유저에 따른 리뷰 목록
-    Page<Review> findAllByLiquorIdAndIsHiddenFalse(Pageable pageable, Long liquorId);
-    Page<Review> findAllByUserIdAndIsHiddenFalse(Pageable pageable, UUID userId);
+    List<Review> findAllByLiquor_IdAndStatus(Long id, Review.ReviewStatus status); // TODO 주류 리뷰 모두 숨김 상태 아니여야 함.
+    Page<Review> findAllByLiquor_IdAndStatus(Pageable pageable, Long liquorId, Review.ReviewStatus status);
+    Page<Review> findAllByUser_IdAndStatus(Pageable pageable, UUID userId, Review.ReviewStatus status);
 
     // 좋아요 누른 리뷰 개수
     long countByUserAndStatus(User user, Review.ReviewStatus status);
