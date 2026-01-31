@@ -17,6 +17,9 @@ public interface LiquorTagRepository extends JpaRepository<LiquorTag, LiquorTagI
     // 태그 ID로 주류 목록 조회
     List<LiquorTag> findLiquorByTagId(Long tagId);
 
+    // 주류 ID로 태그 조회
+    List<LiquorTag> findAllByLiquor_Id(Long LiquorId);
+
     // 태그 이름으로 주류 조회
     @Query("SELECT lt.liquor FROM LiquorTag lt JOIN lt.tag t WHERE t.name = :tagName")
     List<Liquor> findLiquorsByTagName(@Param("tagName") String tagName);

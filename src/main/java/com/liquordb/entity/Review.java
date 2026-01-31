@@ -41,14 +41,8 @@ public class Review {
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
 
-//    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<ReviewLike> likes = new HashSet<>();
-
     @OneToOne(mappedBy = "review", cascade = CascadeType.ALL)
     private ReviewDetail detail;
-
-//    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
-//    private List<Comment> comments;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> images;

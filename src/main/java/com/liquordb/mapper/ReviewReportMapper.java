@@ -25,7 +25,7 @@ public class ReviewReportMapper {
     public ReviewReport toEntity(ReviewReportRequestDto request, User requestUser) {
 
         Long reviewId = request.reviewId();
-        Review review = reviewRepository.findByIdAndStatus_Active(reviewId)
+        Review review = reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         return ReviewReport.create(review, requestUser.getId(), request.reason());

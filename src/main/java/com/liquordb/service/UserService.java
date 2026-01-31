@@ -19,7 +19,6 @@ import com.liquordb.dto.review.ReviewSummaryDto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.stereotype.Service;
@@ -129,7 +128,7 @@ public class UserService {
                 .toList();
 
         // 좋아요한 주류, 리뷰, 댓글 목록
-        List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUser_IdAndLiquorIsHiddenFalse(userId).stream()
+        List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUser_IdAndLiquorIsDeletedFalse(userId).stream()
                 .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), user))
                 .toList();
         List<ReviewResponseDto> likedReviews = reviewLikeRepository.findByUser_IdAndReviewIsHiddenFalse(userId).stream()

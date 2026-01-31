@@ -1,8 +1,6 @@
 package com.liquordb.repository;
 
-import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorLike;
-import com.liquordb.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -15,13 +13,15 @@ public interface LiquorLikeRepository extends JpaRepository<LiquorLike, Long> {
     long countByLiquorIdAndLikedTrue(Long liquorId);
 
     // 유저가 누른 좋아요 개수 - 마이페이지에서 사용
-    long countByUser_IdAndLiquorIsHiddenFalse(UUID userId);
+    long countByUser_IdAndLiquorIsDeletedFalse(UUID userId);
+
+    List<LiquorLike> findAllByLiquor_IdAndLiquorIsDeletedFalse(Long liquorId);
 
     // 유저가 좋이요 누른 객체 목록 - 마이페이지에서 사용
-    List<LiquorLike> findByUser_IdAndLiquorIsHiddenFalse(UUID userId);
+    List<LiquorLike> findByUser_IdAndLiquorIsDeletedFalse(UUID userId);
 
-//    // 유저가 특정 객체에 좋아요 눌렀는지 확인 (눌렀는지 여부만)
-//    boolean existsByUserIdAndLiquorId(UUID userId, Long liquorId);
+    // 유저가 특정 객체에 좋아요 눌렀는지 확인 (눌렀는지 여부만)
+    boolean existsByUserIdAndLiquorId(UUID userId, Long liquorId);
 
     // 유저가 특정 객체에 좋아요 눌렀는지 확인 (Like 객체 전체 반환)
     Optional<LiquorLike> findByUserIdAndLiquorId(UUID userId, Long liquorId);
