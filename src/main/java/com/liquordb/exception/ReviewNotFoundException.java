@@ -1,11 +1,14 @@
 package com.liquordb.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import com.liquordb.enums.ErrorCode;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
+import java.io.Serial;
+import java.util.Map;
+
 public class ReviewNotFoundException extends EntityNotFoundException {
-    public ReviewNotFoundException(Long id) {
-        super("리뷰를 찾을 수 없습니다. ID=" + id);
+
+    public ReviewNotFoundException(Map<String, Object> details) {
+        super(ErrorCode.REVIEW_NOT_FOUND, "리뷰를 찾을 수 없습니다.", details);
     }
+
 }

@@ -4,7 +4,9 @@ import com.liquordb.ReportManager;
 import com.liquordb.dto.report.CommentReportRequestDto;
 import com.liquordb.dto.report.CommentReportResponseDto;
 import com.liquordb.entity.*;
-import com.liquordb.exception.ReportNotFoundException;
+import com.liquordb.exception.report.CommentReportAlreadyExistsException;
+import com.liquordb.exception.report.CommentReportNotFoundException;
+import com.liquordb.exception.report.ReportNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentReportMapper;
@@ -68,7 +70,7 @@ public class CommentReportService {
     @Transactional
     public CommentReportResponseDto approveById(Long id) {
         CommentReport report = commentReportRepository.findById(id)
-                .orElseThrow(() -> new ReportNotFoundException(id));
+                .orElseThrow(() -> new CommentReportNotFoundException(id));
         report.approve();
         commentReportRepository.save(report);
 

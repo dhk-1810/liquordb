@@ -1,16 +1,15 @@
 package com.liquordb.exception.user;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import com.liquordb.enums.ErrorCode;
+import com.liquordb.exception.LiquordbException;
 
-import java.util.UUID;
+import java.io.Serial;
+import java.util.Map;
 
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class BannedUserException extends RuntimeException {
-    public BannedUserException(String email) {
-        super("회원가입이 제한된 이메일입니다. 이메일=" + email);
+public class BannedUserException extends LiquordbException {
+
+    public BannedUserException(Map<String, Object> details) {
+        super(ErrorCode.BANNED_USER, "신고 누적으로 강제 탈퇴 처리되었습니다.", details);
     }
-    public BannedUserException(UUID id) {
-        super("강제 탈퇴된 사용자입니다. ID=" + id);
-    }
+
 }

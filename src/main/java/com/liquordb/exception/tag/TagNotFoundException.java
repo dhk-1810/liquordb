@@ -1,11 +1,14 @@
 package com.liquordb.exception.tag;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import com.liquordb.enums.ErrorCode;
+import com.liquordb.exception.EntityNotFoundException;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class TagNotFoundException extends RuntimeException {
-    public TagNotFoundException(Long id) {
-        super("태그를 찾을 수 없습니다. ID=" + id);
+import java.util.Map;
+
+public class TagNotFoundException extends EntityNotFoundException {
+
+    public TagNotFoundException(Map<String, Object> details) {
+        super(ErrorCode.TAG_NOT_FOUND, "태그를 찾을 수 없습니다.", details);
     }
+
 }

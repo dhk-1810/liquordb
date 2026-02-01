@@ -7,7 +7,7 @@ import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
-import com.liquordb.exception.user.UnauthorizedUserException;
+import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentRepository;
@@ -59,7 +59,7 @@ public class CommentService {
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new UnauthorizedUserException(user.getId());
+            throw new UnauthenticatedUserException(user.getId());
         }
 
         if (comment.getStatus().equals(Comment.CommentStatus.DELETED)) {
@@ -102,7 +102,7 @@ public class CommentService {
 
         UUID requestUserId = requestUser.getId();
         if (!comment.getUser().getId().equals(requestUserId)) {
-            throw new UnauthorizedUserException(requestUserId);
+            throw new UnauthenticatedUserException(requestUserId);
         }
 
         comment.softDelete(LocalDateTime.now());

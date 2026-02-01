@@ -1,11 +1,14 @@
 package com.liquordb.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import com.liquordb.enums.ErrorCode;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
+import java.io.Serial;
+import java.util.Map;
+
 public class NoticeNotFoundException extends EntityNotFoundException {
-    public NoticeNotFoundException(Long id) {
-        super("공지를 찾을 수 없습니다. ID=" + id);
+
+    public NoticeNotFoundException(Map<String, Object> details) {
+        super(ErrorCode.NOTICE_NOT_FOUND, "공지를 찾을 수 없습니다.", details);
     }
+
 }

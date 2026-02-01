@@ -7,7 +7,7 @@ import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.LiquorNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
-import com.liquordb.exception.user.UnauthorizedUserException;
+import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
@@ -134,7 +134,7 @@ public class ReviewService {
 
         UUID requestUserId = requestUser.getId();
         if (!review.getUser().getId().equals(requestUser.getId())) {
-            throw new UnauthorizedUserException(requestUserId);
+            throw new UnauthenticatedUserException(requestUserId);
         }
         LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
         commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);

@@ -3,7 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.report.ReviewReportRequestDto;
 import com.liquordb.dto.report.ReviewReportResponseDto;
 import com.liquordb.entity.*;
-import com.liquordb.exception.ReportNotFoundException;
+import com.liquordb.exception.report.ReportNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewReportMapper;
