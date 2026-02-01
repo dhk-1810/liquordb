@@ -29,7 +29,7 @@ public class AdminUserController {
                                                        @RequestPart(required = false) MultipartFile profileImage
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.register(dto, profileImage, Role.ADMIN));
+                .body(userService.signUp(dto, profileImage, Role.ADMIN));
     }
 
     // 유저 전체 조회 및 검색

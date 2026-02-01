@@ -52,7 +52,7 @@ public class UserService {
 
     // 회원가입
     @Transactional
-    public UserResponseDto register(UserRegisterRequestDto request, MultipartFile profileImage, Role role) {
+    public UserResponseDto signUp(UserRegisterRequestDto request, MultipartFile profileImage, Role role) {
 
         String email = request.email();
         User existingUser = userRepository.findByEmail(email)
@@ -60,10 +60,12 @@ public class UserService {
 
         if (existingUser != null) {
             if (existingUser.getStatus().isAvailable()) {
-                throw new EmailAlreadyExistsException(email);
+                throw new DuplicateEmailException(email);
             }
             if (existingUser.getStatus().equals(UserStatus.BANNED)) {
-                throw new BannedUserException(email);
+                throw new BannedUserException();
+            } else if (existingUser.getStatus().equals(UserStatus.WITHDRAWN)) {
+                throw new WithdrawnUserException();
             }
         }
 
@@ -79,17 +81,12 @@ public class UserService {
 
     // 로그인
     @Transactional
-    public UserResponseDto login(UserLoginRequestDto dto) {
-        String email = dto.email();
-        User user = userRepository.findByEmail(email)
+    public UserResponseDto login(UserLoginRequestDto request) {
+        User user = userRepository.findByEmail(request.email())
                 .orElseThrow(LoginFailedException::new);
 
-        if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new LoginFailedException();
-        }
-
-        if (user.getStatus().equals(UserStatus.BANNED)) {
-            throw new BannedUserException(email);
         }
 
         return UserMapper.toDto(user);
@@ -177,7 +174,7 @@ public class UserService {
 
         String email = request.email();
         if (email != null && !userRepository.existsByEmail(email)) {
-            throw new EmailAlreadyExistsException(email);
+            throw new DuplicateEmailException(email);
         }
 
         String username = request.username();

@@ -144,7 +144,7 @@ public class User {
 
     public void restore() {
         if (this.status.isAvailable()) return;
-        if (LocalDateTime.now().isBefore(this.suspendedUntil)) {
+        if (this.suspendedUntil != null && LocalDateTime.now().isBefore(this.suspendedUntil)) {
             this.status = UserStatus.SUSPENDED;
         } else {
             this.status = UserStatus.ACTIVE;

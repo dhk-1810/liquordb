@@ -10,11 +10,11 @@ public enum ErrorCode {
     // User
     USER_NOT_FOUND,
     USER_ALREADY_EXISTS,
-    USERNAME_ALREADY_EXISTS,
-    EMAIL_ALREADY_EXISTS,
-    DUPLICATE_USER,
+    DUPLICATE_USERNAME,
+    DUPLICATE_EMAIL,
     SUSPENDED_USER, // 활동제한
     BANNED_USER, // 강제탈퇴
+    WITHDRAWN_USER, // 자발적 탈퇴
 
     // Liquor
     LIQUOR_NOT_FOUND,

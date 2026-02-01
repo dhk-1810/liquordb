@@ -1,16 +1,13 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.user.*;
-import com.liquordb.entity.User;
 import com.liquordb.enums.Role;
 import com.liquordb.security.CustomUserDetails;
-import com.liquordb.service.LiquorTagService;
 import com.liquordb.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,7 +26,7 @@ public class UserController {
             @RequestBody UserRegisterRequestDto dto,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ) {
-        return ResponseEntity.ok(userService.register(dto, profileImage, Role.USER));
+        return ResponseEntity.ok(userService.signUp(dto, profileImage, Role.USER));
     }
 
     // 로그인
