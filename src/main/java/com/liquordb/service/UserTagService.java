@@ -27,6 +27,7 @@ public class UserTagService {
     private final UserRepository userRepository;
     private final UserTagRepository userTagRepository;
     private final TagRepository tagRepository;
+    private final LiquorMapper liquorMapper;
 
     // 선호하는 태그로 등록
     @Transactional
@@ -69,7 +70,7 @@ public class UserTagService {
                 .toList();
 
         return liquors.stream()
-                .map(liquor -> LiquorMapper.toSummaryDto(liquor, user))
+                .map(liquor -> liquorMapper.toSummaryDto(liquor, user))
                 .distinct()
                 .toList();
     }

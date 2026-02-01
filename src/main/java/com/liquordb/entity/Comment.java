@@ -4,6 +4,7 @@ import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comments")
-public class Comment {
+public class Comment extends LikeableEntity implements ReportableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +23,7 @@ public class Comment {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private CommentStatus status = CommentStatus.ACTIVE; // 기본값은 ACTIVE
+    private CommentStatus status = CommentStatus.ACTIVE;
 
     @ManyToOne
     @JoinColumn(name = "review_id")
@@ -39,8 +40,6 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    private long likeCount = 0;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -106,12 +105,4 @@ public class Comment {
         this.deletedAt = null;
     }
 
-    public void increaseLikeCount() {
-        this.likeCount++;
-    }
-
-    public void decreaseLikeCount() {
-        if (likeCount <= 0) return;
-        this.likeCount--;
-    }
 }

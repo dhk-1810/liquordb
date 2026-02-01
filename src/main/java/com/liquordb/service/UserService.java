@@ -44,6 +44,7 @@ public class UserService {
 
     private final UserTagService userTagService;
     private final FileService fileService;
+    private final LiquorMapper liquorMapper;
     private final CommentMapper commentMapper;
 
     private final JavaMailSender mailSender;
@@ -96,7 +97,7 @@ public class UserService {
 
     // 회원 탈퇴 (soft delete)
     @Transactional
-    public void delete(UUID userId) {
+    public void withdraw(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -129,7 +130,7 @@ public class UserService {
 
         // 좋아요한 주류, 리뷰, 댓글 목록
         List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUser_IdAndLiquorIsDeletedFalse(userId).stream()
-                .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), user))
+                .map(liquorLike -> liquorMapper.toSummaryDto(liquorLike.getLiquor(), user))
                 .toList();
         List<ReviewResponseDto> likedReviews = reviewLikeRepository.findByUser_IdAndReviewIsHiddenFalse(userId).stream()
                 .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))

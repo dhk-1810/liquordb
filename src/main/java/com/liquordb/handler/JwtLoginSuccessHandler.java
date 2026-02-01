@@ -31,7 +31,6 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtRegistry jwtRegistry; // 중복 로그인 체크
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper; // JSON 변환
-    private final UserMapper userMapper; // 객체 변환
     private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 14;
 
     @Override
@@ -57,7 +56,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         );
 
         JwtInformation jwtInformation = new JwtInformation(
-                userMapper.toDto(user),
+                UserMapper.toDto(user),
                 accessToken,
                 refreshToken
         );
@@ -75,7 +74,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         JwtDto jwtDto = JwtDto.builder()
-                .userDto(userMapper.toDto(user))
+                .userDto(UserMapper.toDto(user))
                 .accessToken(accessToken)
                 .build();
 

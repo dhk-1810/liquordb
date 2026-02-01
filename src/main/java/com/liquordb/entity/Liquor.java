@@ -4,13 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "liquors")
-public class Liquor {
+public class Liquor extends LikeableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +37,6 @@ public class Liquor {
     private boolean isDiscontinued; // 단종 여부
 
     private String imageUrl; // 대표 이미지 사진 저장경로
-    private long likeCount = 0;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -103,15 +101,6 @@ public class Liquor {
         this.isDeleted = false;
         this.deletedAt = null;
         // 연관 리뷰 복구는 서비스단에서 수행.
-    }
-
-    public void increaseLikeCount() {
-        this.likeCount++;
-    }
-
-    public void decreaseLikeCount() {
-        if (likeCount <= 0) return;
-        this.likeCount--;
     }
 
 }

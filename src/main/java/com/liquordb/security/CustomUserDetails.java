@@ -23,7 +23,9 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
 
     @Override
-    public String getUsername() { return dto.username(); }
+    public String getUsername() {
+        return dto.username();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -31,24 +33,4 @@ public class CustomUserDetails implements UserDetails {
         return List.of(new SimpleGrantedAuthority(roleWithPrefix));
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    // 비밀번호 만료
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }

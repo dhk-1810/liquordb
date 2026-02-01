@@ -1,5 +1,6 @@
 package com.liquordb.service;
 
+import com.liquordb.ReportManager;
 import com.liquordb.dto.report.CommentReportRequestDto;
 import com.liquordb.dto.report.CommentReportResponseDto;
 import com.liquordb.entity.*;
@@ -23,6 +24,7 @@ public class CommentReportService {
     private final CommentRepository commentRepository;
     private final CommentReportMapper commentReportMapper;
     private final UserRepository userRepository;
+    private final ReportManager reportManager;
 
     private static final int REPORT_THRESHOLD = 3;
 
@@ -68,17 +70,11 @@ public class CommentReportService {
         CommentReport report = commentReportRepository.findById(id)
                 .orElseThrow(() -> new ReportNotFoundException(id));
         report.approve();
+        commentReportRepository.save(report);
 
         User user = report.getComment().getUser();
+        reportManager.processUserPenalty(user);
 
-        if (user.getReportCount() >= 5) {
-            user.withdraw(); // TODO 강제탈퇴 이거 맞았나
-        } else if (user.getReportCount() >= 3) {
-            user.suspend(LocalDateTime.now().plusDays(30));
-        }
-
-        commentReportRepository.save(report);
-        userRepository.save(user);
         return commentReportMapper.toDto(report);
     }
 

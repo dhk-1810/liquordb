@@ -7,16 +7,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "reviews")
-public class Review {
+public class Review extends LikeableEntity implements ReportableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,8 +43,6 @@ public class Review {
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> images;
-
-    private long likeCount = 0;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -133,12 +128,4 @@ public class Review {
         // 연관 댓글 복구는 서비스단에서 수행.
     }
 
-    public void increaseLikeCount() {
-        this.likeCount++;
-    }
-
-    public void decreaseLikeCount() {
-        if (likeCount <= 0) return;
-        this.likeCount--;
-    }
 }

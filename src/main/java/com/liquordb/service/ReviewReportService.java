@@ -46,14 +46,14 @@ public class ReviewReportService {
         // 누적 신고 수 확인 + 조건 충족시 숨기기 처리
         long count = reviewReportRepository.countByReview_Id(request.reviewId());
         if (count >= REPORT_THRESHOLD) {
-            hideTarget(request.reviewId());
+            hideReport(request.reviewId());
         }
 
         return reviewReportMapper.toDto(report);
     }
 
     // 자동 숨기기 처리 (3건 이상 신고 접수되면)
-    private void hideTarget(Long reviewId) {
+    private void hideReport(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
         review.hide(LocalDateTime.now());
@@ -64,7 +64,6 @@ public class ReviewReportService {
      * 관리자용
      */
     // 신고 승인.
-    // TODO 신고 누적건수에 따라 유저활동을 일시제한, 영구제한함.
     @Transactional
     public ReviewReportResponseDto approveById(Long id) {
         ReviewReport report = reviewReportRepository.findById(id)
@@ -74,9 +73,9 @@ public class ReviewReportService {
         User user = report.getReview().getUser();
 
         if (user.getReportCount() >= 5) {
-            user.withdraw(); // TODO 강제탈퇴 이거 맞았나
+            user.ban();
         } else if (user.getReportCount() >= 3) {
-            user.suspend(LocalDateTime.now().plusDays(30));
+            user.suspend(LocalDateTime.now().plusDays(7));
         }
 
         reviewReportRepository.save(report);
