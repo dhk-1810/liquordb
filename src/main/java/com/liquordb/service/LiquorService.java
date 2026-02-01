@@ -3,7 +3,7 @@ package com.liquordb.service;
 import com.liquordb.PageResponse;
 import com.liquordb.dto.liquor.LiquorUpdateRequestDto;
 import com.liquordb.entity.User;
-import com.liquordb.exception.LiquorNotFoundException;
+import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor

@@ -59,7 +59,7 @@ public class UserService {
                 .orElse(null);
 
         if (existingUser != null) {
-            if (existingUser.getStatus().isActiveUser()) {
+            if (existingUser.getStatus().isAvailable()) {
                 throw new EmailAlreadyExistsException(email);
             }
             if (existingUser.getStatus().equals(UserStatus.BANNED)) {
@@ -147,7 +147,7 @@ public class UserService {
 
 
         // 등록한(=선호하는) 태그 목록
-        List<TagResponseDto> preferredTags = userTagService.findByUserId(userId, showAllTags);
+        List<TagResponseDto> preferredTags = userTagService.getByUserId(userId, showAllTags);
 
         return UserMyPageResponseDto.builder()
                 .userId(user.getId())

@@ -1,12 +1,10 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.review.ReviewLikeResponseDto;
-import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.entity.ReviewLike;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.ReviewNotFoundException;
+import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
-import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.entity.Review;
 import com.liquordb.repository.ReviewRepository;
@@ -16,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service

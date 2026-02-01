@@ -5,7 +5,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.util.UUID;
 
-@Getter // TODO Getter 필요한가?
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode

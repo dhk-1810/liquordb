@@ -33,4 +33,9 @@ public class CustomUserDetails implements UserDetails {
         return List.of(new SimpleGrantedAuthority(roleWithPrefix));
     }
 
+    @Override
+    public boolean isEnabled() {
+        return dto.status().isAvailable();
+    }
+
 }

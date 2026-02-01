@@ -10,8 +10,12 @@ import java.util.Map;
 
 public class EmailAlreadyExistsException extends AlreadyExistsException {
 
-    public EmailAlreadyExistsException(Map<String, Object> details) {
-        super(ErrorCode.EMAIL_ALREADY_EXISTS, "해당 이메일로 가입된 사용자가 이미 존재합니다.", details);
+    public EmailAlreadyExistsException(String email) {
+        super(
+                ErrorCode.EMAIL_ALREADY_EXISTS,
+                "해당 이메일로 가입된 사용자가 이미 존재합니다.",
+                Map.of("email", email)
+        );
     }
 
 }

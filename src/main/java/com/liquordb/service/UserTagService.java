@@ -4,9 +4,9 @@ import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.tag.UserTagRequestDto;
 import com.liquordb.entity.*;
-import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.tag.TagNotFoundException;
 import com.liquordb.exception.tag.UserTagAlreadyExistsException;
+import com.liquordb.exception.tag.UserTagNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.TagMapper;
@@ -29,24 +29,28 @@ public class UserTagService {
     private final TagRepository tagRepository;
     private final LiquorMapper liquorMapper;
 
-    // 선호하는 태그로 등록
+    // 선호하는 태그 목록에 추가
     @Transactional
-    public UserTag add(UserTagRequestDto request, User requestUser) {
+    public UserTag add(UserTagRequestDto request, UUID userId) {
 
-        Tag tag = tagRepository.findById(request.tagId())
+        Long tagId = request.tagId();
+        Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new TagNotFoundException(request.tagId()));
 
-        if (userTagRepository.existsUserTagByUserAndTag_Id(requestUser, request.tagId())) {
-            throw new UserTagAlreadyExistsException(request.tagId());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (userTagRepository.existsByUserAndTag_Id(user, tagId)) {
+            throw new UserTagAlreadyExistsException(userId, tagId);
         }
 
-        UserTag userTag = UserTag.create(requestUser, tag);
+        UserTag userTag = UserTag.create(user, tag);
         return userTagRepository.save(userTag);
     }
 
     // 선호 태그 목록 반환
     @Transactional(readOnly = true)
-    public List<TagResponseDto> findByUserId(UUID userId , boolean showAll) {
+    public List<TagResponseDto> getByUserId(UUID userId , boolean showAll) {
 
         // TODO (10개 제한 여부 선택 가능)
         return userTagRepository.findTagsByUserId(userId).stream()
@@ -59,12 +63,12 @@ public class UserTagService {
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getLiquorsByUserTags(UUID userId) {
 
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         List<UserTag> userTags = userTagRepository.findByUserId(userId);
         List<Liquor> liquors = userTags.stream()
-                .flatMap(ut -> ut.getTag().getLiquorTags().stream()
+                .flatMap(userTag -> userTag.getTag().getLiquorTags().stream()
                         .map(LiquorTag::getLiquor))
                 .distinct()
                 .toList();
@@ -77,9 +81,9 @@ public class UserTagService {
 
     // 선호하는 태그에서 삭제
     @Transactional
-    public void deleteByUserIdAndTagId(User requestUser, UserTagRequestDto request) {
-        Tag tag = tagRepository.findById(request.tagId())
-                .orElseThrow(() -> new TagNotFoundException(request.tagId()));
-        userTagRepository.deleteByUserIdAndTagId(requestUser.getId(), tag.getId());
+    public void delete(UserTagRequestDto request, UUID userId) {
+        UserTag userTag = userTagRepository.findById(request.tagId())
+                .orElseThrow(() -> new UserTagNotFoundException(userId, request.tagId()));
+        userTagRepository.deleteByUser_IdAndTag_Id(userId, userTag.getTag().getId());
     }
 }

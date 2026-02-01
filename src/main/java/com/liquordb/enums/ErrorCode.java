@@ -9,6 +9,7 @@ public enum ErrorCode {
 
     // User
     USER_NOT_FOUND,
+    USER_ALREADY_EXISTS,
     USERNAME_ALREADY_EXISTS,
     EMAIL_ALREADY_EXISTS,
     DUPLICATE_USER,
@@ -30,7 +31,9 @@ public enum ErrorCode {
     // Tag
     TAG_NOT_FOUND,
     TAG_ALREADY_EXISTS,
+    USER_TAG_NOT_FOUND,
     USER_TAG_ALREADY_EXISTS,
+    LIQUID_NOT_FOUND,
     LIQUOR_TAG_ALREADY_EXISTS,
 
     // Report
@@ -42,6 +45,7 @@ public enum ErrorCode {
     // Notice
     NOTICE_NOT_FOUND,
 
+    // File
     BINARY_CONTENT_NOT_FOUND,
     DUPLICATE_BINARY_CONTENT,
     BINARY_CONTENT_UPLOAD_ALREADY_SUCCEEDED,

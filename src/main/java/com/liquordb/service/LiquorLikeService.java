@@ -1,12 +1,10 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.liquor.LiquorLikeResponseDto;
-import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorLike;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.LiquorNotFoundException;
+import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
-import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.entity.Liquor;
 import com.liquordb.repository.LiquorRepository;
@@ -16,9 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

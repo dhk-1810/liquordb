@@ -7,8 +7,12 @@ import java.util.Map;
 
 public class TagNotFoundException extends EntityNotFoundException {
 
-    public TagNotFoundException(Map<String, Object> details) {
-        super(ErrorCode.TAG_NOT_FOUND, "태그를 찾을 수 없습니다.", details);
+    public TagNotFoundException(Long tagId) {
+        super(
+                ErrorCode.TAG_NOT_FOUND,
+                "태그를 찾을 수 없습니다.",
+                Map.of("tagId", tagId)
+        );
     }
 
 }

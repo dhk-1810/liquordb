@@ -2,9 +2,6 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.repository.TagRepository;
-import com.liquordb.service.LiquorTagService;
-import com.liquordb.service.TagService;
 import com.liquordb.service.UserTagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +23,7 @@ public class UserTagController {
             @PathVariable UUID userId,
             @RequestParam(defaultValue = "false") boolean showAll
     ) {
-        return userTagService.findByUserId(userId, showAll);
+        return userTagService.getByUserId(userId, showAll);
     }
 
     // 선호 태그 기반 주류 추천

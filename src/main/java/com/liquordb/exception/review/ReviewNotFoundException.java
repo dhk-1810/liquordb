@@ -1,8 +1,8 @@
-package com.liquordb.exception;
+package com.liquordb.exception.review;
 
 import com.liquordb.enums.ErrorCode;
+import com.liquordb.exception.EntityNotFoundException;
 
-import java.io.Serial;
 import java.util.Map;
 
 public class ReviewNotFoundException extends EntityNotFoundException {

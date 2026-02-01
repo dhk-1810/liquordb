@@ -2,7 +2,7 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.user.UserRegisterRequestDto;
 import com.liquordb.dto.user.UserResponseDto;
-import com.liquordb.entity.User;
+import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.service.UserService;
 import lombok.RequiredArgsConstructor;

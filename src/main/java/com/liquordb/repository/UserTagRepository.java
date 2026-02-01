@@ -1,5 +1,6 @@
 package com.liquordb.repository;
 
+import com.liquordb.entity.Liquor;
 import com.liquordb.entity.Tag;
 import com.liquordb.entity.User;
 import com.liquordb.entity.UserTag;
@@ -8,21 +9,29 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * 유저가 선택한 태그 저장소입니다.
- */
 public interface UserTagRepository extends JpaRepository<UserTag, Long> {
+
+    Optional<UserTag> findByUserIdAndTagId(UUID userId, Long tagId);
 
     @Query("SELECT t FROM Tag t JOIN t.userTags ut WHERE ut.user.id = :userId")
     List<Tag> findTagsByUserId(@Param("userId") UUID userId);
 
-    UserTag getReferenceById(Long tagId);
-
     List<UserTag> findByUserId(UUID userId);
 
-    void deleteByUserIdAndTagId(UUID userId, Long tagId);
+    boolean existsByUserAndTag_Id(User user, Long tagId);
 
-    boolean existsUserTagByUserAndTag_Id(User user, Long tagId);
+    @Query("""
+        SELECT DISTINCT lt.liquor FROM LiquorTag lt
+        JOIN lt.tag t
+        JOIN UserTag ut ON ut.tag = t
+        WHERE ut.user.id = :userId
+    """)
+    List<Liquor> findLiquorsByUser_Id(@Param("userId") UUID userId);
+
+    boolean existsByUserIdAndTagId(UUID userId, Long tagId);
+
+    void deleteByUser_IdAndTag_Id(UUID userId, Long tagId);
 }

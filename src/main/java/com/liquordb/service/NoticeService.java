@@ -5,14 +5,13 @@ import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
 import com.liquordb.entity.User;
-import com.liquordb.exception.NoticeNotFoundException;
+import com.liquordb.exception.notice.NoticeNotFoundException;
 import com.liquordb.mapper.NoticeMapper;
 import com.liquordb.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.liquordb.mapper.NoticeMapper.*;

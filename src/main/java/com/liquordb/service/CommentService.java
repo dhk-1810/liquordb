@@ -6,7 +6,7 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.exception.comment.CommentNotFoundException;
-import com.liquordb.exception.ReviewNotFoundException;
+import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;

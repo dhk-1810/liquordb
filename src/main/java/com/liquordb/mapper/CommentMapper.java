@@ -6,7 +6,7 @@ import com.liquordb.entity.Comment;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
 import com.liquordb.exception.comment.CommentNotFoundException;
-import com.liquordb.exception.ReviewNotFoundException;
+import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.comment.InvalidParentCommentException;
 import com.liquordb.repository.CommentRepository;
 import com.liquordb.repository.ReviewRepository;

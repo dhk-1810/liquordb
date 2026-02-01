@@ -10,7 +10,11 @@ import java.util.Map;
 
 public class UsernameAlreadyExistsException extends AlreadyExistsException {
 
-    public UsernameAlreadyExistsException(Map<String, Object> details) {
-        super(ErrorCode.USERNAME_ALREADY_EXISTS, "해당 닉네임을 가진 사용자가 이미 존재합니다." ,details);
+    public UsernameAlreadyExistsException(String username) {
+        super(
+                ErrorCode.USERNAME_ALREADY_EXISTS,
+                "해당 닉네임을 가진 사용자가 이미 존재합니다.",
+                Map.of("username", username)
+        );
     }
 }

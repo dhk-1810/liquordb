@@ -5,7 +5,6 @@ import com.liquordb.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
-import org.springframework.security.core.parameters.P;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -132,19 +131,19 @@ public class User {
     }
 
     public void ban(){
-        if (!this.status.isActiveUser()) return;
+        if (!this.status.isAvailable()) return;
         this.status = UserStatus.BANNED;
         this.bannedAt = LocalDateTime.now();
     }
 
     public void withdraw() {
-        if (!this.status.isActiveUser()) return;
+        if (!this.status.isAvailable()) return;
         this.status = UserStatus.WITHDRAWN;
         this.withdrawnAt = LocalDateTime.now();
     }
 
     public void restore() {
-        if (this.status.isActiveUser()) return;
+        if (this.status.isAvailable()) return;
         if (LocalDateTime.now().isBefore(this.suspendedUntil)) {
             this.status = UserStatus.SUSPENDED;
         } else {
