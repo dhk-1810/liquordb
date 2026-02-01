@@ -66,24 +66,18 @@ public class UserTagService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        List<UserTag> userTags = userTagRepository.findByUserId(userId);
-        List<Liquor> liquors = userTags.stream()
-                .flatMap(userTag -> userTag.getTag().getLiquorTags().stream()
-                        .map(LiquorTag::getLiquor))
-                .distinct()
-                .toList();
+        List<Liquor> liquors = userTagRepository.findLiquorsByUser_Id(userId);
 
         return liquors.stream()
                 .map(liquor -> liquorMapper.toSummaryDto(liquor, user))
-                .distinct()
                 .toList();
     }
 
     // 선호하는 태그에서 삭제
     @Transactional
-    public void delete(UserTagRequestDto request, UUID userId) {
-        UserTag userTag = userTagRepository.findById(request.tagId())
-                .orElseThrow(() -> new UserTagNotFoundException(userId, request.tagId()));
+    public void delete(Long tagId, UUID userId) {
+        UserTag userTag = userTagRepository.findById(tagId)
+                .orElseThrow(() -> new UserTagNotFoundException(userId, tagId));
         userTagRepository.deleteByUser_IdAndTag_Id(userId, userTag.getTag().getId());
     }
 }

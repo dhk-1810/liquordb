@@ -14,7 +14,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException e) {
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.NOT_FOUND,
-                e.getMessage()
+                e.errorCode,
+                e.getMessage(),
+                e.details
         );
         log.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
@@ -24,8 +26,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAlreadyExists(AlreadyExistsException e) {
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.CONFLICT,
-                "정보가 중복됩니다.",
-                e.getMessage()
+                e.errorCode,
+                e.getMessage(),
+                e.details
         );
         log.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
