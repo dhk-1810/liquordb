@@ -25,4 +25,8 @@ public abstract class ReviewDetail {
     @MapsId // Review 엔터티와 동일한 PK 사용
     @JoinColumn(name = "review_id")
     private Review review;
+
+    public void setReview(Review review) {
+        this.review = review;
+    }
 }

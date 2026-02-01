@@ -7,16 +7,17 @@ import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.File;
 import com.liquordb.entity.User;
+import com.liquordb.entity.reviewdetail.ReviewDetail;
 
 import java.util.Collections;
 import java.util.List;
 
-/**
- * 수동 Mapper 클래스입니다.
- */
 public class ReviewMapper {
     public static Review toEntity(ReviewRequestDto request, User user, Liquor liquor) {
-        return Review.create(request, user, liquor);
+        Review review = Review.create(request, liquor, user);
+        ReviewDetail detail = ReviewDetailMapper.toEntity(request.reviewDetailRequest(), review);
+        review.addDetail(detail);
+        return review;
     }
 
     public static ReviewResponseDto toDto(Review review) {

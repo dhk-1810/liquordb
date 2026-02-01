@@ -17,7 +17,9 @@ import java.util.UUID;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
+    // 리뷰 단건 조회
     Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
+    Optional<Review> findByIdAndStatusNot(Long id, Review.ReviewStatus status);
 
     // 리뷰 평균 평점
     // TODO 생성, 수정, 삭제시에 알아서 변경되게 할까싶음

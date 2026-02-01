@@ -6,8 +6,8 @@ import com.liquordb.entity.User;
 import com.liquordb.enums.Role;
 import org.springframework.stereotype.Component;
 
-@Component
 public class UserMapper {
+
     public static UserResponseDto toDto(User user){
         return UserResponseDto.builder()
                 .id(user.getId())

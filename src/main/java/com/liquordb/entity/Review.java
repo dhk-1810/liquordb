@@ -41,7 +41,7 @@ public class Review {
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
 
-    @OneToOne(mappedBy = "review", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private ReviewDetail detail;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -80,15 +80,19 @@ public class Review {
         this.detail = detail;
     }
 
-    public static Review create(ReviewRequestDto request, ReviewDetail reviewDetail, Liquor liquor, User user) {
+    public static Review create(ReviewRequestDto request, Liquor liquor, User user) {
         return Review.builder()
                 .rating(request.rating())
                 .title(request.title())
                 .content(request.content())
                 .user(user)
                 .liquor(liquor)
-                .detail(reviewDetail)
                 .build();
+    }
+
+    public void addDetail(ReviewDetail detail) {
+        this.detail = detail;
+        detail.setReview(this);
     }
 
     public void update(ReviewUpdateRequestDto request) {

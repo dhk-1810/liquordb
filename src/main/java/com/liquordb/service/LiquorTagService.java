@@ -22,12 +22,13 @@ public class LiquorTagService {
     private final LiquorRepository liquorRepository;
     private final TagRepository tagRepository;
     private final LiquorTagRepository liquorTagRepository;
+    private final LiquorMapper liquorMapper;
 
     // 태그 이름으로 주류 검색
     @Transactional(readOnly = true)
     public List<LiquorResponseDto> getLiquorsByTagName(String tagName, User user) {
         return liquorTagRepository.findLiquorsByTagName(tagName).stream()
-                .map(liquor -> LiquorMapper.toDto(liquor, user))
+                .map(liquor -> liquorMapper.toDto(liquor, user))
                 .toList();
     }
 
@@ -35,7 +36,7 @@ public class LiquorTagService {
     @Transactional(readOnly = true)
     public List<LiquorResponseDto> getLiquorsByTagId(Long tagId, User user) {
         return liquorTagRepository.findLiquorByTagId(tagId).stream()
-                .map(liquorTag -> LiquorMapper.toDto(liquorTag.getLiquor(), user))
+                .map(liquorTag -> liquorMapper.toDto(liquorTag.getLiquor(), user))
                 .toList();
     }
 
@@ -43,7 +44,7 @@ public class LiquorTagService {
     @Transactional(readOnly = true)
     public List<TagResponseDto> getTagsByLiquorId(Long liquorId) {
         return liquorTagRepository.findTagsByLiquorId(liquorId).stream()
-                .map(LiquorTagMapper::toDto)
+                .map(LiquorTagMapper::toTagDto)
                 .toList();
     }
 
@@ -62,6 +63,6 @@ public class LiquorTagService {
         LiquorTag liquorTag = LiquorTagMapper.toEntity(liquor, tag);
         liquorTagRepository.save(liquorTag);
 
-        return LiquorTagMapper.toDto(liquorTag);
+        return LiquorTagMapper.toTagDto(liquorTag);
     }
 }

@@ -10,7 +10,7 @@ public class LiquorTagMapper {
         return LiquorTag.create(liquor, tag);
     }
 
-    public static TagResponseDto toDto(LiquorTag liquorTag) {
+    public static TagResponseDto toTagDto(LiquorTag liquorTag) {
         return TagResponseDto.builder()
                 .id(liquorTag.getTag().getId())
                 .name(liquorTag.getTag().getName())

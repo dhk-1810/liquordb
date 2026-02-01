@@ -9,12 +9,10 @@ import com.liquordb.exception.LiquorNotFoundException;
 import com.liquordb.exception.ReviewNotFoundException;
 import com.liquordb.exception.user.UnauthorizedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
-import com.liquordb.mapper.ReviewDetailMapper;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
-import com.liquordb.entity.reviewdetail.ReviewDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,7 +65,7 @@ public class ReviewService {
     public Page<ReviewResponseDto> findAllByLiquorIdAndIsHiddenFalse(Pageable pageable, Long liquorId) {
         Liquor liquor = liquorRepository.findById(liquorId)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
-        return reviewRepository.findAllByLiquorIdAndIsHiddenFalse(pageable, liquorId)
+        return reviewRepository.findAllByLiquor_IdAndStatus(pageable, liquorId, Review.ReviewStatus.ACTIVE)
                 .map(ReviewMapper::toDto);
     }
 
@@ -76,7 +74,7 @@ public class ReviewService {
     public Page<ReviewResponseDto> findAllByUserId(Pageable pageable, UUID userId) {
         User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        return reviewRepository.findAllByUserIdAndIsHiddenFalse(pageable, userId)
+        return reviewRepository.findAllByUser_IdAndStatus(pageable, userId, Review.ReviewStatus.ACTIVE)
                 .map(ReviewMapper::toDto);
     }
 
@@ -131,7 +129,7 @@ public class ReviewService {
     // 리뷰 삭제 (Soft Delete)
     @Transactional
     public void deleteByIdAndUser(Long reviewId, User requestUser) {
-        Review review = reviewRepository.findByIdAndStatus_Active(reviewId)
+        Review review = reviewRepository.findByIdAndStatusNot(reviewId, Review.ReviewStatus.DELETED)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         UUID requestUserId = requestUser.getId();
