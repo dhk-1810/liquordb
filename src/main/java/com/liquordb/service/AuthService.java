@@ -12,5 +12,5 @@ public class AuthService {
 
     private final UserRepository userRepository;
 
-    public UserResponseDto restore(UserLoginRequestDto request) {}
+
 }

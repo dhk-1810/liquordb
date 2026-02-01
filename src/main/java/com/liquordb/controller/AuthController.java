@@ -16,8 +16,5 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/restore")
-    public ResponseEntity<?> restore(@RequestBody UserLoginRequestDto request) {
-        authService.restore(request);
-    }
+
 }

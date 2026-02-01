@@ -31,8 +31,8 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDto> login(@RequestBody UserLoginRequestDto dto) {
-        return ResponseEntity.ok(userService.login(dto));
+    public ResponseEntity<UserResponseDto> login(@RequestBody UserLoginRequestDto request) {
+        return ResponseEntity.ok(userService.login(request));
     }
 
     // 비밀번호 찾기 - 재설정 링크 전송
@@ -64,6 +64,12 @@ public class UserController {
                                        @PathVariable UUID id) {
         userService.withdraw(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // 계정 복구
+    @PostMapping("/restore")
+    public ResponseEntity<UserResponseDto> restore(@RequestBody UserLoginRequestDto request) {
+        return ResponseEntity.ok(userService.restore(request));
     }
 
     // 마이페이지

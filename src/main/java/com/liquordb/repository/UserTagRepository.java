@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public interface UserTagRepository extends JpaRepository<UserTag, Long> {
 
-    Optional<UserTag> findByUserIdAndTagId(UUID userId, Long tagId);
+    Optional<UserTag> findByUser_IdAndTag_Id(UUID userId, Long tagId);
 
     @Query("SELECT t FROM Tag t JOIN t.userTags ut WHERE ut.user.id = :userId")
     List<Tag> findTagsByUserId(@Param("userId") UUID userId);

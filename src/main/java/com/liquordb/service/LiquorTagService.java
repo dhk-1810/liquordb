@@ -52,7 +52,7 @@ public class LiquorTagService {
      * 관리자용
      */
     // 주류에 태그 추가
-    public TagResponseDto addLiquorTag(LiquorTagRequestDto request) {
+    public TagResponseDto add(LiquorTagRequestDto request) {
 
         Liquor liquor = liquorRepository.findById(request.liquorId())
                 .orElseThrow(() -> new LiquorNotFoundException(request.liquorId()));

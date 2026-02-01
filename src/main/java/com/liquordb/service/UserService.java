@@ -80,6 +80,7 @@ public class UserService {
     }
 
     // 로그인
+    // TODO 사라질 운명. 시큐리티에서 대체.
     @Transactional
     public UserResponseDto login(UserLoginRequestDto request) {
         User user = userRepository.findByEmail(request.email())
@@ -87,6 +88,9 @@ public class UserService {
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new LoginFailedException();
+        }
+        if (user.getStatus() == UserStatus.WITHDRAWN) {
+            throw new WithdrawnUserException();
         }
 
         return UserMapper.toDto(user);
@@ -99,11 +103,21 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.withdraw();
-        user.update(user.getEmail() + LocalDate.now(), null);
         userRepository.save(user);
     }
 
-    // TODO 계정 복구
+    // 계정 복구
+    @Transactional
+    public UserResponseDto restore(UserLoginRequestDto request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(LoginFailedException::new);
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new LoginFailedException();
+        }
+        user.restore();
+        userRepository.save(user);
+        return UserMapper.toDto(user);
+    }
 
     // 마이페이지
     @Transactional
@@ -254,16 +268,7 @@ public class UserService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-//    // 생성된 비밀번호를 이메일로 발송
-//    public void sendTempPassword(String toEmail, String tempPassword) {
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(toEmail);
-//        message.setFrom(fromEmail);
-//        message.setSubject("임시 비밀번호 안내");
-//        message.setText("임시 비밀번호는 다음과 같습니다: " + tempPassword);
-//
-//        mailSender.send(message);
-//    }
+
 */
     /**
      * 관리자용 메서드
