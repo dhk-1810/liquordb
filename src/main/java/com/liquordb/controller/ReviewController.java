@@ -4,11 +4,10 @@ import com.liquordb.dto.review.ReviewLikeResponseDto;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
+import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
 import com.liquordb.service.ReviewService;
-import com.liquordb.UserValidator;
 import com.liquordb.entity.User;
-import com.liquordb.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,52 +20,48 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/reviews")
+@RequestMapping("/api")
 public class ReviewController {
 
     private final ReviewService reviewService;
     private final ReviewLikeService reviewLikeService;
-    private final UserValidator userValidator;
 
     // 리뷰 등록
-    @PostMapping
+    @PostMapping("/liquors/{liquorId}/reviews")
     public ResponseEntity<ReviewResponseDto> create(
+            @PathVariable Long liquorId,
             @RequestPart @Valid ReviewRequestDto requestDto,
             @RequestPart(required = false) List<MultipartFile> images,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        userValidator.validateCanPost(user);
-        ReviewResponseDto response = reviewService.create(user, requestDto, images);
+        ReviewResponseDto response = reviewService.create(liquorId, requestDto, images, user.getUserId());
         return ResponseEntity.ok(response);
     }
 
     // 리뷰 수정
-    @PatchMapping("/{reviewId}")
+    @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
             @RequestPart @Valid ReviewUpdateRequestDto request,
             @RequestPart(required = false) List<MultipartFile> imagesToAdd,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        userValidator.validateCanPost(user);
-        ReviewResponseDto response = reviewService.update(reviewId, user, request, imagesToAdd);
+        ReviewResponseDto response = reviewService.update(reviewId, request, imagesToAdd, user.getUserId());
         return ResponseEntity.ok(response);
     }
 
     // 리뷰 삭제
-    @DeleteMapping("/{reviewId}")
-    public ResponseEntity<Void> delete(@PathVariable Long reviewId, @AuthenticationPrincipal User user) {
-        userValidator.validateCanPost(user);
-        reviewService.deleteByIdAndUser(reviewId, user);
+    @DeleteMapping("/reviews/{reviewId}")
+    public ResponseEntity<Void> delete(@PathVariable Long reviewId, @AuthenticationPrincipal CustomUserDetails user) {
+        reviewService.delete(reviewId, user.getUserId());
         return ResponseEntity.noContent().build();
     }
 
     // 리뷰 좋아요
-    // TODO 유저 인증정보
-    @PostMapping("/{reviewId}/like")
+    @PostMapping("/reviews/{reviewId}/like")
     public ResponseEntity<ReviewLikeResponseDto> toggleLike(@PathVariable Long reviewId,
-                                                            @RequestParam UUID userId) {
-        ReviewLikeResponseDto response = reviewLikeService.toggleLike(userId, reviewId);
+                                                            @AuthenticationPrincipal CustomUserDetails user) {
+        ReviewLikeResponseDto response = reviewLikeService.toggleLike(user.getUserId(), reviewId);
         return ResponseEntity.ok(response);
     }
 

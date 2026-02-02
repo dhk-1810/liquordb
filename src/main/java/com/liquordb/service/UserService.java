@@ -45,7 +45,6 @@ public class UserService {
     private final UserTagService userTagService;
     private final FileService fileService;
     private final LiquorMapper liquorMapper;
-    private final CommentMapper commentMapper;
 
     private final JavaMailSender mailSender;
     private final OAuth2UserService oAuth2UserService;
@@ -136,7 +135,7 @@ public class UserService {
 
         // 댓글 작성 목록
         List<CommentResponseDto> createdComments = commentRepository.findAllByUser_Id(userId).stream()
-                .map(commentMapper::toDto)
+                .map(CommentMapper::toDto)
                 .toList();
 
         // 좋아요한 주류, 리뷰, 댓글 목록
@@ -147,7 +146,7 @@ public class UserService {
                 .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))
                 .toList();
         List<CommentResponseDto> likedComments = commentLikeRepository.findByUser_IdAndCommentIsHiddenFalse(userId).stream()
-                .map(commentLike -> commentMapper.toDto(commentLike.getComment()))
+                .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))
                 .toList();
 
         long reviewCount = createdReviews.size();
@@ -290,26 +289,26 @@ public class UserService {
 
     // 유저 이용제한
     // TODO ReportService로 옮기기. 신고 승인시 자동 처리.
-    public UserResponseDto restrictUser(UUID userId, String period) {
-
-        User user = userRepository.findActiveOrSuspendedUser(userId, List.of(UserStatus.ACTIVE, UserStatus.SUSPENDED))
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        long days = switch (period) {
-            case "WARNING" -> 0;
-            case "1D" -> 1;
-            case "3D" -> 3;
-            case "7D" -> 7;
-            case "1M" -> 30;
-            case "3M" -> 90;
-            default -> throw new IllegalArgumentException("유효하지 않은 기간입니다.");
-        };
-
-        if (days > 0) {
-            user.suspend(LocalDateTime.now().plusDays(days));
-        }
-
-        return UserMapper.toDto(userRepository.save(user));
-    }
+//    public UserResponseDto restrictUser(UUID userId, String period) {
+//
+//        User user = userRepository.findActiveOrSuspendedUser(userId, List.of(UserStatus.ACTIVE, UserStatus.SUSPENDED))
+//                .orElseThrow(() -> new UserNotFoundException(userId));
+//
+//        long days = switch (period) {
+//            case "WARNING" -> 0;
+//            case "1D" -> 1;
+//            case "3D" -> 3;
+//            case "7D" -> 7;
+//            case "1M" -> 30;
+//            case "3M" -> 90;
+//            default -> throw new IllegalArgumentException("유효하지 않은 기간입니다.");
+//        };
+//
+//        if (days > 0) {
+//            user.suspend(LocalDateTime.now().plusDays(days));
+//        }
+//
+//        return UserMapper.toDto(userRepository.save(user));
+//    }
 }
 

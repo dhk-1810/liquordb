@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ReviewMapper {
-    public static Review toEntity(ReviewRequestDto request, User user, Liquor liquor) {
+    public static Review toEntity(ReviewRequestDto request, Liquor liquor, User user) {
         Review review = Review.create(request, liquor, user);
         ReviewDetail detail = ReviewDetailMapper.toEntity(request.reviewDetailRequest(), review);
         review.addDetail(detail);

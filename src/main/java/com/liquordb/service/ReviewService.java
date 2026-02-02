@@ -4,10 +4,8 @@ import com.liquordb.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
-import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
-import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
@@ -28,28 +26,31 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReviewService {
 
-    private final ReviewRepository reviewRepository;
-    private final LiquorRepository liquorRepository;
     private final UserRepository userRepository;
+    private final LiquorRepository liquorRepository;
+    private final ReviewRepository reviewRepository;
+    private final CommentRepository commentRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService;
-    private final CommentRepository commentRepository;
 
     // 리뷰 등록
     @Transactional
-    public ReviewResponseDto create(User user, ReviewRequestDto request, List<MultipartFile> images) {
+    public ReviewResponseDto create(Long liquorId, ReviewRequestDto request, List<MultipartFile> images, UUID userId) {
 
-        Liquor liquor = liquorRepository.findById(request.liquorId())
-                .orElseThrow(() -> new LiquorNotFoundException(request.liquorId()));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
-        Review review = ReviewMapper.toEntity(request, user, liquor);
+        Liquor liquor = liquorRepository.findById(liquorId)
+                .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
-        // 리뷰이미지 업로드 및 저장
-        images.forEach(file -> {
-            review.getImages().add(fileService.upload(file));
-        });
+        Review review = ReviewMapper.toEntity(request, liquor, user);
 
-        return ReviewMapper.toDto(reviewRepository.save(review));
+        images.forEach(file ->
+            review.getImages().add(fileService.upload(file))
+        );
+
+        reviewRepository.save(review);
+        return ReviewMapper.toDto(review);
     }
 
     // 리뷰 단건 조회
@@ -62,8 +63,8 @@ public class ReviewService {
 
     // 주류에 따른 리뷰 조회
     @Transactional(readOnly = true)
-    public Page<ReviewResponseDto> findAllByLiquorIdAndIsHiddenFalse(Pageable pageable, Long liquorId) {
-        Liquor liquor = liquorRepository.findById(liquorId)
+    public Page<ReviewResponseDto> findAllByLiquorId(Pageable pageable, Long liquorId) {
+        Liquor liquor = liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
         return reviewRepository.findAllByLiquor_IdAndStatus(pageable, liquorId, Review.ReviewStatus.ACTIVE)
                 .map(ReviewMapper::toDto);
@@ -72,7 +73,7 @@ public class ReviewService {
     // 유저에 따른 리뷰 조회
     @Transactional(readOnly = true)
     public Page<ReviewResponseDto> findAllByUserId(Pageable pageable, UUID userId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         return reviewRepository.findAllByUser_IdAndStatus(pageable, userId, Review.ReviewStatus.ACTIVE)
                 .map(ReviewMapper::toDto);
@@ -80,16 +81,11 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewResponseDto update(Long reviewId, User requestUser,
-                                    ReviewUpdateRequestDto request, List<MultipartFile> newImages) {
+    // TODO PreAuthorize
+    public ReviewResponseDto update(Long reviewId, ReviewUpdateRequestDto request, List<MultipartFile> newImages, UUID userId) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
-
-        // 작성자 확인
-        if (!review.getUser().getId().equals(requestUser.getId())) {
-            throw new IllegalArgumentException("리뷰를 수정할 권한이 없습니다."); // TODO 커스텀예외
-        }
 
         // 공통 필드 수정
         review.update(request);
@@ -128,14 +124,11 @@ public class ReviewService {
 
     // 리뷰 삭제 (Soft Delete)
     @Transactional
-    public void deleteByIdAndUser(Long reviewId, User requestUser) {
+    // TODO PreAuthorize
+    public void delete(Long reviewId, UUID userId) {
         Review review = reviewRepository.findByIdAndStatusNot(reviewId, Review.ReviewStatus.DELETED)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
-        UUID requestUserId = requestUser.getId();
-        if (!review.getUser().getId().equals(requestUser.getId())) {
-            throw new UnauthenticatedUserException(requestUserId);
-        }
         LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
         commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);
         review.softDelete(reviewDeletedAt);

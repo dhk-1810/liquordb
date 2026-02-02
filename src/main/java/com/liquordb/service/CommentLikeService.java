@@ -30,7 +30,8 @@ public class CommentLikeService {
     // 좋아요 토글 (누르기/취소)
     @Transactional
     public CommentLikeResponseDto toggleLike(UUID userId, Long commentId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.BANNED)
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Comment comment = commentRepository.findById(commentId)
@@ -41,10 +42,12 @@ public class CommentLikeService {
 
         if (existingCommentLike != null) {
             commentLikeRepository.delete(existingCommentLike);
+            comment.decreaseLikeCount();
             return null;
         } else {
             CommentLike newLike = CommentLike.create(user, comment);
             commentLikeRepository.save(newLike);
+            comment.increaseLikeCount();
             return CommentLikeResponseDto.toDto(newLike);
         }
     }

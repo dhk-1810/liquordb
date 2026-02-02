@@ -27,7 +27,8 @@ public class ReviewLikeService {
     // 좋아요 토글 (누르기/취소)
     @Transactional
     public ReviewLikeResponseDto toggleLike(UUID userId, Long reviewId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.BANNED)
+
+        User user = userRepository.findByIdAndStatus(userId, UserStatus.BANNED)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Review review = reviewRepository.findById(reviewId)
@@ -38,10 +39,12 @@ public class ReviewLikeService {
 
         if (existingReviewLike != null) {
             reviewLikeRepository.delete(existingReviewLike);
+            review.decreaseLikeCount();
             return null;
         } else {
             ReviewLike reviewLike = ReviewLike.create(user, review);
             reviewLikeRepository.save(reviewLike);
+            review.increaseLikeCount();
             return ReviewLikeResponseDto.toDto(reviewLike);
         }
     }

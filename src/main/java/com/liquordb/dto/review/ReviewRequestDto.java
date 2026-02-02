@@ -12,9 +12,6 @@ import jakarta.validation.constraints.NotBlank;
 @Builder
 public record ReviewRequestDto (
 
-        @NotNull(message = "리뷰 대상 주류 ID는 필수입니다.")
-        Long liquorId,
-
         @NotNull(message = "평점은 필수입니다.")
         Double rating,
 

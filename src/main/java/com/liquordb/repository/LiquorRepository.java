@@ -10,19 +10,20 @@ import java.util.Optional;
 
 public interface LiquorRepository extends JpaRepository<Liquor, Long> {
 
+    // 삭제되지 않은 주류 단건 조회
+    Optional<Liquor> findByIdAndIsDeleted(Long id, boolean deleted);
+
     // 전체 조회
-    Page<Liquor> findAllByIsHiddenFalse(Pageable pageable);
+    Page<Liquor> findAllByIsDeleted(Pageable pageable, boolean deleted);
 
     // 검색
-    Page<Liquor> findByNameContainingAndIsHiddenFalse(Pageable pageable, String keyword);
+    Page<Liquor> findByNameContainingAndIsDeleted(Pageable pageable, String keyword, boolean deleted);
 
     // 대분류로 필터링
-    Page<Liquor> findByCategoryAndIsHiddenFalse(Pageable pageable, Liquor.LiquorCategory liquorCategory);
+    Page<Liquor> findByCategoryAndIsDeleted(Pageable pageable, Liquor.LiquorCategory liquorCategory, boolean deleted);
 
     // 소분류로 필터링
-    Page<Liquor> findBySubcategoryAndIsHiddenFalse(Pageable pageable, LiquorSubcategory liquorSubcategory);
+    Page<Liquor> findBySubcategoryAndIsDeleted(Pageable pageable, LiquorSubcategory liquorSubcategory, boolean deleted);
 
-    // 삭제되지 않은 주류 단건 조회
-    Optional<Liquor> findByIdAndIsHiddenFalse(Long id);
 
 }

@@ -8,8 +8,6 @@ import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.CommentLikeService;
 import com.liquordb.service.CommentService;
-import com.liquordb.UserValidator;
-import com.liquordb.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +37,7 @@ public class CommentController {
     }
 
     // 특정 리뷰의 댓글 조회
-    @GetMapping("/review/{reviewId}")
+    @GetMapping("/reviews/{reviewId}/comments")
     public ResponseEntity<PageResponse<CommentResponseDto>> findByReviewId(@PathVariable Long reviewId,
                                                                            Pageable pageable) {
         PageResponse<CommentResponseDto> comments = commentService.findByReviewId(reviewId, pageable);
@@ -47,7 +45,7 @@ public class CommentController {
     }
 
     // 댓글 수정
-    @PatchMapping("/{commentId}")
+    @PatchMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponseDto> update(@PathVariable Long commentId,
                                                      @RequestBody @Valid CommentUpdateRequestDto request,
                                                      @AuthenticationPrincipal CustomUserDetails user) {
@@ -56,7 +54,7 @@ public class CommentController {
     }
 
     // 댓글 삭제
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> delete(@PathVariable Long commentId,
                                        @AuthenticationPrincipal CustomUserDetails user) {
         commentService.deleteByIdAndUser(commentId, user.getUserId());
@@ -64,10 +62,10 @@ public class CommentController {
     }
 
     // 좋아요 토글
-    @PostMapping("/{commentId}/like")
+    @PostMapping("/comments/{commentId}/like")
     public ResponseEntity<CommentLikeResponseDto> toggleLike(@PathVariable Long commentId,
-                                                             @AuthenticationPrincipal UUID userId) { // TODO 본인이 눌렀던 좋아요만 취소할수 있어야함
-        CommentLikeResponseDto response = commentLikeService.toggleLike(userId, commentId);
+                                                             @AuthenticationPrincipal CustomUserDetails user) {
+        CommentLikeResponseDto response = commentLikeService.toggleLike(user.getUserId(), commentId);
         return ResponseEntity.ok(response);
     }
 

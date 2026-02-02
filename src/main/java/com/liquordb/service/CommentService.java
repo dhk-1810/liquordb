@@ -9,7 +9,6 @@ import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.comment.InvalidParentCommentException;
 import com.liquordb.exception.review.ReviewNotFoundException;
-import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentRepository;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -63,7 +61,7 @@ public class CommentService {
     // 댓글 수정
     @Transactional
     // TODO PreAuthorize
-    public CommentResponseDto update(Long commentId, CommentUpdateRequestDto request,  UUID userId) {
+    public CommentResponseDto update(Long commentId, CommentUpdateRequestDto request, UUID userId) {
 
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
@@ -86,12 +84,10 @@ public class CommentService {
         return PageResponse.from(response);
     }
 
-    // 특정 유저가 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
+    // 본인이 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
     // TODO PreAuthorize
     public PageResponse<CommentResponseDto> findByUserId(UUID userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
         Page<Comment> comments = commentRepository.findByUserIdAndStatus(userId, Comment.CommentStatus.ACTIVE, pageable);
         Page<CommentResponseDto> response = comments.map(CommentMapper::toDto);
         return PageResponse.from(response);
@@ -115,8 +111,10 @@ public class CommentService {
     // 유저ID, 리뷰 조회
     @Transactional(readOnly = true)
     public PageResponse<CommentResponseDto> findAllByOptionalFilters(UUID userId, Comment.CommentStatus status, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        if (userId != null) {
+            userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+        }
         Page<CommentResponseDto> page = commentRepository.findAllByOptionalFilters(userId, status, pageable)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);
