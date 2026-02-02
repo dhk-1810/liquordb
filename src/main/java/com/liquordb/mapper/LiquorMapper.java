@@ -5,10 +5,7 @@ import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.entity.Liquor;
-import com.liquordb.entity.LiquorLike;
-import com.liquordb.entity.Review;
-import com.liquordb.entity.User;
+import com.liquordb.entity.*;
 import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.repository.LiquorRepository;
 import com.liquordb.repository.LiquorTagRepository;
@@ -22,29 +19,10 @@ import java.util.stream.Collectors;
 
 public class LiquorMapper {
 
-    public LiquorResponseDto toDto(Liquor liquor, User user) { // User는 null 허용.
-
-        Long liquorId = liquor.getId();
-
-        List<ReviewResponseDto> reviewResponseDtos = reviewRepository
-                .findAllByLiquor_IdAndStatus(liquor.getId(), Review.ReviewStatus.ACTIVE)
-                .stream()
-                .map(ReviewMapper::toDto)
-                .toList();
-
-        Set<TagResponseDto> tagDtos = liquorTagRepository.findAllByLiquor_Id(liquorId).stream()
-                .map(TagMapper::toDto)
-                .collect(Collectors.toSet());
-
-        List<LiquorLike> liquorLikes = liquorLikeRepository.findAllByLiquor_IdAndLiquorIsDeletedFalse(liquorId);
-        boolean likedByMe = false;
-        if (user != null) {
-            likedByMe = liquorLikeRepository
-                   .existsByUserIdAndLiquorId(user.getId(), liquorId);
-        }
+    public static LiquorResponseDto toDto(Liquor liquor, Set<TagResponseDto> tags, boolean likedByMe) {
 
         return LiquorResponseDto.builder()
-                .id(liquorId)
+                .id(liquor.getId())
                 .name(liquor.getName())
                 .category(liquor.getCategory())
                 .subcategory(liquor.getSubcategory())
@@ -55,11 +33,10 @@ public class LiquorMapper {
                 .imageUrl(liquor.getImageUrl())
 
                 .averageRating(liquor.getAverageRating())
-                .reviewCount(reviewResponseDtos.size())
-                .reviews(reviewResponseDtos)
-                .tags(tagDtos)
+                .reviewCount(liquor.getReviewCount())
+                .tags(tags)
 
-                .likeCount(liquorLikes.size())
+                .likeCount(liquor.getLikeCount())
                 .likedByMe(likedByMe)
                 .build();
     }

@@ -2,6 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.PageResponse;
 import com.liquordb.dto.liquor.LiquorUpdateRequestDto;
+import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.LiquorLike;
 import com.liquordb.entity.User;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -11,10 +12,8 @@ import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.repository.CommentRepository;
-import com.liquordb.repository.LiquorLikeRepository;
-import com.liquordb.repository.LiquorRepository;
-import com.liquordb.repository.ReviewRepository;
+import com.liquordb.mapper.TagMapper;
+import com.liquordb.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +35,7 @@ public class LiquorService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final LiquorLikeRepository liquorLikeRepository;
+    private final LiquorTagRepository liquorTagRepository;
 
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
@@ -78,13 +79,18 @@ public class LiquorService {
 
     // 주류 상세 페이지
     @Transactional(readOnly = true)
-    public LiquorResponseDto getLiquorDetail(Long liquorId, User user) {
+    public LiquorResponseDto getLiquorDetail(Long liquorId, UUID userId) {
 
-        // 주류 정보 조회 (삭제되지 않은 것만)
         Liquor liquor = liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
-        return LiquorMapper.toDto(liquor, user);
+        Set<TagResponseDto> tags = liquorTagRepository.findAllByLiquor_Id(liquorId).stream()
+                .map(liquorTag -> TagMapper.toDto(liquorTag.getTag()))
+                .collect(Collectors.toSet());
+
+        boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
+
+        return LiquorMapper.toDto(liquor, tags, likedByMe);
     }
 
     /**
@@ -95,7 +101,8 @@ public class LiquorService {
     @Transactional
     public LiquorResponseDto create(LiquorRequestDto request) {
         Liquor liquor = LiquorMapper.toEntity(request);
-        return LiquorMapper.toDto(liquorRepository.save(liquor), null);
+        liquorRepository.save(liquor);
+        return LiquorMapper.toDto(liquor, null, false);
     }
 
     // 주류 수정
@@ -104,7 +111,8 @@ public class LiquorService {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
         liquor.updateFromDto(request.isDiscontinued(), request.deleteImage());
-        return LiquorMapper.toDto(liquorRepository.save(liquor), null);
+        liquorRepository.save(liquor);
+        return LiquorMapper.toDto(liquor, null, false);
     }
 
     // 주류 삭제 (Soft Delete)

@@ -25,8 +25,7 @@ public record LiquorResponseDto (
     String imageUrl,
 
     double averageRating,
-    int reviewCount,
-    List<ReviewResponseDto> reviews,
+    long reviewCount,
     Set<TagResponseDto> tags,
 
     long likeCount,
