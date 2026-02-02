@@ -1,12 +1,9 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.comment.CommentLikeResponseDto;
-import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.CommentLike;
-import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
-import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.entity.Comment;
 import com.liquordb.repository.CommentRepository;
@@ -16,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service

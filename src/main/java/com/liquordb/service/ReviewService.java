@@ -14,6 +14,7 @@ import com.liquordb.dto.review.ReviewResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -81,7 +82,7 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    // TODO PreAuthorize
+    @PreAuthorize("#userId == authentication.principal.userId")
     public ReviewResponseDto update(Long reviewId, ReviewUpdateRequestDto request, List<MultipartFile> newImages, UUID userId) {
 
         Review review = reviewRepository.findById(reviewId)
@@ -118,13 +119,9 @@ public class ReviewService {
         });
     }
 
-    public void updateBeerReview(){
-
-    }
-
     // 리뷰 삭제 (Soft Delete)
     @Transactional
-    // TODO PreAuthorize
+    @PreAuthorize("#userId == authentication.principal.userId")
     public void delete(Long reviewId, UUID userId) {
         Review review = reviewRepository.findByIdAndStatusNot(reviewId, Review.ReviewStatus.DELETED)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));

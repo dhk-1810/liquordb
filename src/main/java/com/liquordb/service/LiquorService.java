@@ -29,7 +29,7 @@ public class LiquorService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
 
-    // 1. 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
+    // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
     public PageResponse<LiquorSummaryDto> getLiquorsByFilters(User user, // 조회하는 사람, null 허용.
                                                               Liquor.LiquorCategory category, // 주류 대분류

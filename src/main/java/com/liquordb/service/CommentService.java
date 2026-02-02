@@ -19,6 +19,7 @@ import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +61,7 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    // TODO PreAuthorize
+    @PreAuthorize("#userId == authentication.principal.userId")
     public CommentResponseDto update(Long commentId, CommentUpdateRequestDto request, UUID userId) {
 
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)
@@ -86,7 +87,7 @@ public class CommentService {
 
     // 본인이 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
-    // TODO PreAuthorize
+    @PreAuthorize("#userId == authentication.principal.userId")
     public PageResponse<CommentResponseDto> findByUserId(UUID userId, Pageable pageable) {
         Page<Comment> comments = commentRepository.findByUserIdAndStatus(userId, Comment.CommentStatus.ACTIVE, pageable);
         Page<CommentResponseDto> response = comments.map(CommentMapper::toDto);
@@ -95,7 +96,7 @@ public class CommentService {
 
     // 댓글 삭제 (Soft Delete)
     @Transactional
-    // TODO @PreAuthorize
+    @PreAuthorize("#userId == authentication.principal.userId")
     public void deleteByIdAndUser(Long commentId, UUID userId) {
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));

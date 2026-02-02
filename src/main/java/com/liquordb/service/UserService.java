@@ -19,6 +19,7 @@ import com.liquordb.dto.review.ReviewSummaryDto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.stereotype.Service;
@@ -97,6 +98,7 @@ public class UserService {
 
     // 회원 탈퇴 (soft delete)
     @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
     public void withdraw(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -120,7 +122,7 @@ public class UserService {
 
     // 마이페이지
     @Transactional
-    // TODO @PreAuthorize()
+    @PreAuthorize("#userId == authentication.principal.userId")
     public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
 
         User user = userRepository.findById(userId)
@@ -179,7 +181,7 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
-    // TODO @PreAuthorize()
+    @PreAuthorize("#userId == authentication.principal.userId")
     public void update(UUID userId, UserUpdateRequestDto request, MultipartFile newProfileImage) {
 
         User user = userRepository.findById(userId)
