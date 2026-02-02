@@ -38,6 +38,8 @@ public class Liquor extends LikeableEntity {
 
     private String imageUrl; // 대표 이미지 사진 저장경로
 
+    private long reviewCount = 0;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
@@ -101,6 +103,15 @@ public class Liquor extends LikeableEntity {
         this.isDeleted = false;
         this.deletedAt = null;
         // 연관 리뷰 복구는 서비스단에서 수행.
+    }
+
+    public void incrementReviewCount() {
+        this.reviewCount++;
+    }
+
+    public void decrementReviewCount() {
+        if (this.reviewCount <= 0) return;
+        this.reviewCount--;
     }
 
 }

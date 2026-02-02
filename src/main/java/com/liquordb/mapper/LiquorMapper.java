@@ -20,13 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
 public class LiquorMapper {
-
-    private final ReviewRepository reviewRepository;
-    private final LiquorLikeRepository liquorLikeRepository;
-    private final LiquorTagRepository liquorTagRepository;
 
     public LiquorResponseDto toDto(Liquor liquor, User user) { // User는 null 허용.
 
@@ -70,27 +64,14 @@ public class LiquorMapper {
                 .build();
     }
 
-    public LiquorSummaryDto toSummaryDto(Liquor liquor, User user){
-
-        Long liquorId = liquor.getId();
-        boolean likedByMe = false;
-        if (user != null) {
-            likedByMe = liquorLikeRepository
-                    .existsByUserIdAndLiquorId(user.getId(), liquorId);
-        }
-
-        // TODO 이게최선인가
-        long reviewCount = reviewRepository
-                .findAllByLiquor_IdAndStatus(liquor.getId(), Review.ReviewStatus.ACTIVE).size();
-        List<LiquorLike> liquorLikes = liquorLikeRepository.findAllByLiquor_IdAndLiquorIsDeletedFalse(liquorId);
-
+    public static LiquorSummaryDto toSummaryDto(Liquor liquor, boolean likedByMe, long reviewCount, long likeCount) {
         return LiquorSummaryDto.builder()
-                .id(liquorId)
+                .id(liquor.getId())
                 .name(liquor.getName())
                 .imageUrl(liquor.getImageUrl())
                 .averageRating(liquor.getAverageRating())
                 .reviewCount(reviewCount)
-                .likeCount(liquorLikes.size())
+                .likeCount(likeCount)
                 .likedByMe(likedByMe)
                 .build();
     }
