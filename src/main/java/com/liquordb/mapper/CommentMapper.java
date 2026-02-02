@@ -13,32 +13,18 @@ import com.liquordb.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
 public class CommentMapper {
 
-    private final ReviewRepository reviewRepository;
-    private final CommentRepository commentRepository;
-
-    public Comment toEntity(User requestUser, CommentRequestDto request) {
-        Long reviewId = request.reviewId();
-        Review review = reviewRepository.findByIdAndStatus_Active(reviewId)
-                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
-
-        Comment parent = null;
-        Long parentId = request.parentId();
-        if (parentId != null) {
-            parent = commentRepository.findByIdAndStatus_Active(parentId)
-                    .orElseThrow(() -> new CommentNotFoundException(parentId));
-        }
-        if (parent != null && !parent.getReview().getId().equals(reviewId)) {
-            throw new InvalidParentCommentException(parentId);
-        }
-
-        return Comment.create(request.content(), review, parent, requestUser);
+    public static Comment toEntity(CommentRequestDto request, Comment parent, Review review, User requestUser) {
+        return Comment.create(
+                request.content(),
+                review,
+                parent,
+                requestUser
+        );
     }
 
-    public CommentResponseDto toDto(Comment comment) {
+    public static CommentResponseDto toDto(Comment comment) {
             return CommentResponseDto.builder()
                     .id(comment.getId())
                     .userId(comment.getUser().getId())

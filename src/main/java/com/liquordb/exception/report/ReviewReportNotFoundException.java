@@ -10,10 +10,12 @@ import java.util.Map;
 
 public class ReviewReportNotFoundException extends EntityNotFoundException {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    public ReviewReportNotFoundException(Map<String, Object> details) {
-        super(ErrorCode.REVIEW_REPORT_NOT_FOUND, "리뷰 신고 내역을 찾을 수 없습니다.", details);
+    public ReviewReportNotFoundException(Long reviewReportId) {
+        super(
+                ErrorCode.REVIEW_REPORT_NOT_FOUND,
+                "리뷰 신고 내역을 찾을 수 없습니다.",
+                Map.of("reviewReportId", reviewReportId)
+        );
     }
+
 }

@@ -19,7 +19,7 @@ import java.util.UUID;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 댓글 단건 조회
-    Optional<Comment> findByIdAndStatus_Active(Long id);
+    Optional<Comment> findByIdAndStatus(Long id, Comment.CommentStatus status);
 
     // 특정 리뷰에 달린 댓글 조회 (삭제되지 않은 댓글만)
     Page<Comment> findByReviewIdAndStatus(Long reviewId, Comment.CommentStatus status, Pageable pageable);

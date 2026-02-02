@@ -7,8 +7,12 @@ import java.util.Map;
 
 public class InvalidParentCommentException extends LiquordbException {
 
-    public InvalidParentCommentException(Map<String, Object> details) {
-        super(ErrorCode.BANNED_USER, "부모 댓글 정보가 잘못되었습니다.", details);
+    public InvalidParentCommentException(Long parentId) {
+        super(
+                ErrorCode.BANNED_USER,
+                "부모 댓글 정보가 잘못되었습니다.",
+                Map.of("parentId", parentId)
+        );
     }
 
 }

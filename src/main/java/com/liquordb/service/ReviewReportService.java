@@ -3,7 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.report.ReviewReportRequestDto;
 import com.liquordb.dto.report.ReviewReportResponseDto;
 import com.liquordb.entity.*;
-import com.liquordb.exception.report.ReportNotFoundException;
+import com.liquordb.exception.report.ReviewReportNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewReportMapper;
@@ -67,7 +67,7 @@ public class ReviewReportService {
     @Transactional
     public ReviewReportResponseDto approveById(Long id) {
         ReviewReport report = reviewReportRepository.findById(id)
-                .orElseThrow(() -> new ReportNotFoundException(id));
+                .orElseThrow(() -> new ReviewReportNotFoundException(id));
         report.approve();
 
         User user = report.getReview().getUser();
@@ -86,7 +86,7 @@ public class ReviewReportService {
     // 신고 반려
     public ReviewReportResponseDto rejectById(Long id) {
         ReviewReport report = reviewReportRepository.findById(id)
-                .orElseThrow(() -> new ReportNotFoundException(id));
+                .orElseThrow(() -> new ReviewReportNotFoundException(id));
 
         report.getReview().unhide();
         report.reject();

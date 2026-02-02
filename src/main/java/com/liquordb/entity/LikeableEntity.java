@@ -15,4 +15,8 @@ public abstract class LikeableEntity {
         if (likeCount <= 0) return;
         this.likeCount--;
     }
+
+    public long getLikeCount() {
+        return likeCount;
+    }
 }

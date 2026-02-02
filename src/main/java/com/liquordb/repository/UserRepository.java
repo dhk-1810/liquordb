@@ -16,6 +16,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     // 유저 단건 조회
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
+    Optional<User> findByIdAndStatus(UUID id, UserStatus status);
 
     // 탈퇴된 회원 정보 삭제 시 사용.
     List<User> findAllByStatusAndWithdrawnAtBefore(UserStatus status, LocalDateTime withdrawnAt);

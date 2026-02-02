@@ -5,6 +5,7 @@ import com.liquordb.dto.comment.CommentLikeResponseDto;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
+import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.CommentLikeService;
 import com.liquordb.service.CommentService;
 import com.liquordb.UserValidator;
@@ -26,16 +27,14 @@ public class CommentController {
 
     private final CommentService commentService;
     private final CommentLikeService commentLikeService;
-    private final UserValidator userValidator;
 
     // 댓글 작성
     @PostMapping("/reviews/{reviewId}/comments")
     public ResponseEntity<CommentResponseDto> create(@PathVariable Long reviewId,
                                                      @RequestBody @Valid CommentRequestDto request,
-                                                     @AuthenticationPrincipal User user
+                                                     @AuthenticationPrincipal CustomUserDetails user
     ) {
-        userValidator.validateCanPost(user);
-        CommentResponseDto response = commentService.create(user, reviewId, request);
+        CommentResponseDto response = commentService.create(reviewId, request, user.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -51,23 +50,23 @@ public class CommentController {
     @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponseDto> update(@PathVariable Long commentId,
                                                      @RequestBody @Valid CommentUpdateRequestDto request,
-                                                     @AuthenticationPrincipal User user){
-        CommentResponseDto response = commentService.update(user, commentId, request);
+                                                     @AuthenticationPrincipal CustomUserDetails user) {
+        CommentResponseDto response = commentService.update(commentId, request, user.getUserId());
         return ResponseEntity.ok(response);
     }
 
     // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> delete(@PathVariable Long commentId,
-                                       @AuthenticationPrincipal User user) {
-        commentService.deleteByIdAndUser(commentId, user);
+                                       @AuthenticationPrincipal CustomUserDetails user) {
+        commentService.deleteByIdAndUser(commentId, user.getUserId());
         return ResponseEntity.noContent().build();
     }
 
     // 좋아요 토글
     @PostMapping("/{commentId}/like")
     public ResponseEntity<CommentLikeResponseDto> toggleLike(@PathVariable Long commentId,
-                                                             @RequestParam UUID userId) {
+                                                             @AuthenticationPrincipal UUID userId) { // TODO 본인이 눌렀던 좋아요만 취소할수 있어야함
         CommentLikeResponseDto response = commentLikeService.toggleLike(userId, commentId);
         return ResponseEntity.ok(response);
     }
