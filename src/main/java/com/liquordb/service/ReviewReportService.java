@@ -30,16 +30,16 @@ public class ReviewReportService {
     private static final int REPORT_THRESHOLD = 3;
 
     // 신고 생성
-    public ReviewReportResponseDto create(UUID requestUserId, ReviewReportRequestDto request) {
+    public ReviewReportResponseDto create(ReviewReportRequestDto request, UUID userId) { // 신고자 ID
 
-        User requestUser = userRepository.findById(requestUserId)
-                .orElseThrow(() -> new UserNotFoundException(requestUserId));
+        User requestUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
         Long reviewId = request.reviewId();
 
         // 중복 신고 방지
-        boolean exists = reviewReportRepository.existsByReviewIdAndUser_Id(reviewId, requestUserId);
+        boolean exists = reviewReportRepository.existsByReviewIdAndUser_Id(reviewId, userId);
         if (exists) {
-            throw new ReviewReportAlreadyExistsException(reviewId, requestUserId);
+            throw new ReviewReportAlreadyExistsException(reviewId, userId);
         }
 
         // 신고 저장

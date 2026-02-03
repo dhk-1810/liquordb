@@ -24,28 +24,24 @@ public class AdminUserController {
     private final UserService userService;
 
     // 관리자 회원가입
+    // TODO 없애고 가입후 권한변경?
     @PostMapping
-    public ResponseEntity<UserResponseDto> createAdmin(@RequestBody UserRegisterRequestDto dto,
-                                                       @RequestPart(required = false) MultipartFile profileImage
+    public ResponseEntity<UserResponseDto> createAdmin(
+            @RequestBody UserRegisterRequestDto request,
+            @RequestPart(required = false) MultipartFile profileImage
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.signUp(dto, profileImage, Role.ADMIN));
+                .body(userService.signUp(request, profileImage, Role.ADMIN));
     }
 
     // 유저 전체 조회 및 검색
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> userList(@RequestParam(required = false) String keyword, // 닉네임 또는 이메일 검색어
-                                                          @RequestParam(required = false) UserStatus status) {
+    public ResponseEntity<List<UserResponseDto>> userList(
+            @RequestParam(required = false) String keyword, // 닉네임 또는 이메일 검색어
+            @RequestParam(required = false) UserStatus status
+    ) {
         List<UserResponseDto> users = userService.getUsers(keyword, status);
         return ResponseEntity.ok(users);
     }
 
-    // 유저 이용제한 처리
-    // TODO 검토
-    @PostMapping("/{userId}/restrict")
-    public ResponseEntity<UserResponseDto> restrictUser(@PathVariable UUID userId,
-                                                        @RequestParam String period) {
-        UserResponseDto user = userService.restrictUser(userId, period);
-        return ResponseEntity.ok(user);
-    }
 }

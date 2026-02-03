@@ -5,6 +5,7 @@ import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.NoticeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,29 +21,30 @@ public class AdminNoticeController {
 
     // 공지사항 등록
     @PostMapping
-    public ResponseEntity<NoticeResponseDto> createNotice(@RequestBody NoticeRequestDto dto,
-                                                          @AuthenticationPrincipal CustomUserDetails userDetails
+    public ResponseEntity<NoticeResponseDto> createNotice(
+            @RequestBody NoticeRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        return ResponseEntity.ok(noticeService.create(dto, null)); // TODO 수정 필요
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(noticeService.create(dto, user.getUserId()));
     }
 
     // 공지사항 수정
-    @PatchMapping("/{id}")
-    public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long id,
-                                                          @RequestBody NoticeRequestDto dto) {
-        return ResponseEntity.ok(noticeService.update(id, dto));
+    @PatchMapping("/{noticeId}")
+    public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long noticeId, @RequestBody NoticeRequestDto dto) {
+        return ResponseEntity.ok(noticeService.update(noticeId, dto));
     }
 
     // 고정 토글
-    @PatchMapping("/{id}/pin")
-    public ResponseEntity<NoticeResponseDto> togglePin(@PathVariable Long id){
-        return ResponseEntity.ok(noticeService.togglePin(id));
+    @PatchMapping("/{noticeId}/pin")
+    public ResponseEntity<NoticeResponseDto> togglePin(@PathVariable Long noticeId){
+        return ResponseEntity.ok(noticeService.togglePin(noticeId));
     }
 
     // 공지사항 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNotice(@PathVariable Long id) {
-        noticeService.delete(id);
+    @DeleteMapping("/{noticeId}")
+    public ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId) {
+        noticeService.delete(noticeId);
         return ResponseEntity.noContent().build();
     }
 }

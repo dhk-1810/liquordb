@@ -6,13 +6,16 @@ import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
 import com.liquordb.entity.User;
 import com.liquordb.exception.notice.NoticeNotFoundException;
+import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.NoticeMapper;
 import com.liquordb.repository.NoticeRepository;
+import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.liquordb.mapper.NoticeMapper.*;
 
@@ -20,6 +23,7 @@ import static com.liquordb.mapper.NoticeMapper.*;
 @RequiredArgsConstructor
 public class NoticeService {
 
+    private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
 
     // 공지사항 단건 조회
@@ -44,8 +48,10 @@ public class NoticeService {
      */
     // 공지사항 등록
     @Transactional
-    public NoticeResponseDto create(NoticeRequestDto dto, User author) {
-        Notice notice = toEntity(dto, author);
+    public NoticeResponseDto create(NoticeRequestDto dto, UUID authorId) {
+        User user = userRepository.findById(authorId)
+                .orElseThrow(() -> new UserNotFoundException(authorId));
+        Notice notice = toEntity(dto, user);
         noticeRepository.save(notice);
         return toDto(notice);
     }

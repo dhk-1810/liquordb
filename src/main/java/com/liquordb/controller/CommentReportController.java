@@ -22,9 +22,11 @@ public class CommentReportController {
     private final CommentReportService commentReportService;
 
     @PostMapping
-    public ResponseEntity<CommentReportResponseDto> create(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                           @RequestBody @Valid CommentReportRequestDto request) {
-        CommentReportResponseDto response = commentReportService.create(userDetails.getId(), request);
+    public ResponseEntity<CommentReportResponseDto> create(
+            @RequestBody @Valid CommentReportRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        CommentReportResponseDto response = commentReportService.create(request, user.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

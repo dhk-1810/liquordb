@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
-    @ExceptionHandler(AlreadyExistsException.class)
+    @ExceptionHandler(LiquordbException.class)
     public ResponseEntity<ErrorResponse> handleLiquordbException(LiquordbException e) {
         ErrorResponse response = ErrorResponse.of(
                 e.errorCode.getStatus(),

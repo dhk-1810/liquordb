@@ -25,9 +25,9 @@ public class AdminCommentController {
 
     private final CommentService commentService;
 
-    // 유저별 댓글 조회 - 상태 필터 적용 가능
+    // 댓글 조회 - 작성 유저, 댓글 상태 필터링 가능
     @GetMapping("/{userId}")
-    public ResponseEntity<PageResponse<CommentResponseDto>> findByUserIdAndStatus(
+    public ResponseEntity<PageResponse<CommentResponseDto>> findByUserIdAndCommentStatus(
             @PathVariable UUID userId,
             @RequestParam(required = false) Comment.CommentStatus status,
             Pageable pageable
@@ -36,5 +36,4 @@ public class AdminCommentController {
         return ResponseEntity.ok(comments);
     }
 
-    // TODO 신고 조치로 리뷰 숨김처리
 }

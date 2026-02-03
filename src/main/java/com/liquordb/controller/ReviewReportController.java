@@ -19,9 +19,11 @@ public class ReviewReportController {
     private final ReviewReportService reportService;
 
     @PostMapping
-    public ResponseEntity<ReviewReportResponseDto> create(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                          @RequestBody @Valid ReviewReportRequestDto request) {
-        ReviewReportResponseDto response = reportService.create(userDetails.getId(), request);
+    public ResponseEntity<ReviewReportResponseDto> create(
+            @RequestBody @Valid ReviewReportRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        ReviewReportResponseDto response = reportService.create(request, user.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

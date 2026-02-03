@@ -6,6 +6,8 @@ import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
 import com.liquordb.entity.User;
 
+import java.util.UUID;
+
 public class NoticeMapper {
 
     public static Notice toEntity(NoticeRequestDto request, User author) {

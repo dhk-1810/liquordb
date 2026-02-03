@@ -28,6 +28,7 @@ public class AdminTagController {
     }
 
     // 태그 전체 조회
+    // TODO 페이지네이션
     @GetMapping
     public ResponseEntity<List<TagResponseDto>> getAll() {
         List<TagResponseDto> response = tagService.findAll();
@@ -36,8 +37,10 @@ public class AdminTagController {
 
     // 태그 이름 변경
     @PatchMapping("/{id}")
-    public ResponseEntity<TagResponseDto> rename(@PathVariable Long id,
-                                                 @RequestBody @Valid TagRequestDto requestDto) {
+    public ResponseEntity<TagResponseDto> rename(
+            @PathVariable Long id,
+            @RequestBody @Valid TagRequestDto requestDto
+    ) {
         TagResponseDto updatedTag = tagService.rename(id, requestDto);
         return ResponseEntity.ok(updatedTag);
     }

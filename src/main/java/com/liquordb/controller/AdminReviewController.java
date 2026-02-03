@@ -20,9 +20,9 @@ public class AdminReviewController {
 
     private final ReviewService reviewService;
 
-    // 리뷰 조회 - 유저 또는 상태 필터링 가능
+    // 리뷰 조회 - 작성 유저, 리뷰 상태 필터링 가능
     @GetMapping("/{userId}")
-    public ResponseEntity<PageResponse<ReviewResponseDto>> findByUserIdAndStatus(
+    public ResponseEntity<PageResponse<ReviewResponseDto>> findByUserIdAndReviewStatus(
             @PathVariable UUID userId,
             @RequestParam(required = false) Review.ReviewStatus status,
             Pageable pageable
@@ -31,5 +31,4 @@ public class AdminReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    // TODO 신고 조치로 리뷰 숨김처리
 }

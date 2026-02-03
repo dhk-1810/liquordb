@@ -30,15 +30,15 @@ public class CommentReportService {
     private static final int REPORT_THRESHOLD = 3;
 
     // 신고 생성
-    public CommentReportResponseDto create(UUID requestUserId, CommentReportRequestDto request) {
+    public CommentReportResponseDto create(CommentReportRequestDto request, UUID userId) { // 신고자 ID
 
-        User requestUser = userRepository.findById(requestUserId)
-                .orElseThrow(() -> new UserNotFoundException(requestUserId));
+        User requestUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 중복 신고 방지
-        boolean exists = commentReportRepository.existsByCommentIdAndUser_Id(request.commentId(), requestUserId);
+        boolean exists = commentReportRepository.existsByCommentIdAndUser_Id(request.commentId(), userId);
         if (exists) {
-            throw new CommentReportAlreadyExistsException(request.commentId(), requestUserId);
+            throw new CommentReportAlreadyExistsException(request.commentId(), userId);
         }
 
         // 신고 저장

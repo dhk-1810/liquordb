@@ -17,9 +17,9 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
-    @GetMapping
-    public ResponseEntity<NoticeResponseDto> getNotice(@PathVariable Long id) {
-        return ResponseEntity.ok(noticeService.getNotice(id));
+    @GetMapping("/{noticeId}")
+    public ResponseEntity<NoticeResponseDto> getNotice(@PathVariable Long noticeId) {
+        return ResponseEntity.ok(noticeService.getNotice(noticeId));
     }
 
     // TODO 페이지네이션 수정
