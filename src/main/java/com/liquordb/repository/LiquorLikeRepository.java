@@ -32,7 +32,7 @@ public interface LiquorLikeRepository extends JpaRepository<LiquorLike, Long> {
                                                      @Param("liquorIds") List<Long> liquorIds);
 
     // 유저가 특정 객체에 좋아요 눌렀는지 확인 (Like 객체 전체 반환)
-    Optional<LiquorLike> findByLiquorIdAndUserId(Long liquorId, UUID userId);
+    Optional<LiquorLike> findByLiquor_IdAndUser_Id(Long liquorId, UUID userId);
 
     UUID user(User user);
 }

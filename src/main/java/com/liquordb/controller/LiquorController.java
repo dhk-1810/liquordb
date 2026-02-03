@@ -7,6 +7,7 @@ import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.User;
+import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
@@ -32,20 +33,25 @@ public class LiquorController {
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
     public ResponseEntity<PageResponse<LiquorSummaryDto>> getLiquorsByFilters(
-            @AuthenticationPrincipal User user,
-            @RequestParam(required = false) Liquor.LiquorCategory type,
+            @RequestParam(required = false) Liquor.LiquorCategory category,
             @RequestParam(required = false) LiquorSubcategory subcategory,
-            Pageable pageable) {
-        PageResponse<LiquorSummaryDto> liquor = liquorService.getLiquorsByFilters(user, type, subcategory, pageable);
+            @AuthenticationPrincipal CustomUserDetails user,
+            Pageable pageable
+    ) {
+        UUID userId = (user != null) ? user.getUserId() : null;
+        PageResponse<LiquorSummaryDto> liquor = liquorService.getLiquorsByFilters(category, subcategory, userId, pageable);
         return ResponseEntity.ok(liquor);
     }
 
     // 주류 검색 (이름으로)
     @GetMapping("/search")
-    public ResponseEntity<PageResponse<LiquorSummaryDto>> searchLiquors(@AuthenticationPrincipal User user,
-                                                                        @RequestParam String keyword,
-                                                                        Pageable pageable) {
-        PageResponse<LiquorSummaryDto> response = liquorService.searchLiquorsByName(user, keyword, pageable);
+    public ResponseEntity<PageResponse<LiquorSummaryDto>> searchLiquors(
+            @RequestParam String keyword,
+            @AuthenticationPrincipal CustomUserDetails user,
+            Pageable pageable
+    ) {
+        UUID userId = (user != null) ? user.getUserId() : null;
+        PageResponse<LiquorSummaryDto> response = liquorService.searchLiquorsByName(keyword, userId, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -53,17 +59,21 @@ public class LiquorController {
     @GetMapping("/{liquorId}")
     public ResponseEntity<LiquorResponseDto> getLiquorDetail(
             @PathVariable Long liquorId,
-            @AuthenticationPrincipal User currentUser) {
-
-        LiquorResponseDto dto = liquorService.getLiquorDetail(liquorId, currentUser);
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        UUID userId = (user != null) ? user.getUserId() : null;
+        LiquorResponseDto dto = liquorService.getLiquorDetail(liquorId, userId);
         return ResponseEntity.ok(dto);
     }
 
     // 주류 좋아요 토글 (누르기/취소)
     @PostMapping("/{liquorId}/like")
-    public ResponseEntity<LiquorLikeResponseDto> toggleLike(@PathVariable Long liquorId,
-                                                            @RequestParam UUID userId) {
-        LiquorLikeResponseDto response = liquorLikeService.toggleLike(userId, liquorId);
+    public ResponseEntity<LiquorLikeResponseDto> toggleLike(
+            @PathVariable Long liquorId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        UUID userId = (user != null) ? user.getUserId() : null;
+        LiquorLikeResponseDto response = liquorLikeService.toggleLike(liquorId, userId);
         return ResponseEntity.ok(response);
     }
 

@@ -26,15 +26,15 @@ public class LiquorLikeService {
 
     // 좋아요 토글 (누르기/취소)
     @Transactional
-    public LiquorLikeResponseDto toggleLike(UUID userId, Long liquorId) {
-        User user = userRepository.findByIdAndStatusNot(userId, UserStatus.WITHDRAWN)
+    public LiquorLikeResponseDto toggleLike(Long liquorId, UUID userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Liquor liquor = liquorRepository.findById(liquorId)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
         LiquorLike existingLiquorLike = liquorLikeRepository
-                .findByUserIdAndLiquorId(user.getId(), liquor.getId()).orElse(null);
+                .findByLiquor_IdAndUser_Id(liquor.getId(), user.getId()).orElse(null);
 
         if (existingLiquorLike != null) {
             liquorLikeRepository.delete(existingLiquorLike);

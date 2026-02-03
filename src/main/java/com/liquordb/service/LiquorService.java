@@ -41,8 +41,9 @@ public class LiquorService {
     @Transactional(readOnly = true)
     public PageResponse<LiquorSummaryDto> getLiquorsByFilters(Liquor.LiquorCategory category,
                                                               LiquorSubcategory subcategory,
-                                                              Pageable pageable,
-                                                              UUID userId) { // 조회하는 사람, null 허용.
+                                                              UUID userId,
+                                                              Pageable pageable
+                                                              ) { // 조회하는 사람, null 허용.
 
         Page<Liquor> liquors = fetchLiquors(category, subcategory, pageable);
         List<Long> liquorIds = liquors.getContent().stream()
@@ -62,7 +63,7 @@ public class LiquorService {
 
     // 주류 목록 검색 (이름으로)
     @Transactional(readOnly = true)
-    public PageResponse<LiquorSummaryDto> searchLiquorsByName(String keyword, Pageable pageable, UUID userId) {
+    public PageResponse<LiquorSummaryDto> searchLiquorsByName(String keyword, UUID userId, Pageable pageable) {
         Page<Liquor> searchedLiquors = liquorRepository.findByNameContainingAndIsDeleted(pageable, keyword, false);
         List<Long> liquorIds = searchedLiquors.getContent().stream()
                 .map(Liquor::getId)
@@ -91,6 +92,19 @@ public class LiquorService {
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
 
         return LiquorMapper.toDto(liquor, tags, likedByMe);
+    }
+
+    private Page<Liquor> fetchLiquors(Liquor.LiquorCategory category,
+                                      LiquorSubcategory subcategory,
+                                      Pageable pageable
+    ) {
+        if (subcategory != null) {
+            return liquorRepository.findBySubcategoryAndIsDeleted(pageable, subcategory, false);
+        } else if (category != null) {
+            return liquorRepository.findByCategoryAndIsDeleted(pageable, category, false);
+        } else {
+            return liquorRepository.findAllByIsDeleted(pageable, false);
+        }
     }
 
     /**
@@ -129,16 +143,4 @@ public class LiquorService {
         liquorRepository.save(liquor);
     }
 
-    private Page<Liquor> fetchLiquors(Liquor.LiquorCategory category,
-                                      LiquorSubcategory subcategory,
-                                      Pageable pageable
-    ) {
-        if (subcategory != null) {
-            return liquorRepository.findBySubcategoryAndIsDeleted(pageable, subcategory, false);
-        } else if (category != null) {
-            return liquorRepository.findByCategoryAndIsDeleted(pageable, category, false);
-        } else {
-            return liquorRepository.findAllByIsDeleted(pageable, false);
-        }
-    }
 }
