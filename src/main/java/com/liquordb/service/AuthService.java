@@ -107,8 +107,9 @@ public class AuthService {
 
     // 비밀번호 재설정
     @Transactional
-    public void resetPasswordByToken(PasswordResetRequest request, String token) {
+    public void resetPasswordByToken(PasswordResetRequest request) {
 
+        String token = request.token();
         String email = redisTemplate.opsForValue().get(token);
         if (email == null) {
             throw new InvalidTokenException();
