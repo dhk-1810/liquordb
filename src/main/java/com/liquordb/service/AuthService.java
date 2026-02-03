@@ -8,6 +8,7 @@ import com.liquordb.exception.user.*;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,11 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+
+    private static final String RESET_LINK = "https://liquordb.com/password/reset?token=";  // 실제로 작동하지는 않는 링크임.
+    private static final String RESET_MAIL_SUBJECT = "[LiquorDB] 비밀번호 재설정 안내드립니다.";
 
     // 회원가입
     @Transactional
@@ -88,9 +93,15 @@ public class AuthService {
         // TODO Redis 설정
         redisTemplate.opsForValue().set(resetToken, email, Duration.ofMinutes(10));
 
-        // TODO 메일
-        String resetLink = "https://liquordb.com/password/reset?token=" + resetToken; // 실제로 작동하지는 않는 링크임.
-        mailSender.sendMail(user.getEmail(), resetLink);
+        String resetLink = RESET_LINK + resetToken;
+
+        final String resetMailText
+                = "안녕하세요. LiquorDB입니다.\n\n" +
+                "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" +
+                resetLink + "\n\n" +
+                "이 링크는 5분 동안만 유효합니다.";
+
+        mailService.sendMail(user.getEmail(), RESET_MAIL_SUBJECT, resetMailText);
     }
 
     // 비밀번호 재설정
