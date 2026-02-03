@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class UserTagNotFoundException extends EntityNotFoundException {
+
     public UserTagNotFoundException(UUID userId, Long tagId) {
         super(
                 ErrorCode.USER_TAG_NOT_FOUND,
@@ -14,4 +15,5 @@ public class UserTagNotFoundException extends EntityNotFoundException {
                 Map.of("userId", userId, "tagId", tagId)
         );
     }
+
 }

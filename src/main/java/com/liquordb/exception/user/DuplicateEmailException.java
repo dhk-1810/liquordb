@@ -5,7 +5,7 @@ import com.liquordb.exception.AlreadyExistsException;
 
 import java.util.Map;
 
-public class DuplicateEmailException extends AlreadyExistsException { // TODO 부모도 수정?
+public class DuplicateEmailException extends AlreadyExistsException {
 
     public DuplicateEmailException(String email) {
         super(

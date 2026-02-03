@@ -7,11 +7,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.Serial;
 import java.util.Map;
+import java.util.UUID;
 
 public class ReviewReportAlreadyExistsException extends AlreadyExistsException {
 
-    public ReviewReportAlreadyExistsException(Map<String, Object> details) {
-        super(ErrorCode.REVIEW_REPORT_ALREADY_EXISTS, "이미 신고한 리뷰입니다.", details);
+    public ReviewReportAlreadyExistsException(Long reviewId, UUID userId) {
+        super(
+                ErrorCode.REVIEW_REPORT_ALREADY_EXISTS,
+                "이미 신고한 리뷰입니다.",
+                Map.of("reviewId", reviewId, "userId", userId)
+        );
     }
 
 }

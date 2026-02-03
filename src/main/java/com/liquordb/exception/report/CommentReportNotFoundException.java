@@ -8,7 +8,12 @@ import java.util.Map;
 
 public class CommentReportNotFoundException extends EntityNotFoundException {
 
-    public CommentReportNotFoundException(Map<String, Object> details) {
-        super(ErrorCode.COMMENT_REPORT_NOT_FOUND, "댓글 신고 내역을 찾을 수 없습니다.", details);
+    public CommentReportNotFoundException(Long commentReportId) {
+        super(
+                ErrorCode.COMMENT_REPORT_NOT_FOUND,
+                "댓글 신고 내역을 찾을 수 없습니다.",
+                Map.of("commentReportId", commentReportId)
+        );
     }
+
 }

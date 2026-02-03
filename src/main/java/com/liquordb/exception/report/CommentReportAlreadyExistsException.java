@@ -7,11 +7,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.Serial;
 import java.util.Map;
+import java.util.UUID;
 
 public class CommentReportAlreadyExistsException extends AlreadyExistsException {
 
-    public CommentReportAlreadyExistsException(Map<String, Object> details) {
-        super(ErrorCode.COMMENT_REPORT_ALREADY_EXISTS, "이미 신고한 댓글입니다.", details);
+    public CommentReportAlreadyExistsException(Long commentId, UUID userId) {
+        super(
+                ErrorCode.COMMENT_REPORT_ALREADY_EXISTS,
+                "이미 신고한 댓글입니다.",
+                Map.of("commentReportId", commentId, "requestUserId", userId)
+        );
     }
 
 }

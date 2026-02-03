@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.report.ReviewReportRequestDto;
 import com.liquordb.dto.report.ReviewReportResponseDto;
 import com.liquordb.entity.*;
+import com.liquordb.exception.report.ReviewReportAlreadyExistsException;
 import com.liquordb.exception.report.ReviewReportNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
@@ -33,20 +34,21 @@ public class ReviewReportService {
 
         User requestUser = userRepository.findById(requestUserId)
                 .orElseThrow(() -> new UserNotFoundException(requestUserId));
+        Long reviewId = request.reviewId();
 
         // 중복 신고 방지
-        boolean exists = reviewReportRepository.existsByReviewIdAndUser_Id(request.reviewId(), requestUserId);
+        boolean exists = reviewReportRepository.existsByReviewIdAndUser_Id(reviewId, requestUserId);
         if (exists) {
-            throw new IllegalArgumentException("이미 신고한 대상입니다."); // TODO 커스텀예외
+            throw new ReviewReportAlreadyExistsException(reviewId, requestUserId);
         }
 
         // 신고 저장
         ReviewReport report = reviewReportRepository.save(reviewReportMapper.toEntity(request, requestUser));
 
         // 누적 신고 수 확인 + 조건 충족시 숨기기 처리
-        long count = reviewReportRepository.countByReview_Id(request.reviewId());
+        long count = reviewReportRepository.countByReview_Id(reviewId);
         if (count >= REPORT_THRESHOLD) {
-            hideReport(request.reviewId());
+            hideReport(reviewId);
         }
 
         return reviewReportMapper.toDto(report);
