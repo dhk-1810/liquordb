@@ -9,7 +9,7 @@ public class InvalidParentCommentException extends LiquordbException {
 
     public InvalidParentCommentException(Long parentId) {
         super(
-                ErrorCode.BANNED_USER,
+                ErrorCode.INVALID_PARENT_COMMENT,
                 "부모 댓글 정보가 잘못되었습니다.",
                 Map.of("parentId", parentId)
         );

@@ -4,8 +4,8 @@ import com.liquordb.ReportManager;
 import com.liquordb.dto.report.CommentReportRequestDto;
 import com.liquordb.dto.report.CommentReportResponseDto;
 import com.liquordb.entity.*;
+import com.liquordb.exception.report.CommentReportAlreadyExistsException;
 import com.liquordb.exception.report.CommentReportNotFoundException;
-import com.liquordb.exception.report.ReportNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentReportMapper;
@@ -38,7 +38,7 @@ public class CommentReportService {
         // 중복 신고 방지
         boolean exists = commentReportRepository.existsByCommentIdAndUser_Id(request.commentId(), requestUserId);
         if (exists) {
-            throw new IllegalArgumentException("이미 신고한 대상입니다."); // TODO 커스텀예외
+            throw new CommentReportAlreadyExistsException(request.commentId(), requestUserId);
         }
 
         // 신고 저장
@@ -82,7 +82,7 @@ public class CommentReportService {
     // 신고 반려
     public CommentReportResponseDto rejectById(Long id) {
         CommentReport report = commentReportRepository.findById(id)
-                .orElseThrow(() -> new ReportNotFoundException(id));
+                .orElseThrow(() -> new CommentReportNotFoundException(id));
 
         report.getComment().unhide();
         report.reject();

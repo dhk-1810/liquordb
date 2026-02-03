@@ -216,7 +216,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+            throw new InvalidPasswordException();
         }
 
         user.updatePassword(passwordEncoder.encode(dto.newPassword()));

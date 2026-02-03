@@ -39,12 +39,12 @@ public class LiquorService {
 
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
-    public PageResponse<LiquorSummaryDto> getLiquorsByFilters(Liquor.LiquorCategory category,
-                                                              LiquorSubcategory subcategory,
-                                                              UUID userId,
-                                                              Pageable pageable
-                                                              ) { // 조회하는 사람, null 허용.
-
+    public PageResponse<LiquorSummaryDto> getLiquorsByFilters(
+            Liquor.LiquorCategory category,
+            LiquorSubcategory subcategory,
+            UUID userId,  // 조회하는 사람, null 허용.
+            Pageable pageable
+    ) {
         Page<Liquor> liquors = fetchLiquors(category, subcategory, pageable);
         List<Long> liquorIds = liquors.getContent().stream()
                 .map(Liquor::getId)
@@ -64,6 +64,7 @@ public class LiquorService {
     // 주류 목록 검색 (이름으로)
     @Transactional(readOnly = true)
     public PageResponse<LiquorSummaryDto> searchLiquorsByName(String keyword, UUID userId, Pageable pageable) {
+
         Page<Liquor> searchedLiquors = liquorRepository.findByNameContainingAndIsDeleted(pageable, keyword, false);
         List<Long> liquorIds = searchedLiquors.getContent().stream()
                 .map(Liquor::getId)
@@ -94,9 +95,10 @@ public class LiquorService {
         return LiquorMapper.toDto(liquor, tags, likedByMe);
     }
 
-    private Page<Liquor> fetchLiquors(Liquor.LiquorCategory category,
-                                      LiquorSubcategory subcategory,
-                                      Pageable pageable
+    private Page<Liquor> fetchLiquors(
+            Liquor.LiquorCategory category,
+            LiquorSubcategory subcategory,
+            Pageable pageable
     ) {
         if (subcategory != null) {
             return liquorRepository.findBySubcategoryAndIsDeleted(pageable, subcategory, false);
