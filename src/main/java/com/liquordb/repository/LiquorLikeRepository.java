@@ -22,7 +22,7 @@ public interface LiquorLikeRepository extends JpaRepository<LiquorLike, Long> {
     List<LiquorLike> findAllByLiquor_IdAndLiquorIsDeletedFalse(Long liquorId);
 
     // 유저가 좋이요 누른 객체 목록 - 마이페이지에서 사용
-    List<LiquorLike> findByUser_IdAndLiquorIsDeletedFalse(UUID userId);
+    List<LiquorLike> findByUser_IdAndLiquor_IsDeletedFalse(UUID userId);
 
     // 유저가 특정 객체에 좋아요 눌렀는지 확인 (눌렀는지 여부만)
     boolean existsByLiquor_IdAndUser_Id(Long liquorId, UUID userId);

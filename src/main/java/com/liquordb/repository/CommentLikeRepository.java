@@ -1,6 +1,5 @@
 package com.liquordb.repository;
 
-import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.CommentLike;
 import com.liquordb.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

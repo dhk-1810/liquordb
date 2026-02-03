@@ -26,8 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -45,7 +43,6 @@ public class UserService {
 
     private final UserTagService userTagService;
     private final FileService fileService;
-    private final LiquorMapper liquorMapper;
 
     private final JavaMailSender mailSender;
     private final OAuth2UserService oAuth2UserService;
@@ -61,8 +58,7 @@ public class UserService {
         if (existingUser != null) {
             if (existingUser.getStatus().isAvailable()) {
                 throw new DuplicateEmailException(email);
-            }
-            if (existingUser.getStatus().equals(UserStatus.BANNED)) {
+            } else if (existingUser.getStatus().equals(UserStatus.BANNED)) {
                 throw new BannedUserException();
             } else if (existingUser.getStatus().equals(UserStatus.WITHDRAWN)) {
                 throw new WithdrawnUserException();
@@ -139,10 +135,14 @@ public class UserService {
         List<CommentResponseDto> createdComments = commentRepository.findAllByUser_Id(userId).stream()
                 .map(CommentMapper::toDto)
                 .toList();
+        long reviewCount = createdReviews.size();
+        long commentCount = createdComments.size();
 
         // 좋아요한 주류, 리뷰, 댓글 목록
-        List<LiquorSummaryDto> likedLiquors = liquorLikeRepository.findByUser_IdAndLiquorIsDeletedFalse(userId).stream()
-                .map(liquorLike -> liquorMapper.toSummaryDto(liquorLike.getLiquor(), user))
+        List<LiquorLike> liquorLikes = liquorLikeRepository.findByUser_IdAndLiquor_IsDeletedFalse(userId); // TODO 개선
+        long liquorLikeCount = liquorLikes.size();
+        List<LiquorSummaryDto> likedLiquors = liquorLikes.stream()
+                .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), true, reviewCount, liquorLikeCount))
                 .toList();
         List<ReviewResponseDto> likedReviews = reviewLikeRepository.findByUser_IdAndReviewIsHiddenFalse(userId).stream()
                 .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))
@@ -151,8 +151,7 @@ public class UserService {
                 .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))
                 .toList();
 
-        long reviewCount = createdReviews.size();
-        long commentCount = createdComments.size();
+
         long likedLiquorCount = likedLiquors.size();
         long likedReviewCount = likedReviews.size();
         long likedCommentCount = likedComments.size();
