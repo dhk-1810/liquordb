@@ -4,7 +4,6 @@ import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
-import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
 import com.liquordb.mapper.CommentMapper;
@@ -44,54 +43,6 @@ public class UserService {
     private final UserTagService userTagService;
     private final FileService fileService;
 
-    private final JavaMailSender mailSender;
-    private final OAuth2UserService oAuth2UserService;
-
-    // 회원가입
-    @Transactional
-    public UserResponseDto signUp(UserRegisterRequestDto request, MultipartFile profileImage, Role role) {
-
-        String email = request.email();
-        User existingUser = userRepository.findByEmail(email)
-                .orElse(null);
-
-        if (existingUser != null) {
-            if (existingUser.getStatus().isAvailable()) {
-                throw new DuplicateEmailException(email);
-            } else if (existingUser.getStatus().equals(UserStatus.BANNED)) {
-                throw new BannedUserException();
-            } else if (existingUser.getStatus().equals(UserStatus.WITHDRAWN)) {
-                throw new WithdrawnUserException();
-            }
-        }
-
-        String encodedPassword = passwordEncoder.encode(request.password());
-        User user = UserMapper.toEntity(request, encodedPassword, role);
-        if (profileImage != null) {
-            user.setProfileImage(fileService.upload(profileImage));
-        }
-        userRepository.save(user);
-
-        return UserMapper.toDto(user);
-    }
-
-    // 로그인
-    // TODO 사라질 운명. 시큐리티에서 대체.
-    @Transactional
-    public UserResponseDto login(UserLoginRequestDto request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(LoginFailedException::new);
-
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new LoginFailedException();
-        }
-        if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new WithdrawnUserException();
-        }
-
-        return UserMapper.toDto(user);
-    }
-
     // 회원 탈퇴 (soft delete)
     @Transactional
     @PreAuthorize("#userId == authentication.principal.userId")
@@ -101,19 +52,6 @@ public class UserService {
 
         user.withdraw();
         userRepository.save(user);
-    }
-
-    // 계정 복구
-    @Transactional
-    public UserResponseDto restore(UserLoginRequestDto request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(LoginFailedException::new);
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new LoginFailedException();
-        }
-        user.restore();
-        userRepository.save(user);
-        return UserMapper.toDto(user);
     }
 
     // 마이페이지
@@ -209,67 +147,20 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // 비밀번호 재설정 (마이페이지)
+    // 비밀번호 수정 (로그인 상태에서)
     @Transactional
-    public void updatePassword(UUID userId, UserUpdatePasswordDto dto) {
+    public void updatePassword(PasswordUpdateRequestDto request, UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new InvalidPasswordException();
         }
 
-        user.updatePassword(passwordEncoder.encode(dto.newPassword()));
+        user.updatePassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
     }
 
-    // TODO 나중에 구현
-    /*
-    // 비밀번호 찾기 - 재설정 링크 전송
-    @Transactional
-    public void sendPasswordResetLink(UserFindPasswordRequestDto dto) {
-        String email = dto.getEmail();
-        User user = userRepository.findByEmail(email).orElse(null);
-
-        if (user == null || user.getStatus().equals(UserStatus.BANNED)) {
-            return;
-        }
-
-        String resetToken = UUID.randomUUID().toString();
-
-        // TODO Redis에 저장
-        user.updatePasswordResetToken(resetToken, LocalDateTime.now().plusMinutes(30));
-
-        // 4. 재설정 페이지 URL 생성 및 전송
-        String resetLink = "https://your-service.com/password/reset?token=" + resetToken;
-        mail.sendResetLink(user.getEmail(), resetLink);
-    }
-
-    // 비밀번호 재설정 (찾기 후)
-    @Transactional
-    public void resetPasswordByToken(String token, String newPassword) {
-        // 1. 토큰으로 유저 찾기 (유효 시간 검증 포함)
-        User user = userRepository.findByResetToken(token)
-                .orElseThrow(() -> new InvalidTokenException("유효하지 않거나 만료된 토큰입니다."));
-
-        // 2. 토큰 만료 시간 체크 (엔터티 내부 로직 권장)
-        if (user.isResetTokenExpired()) {
-            throw new InvalidTokenException("만료된 토큰입니다.");
-        }
-
-        // 3. 비밀번호 변경 및 토큰 초기화 (재사용 방지)
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.clearResetToken(); // 다시는 이 토큰으로 접근 못하게 비움
-
-        userRepository.save(user);
-    }
-
-
-    @Value("${spring.mail.username}")
-    private String fromEmail;
-
-
-*/
     /**
      * 관리자용 메서드
      */
@@ -288,28 +179,5 @@ public class UserService {
                 .toList();
     }
 
-    // 유저 이용제한
-    // TODO ReportService로 옮기기. 신고 승인시 자동 처리.
-//    public UserResponseDto restrictUser(UUID userId, String period) {
-//
-//        User user = userRepository.findActiveOrSuspendedUser(userId, List.of(UserStatus.ACTIVE, UserStatus.SUSPENDED))
-//                .orElseThrow(() -> new UserNotFoundException(userId));
-//
-//        long days = switch (period) {
-//            case "WARNING" -> 0;
-//            case "1D" -> 1;
-//            case "3D" -> 3;
-//            case "7D" -> 7;
-//            case "1M" -> 30;
-//            case "3M" -> 90;
-//            default -> throw new IllegalArgumentException("유효하지 않은 기간입니다.");
-//        };
-//
-//        if (days > 0) {
-//            user.suspend(LocalDateTime.now().plusDays(days));
-//        }
-//
-//        return UserMapper.toDto(userRepository.save(user));
-//    }
 }
 

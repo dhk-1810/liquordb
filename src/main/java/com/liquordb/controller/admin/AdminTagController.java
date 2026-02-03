@@ -1,4 +1,4 @@
-package com.liquordb.controller;
+package com.liquordb.controller.admin;
 
 import com.liquordb.dto.tag.TagRequestDto;
 import com.liquordb.dto.tag.TagResponseDto;

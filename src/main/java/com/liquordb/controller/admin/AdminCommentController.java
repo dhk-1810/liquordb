@@ -1,20 +1,15 @@
-package com.liquordb.controller;
+package com.liquordb.controller.admin;
 
 import com.liquordb.PageResponse;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.Comment;
-import com.liquordb.entity.Review;
-import com.liquordb.repository.CommentRepository;
 import com.liquordb.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController

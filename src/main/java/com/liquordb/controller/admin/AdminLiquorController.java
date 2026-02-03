@@ -1,4 +1,4 @@
-package com.liquordb.controller;
+package com.liquordb.controller.admin;
 
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;

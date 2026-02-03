@@ -9,7 +9,7 @@ import lombok.*;
  * 회원가입 요청 DTO입니다.
  */
 @Builder
-public record UserRegisterRequestDto (
+public record SignUpRequestDto(
 
         @NotBlank(message = "이메일로 공백은 사용할 수 없습니다.")
         @Email(message = "이메일 형식이 올바르지 않습니다.")

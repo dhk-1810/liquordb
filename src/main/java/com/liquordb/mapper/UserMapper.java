@@ -1,10 +1,9 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.user.UserRegisterRequestDto;
+import com.liquordb.dto.user.SignUpRequestDto;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
 import com.liquordb.enums.Role;
-import org.springframework.stereotype.Component;
 
 public class UserMapper {
 
@@ -17,7 +16,7 @@ public class UserMapper {
                 .build();
     }
 
-    public static User toEntity(UserRegisterRequestDto request, String encodedPassword, Role role){
+    public static User toEntity(SignUpRequestDto request, String encodedPassword, Role role){
         return User.builder()
                 .email(request.email())
                 .password(encodedPassword)
