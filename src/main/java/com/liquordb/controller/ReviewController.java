@@ -52,15 +52,20 @@ public class ReviewController {
 
     // 리뷰 삭제
     @DeleteMapping("/reviews/{reviewId}")
-    public ResponseEntity<Void> delete(@PathVariable Long reviewId, @AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<Void> delete(
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
         reviewService.delete(reviewId, user.getUserId());
         return ResponseEntity.noContent().build();
     }
 
     // 리뷰 좋아요
     @PostMapping("/reviews/{reviewId}/like")
-    public ResponseEntity<ReviewLikeResponseDto> toggleLike(@PathVariable Long reviewId,
-                                                            @AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<ReviewLikeResponseDto> toggleLike(
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
         ReviewLikeResponseDto response = reviewLikeService.toggleLike(user.getUserId(), reviewId);
         return ResponseEntity.ok(response);
     }

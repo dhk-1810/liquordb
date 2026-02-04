@@ -27,7 +27,6 @@ public class UserTagService {
     private final UserRepository userRepository;
     private final UserTagRepository userTagRepository;
     private final TagRepository tagRepository;
-    private final LiquorMapper liquorMapper;
 
     // 선호하는 태그 목록에 추가
     @Transactional
@@ -50,7 +49,7 @@ public class UserTagService {
 
     // 선호 태그 목록 반환
     @Transactional(readOnly = true)
-    public List<TagResponseDto> getByUserId(UUID userId , boolean showAll) {
+    public List<TagResponseDto> getByUserId(UUID userId , boolean showAll) { // TODO showAll 처리
 
         // TODO (10개 제한 여부 선택 가능)
         return userTagRepository.findTagsByUserId(userId).stream()
@@ -60,8 +59,9 @@ public class UserTagService {
     }
 
     // 유저가 선호하는 태그로 주류 목록 조회
+    // TODO LiquorTagService랑 중복되지 않나
     @Transactional(readOnly = true)
-    public List<LiquorSummaryDto> getLiquorsByUserTags(UUID userId) {
+    public List<LiquorSummaryDto> getRecommendedLiquors(UUID userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -69,7 +69,7 @@ public class UserTagService {
         List<Liquor> liquors = userTagRepository.findLiquorsByUser_Id(userId);
 
         return liquors.stream()
-                .map(liquor -> liquorMapper.toSummaryDto(liquor, user))
+                .map(liquor -> LiquorMapper.toSummaryDto(liquor, user))
                 .toList();
     }
 

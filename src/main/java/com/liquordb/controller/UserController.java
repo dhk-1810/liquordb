@@ -26,9 +26,9 @@ public class UserController {
     public ResponseEntity<String> update(
             @ModelAttribute UserUpdateRequestDto dto,
             @RequestPart(required = false) MultipartFile profileImage,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        userService.update(userDetails.getUserId(), dto, profileImage);
+        userService.update(user.getUserId(), dto, profileImage);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
     }
 
@@ -46,9 +46,9 @@ public class UserController {
     @GetMapping("/my-page")
     public ResponseEntity<UserMyPageResponseDto> getMyPage(
             @RequestParam(defaultValue = "false") boolean showAllTags,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        UserMyPageResponseDto myPage = userService.getMyPageInfo(userDetails.getUserId(), showAllTags);
+        UserMyPageResponseDto myPage = userService.getMyPageInfo(user.getUserId(), showAllTags);
         return ResponseEntity.ok(myPage);
     }
 
@@ -59,5 +59,4 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    public record MessageResponse(String message) {}
 }

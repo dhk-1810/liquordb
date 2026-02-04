@@ -28,9 +28,10 @@ public class CommentController {
 
     // 댓글 작성
     @PostMapping("/reviews/{reviewId}/comments")
-    public ResponseEntity<CommentResponseDto> create(@PathVariable Long reviewId,
-                                                     @RequestBody @Valid CommentRequestDto request,
-                                                     @AuthenticationPrincipal CustomUserDetails user
+    public ResponseEntity<CommentResponseDto> create(
+            @PathVariable Long reviewId,
+            @RequestBody @Valid CommentRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
         CommentResponseDto response = commentService.create(reviewId, request, user.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -38,33 +39,41 @@ public class CommentController {
 
     // 특정 리뷰의 댓글 조회
     @GetMapping("/reviews/{reviewId}/comments")
-    public ResponseEntity<PageResponse<CommentResponseDto>> findByReviewId(@PathVariable Long reviewId,
-                                                                           Pageable pageable) {
+    public ResponseEntity<PageResponse<CommentResponseDto>> findByReviewId(
+            @PathVariable Long reviewId,
+            Pageable pageable
+    ) {
         PageResponse<CommentResponseDto> comments = commentService.findByReviewId(reviewId, pageable);
         return ResponseEntity.ok(comments);
     }
 
     // 댓글 수정
     @PatchMapping("/comments/{commentId}")
-    public ResponseEntity<CommentResponseDto> update(@PathVariable Long commentId,
-                                                     @RequestBody @Valid CommentUpdateRequestDto request,
-                                                     @AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<CommentResponseDto> update(
+            @PathVariable Long commentId,
+            @RequestBody @Valid CommentUpdateRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
         CommentResponseDto response = commentService.update(commentId, request, user.getUserId());
         return ResponseEntity.ok(response);
     }
 
     // 댓글 삭제
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<Void> delete(@PathVariable Long commentId,
-                                       @AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<Void> delete(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
         commentService.deleteByIdAndUser(commentId, user.getUserId());
         return ResponseEntity.noContent().build();
     }
 
     // 좋아요 토글
     @PostMapping("/comments/{commentId}/like")
-    public ResponseEntity<CommentLikeResponseDto> toggleLike(@PathVariable Long commentId,
-                                                             @AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<CommentLikeResponseDto> toggleLike(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
         CommentLikeResponseDto response = commentLikeService.toggleLike(user.getUserId(), commentId);
         return ResponseEntity.ok(response);
     }

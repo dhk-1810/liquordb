@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users/tags")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserTagController {
 
     private final UserTagService userTagService;
 
     // 유저 기준 태그 목록 조회
-    @GetMapping("/user/{userId}")
+    @GetMapping("/{userId}/tags")
     public List<TagResponseDto> getPreferredTags(
             @PathVariable UUID userId,
             @RequestParam(defaultValue = "false") boolean showAll
@@ -27,10 +27,10 @@ public class UserTagController {
     }
 
     // 선호 태그 기반 주류 추천
-    @GetMapping("/user/{userId}/preferred-liquors")
-    public ResponseEntity<List<LiquorSummaryDto>> getPreferredLiquors(@PathVariable UUID userId) {
+    @GetMapping("/{userId}/recommended-liquors")
+    public ResponseEntity<List<LiquorSummaryDto>> getRecommendedLiquors(@PathVariable UUID userId) {
 
-        List<LiquorSummaryDto> liquors = userTagService.getLiquorsByUserTags(userId);
+        List<LiquorSummaryDto> liquors = userTagService.getRecommendedLiquors(userId);
         return ResponseEntity.ok(liquors);
     }
 }
