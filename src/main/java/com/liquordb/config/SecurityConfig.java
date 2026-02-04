@@ -1,6 +1,7 @@
 package com.liquordb.config;
 
 import com.liquordb.handler.JwtLoginSuccessHandler;
+import com.liquordb.handler.JwtLogoutHandler;
 import com.liquordb.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
+    private final JwtLogoutHandler jwtLogoutHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
@@ -28,28 +31,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 비활성화
+                // 기본 설정
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // URL 권한 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "api/auth/signup").permitAll()
-                        .requestMatchers("/api/auth/token-refresh").permitAll()// TODO 로그인, 소셜로그인?
-                        .anyRequest().authenticated()
-                )
-                .formLogin(login -> login
-                        .successHandler(jwtLoginSuccessHandler)
-                    .loginPage("/login") // 커스텀 로그인 페이지
-                    .defaultSuccessUrl("/") // 로그인 성공 시 리다이렉트 경로
-                    .permitAll()
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // OAuth2 로그인 설정
-                .oauth2Login(oauth2 -> oauth2
+                // 인증 설정
+                .formLogin(AbstractHttpConfigurer::disable)
+                .oauth2Login(oauth2 -> oauth2 // TODO 점검
                         .loginPage("/login") // 소셜 로그인도 같은 로그인 페이지 사용
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
+                )
+                .logout(logout -> logout.addLogoutHandler(jwtLogoutHandler))
+
+                // 인가 설정
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "api/auth/signup").permitAll()
+                        .requestMatchers("/api/auth/token-refresh").permitAll()// TODO 로그인, 소셜로그인?
+                        .anyRequest().authenticated()
                 );
 
         return http.build();

@@ -13,6 +13,7 @@ import com.liquordb.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,9 +67,8 @@ public class AuthService {
     }
 
     // 로그인
-    // TODO 사라질 운명. 시큐리티에서 대체.
     @Transactional
-    public UserResponseDto login(LoginRequestDto request) {
+    public JwtInformation login(LoginRequestDto request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(LoginFailedException::new);
 
@@ -79,7 +79,11 @@ public class AuthService {
             throw new WithdrawnUserException();
         }
 
-        return UserMapper.toDto(user);
+        JwtInformation reponse = new JwtInformation(
+                // TODO 토큰 발급 추가
+        )
+
+        return JwtInformation;
     }
 
     // 토큰 재발급
@@ -159,7 +163,6 @@ public class AuthService {
     }
 
     // 계정 복구
-    // TODO 시큐리티로 대체
     @Transactional
     public UserResponseDto restore(LoginRequestDto request) {
         User user = userRepository.findByEmail(request.email())

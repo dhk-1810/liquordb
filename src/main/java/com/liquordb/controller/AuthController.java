@@ -32,9 +32,8 @@ public class AuthController {
     }
 
     // 로그인
-    // TODO 시큐리티로 대체
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDto> login(@RequestBody @Valid LoginRequestDto request) {
+    public ResponseEntity<JwtInformation> login(@RequestBody @Valid LoginRequestDto request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
@@ -70,7 +69,6 @@ public class AuthController {
     }
 
     // 계정 복구
-    // TODO 시큐리티로 대체
     @PostMapping("/restore")
     public ResponseEntity<UserResponseDto> restore(@RequestBody LoginRequestDto request) {
         return ResponseEntity.ok(authService.restore(request));
