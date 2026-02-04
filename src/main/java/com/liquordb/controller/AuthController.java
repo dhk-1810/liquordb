@@ -1,8 +1,13 @@
 package com.liquordb.controller;
 
+import com.liquordb.dto.JwtDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.enums.Role;
+import com.liquordb.security.JwtInformation;
+import com.liquordb.security.TokenUtil;
 import com.liquordb.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -31,6 +36,23 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<UserResponseDto> login(@RequestBody @Valid LoginRequestDto request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    // 토큰 재발급
+    @PostMapping("/token-refresh")
+    public ResponseEntity<JwtDto> refreshToken(
+            @CookieValue(value = "REFRESH_TOKEN", required = false) String refreshToken,
+            HttpServletResponse response){
+
+        JwtInformation newInfo = authService.refresh(refreshToken);
+        Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(newInfo.refreshToken());
+        response.addCookie(refreshCookie);
+        JwtDto jwtDto = JwtDto.builder()
+                .accessToken(newInfo.accessToken())
+                .userDto(newInfo.dto())
+                .build();
+
+        return ResponseEntity.ok(jwtDto);
     }
 
     // 비밀번호 재설정 링크 전송

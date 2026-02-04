@@ -7,19 +7,17 @@ import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.UserRepository;
+import com.liquordb.security.JwtInformation;
+import com.liquordb.security.JwtRegistry;
+import com.liquordb.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -30,6 +28,9 @@ public class AuthService {
     private final FileService fileService;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+
+    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtRegistry jwtRegistry;
     private final StringRedisTemplate stringRedisTemplate;
 
     private static final String RESET_LINK_PREFIX = "https://liquordb.com/password/reset?token=";  // 실제로 작동하지는 않는 링크임.
@@ -79,6 +80,37 @@ public class AuthService {
         }
 
         return UserMapper.toDto(user);
+    }
+
+    // 토큰 재발급
+    public JwtInformation refresh(String refreshToken) {
+
+        // 서명 유효성, DB 존재 여부 확인
+        if (refreshToken == null
+                || !jwtTokenProvider.validateRefreshToken(refreshToken)
+                || !jwtRegistry.hasActiveJwtInformationByRefreshToken(refreshToken)
+        ) {
+            throw new InvalidTokenException(); // TODO Access, Refresh 분리
+        }
+
+        // 정보 조회
+        String username = jwtTokenProvider.getClaims(refreshToken).getSubject();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+
+        // 새 토큰 생성 - Access, Refresh 모두 새로 발급
+        String newAccess = jwtTokenProvider.createAccessToken(username, user.getRole().name());
+        String newRefresh = jwtTokenProvider.createRefreshToken(username, user.getRole().name());
+
+        // DB Rotation
+        JwtInformation newInfo = new JwtInformation(
+                UserMapper.toDto(user),
+                newAccess,
+                newRefresh
+        );
+        jwtRegistry.rotateJwtInformation(refreshToken, newInfo);
+
+        return newInfo;
     }
 
     // 비밀번호 재설정 링크 전송

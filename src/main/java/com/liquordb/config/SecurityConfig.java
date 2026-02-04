@@ -33,7 +33,8 @@ public class SecurityConfig {
 
                 // URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**", "/signup", "/api/users/**").permitAll()
+                        .requestMatchers("/", "api/auth/signup").permitAll()
+                        .requestMatchers("/api/auth/token-refresh").permitAll()// TODO 로그인, 소셜로그인?
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
