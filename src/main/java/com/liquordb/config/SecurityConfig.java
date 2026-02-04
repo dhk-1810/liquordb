@@ -1,11 +1,13 @@
 package com.liquordb.config;
 
+import com.liquordb.handler.JwtLoginSuccessHandler;
 import com.liquordb.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -15,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
@@ -26,14 +29,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 // CSRF 비활성화
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
 
                 // URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login/**", "/oauth2/**", "/signup", "/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
+                .formLogin(login -> login
+                        .successHandler(jwtLoginSuccessHandler)
                     .loginPage("/login") // 커스텀 로그인 페이지
                     .defaultSuccessUrl("/") // 로그인 성공 시 리다이렉트 경로
                     .permitAll()

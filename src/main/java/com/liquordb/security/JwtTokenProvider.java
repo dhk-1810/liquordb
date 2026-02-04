@@ -1,5 +1,6 @@
 package com.liquordb.security;
 
+import com.liquordb.exception.user.InvalidTokenException;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -77,7 +78,7 @@ public class JwtTokenProvider {
             SignedJWT signedJWT = SignedJWT.parse(token);
 
             if (!signedJWT.verify(verifier)) {
-                throw new RuntimeException("Invalid JWT Signature");
+                throw new InvalidTokenException();
             }
 
             JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
@@ -90,7 +91,7 @@ public class JwtTokenProvider {
             return claims;
         } catch (ParseException | JOSEException e) {
             log.error("Invalid Token: {}", e.getMessage());
-            throw new RuntimeException("Invalid JWT Token", e);
+            throw new InvalidTokenException();
         }
     }
 

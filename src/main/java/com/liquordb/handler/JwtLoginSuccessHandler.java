@@ -7,6 +7,7 @@ import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.UserRepository;
 import com.liquordb.security.JwtInformation;
 import com.liquordb.security.JwtProperties;
+import com.liquordb.security.JwtRegistry;
 import com.liquordb.security.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtRegistry jwtRegistry; // 중복 로그인 체크
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper; // JSON 변환
-    private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 14;
+    private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 14; // 2주
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
