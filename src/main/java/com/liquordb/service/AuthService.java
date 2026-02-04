@@ -8,6 +8,8 @@ import com.liquordb.exception.user.*;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -28,9 +30,11 @@ public class AuthService {
     private final FileService fileService;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate stringRedisTemplate;
 
     private static final String RESET_LINK_PREFIX = "https://liquordb.com/password/reset?token=";  // 실제로 작동하지는 않는 링크임.
     private static final String RESET_MAIL_SUBJECT = "[LiquorDB] 비밀번호 재설정 안내드립니다.";
+    private static final long RESET_TOKEN_EXPIRATION_MINUTES = 5;
 
     // 회원가입
     @Transactional
@@ -91,8 +95,7 @@ public class AuthService {
 
         String resetToken = UUID.randomUUID().toString();
 
-        // TODO Redis 설정
-        redisTemplate.opsForValue().set(resetToken, email, Duration.ofMinutes(10));
+        stringRedisTemplate.opsForValue().set(resetToken, email, Duration.ofMinutes(RESET_TOKEN_EXPIRATION_MINUTES));
 
         String resetLink = RESET_LINK_PREFIX + resetToken;
 
@@ -110,7 +113,7 @@ public class AuthService {
     public void resetPasswordByToken(PasswordResetRequest request) {
 
         String token = request.token();
-        String email = redisTemplate.opsForValue().get(token);
+        String email = stringRedisTemplate.opsForValue().get(token);
         if (email == null) {
             throw new InvalidTokenException();
         }
@@ -120,7 +123,7 @@ public class AuthService {
         user.updatePassword(passwordEncoder.encode(request.password()));
         userRepository.save(user);
 
-        redisTemplate.delete(token);
+        stringRedisTemplate.delete(token);
     }
 
     // 계정 복구
