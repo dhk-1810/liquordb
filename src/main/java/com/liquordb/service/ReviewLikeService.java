@@ -1,14 +1,13 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.review.ReviewLikeResponseDto;
-import com.liquordb.entity.ReviewLike;
+import com.liquordb.dto.LikeResponseDto;
+import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
+import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.repository.ReviewLikeRepository;
-import com.liquordb.entity.Review;
 import com.liquordb.repository.ReviewRepository;
-import com.liquordb.entity.User;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,29 +23,32 @@ public class ReviewLikeService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
 
-    // 좋아요 토글 (누르기/취소)
     @Transactional
-    public ReviewLikeResponseDto toggleLike(UUID userId, Long reviewId) {
+    public LikeResponseDto like(Long reviewId, UUID userId) {
 
-        User user = userRepository.findByIdAndStatus(userId, UserStatus.BANNED)
+        if (reviewLikeRepository.existsByReview_IdAndUser_Id(reviewId, userId)) {
+            return new LikeResponseDto(true, reviewLikeRepository.countByReview_Id(reviewId));
+        }
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
-        ReviewLike existingReviewLike = reviewLikeRepository.findByUserIdAndReviewId(userId, reviewId)
-                .orElse(null);
+        ReviewLike reviewLike = ReviewLike.create(user, review);
+        reviewLikeRepository.save(reviewLike);
+        long likeCount = reviewLikeRepository.countByReview_Id(reviewId);
+        return new LikeResponseDto(true, likeCount);
+    }
 
-        if (existingReviewLike != null) {
-            reviewLikeRepository.delete(existingReviewLike);
-            review.decreaseLikeCount();
-            return null;
-        } else {
-            ReviewLike reviewLike = ReviewLike.create(user, review);
-            reviewLikeRepository.save(reviewLike);
-            review.increaseLikeCount();
-            return ReviewLikeResponseDto.toDto(reviewLike);
-        }
+    @Transactional
+    public LikeResponseDto cancelLike(Long reviewId, UUID userId) {
+        reviewLikeRepository.findByReview_IdAndUser_Id(reviewId, userId)
+                .ifPresent(reviewLikeRepository::delete);
+
+        long likeCount = reviewLikeRepository.countByReview_Id(reviewId);
+        return new LikeResponseDto(false, likeCount);
     }
 
 }

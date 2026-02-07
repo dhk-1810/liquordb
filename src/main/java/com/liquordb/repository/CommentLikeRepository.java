@@ -24,5 +24,9 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     // 유저가 특정 댓글에 좋아요 눌렀는지 확인 (Like 객체 전체 반환)
     Optional<CommentLike> findByUserIdAndCommentId(UUID userId, Long commentId);
 
-    UUID user(User user);
+    boolean existsByComment_IdAndUser_Id(Long commentId, UUID userId);
+
+    long countByComment_Id(Long commentId);
+
+    Optional<Object> findByCommentIdAndUser_Id(Long commentId, UUID userId);
 }

@@ -23,4 +23,10 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
 
     // 유저가 리뷰에 좋아요 눌렀는지 확인 (Like 객체 전체 반환)
     Optional<ReviewLike> findByUserIdAndReviewId(UUID userId, Long reviewId);
+
+    boolean existsByReview_IdAndUser_Id(Long reviewId, UUID userId);
+
+    long countByReview_Id(Long reviewId);
+
+    Optional<ReviewLike> findByReview_IdAndUser_Id(Long reviewId, UUID userId);
 }

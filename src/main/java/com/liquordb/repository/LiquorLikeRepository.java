@@ -13,6 +13,8 @@ import java.util.UUID;
 
 public interface LiquorLikeRepository extends JpaRepository<LiquorLike, Long> {
 
+    long countByLiquor_Id(Long liquorId);
+
     // 유저가 누른 좋아요 개수 - 마이페이지에서 사용
     long countByUser_IdAndLiquorIsDeletedFalse(UUID userId);
 

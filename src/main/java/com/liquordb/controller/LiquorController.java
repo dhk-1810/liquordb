@@ -6,20 +6,15 @@ import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.entity.Liquor;
-import com.liquordb.entity.User;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -73,7 +68,7 @@ public class LiquorController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         UUID userId = (user != null) ? user.getUserId() : null;
-        LiquorLikeResponseDto response = liquorLikeService.toggleLike(liquorId, userId);
+        LiquorLikeResponseDto response = liquorLikeService.like(liquorId, userId);
         return ResponseEntity.ok(response);
     }
 

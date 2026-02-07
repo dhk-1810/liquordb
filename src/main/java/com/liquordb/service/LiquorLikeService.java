@@ -1,8 +1,7 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.liquor.LiquorLikeResponseDto;
+import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.entity.LiquorLike;
-import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.repository.LiquorLikeRepository;
@@ -16,34 +15,40 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class LiquorLikeService {
 
     private final LiquorRepository liquorRepository;
     private final LiquorLikeRepository liquorLikeRepository;
     private final UserRepository userRepository;
 
-    // 좋아요 토글 (누르기/취소)
     @Transactional
-    public LiquorLikeResponseDto toggleLike(Long liquorId, UUID userId) {
+    public LikeResponseDto like(Long liquorId, UUID userId) {
+
+        if (liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId)) {
+            return new LikeResponseDto(true, liquorLikeRepository.countByLiquor_Id(liquorId));
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Liquor liquor = liquorRepository.findById(liquorId)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
-        LiquorLike existingLiquorLike = liquorLikeRepository
-                .findByLiquor_IdAndUser_Id(liquor.getId(), user.getId()).orElse(null);
+        LiquorLike liquorLike = LiquorLike.create(user, liquor);
+        liquorLikeRepository.save(liquorLike);
+        long likeCount = liquorLikeRepository.countByLiquor_Id(liquorId);
+        return new LikeResponseDto(true, likeCount);
+    }
 
-        if (existingLiquorLike != null) {
-            liquorLikeRepository.delete(existingLiquorLike);
-            return null;
-        } else {
-            LiquorLike liquorLike = LiquorLike.create(user, liquor);
-            liquorLikeRepository.save(liquorLike);
-            return LiquorLikeResponseDto.toDto(liquorLike);
-        }
+    @Transactional
+    public LikeResponseDto cancelLike(Long liquorId, UUID userId) {
+        liquorLikeRepository.findByLiquor_IdAndUser_Id(liquorId, userId)
+                .ifPresent(liquorLikeRepository::delete);
+
+        long likeCount = liquorLikeRepository.countByLiquor_Id(liquorId);
+        return new LikeResponseDto(false, likeCount);
     }
 
 }
