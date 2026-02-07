@@ -1,7 +1,7 @@
 package com.liquordb.controller;
 
 import com.liquordb.PageResponse;
-import com.liquordb.dto.comment.CommentLikeResponseDto;
+import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
@@ -68,13 +68,23 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
-    // 좋아요 토글
+    // 좋아요
     @PostMapping("/comments/{commentId}/like")
-    public ResponseEntity<CommentLikeResponseDto> toggleLike(
+    public ResponseEntity<LikeResponseDto> like(
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CommentLikeResponseDto response = commentLikeService.toggleLike(user.getUserId(), commentId);
+        LikeResponseDto response = commentLikeService.like(commentId, user.getUserId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // 좋아요 취소
+    @DeleteMapping("/comments/{commentId}/cancel-like")
+    public ResponseEntity<LikeResponseDto> cancelLike(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        LikeResponseDto response = commentLikeService.cancelLike(commentId, user.getUserId());
         return ResponseEntity.ok(response);
     }
 

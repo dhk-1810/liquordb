@@ -1,7 +1,7 @@
 package com.liquordb.controller;
 
 import com.liquordb.PageResponse;
-import com.liquordb.dto.liquor.LiquorLikeResponseDto;
+import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.LiquorSubcategory;
@@ -11,6 +11,7 @@ import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -61,15 +62,26 @@ public class LiquorController {
         return ResponseEntity.ok(dto);
     }
 
-    // 주류 좋아요 토글 (누르기/취소)
+    // 좋아요
     @PostMapping("/{liquorId}/like")
-    public ResponseEntity<LiquorLikeResponseDto> toggleLike(
+    public ResponseEntity<LikeResponseDto> like(
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        UUID userId = (user != null) ? user.getUserId() : null;
-        LiquorLikeResponseDto response = liquorLikeService.like(liquorId, userId);
+        LikeResponseDto response = liquorLikeService.like(liquorId, user.getUserId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // 좋아요 취소
+    @DeleteMapping("/{liquorId}/cancel-like")
+    public ResponseEntity<LikeResponseDto> cancelLike(
+            @PathVariable Long liquorId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        LikeResponseDto response = liquorLikeService.cancelLike(liquorId, user.getUserId());
         return ResponseEntity.ok(response);
     }
+
+
 
 }

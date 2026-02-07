@@ -1,6 +1,6 @@
 package com.liquordb.controller;
 
-import com.liquordb.dto.review.ReviewLikeResponseDto;
+import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
@@ -10,6 +10,7 @@ import com.liquordb.service.ReviewService;
 import com.liquordb.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -60,13 +61,23 @@ public class ReviewController {
         return ResponseEntity.noContent().build();
     }
 
-    // 리뷰 좋아요
+    // 좋아요
     @PostMapping("/reviews/{reviewId}/like")
-    public ResponseEntity<ReviewLikeResponseDto> toggleLike(
+    public ResponseEntity<LikeResponseDto> like(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        ReviewLikeResponseDto response = reviewLikeService.toggleLike(user.getUserId(), reviewId);
+        LikeResponseDto response = reviewLikeService.like(reviewId, user.getUserId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // 좋아요 취소
+    @DeleteMapping("/reviews/{reviewId}/cancel-like")
+    public ResponseEntity<LikeResponseDto> cancelLike(
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        LikeResponseDto response = reviewLikeService.cancelLike(reviewId, user.getUserId());
         return ResponseEntity.ok(response);
     }
 
