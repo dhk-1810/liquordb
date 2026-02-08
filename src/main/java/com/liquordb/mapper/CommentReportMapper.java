@@ -11,21 +11,15 @@ import com.liquordb.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
+import java.util.UUID;
+
 public class CommentReportMapper {
 
-    private final CommentRepository commentRepository;
-
-    public CommentReport toEntity(CommentReportRequestDto request, User requestUser) {
-        Long commentId = request.commentId();
-        Comment comment = commentRepository.findByIdAndStatus_Active(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(commentId));
-
-        return CommentReport.create(comment, requestUser.getId(), request.reason());
+    public static CommentReport toEntity(Comment comment, String reason, UUID requestUserId) {
+        return CommentReport.create(comment, reason, requestUserId);
     }
 
-    public CommentReportResponseDto toDto(CommentReport report){
+    public static CommentReportResponseDto toDto(CommentReport report){
         return new CommentReportResponseDto(
                 report.getComment().getId(), // TODO N+1 ??
                 report.getRequestUserId(),

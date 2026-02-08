@@ -1,8 +1,6 @@
 package com.liquordb.dto.report;
 
-import com.liquordb.entity.ReviewReport;
 import com.liquordb.enums.ReportStatus;
-import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

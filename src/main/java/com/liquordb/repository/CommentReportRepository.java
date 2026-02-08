@@ -1,7 +1,12 @@
 package com.liquordb.repository;
 
 import com.liquordb.entity.CommentReport;
+import com.liquordb.enums.ReportStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.UUID;
 
@@ -13,4 +18,7 @@ public interface CommentReportRepository extends JpaRepository<CommentReport, Lo
     // 누적 신고 건수 count
     long countByComment_Id(Long comment);
 
+    // 목록 조회
+    @Query("SELECT cr FROM CommentReport cr WHERE (:status IS NULL OR cr.status = :status)")
+    Page<CommentReport> findAllByStatus(@Param("status") ReportStatus status, Pageable pageable);
 }

@@ -59,7 +59,7 @@ public class CommentReport {
         this.reason = reason;
     }
 
-    public static CommentReport create(Comment comment, UUID requestUserId, String reason) {
+    public static CommentReport create(Comment comment, String reason, UUID requestUserId) {
         return CommentReport.builder()
                 .comment(comment)
                 .requestUserId(requestUserId)

@@ -3,8 +3,6 @@ package com.liquordb.service;
 import com.liquordb.PageResponse;
 import com.liquordb.dto.liquor.LiquorUpdateRequestDto;
 import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.entity.LiquorLike;
-import com.liquordb.entity.User;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.dto.liquor.LiquorRequestDto;

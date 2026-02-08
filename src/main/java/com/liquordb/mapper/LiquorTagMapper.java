@@ -11,9 +11,6 @@ public class LiquorTagMapper {
     }
 
     public static TagResponseDto toTagDto(LiquorTag liquorTag) {
-        return TagResponseDto.builder()
-                .id(liquorTag.getTag().getId())
-                .name(liquorTag.getTag().getName())
-                .build();
+        return new TagResponseDto(liquorTag.getTag().getId(), liquorTag.getTag().getName());
     }
 }
