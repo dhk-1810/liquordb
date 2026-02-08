@@ -1,7 +1,6 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.user.*;
-import com.liquordb.enums.Role;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.UserService;
 import jakarta.validation.Valid;
@@ -11,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,11 +41,11 @@ public class UserController {
 
     // 마이페이지
     @GetMapping("/my-page")
-    public ResponseEntity<UserMyPageResponseDto> getMyPage(
+    public ResponseEntity<UserMyPageDto> getMyPage(
             @RequestParam(defaultValue = "false") boolean showAllTags,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        UserMyPageResponseDto myPage = userService.getMyPageInfo(user.getUserId(), showAllTags);
+        UserMyPageDto myPage = userService.getMyPageInfo(user.getUserId(), showAllTags);
         return ResponseEntity.ok(myPage);
     }
 

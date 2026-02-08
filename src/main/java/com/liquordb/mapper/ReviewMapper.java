@@ -39,10 +39,9 @@ public class ReviewMapper {
         return ReviewSummaryDto.builder()
                 .id(review.getId())
                 .title(review.getTitle())
-                .content(review.getContent())
                 .score(review.getRating())
                 .liquorName(review.getLiquor().getName())
-                .createdDate(review.getCreatedAt())
+                .createdAt(review.getCreatedAt())
                 .build();
 
     }

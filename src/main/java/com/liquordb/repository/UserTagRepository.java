@@ -14,12 +14,11 @@ import java.util.UUID;
 
 public interface UserTagRepository extends JpaRepository<UserTag, Long> {
 
-    Optional<UserTag> findByUser_IdAndTag_Id(UUID userId, Long tagId);
-
-    @Query("SELECT t FROM Tag t JOIN t.userTags ut WHERE ut.user.id = :userId")
+    @Query("SELECT t FROM Tag t JOIN t.userTags ut WHERE ut.user.id = :userId") // TODO 삭제?
     List<Tag> findTagsByUserId(@Param("userId") UUID userId);
 
-    List<UserTag> findByUserId(UUID userId);
+    @Query("SELECT ut FROM UserTag ut JOIN FETCH ut.tag WHERE ut.user.id = :userId")
+    List<UserTag> findAllByUser_IdWithTag(@Param("userId") UUID userId);
 
     boolean existsByUserAndTag_Id(User user, Long tagId);
 
@@ -30,8 +29,6 @@ public interface UserTagRepository extends JpaRepository<UserTag, Long> {
         WHERE ut.user.id = :userId
     """)
     List<Liquor> findLiquorsByUser_Id(@Param("userId") UUID userId);
-
-    boolean existsByUserIdAndTagId(UUID userId, Long tagId);
 
     void deleteByUser_IdAndTag_Id(UUID userId, Long tagId);
 }

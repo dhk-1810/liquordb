@@ -1,20 +1,13 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
-import com.liquordb.mapper.CommentMapper;
-import com.liquordb.mapper.LiquorMapper;
-import com.liquordb.mapper.ReviewMapper;
+import com.liquordb.mapper.TagMapper;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
-import com.liquordb.dto.liquor.LiquorSummaryDto;
-
-import com.liquordb.dto.comment.CommentResponseDto;
-import com.liquordb.dto.review.ReviewSummaryDto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,17 +22,16 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final PasswordEncoder passwordEncoder;
-
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
     private final LiquorLikeRepository liquorLikeRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
-
-    private final UserTagService userTagService;
+    private final UserTagRepository userTagRepository;
     private final FileService fileService;
+
+    private final PasswordEncoder passwordEncoder;
 
     // 회원 탈퇴 (soft delete)
     @Transactional
@@ -55,63 +47,32 @@ public class UserService {
     // 마이페이지
     @Transactional
     @PreAuthorize("#userId == authentication.principal.userId")
-    public UserMyPageResponseDto getMyPageInfo(UUID userId, boolean showAllTags) {
+    public UserMyPageDto getMyPageInfo(UUID userId, boolean showAllTags) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        // 리뷰 작성 목록
-        List<ReviewSummaryDto> createdReviews
-                = reviewRepository.findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(userId, Review.ReviewStatus.ACTIVE)
-                .stream()
-                .map(ReviewMapper::toSummaryDto)
-                .toList();
+        long reviewCount = reviewRepository.countByUser_IdAndStatus(userId, Review.ReviewStatus.ACTIVE);
+        long commentCount = commentRepository.countByUser_IdAndStatus(userId, Comment.CommentStatus.ACTIVE);
 
-        // 댓글 작성 목록
-        List<CommentResponseDto> createdComments = commentRepository.findAllByUser_Id(userId).stream()
-                .map(CommentMapper::toDto)
-                .toList();
-        long reviewCount = createdReviews.size();
-        long commentCount = createdComments.size();
-
-        // 좋아요한 주류, 리뷰, 댓글 목록
-        List<LiquorLike> liquorLikes = liquorLikeRepository.findByUser_IdAndLiquor_IsDeletedFalse(userId); // TODO 개선
-        long liquorLikeCount = liquorLikes.size();
-        List<LiquorSummaryDto> likedLiquors = liquorLikes.stream()
-                .map(liquorLike -> LiquorMapper.toSummaryDto(liquorLike.getLiquor(), true, reviewCount, liquorLikeCount))
-                .toList();
-        List<ReviewResponseDto> likedReviews = reviewLikeRepository.findByUser_IdAndReviewIsHiddenFalse(userId).stream()
-                .map(reviewLike -> ReviewMapper.toDto(reviewLike.getReview()))
-                .toList();
-        List<CommentResponseDto> likedComments = commentLikeRepository.findByUser_IdAndCommentIsHiddenFalse(userId).stream()
-                .map(commentLike -> CommentMapper.toDto(commentLike.getComment()))
-                .toList();
-
-
-        long likedLiquorCount = likedLiquors.size();
-        long likedReviewCount = likedReviews.size();
-        long likedCommentCount = likedComments.size();
-
+        long likedLiquorCount = liquorLikeRepository.countByUser_IdAndLiquorIsDeletedFalse(userId);
+        long likedReviewCount = reviewLikeRepository.countByUser_IdAndReviewStatus(userId, Review.ReviewStatus.ACTIVE);
+        long likedCommentCount = commentLikeRepository.countByUser_IdAndCommentStatus(userId, Comment.CommentStatus.ACTIVE);
 
         // 등록한(=선호하는) 태그 목록
-        List<TagResponseDto> preferredTags = userTagService.getByUserId(userId, showAllTags);
+        List<TagResponseDto> preferredTags = userTagRepository.findAllByUser_IdWithTag(userId)
+                .stream().map(TagMapper::toDto).toList();
 
-        return UserMyPageResponseDto.builder()
-                .userId(user.getId())
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .reviewCount(reviewCount)
-                .commentCount(commentCount)
-                .likedLiquorCount(likedLiquorCount)
-                .likedReviewCount(likedReviewCount)
-                .likedCommentCount(likedCommentCount)
-                .likedLiquors(likedLiquors)
-                .likedReviews(likedReviews)
-                .likedComments(likedComments)
-                .reviewList(createdReviews)
-                .commentList(createdComments)
-                .preferredTags(preferredTags)
-                .build();
+        return UserMapper.toMyPageDto(
+                user,
+                reviewCount,
+                commentCount,
+                likedLiquorCount,
+                likedReviewCount,
+                likedCommentCount,
+                preferredTags
+        );
+
     }
 
     // 회원정보수정 (닉네임, 프사)

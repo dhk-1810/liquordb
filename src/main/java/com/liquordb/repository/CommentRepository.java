@@ -29,7 +29,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByUserIdAndStatus(UUID userId, Comment.CommentStatus statuses, Pageable pageable);
 
     // 특정 유저가 작성한 댓글 수
-    long countByUserAndStatus(User user, Comment.CommentStatus status);
+    long countByUser_IdAndStatus(UUID userId, Comment.CommentStatus status);
 
     // 특정 유저가 작성한 댓글
     List<Comment> findAllByUser_Id(UUID userId);
@@ -84,4 +84,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Comment c SET c.likeCount = c.likeCount + :delta WHERE c.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
+
+
 }
