@@ -30,15 +30,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByIdAndIsHiddenFalse(Long id);
 
     // 특정 주류, 유저에 따른 리뷰 목록
-    List<Review> findAllByLiquor_IdAndStatus(Long id, Review.ReviewStatus status); // TODO 주류 리뷰 모두 숨김 상태 아니여야 함.
-    Page<Review> findAllByLiquor_IdAndStatus(Pageable pageable, Long liquorId, Review.ReviewStatus status);
-    Page<Review> findAllByUser_IdAndStatus(Pageable pageable, UUID userId, Review.ReviewStatus status);
+    List<Review> findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(Long id, Review.ReviewStatus status);
+    Page<Review> findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(Pageable pageable, Long liquorId, Review.ReviewStatus status);
+    Page<Review> findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(Pageable pageable, UUID userId, Review.ReviewStatus status);
 
     // 좋아요 누른 리뷰 개수
     long countByUserAndStatus(User user, Review.ReviewStatus status);
 
     // 특정 유저가 작성한 댓글
-    List<Review> findAllByUser_IdAndStatus(UUID reviewId, Review.ReviewStatus status);
+    List<Review> findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(UUID reviewId, Review.ReviewStatus status);
 
     // 관리자용 - 유저ID나 상태로 리뷰 목록 조회
     @Query("""
@@ -69,4 +69,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     void restoreReviewsByLiquor(@Param("liquor") Liquor liquor);
 
 
+    // 좋아요 수 변경
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Review r SET r.likeCount = r.likeCount + :delta WHERE r.id = :id")
+    void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 }

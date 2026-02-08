@@ -105,11 +105,11 @@ public class Liquor extends LikeableEntity {
         // 연관 리뷰 복구는 서비스단에서 수행.
     }
 
-    public void incrementReviewCount() {
+    public void increaseReviewCount() {
         this.reviewCount++;
     }
 
-    public void decrementReviewCount() {
+    public void decreaseReviewCount() {
         if (this.reviewCount <= 0) return;
         this.reviewCount--;
     }

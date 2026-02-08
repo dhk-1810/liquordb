@@ -17,10 +17,8 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.review.ReviewSummaryDto;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,7 +62,7 @@ public class UserService {
 
         // 리뷰 작성 목록
         List<ReviewSummaryDto> createdReviews
-                = reviewRepository.findAllByUser_IdAndStatus(userId, Review.ReviewStatus.ACTIVE)
+                = reviewRepository.findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(userId, Review.ReviewStatus.ACTIVE)
                 .stream()
                 .map(ReviewMapper::toSummaryDto)
                 .toList();

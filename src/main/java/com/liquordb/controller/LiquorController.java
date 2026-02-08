@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/liquors")
-@RequiredArgsConstructor
 public class LiquorController {
 
     private final LiquorService liquorService;

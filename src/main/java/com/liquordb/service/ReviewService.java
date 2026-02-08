@@ -67,7 +67,7 @@ public class ReviewService {
     public Page<ReviewResponseDto> findAllByLiquorId(Pageable pageable, Long liquorId) {
         Liquor liquor = liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
-        return reviewRepository.findAllByLiquor_IdAndStatus(pageable, liquorId, Review.ReviewStatus.ACTIVE)
+        return reviewRepository.findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(pageable, liquorId, Review.ReviewStatus.ACTIVE)
                 .map(ReviewMapper::toDto);
     }
 
@@ -76,7 +76,7 @@ public class ReviewService {
     public Page<ReviewResponseDto> findAllByUserId(Pageable pageable, UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        return reviewRepository.findAllByUser_IdAndStatus(pageable, userId, Review.ReviewStatus.ACTIVE)
+        return reviewRepository.findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(pageable, userId, Review.ReviewStatus.ACTIVE)
                 .map(ReviewMapper::toDto);
     }
 

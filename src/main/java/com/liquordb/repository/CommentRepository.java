@@ -80,4 +80,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     """)
     void restoreCommentsByLiquor(@Param("liquor") Liquor liquor, @Param("liquorDeletedAt") LocalDateTime liquorDeletedAt);
 
+    // 좋아요 수 변경
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Comment c SET c.likeCount = c.likeCount + :delta WHERE c.id = :id")
+    void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 }

@@ -7,7 +7,6 @@ import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
 import com.liquordb.service.ReviewService;
-import com.liquordb.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,8 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
 @RequestMapping("/api")
 public class ReviewController {
 
