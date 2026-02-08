@@ -1,5 +1,6 @@
 package com.liquordb.controller;
 
+import com.liquordb.CursorPageResponse;
 import com.liquordb.PageResponse;
 import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.comment.CommentRequestDto;
@@ -37,11 +38,11 @@ public class CommentController {
 
     // 특정 리뷰의 댓글 조회
     @GetMapping("/reviews/{reviewId}/comments")
-    public ResponseEntity<PageResponse<CommentResponseDto>> findByReviewId(
+    public ResponseEntity<CursorPageResponse<CommentResponseDto>> findByReviewId(
             @PathVariable Long reviewId,
             Pageable pageable
     ) {
-        PageResponse<CommentResponseDto> comments = commentService.findByReviewId(reviewId, pageable);
+        CursorPageResponse<CommentResponseDto> comments = commentService.findByReviewId(reviewId, pageable);
         return ResponseEntity.ok(comments);
     }
 

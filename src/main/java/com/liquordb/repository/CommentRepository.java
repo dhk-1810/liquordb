@@ -6,6 +6,7 @@ import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,8 +22,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // 댓글 단건 조회
     Optional<Comment> findByIdAndStatus(Long id, Comment.CommentStatus status);
 
-    // 특정 리뷰에 달린 댓글 조회 (삭제되지 않은 댓글만)
-    Page<Comment> findByReviewIdAndStatus(Long reviewId, Comment.CommentStatus status, Pageable pageable);
+    // 특정 리뷰에 달린 댓글 조회
+    Slice<Comment> findByReview_IdAndStatus(Long reviewId, Comment.CommentStatus status, Pageable pageable);
 
     // 특정 유저가 작성한 댓글 조회 (삭제한 댓글은 제외)
     Page<Comment> findByUserIdAndStatus(UUID userId, Comment.CommentStatus statuses, Pageable pageable);
@@ -44,7 +45,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             @Param("status") Comment.CommentStatus status,
             Pageable pageable
     );
-
 
     // 리뷰 연관 댓글 soft delete (Bulk Update)
     @Modifying(clearAutomatically = true)

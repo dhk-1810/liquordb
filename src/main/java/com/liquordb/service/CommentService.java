@@ -1,5 +1,6 @@
 package com.liquordb.service;
 
+import com.liquordb.CursorPageResponse;
 import com.liquordb.PageResponse;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
@@ -19,15 +20,17 @@ import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class CommentService {
 
     private final UserRepository userRepository;
@@ -72,17 +75,23 @@ public class CommentService {
     }
 
     // 특정 리뷰의 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
+    // TODO 정렬조건 - 인기순, 최신순
     @Transactional(readOnly = true)
-    // TODO 커서 페이지네이션
-    public PageResponse<CommentResponseDto> findByReviewId(Long reviewId, Pageable pageable) {
-        Review review = reviewRepository.findById(reviewId)
+    public CursorPageResponse<CommentResponseDto> findByReviewId(Long reviewId, Pageable pageable) {
+        Review review = reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
-        Page<Comment> comments
-                = commentRepository.findByReviewIdAndStatus(reviewId, Comment.CommentStatus.ACTIVE, pageable);
-        Page<CommentResponseDto> response = comments.map(CommentMapper::toDto);
+        Slice<Comment> comments
+                = commentRepository.findByReview_IdAndStatus(reviewId, Comment.CommentStatus.ACTIVE, pageable);
+        Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
 
-        return PageResponse.from(response);
+        Long nextCursor = null;
+        if (response.hasNext()) {
+            List<CommentResponseDto> content = response.getContent();
+            nextCursor = content.get(content.size() - 1).id();
+        }
+
+        return CursorPageResponse.from(response, nextCursor);
     }
 
     // 본인이 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
