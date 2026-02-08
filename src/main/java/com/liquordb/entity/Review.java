@@ -22,9 +22,11 @@ public class Review extends LikeableEntity implements ReportableEntity {
     @Column(nullable = false)
     private Double rating;
 
+    @Column(nullable = false)
     private String title;
 
     @Lob
+    @Column(nullable = false)
     private String content;
 
     @Column(nullable = false)

@@ -1,7 +1,9 @@
 package com.liquordb.service;
 
+import com.liquordb.CursorPageResponse;
 import com.liquordb.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
+import com.liquordb.dto.review.ReviewSummaryDto;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -14,6 +16,7 @@ import com.liquordb.dto.review.ReviewResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +26,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class ReviewService {
 
     private final UserRepository userRepository;
@@ -64,20 +67,24 @@ public class ReviewService {
 
     // 주류에 따른 리뷰 조회
     @Transactional(readOnly = true)
-    public Page<ReviewResponseDto> findAllByLiquorId(Pageable pageable, Long liquorId) {
-        Liquor liquor = liquorRepository.findByIdAndIsDeleted(liquorId, false)
+    public CursorPageResponse<ReviewResponseDto> getAllByLiquor(Long liquorId, Pageable pageable) {
+
+        liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
-        return reviewRepository.findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(pageable, liquorId, Review.ReviewStatus.ACTIVE)
-                .map(ReviewMapper::toDto);
+
+        Slice<Review> reviews = reviewRepository.findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(liquorId, Review.ReviewStatus.ACTIVE, pageable);
+        return getCursorPageResponse(reviews);
     }
 
     // 유저에 따른 리뷰 조회
     @Transactional(readOnly = true)
-    public Page<ReviewResponseDto> findAllByUserId(Pageable pageable, UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        return reviewRepository.findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(pageable, userId, Review.ReviewStatus.ACTIVE)
-                .map(ReviewMapper::toDto);
+    public CursorPageResponse<ReviewResponseDto> getAllByUser(UUID authorId, Pageable pageable) {
+
+        userRepository.findById(authorId)
+                .orElseThrow(() -> new UserNotFoundException(authorId));
+
+        Slice<Review> reviews = reviewRepository.findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(authorId, Review.ReviewStatus.ACTIVE, pageable);
+        return getCursorPageResponse(reviews);
     }
 
     // 리뷰 수정
@@ -130,6 +137,19 @@ public class ReviewService {
         commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);
         review.softDelete(reviewDeletedAt);
         reviewRepository.save(review);
+    }
+
+    // 페이지네이션 헬퍼 메서드
+    private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews) {
+        Slice<ReviewResponseDto> response = reviews.map(ReviewMapper::toDto);
+
+        Long nextCursor = null;
+        if (response.hasNext()) {
+            List<ReviewResponseDto> content = response.getContent();
+            nextCursor = content.get(content.size() - 1).id();
+        }
+
+        return CursorPageResponse.from(response, nextCursor);
     }
 
     /**

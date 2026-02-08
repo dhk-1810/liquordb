@@ -1,14 +1,17 @@
 package com.liquordb.controller;
 
+import com.liquordb.CursorPageResponse;
 import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
+import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
 import com.liquordb.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,6 +38,30 @@ public class ReviewController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         ReviewResponseDto response = reviewService.create(liquorId, requestDto, images, user.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    // 리뷰 목록 조회 - 주류별
+    @GetMapping("/liquors/{liquorId}/reviews")
+    public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByLiquor(
+            @PathVariable Long liquorId,
+            Pageable pageable
+    ) {
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByLiquor(liquorId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    // 리뷰 목록 조회 - 유저별
+    @GetMapping("/users/{authorId}/reviews")
+    public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByUser(
+            @PathVariable UUID authorId,
+            @AuthenticationPrincipal CustomUserDetails user,
+            Pageable pageable
+    ) {
+        if (user == null) {
+            throw new UnauthenticatedUserException();
+        }
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByUser(authorId, pageable);
         return ResponseEntity.ok(response);
     }
 

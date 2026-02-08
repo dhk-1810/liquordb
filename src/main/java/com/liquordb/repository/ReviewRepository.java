@@ -2,9 +2,9 @@ package com.liquordb.repository;
 
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.Review;
-import com.liquordb.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,16 +26,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.liquor.id = :liquorId")
     Double getAverageRatingByLiquorId(@Param("liquorId") Long liquorId);
 
-    // 리뷰 단건 조회
-    Optional<Review> findByIdAndIsHiddenFalse(Long id);
-
-    // 특정 주류, 유저에 따른 리뷰 목록
-    List<Review> findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(Long id, Review.ReviewStatus status);
-    Page<Review> findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(Pageable pageable, Long liquorId, Review.ReviewStatus status);
-    Page<Review> findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(Pageable pageable, UUID userId, Review.ReviewStatus status);
+    // 리뷰 목록 조회
+    Slice<Review> findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(Long liquorId, Review.ReviewStatus status, Pageable pageable);
+    Page<Review> findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(UUID userId, Review.ReviewStatus status, Pageable pageable);
 
     // 좋아요 누른 리뷰 개수
-    long countByUserAndStatus(User user, Review.ReviewStatus status);
+    long countByUser_IdAndStatus(UUID userId, Review.ReviewStatus status);
 
     // 특정 유저가 작성한 댓글
     List<Review> findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(UUID reviewId, Review.ReviewStatus status);
@@ -67,7 +63,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
          WHERE r.liquor = :liquor AND r.deletedAt = :deletedAt
     """)
     void restoreReviewsByLiquor(@Param("liquor") Liquor liquor);
-
 
     // 좋아요 수 변경
     @Modifying(clearAutomatically = true)
