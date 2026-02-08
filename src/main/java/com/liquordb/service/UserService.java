@@ -33,21 +33,10 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    // 회원 탈퇴 (soft delete)
-    @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
-    public void withdraw(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        user.withdraw();
-        userRepository.save(user);
-    }
-
     // 마이페이지
     @Transactional
     @PreAuthorize("#userId == authentication.principal.userId")
-    public UserMyPageDto getMyPageInfo(UUID userId, boolean showAllTags) {
+    public UserMyPageDto getMyPageInfo(UUID userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -72,7 +61,6 @@ public class UserService {
                 likedCommentCount,
                 preferredTags
         );
-
     }
 
     // 회원정보수정 (닉네임, 프사)
@@ -108,7 +96,8 @@ public class UserService {
 
     // 비밀번호 수정 (로그인 상태에서)
     @Transactional
-    public void updatePassword(PasswordUpdateRequestDto request, UUID userId) {
+    @PreAuthorize("#userId == authentication.principal.userId")
+    public void updatePassword(UUID userId, PasswordUpdateRequestDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -117,6 +106,17 @@ public class UserService {
         }
 
         user.updatePassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+    }
+
+    // 회원 탈퇴 (soft delete)
+    @Transactional
+    @PreAuthorize("#userId == authentication.principal.userId")
+    public void withdraw(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.withdraw();
         userRepository.save(user);
     }
 

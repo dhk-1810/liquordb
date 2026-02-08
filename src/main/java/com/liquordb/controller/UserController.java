@@ -11,6 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -18,41 +20,46 @@ public class UserController {
 
     private final UserService userService;
 
-    // 회원정보 수정 (프로필사진, 닉네임)
-    @PatchMapping(path = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<String> update(
-            @ModelAttribute UserUpdateRequestDto dto,
-            @RequestPart(required = false) MultipartFile profileImage,
+    // 마이페이지
+    @GetMapping("/{userId}/my-page")
+    public ResponseEntity<UserMyPageDto> getMyPage(
+            @PathVariable UUID userId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        userService.update(user.getUserId(), dto, profileImage);
+        UserMyPageDto myPage = userService.getMyPageInfo(userId);
+        return ResponseEntity.ok(myPage);
+    }
+
+    // 회원정보 수정 (프로필사진, 닉네임)
+    @PatchMapping(path = "/{userId}/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<String> update(
+            @PathVariable UUID userId,
+            @ModelAttribute UserUpdateRequestDto request,
+            @RequestPart(required = false) MultipartFile profileImage,
+            @AuthenticationPrincipal CustomUserDetails user // 서비스단에서 @PreAuthorize 사용 위해 필요
+    ) {
+        userService.update(userId, request, profileImage);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
     }
 
     // 비밀번호 수정 (로그인 상태에서)
-    @PatchMapping("/update-password")
+    @PatchMapping("/{userId}/update-password")
     public ResponseEntity<Void> updatePassword(
+            @PathVariable UUID userId,
             @RequestBody @Valid PasswordUpdateRequestDto request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        userService.updatePassword(request, user.getUserId());
+        userService.updatePassword(userId, request);
         return ResponseEntity.noContent().build();
     }
 
-    // 마이페이지
-    @GetMapping("/my-page")
-    public ResponseEntity<UserMyPageDto> getMyPage(
-            @RequestParam(defaultValue = "false") boolean showAllTags,
+    // 회원 탈퇴
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID userId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        UserMyPageDto myPage = userService.getMyPageInfo(user.getUserId(), showAllTags);
-        return ResponseEntity.ok(myPage);
-    }
-
-    // 회원 탈퇴
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@AuthenticationPrincipal CustomUserDetails user) {
-        userService.withdraw(user.getUserId());
+        userService.withdraw(userId);
         return ResponseEntity.noContent().build();
     }
 
