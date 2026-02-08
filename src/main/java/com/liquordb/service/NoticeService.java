@@ -1,5 +1,6 @@
 package com.liquordb.service;
 
+import com.liquordb.PageResponse;
 import com.liquordb.dto.notice.NoticeRequestDto;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
@@ -11,10 +12,13 @@ import com.liquordb.mapper.NoticeMapper;
 import com.liquordb.repository.NoticeRepository;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.liquordb.mapper.NoticeMapper.*;
@@ -35,12 +39,20 @@ public class NoticeService {
     }
 
     // 공지사항 목록 조회
-    // TODO 페이지네이션
     @Transactional(readOnly = true)
-    public List<NoticeSummaryDto> getAllNotices() {
-        return noticeRepository.findAll().stream()
-                .map(NoticeMapper::toSummaryDto)
-                .toList();
+    public PageResponse<NoticeSummaryDto> getAllNotices(Pageable pageable) {
+
+        Sort sort = Sort.by(Sort.Order.desc("isPinned")) // 고정된 공지 우선 - 첫 페이지에만 표시됨
+                .and(pageable.getSort());
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+        Page<Notice> notices = noticeRepository.findAllAndIsDeletedFalse(sortedPageable);
+        Page<NoticeSummaryDto> response = notices.map(NoticeMapper::toSummaryDto);
+        return PageResponse.from(response);
     }
 
     /**

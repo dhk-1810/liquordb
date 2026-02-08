@@ -1,10 +1,12 @@
 package com.liquordb.controller;
 
+import com.liquordb.PageResponse;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +24,8 @@ public class NoticeController {
         return ResponseEntity.ok(noticeService.getNotice(noticeId));
     }
 
-    // TODO 페이지네이션 수정
     @GetMapping
-    public ResponseEntity<List<NoticeSummaryDto>> getAllNotices() {
-        return ResponseEntity.ok(noticeService.getAllNotices());
+    public ResponseEntity<PageResponse<NoticeSummaryDto>> getAllNotices(Pageable pageable) {
+        return ResponseEntity.ok(noticeService.getAllNotices(pageable));
     }
 }
