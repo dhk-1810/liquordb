@@ -2,11 +2,11 @@ package com.liquordb.controller.admin;
 
 import com.liquordb.PageResponse;
 import com.liquordb.dto.report.CommentReportResponseDto;
+import com.liquordb.dto.report.CommentReportSummaryDto;
 import com.liquordb.enums.ReportStatus;
 import com.liquordb.service.CommentReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +23,7 @@ public class AdminCommentReportController {
     private final CommentReportService commentReportService;
 
     @GetMapping
-    public ResponseEntity<PageResponse<CommentReportResponseDto>> getAll(ReportStatus status, Pageable pageable) {
+    public ResponseEntity<PageResponse<CommentReportSummaryDto>> getAll(ReportStatus status, Pageable pageable) {
         return ResponseEntity.ok(commentReportService.getAll(status, pageable));
     }
 

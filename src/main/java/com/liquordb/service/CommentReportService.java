@@ -4,6 +4,7 @@ import com.liquordb.PageResponse;
 import com.liquordb.ReportManager;
 import com.liquordb.dto.report.CommentReportRequestDto;
 import com.liquordb.dto.report.CommentReportResponseDto;
+import com.liquordb.dto.report.CommentReportSummaryDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.ReportStatus;
 import com.liquordb.exception.comment.CommentNotFoundException;
@@ -32,21 +33,21 @@ public class CommentReportService {
     private static final int REPORT_THRESHOLD = 3;
 
     // 신고 생성
-    public CommentReportResponseDto create(CommentReportRequestDto request, UUID userId) { // 신고자 ID
+    public CommentReportResponseDto create(CommentReportRequestDto request, UUID reporterId, String reporterUsername) {
 
         Long commentId = request.commentId();
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
         // 중복 신고 방지
-        boolean exists = commentReportRepository.existsByCommentIdAndUser_Id(commentId, userId);
+        boolean exists = commentReportRepository.existsByCommentIdAndUser_Id(commentId, reporterId);
         if (exists) {
-            throw new CommentReportAlreadyExistsException(commentId, userId);
+            throw new CommentReportAlreadyExistsException(commentId, reporterId);
         }
 
         // 신고 저장
         CommentReport report = commentReportRepository
-                .save(CommentReportMapper.toEntity(comment, request.reason(), userId));
+                .save(CommentReportMapper.toEntity(comment, request.reason(), reporterId, reporterUsername));
 
         // 누적 신고 수 확인 + 조건 충족시 숨기기 처리
         long count = commentReportRepository.countByComment_Id(commentId);
@@ -71,9 +72,9 @@ public class CommentReportService {
 
     // 신고 목록 조회
     @Transactional(readOnly = true)
-    public PageResponse<CommentReportResponseDto> getAll(ReportStatus status, Pageable pageable) {
+    public PageResponse<CommentReportSummaryDto> getAll(ReportStatus status, Pageable pageable) {
         Page<CommentReport> reports = commentReportRepository.findAllByStatus(status, pageable);
-        Page<CommentReportResponseDto> response = reports.map(CommentReportMapper::toDto);
+        Page<CommentReportSummaryDto> response = reports.map(CommentReportMapper::toSummaryDto);
         return PageResponse.from(response);
     }
 

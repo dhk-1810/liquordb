@@ -59,7 +59,6 @@ public class UserTagService {
     }
 
     // 유저가 선호하는 태그로 주류 목록 조회
-    // TODO LiquorTagService랑 중복되지 않나
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getRecommendedLiquors(UUID userId) {
 

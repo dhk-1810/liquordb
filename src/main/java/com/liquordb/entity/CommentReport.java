@@ -25,10 +25,15 @@ public class CommentReport {
     private Comment comment;
 
     @Column(nullable = false)
-    private UUID requestUserId; // 단순한 정보 표기 역할이기 떄문에 연관관계 대신 id만 사용
-
     private String reason;
 
+    @Column(nullable = false)
+    private UUID reporterId; // 단순한 정보 표기 역할이기 떄문에 FK로 사용하진 않음
+
+    @Column(nullable = false)
+    private String reporterUsername; // 단순한 정보 표기 역할이기 떄문에 FK로 사용하진 않음
+
+    @Column(nullable = false)
     private ReportStatus status;
 
     private LocalDateTime createdAt;
@@ -53,17 +58,19 @@ public class CommentReport {
     }
 
     @Builder
-    private CommentReport(Comment comment, UUID requestUserId, String reason) {
+    private CommentReport(Comment comment, String reason, UUID reporterId, String reporterUsername) {
         this.comment = comment;
-        this.requestUserId = requestUserId;
         this.reason = reason;
+        this.reporterId = reporterId;
+        this.reporterUsername = reporterUsername;
     }
 
-    public static CommentReport create(Comment comment, String reason, UUID requestUserId) {
+    public static CommentReport create(Comment comment, String reason, UUID reporterId, String reporterUsername) {
         return CommentReport.builder()
                 .comment(comment)
-                .requestUserId(requestUserId)
                 .reason(reason)
+                .reporterId(reporterId)
+                .reporterUsername(reporterUsername)
                 .build();
     }
 
