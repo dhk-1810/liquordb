@@ -18,8 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class UserService {
 
     private final UserRepository userRepository;

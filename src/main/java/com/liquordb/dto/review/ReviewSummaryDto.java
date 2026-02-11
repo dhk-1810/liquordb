@@ -1,10 +1,8 @@
 package com.liquordb.dto.review;
 
-import lombok.*;
-
 import java.time.LocalDateTime;
 
-@Builder
+@Deprecated(forRemoval = true)
 public record ReviewSummaryDto (
         Long id,
         String title,

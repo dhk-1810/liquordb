@@ -13,8 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
 @RequestMapping("/api/users")
 public class UserController {
 

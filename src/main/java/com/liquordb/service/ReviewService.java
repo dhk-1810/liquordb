@@ -3,7 +3,6 @@ package com.liquordb.service;
 import com.liquordb.CursorPageResponse;
 import com.liquordb.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
-import com.liquordb.dto.review.ReviewSummaryDto;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.liquor.LiquorNotFoundException;

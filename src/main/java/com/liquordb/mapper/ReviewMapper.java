@@ -1,6 +1,5 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.review.ReviewSummaryDto;
 import com.liquordb.entity.Liquor;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
@@ -35,14 +34,4 @@ public class ReviewMapper {
                 .build();
     }
 
-    public static ReviewSummaryDto toSummaryDto(Review review) {
-        return ReviewSummaryDto.builder()
-                .id(review.getId())
-                .title(review.getTitle())
-                .score(review.getRating())
-                .liquorName(review.getLiquor().getName())
-                .createdAt(review.getCreatedAt())
-                .build();
-
-    }
 }
