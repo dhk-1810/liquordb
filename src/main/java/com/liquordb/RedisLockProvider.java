@@ -1,5 +1,6 @@
 package com.liquordb;
 
+import com.liquordb.exception.redis.RedisLockAcquisitionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,11 +46,4 @@ public class RedisLockProvider {
         }
     }
 
-    // TODO 분리
-    public static class RedisLockAcquisitionException extends RuntimeException {
-
-        public RedisLockAcquisitionException(String message) {
-            super(message);
-        }
-    }
 }

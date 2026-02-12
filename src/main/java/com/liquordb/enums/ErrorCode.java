@@ -64,6 +64,7 @@ public enum ErrorCode {
     INVALID_INPUT_VALUE (HttpStatus.BAD_REQUEST),
     INVALID_STATE (HttpStatus.BAD_REQUEST),
     METHOD_NOT_ALLOWED (HttpStatus.METHOD_NOT_ALLOWED),
+    LOCK_ACQUISITION_FAILED (HttpStatus.CONFLICT),
     INTERNAL_SERVER_ERROR (HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final HttpStatus status;

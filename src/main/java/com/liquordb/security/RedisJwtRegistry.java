@@ -1,6 +1,7 @@
 package com.liquordb.security;
 
 import com.liquordb.RedisLockProvider;
+import com.liquordb.exception.redis.RedisLockAcquisitionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class RedisJwtRegistry implements JwtRegistry {
+
     private static final String USER_JWT_KEY_PREFIX = "jwt:user:";
     private static final String ACCESS_TOKEN_INDEX_KEY = "jwt:access_tokens";
     private static final String REFRESH_TOKEN_INDEX_KEY = "jwt:refresh_tokens";
@@ -31,7 +33,7 @@ public class RedisJwtRegistry implements JwtRegistry {
 
     @Override
     @CacheEvict(value = "users", key = "'all'")
-    @Retryable(retryFor = RedisLockProvider.RedisLockAcquisitionException.class, maxAttempts = 10,
+    @Retryable(retryFor = RedisLockAcquisitionException.class, maxAttempts = 10,
             backoff = @Backoff(delay = 100, multiplier = 2))
     public void registerJwtInformation(JwtInformation jwtInformation) {
         String userKey = getUserKey(jwtInformation.getUserId());
@@ -101,7 +103,7 @@ public class RedisJwtRegistry implements JwtRegistry {
     }
 
     @Override
-    @Retryable(retryFor = RedisLockProvider.RedisLockAcquisitionException.class, maxAttempts = 10,
+    @Retryable(retryFor = RedisLockAcquisitionException.class, maxAttempts = 10,
             backoff = @Backoff(delay = 100, multiplier = 2))
     public void rotateJwtInformation(String refreshToken, JwtInformation newJwtInfo) {
         String userKey = getUserKey(newJwtInfo.getUserId());
