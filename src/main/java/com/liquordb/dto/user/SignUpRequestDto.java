@@ -1,6 +1,5 @@
 package com.liquordb.dto.user;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
@@ -12,7 +11,10 @@ import lombok.*;
 public record SignUpRequestDto(
 
         @NotBlank(message = "이메일로 공백은 사용할 수 없습니다.")
-        @Email(message = "이메일 형식이 올바르지 않습니다.")
+        @Pattern(
+                regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
+                message = "이메일 형식이 올바르지 않습니다."
+        )
         String email,
 
         @NotBlank(message = "비밀번호로 공백은 사용할 수 없습니다.")

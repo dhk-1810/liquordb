@@ -35,9 +35,9 @@ public class User {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus status = UserStatus.ACTIVE;
+    private UserStatus status;
 
-    private int reportCount = 0; // 신고된 건수
+    private int reportCount; // 신고된 건수
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private File profileImage; // TODO S3에 저장
@@ -90,6 +90,8 @@ public class User {
         this.password = password;
         this.socialProvider = socialProvider;
         this.role = role;
+        this.status = UserStatus.ACTIVE;
+        this.reportCount = 0;
         this.profileImage = profileImage;
     }
 

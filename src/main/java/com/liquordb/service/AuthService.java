@@ -43,19 +43,21 @@ public class AuthService {
     public UserResponseDto signUp(SignUpRequestDto request, MultipartFile profileImage, Role role) {
 
         String email = request.email();
+        String username = request.username();
+
         User existingUser = userRepository.findByEmail(email)
                 .orElse(null);
-
         if (existingUser != null) {
-            if (existingUser.getStatus().isAvailable()) {
-                throw new DuplicateEmailException(email);
-            } else if () {
-
-            }else if (existingUser.getStatus().equals(UserStatus.BANNED)) {
+            if (existingUser.getStatus().equals(UserStatus.BANNED)) {
                 throw new BannedUserException();
             } else if (existingUser.getStatus().equals(UserStatus.WITHDRAWN)) {
                 throw new WithdrawnUserException();
+            } else {
+                throw new DuplicateEmailException(email);
             }
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw new DuplicateUsernameException(username);
         }
 
         String encodedPassword = passwordEncoder.encode(request.password());
