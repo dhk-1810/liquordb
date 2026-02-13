@@ -35,11 +35,14 @@ public class UserService {
 
     // 마이페이지
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public UserMyPageDto getMyPageInfo(UUID userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (!user.getId().equals(userId)) {
+            throw new UserAccessDeniedException(userId);
+        }
 
         long reviewCount = reviewRepository.countByUser_IdAndStatus(userId, Review.ReviewStatus.ACTIVE);
         long commentCount = commentRepository.countByUser_IdAndStatus(userId, Comment.CommentStatus.ACTIVE);
@@ -65,11 +68,14 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public void update(UUID userId, UserUpdateRequestDto request, MultipartFile newProfileImage) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (!user.getId().equals(userId)) {
+            throw new UserAccessDeniedException(userId);
+        }
 
         String email = request.email();
         if (email != null && !userRepository.existsByEmail(email)) {
@@ -78,7 +84,7 @@ public class UserService {
 
         String username = request.username();
         if (username != null && !userRepository.existsByUsername(username)) {
-            throw new UsernameAlreadyExistsException(username);
+            throw new DuplicateUsernameException(username);
         }
 
         if (request.deleteProfileImage()) {
@@ -96,10 +102,12 @@ public class UserService {
 
     // 비밀번호 수정 (로그인 상태에서)
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public void updatePassword(UUID userId, PasswordUpdateRequestDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+        if (!user.getId().equals(userId)) {
+            throw new UserAccessDeniedException(userId);
+        }
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new InvalidPasswordException();
@@ -111,11 +119,12 @@ public class UserService {
 
     // 회원 탈퇴 (soft delete)
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public void withdraw(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-
+        if (!user.getId().equals(userId)) {
+            throw new UserAccessDeniedException(userId);
+        }
         user.withdraw();
         userRepository.save(user);
     }
@@ -125,6 +134,7 @@ public class UserService {
      */
 
     // 유저 조회 - 전체 또는 검색
+    // TODO 페이지네이션
     public List<UserResponseDto> getUsers(String keyword, UserStatus status) {
         if ((keyword == null || keyword.isBlank()) && status == null) {
             return userRepository.findAll().stream()

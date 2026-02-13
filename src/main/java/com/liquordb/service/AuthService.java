@@ -49,7 +49,9 @@ public class AuthService {
         if (existingUser != null) {
             if (existingUser.getStatus().isAvailable()) {
                 throw new DuplicateEmailException(email);
-            } else if (existingUser.getStatus().equals(UserStatus.BANNED)) {
+            } else if () {
+
+            }else if (existingUser.getStatus().equals(UserStatus.BANNED)) {
                 throw new BannedUserException();
             } else if (existingUser.getStatus().equals(UserStatus.WITHDRAWN)) {
                 throw new WithdrawnUserException();

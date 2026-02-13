@@ -13,6 +13,7 @@ public enum ErrorCode {
     INVALID_TOKEN (HttpStatus.UNAUTHORIZED),
 
     // User
+    USER_ACCESS_DENIED (HttpStatus.FORBIDDEN),
     USER_NOT_FOUND (HttpStatus.NOT_FOUND),
     USER_ALREADY_EXISTS (HttpStatus.CONFLICT),
     DUPLICATE_USERNAME (HttpStatus.CONFLICT),
