@@ -83,11 +83,11 @@ public class AuthService {
             throw new WithdrawnUserException();
         }
 
-        JwtInformation reponse = new JwtInformation(
-                // TODO 토큰 발급 추가
-        )
-
-        return JwtInformation;
+        return new JwtInformation(
+                UserMapper.toDto(user),
+                jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole().name()),
+                jwtTokenProvider.createRefreshToken(user.getUsername(), user.getRole().name())
+        );
     }
 
     // 토큰 재발급
