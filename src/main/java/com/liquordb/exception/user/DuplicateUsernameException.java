@@ -1,11 +1,10 @@
 package com.liquordb.exception.user;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.AlreadyExistsException;
 
 import java.util.Map;
 
-public class DuplicateUsernameException extends AlreadyExistsException {
+public class DuplicateUsernameException extends UserException {
 
     public DuplicateUsernameException(String username) {
         super(

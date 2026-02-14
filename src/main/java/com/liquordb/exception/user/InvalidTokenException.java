@@ -5,7 +5,7 @@ import com.liquordb.exception.LiquordbException;
 
 import java.util.Map;
 
-public class InvalidTokenException extends LiquordbException {
+public class InvalidTokenException extends UserException {
 
     public InvalidTokenException() {
         super(

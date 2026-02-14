@@ -1,12 +1,11 @@
 package com.liquordb.exception.tag;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.EntityNotFoundException;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class UserTagNotFoundException extends EntityNotFoundException {
+public class UserTagNotFoundException extends TagException {
 
     public UserTagNotFoundException(UUID userId, Long tagId) {
         super(

@@ -1,12 +1,12 @@
 package com.liquordb.exception.user;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.LiquordbException;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class UserAccessDeniedException extends LiquordbException {
+public class UserAccessDeniedException extends UserException {
+
     public UserAccessDeniedException(UUID userID) {
         super(
                 ErrorCode.USER_ACCESS_DENIED,
@@ -14,4 +14,5 @@ public class UserAccessDeniedException extends LiquordbException {
                 Map.of("userId", userID)
         );
     }
+
 }

@@ -5,7 +5,7 @@ import com.liquordb.exception.LiquordbException;
 
 import java.util.Map;
 
-public class RedisLockAcquisitionException extends LiquordbException {
+public class RedisLockAcquisitionException extends RedisException {
     public RedisLockAcquisitionException(String lockKey) {
         super(
                 ErrorCode.LOCK_ACQUISITION_FAILED,

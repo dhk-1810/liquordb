@@ -13,30 +13,6 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException e) {
-        ErrorResponse response = ErrorResponse.of(
-                e.errorCode.getStatus(),
-                e.errorCode,
-                e.getMessage(),
-                e.details
-        );
-        log.error(e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    @ExceptionHandler(AlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleAlreadyExists(AlreadyExistsException e) {
-        ErrorResponse response = ErrorResponse.of(
-                e.errorCode.getStatus(),
-                e.errorCode,
-                e.getMessage(),
-                e.details
-        );
-        log.error(e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-    }
-
     @ExceptionHandler(LiquordbException.class)
     public ResponseEntity<ErrorResponse> handleLiquordbException(LiquordbException e) {
         ErrorResponse response = ErrorResponse.of(
@@ -46,7 +22,7 @@ public class GlobalExceptionHandler {
                 e.details
         );
         log.error(e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        return ResponseEntity.status(e.errorCode.getStatus()).body(response);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

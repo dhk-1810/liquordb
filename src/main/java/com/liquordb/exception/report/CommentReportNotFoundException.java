@@ -1,12 +1,10 @@
 package com.liquordb.exception.report;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.EntityNotFoundException;
 
-import java.io.Serial;
 import java.util.Map;
 
-public class CommentReportNotFoundException extends EntityNotFoundException {
+public class CommentReportNotFoundException extends ReportException {
 
     public CommentReportNotFoundException(Long commentReportId) {
         super(

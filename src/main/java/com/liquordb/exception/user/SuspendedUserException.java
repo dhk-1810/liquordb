@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.util.Map;
 import java.util.UUID;
 
-public class SuspendedUserException extends LiquordbException {
+public class SuspendedUserException extends UserException {
 
     public SuspendedUserException(UUID userId) {
         super(

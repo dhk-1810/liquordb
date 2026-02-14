@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * 마이페이지 비밀번호 변경
  */
-public class InvalidPasswordException extends LiquordbException {
+public class InvalidPasswordException extends UserException {
 
     public InvalidPasswordException() {
         super(

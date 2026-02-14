@@ -80,7 +80,7 @@ public class RedisJwtRegistry implements JwtRegistry {
         }
 
         redisTemplate.delete(userKey);
-        eventPublisher.publishEvent(new UserLogInOutEvent(userId, false));ㅌ
+        eventPublisher.publishEvent(new UserLogInOutEvent(userId, false));
     }
 
     @Override

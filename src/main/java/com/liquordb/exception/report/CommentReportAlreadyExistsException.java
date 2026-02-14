@@ -1,15 +1,11 @@
 package com.liquordb.exception.report;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.AlreadyExistsException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.io.Serial;
 import java.util.Map;
 import java.util.UUID;
 
-public class CommentReportAlreadyExistsException extends AlreadyExistsException {
+public class CommentReportAlreadyExistsException extends ReportException {
 
     public CommentReportAlreadyExistsException(Long commentId, UUID userId) {
         super(

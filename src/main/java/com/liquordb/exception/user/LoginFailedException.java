@@ -6,7 +6,7 @@ import com.liquordb.exception.LiquordbException;
 import java.io.Serial;
 import java.util.Map;
 
-public class LoginFailedException extends LiquordbException {
+public class LoginFailedException extends UserException {
 
     public LoginFailedException() {
         super(

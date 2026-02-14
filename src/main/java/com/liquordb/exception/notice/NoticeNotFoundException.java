@@ -1,11 +1,10 @@
 package com.liquordb.exception.notice;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.EntityNotFoundException;
 
 import java.util.Map;
 
-public class NoticeNotFoundException extends EntityNotFoundException {
+public class NoticeNotFoundException extends NoticeException {
 
     public NoticeNotFoundException(Long noticeId) {
         super(

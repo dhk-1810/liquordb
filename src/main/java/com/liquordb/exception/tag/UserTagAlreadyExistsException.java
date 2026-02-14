@@ -1,14 +1,11 @@
 package com.liquordb.exception.tag;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.AlreadyExistsException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class UserTagAlreadyExistsException extends AlreadyExistsException {
+public class UserTagAlreadyExistsException extends TagException {
 
     public UserTagAlreadyExistsException(UUID userId, Long tagId) {
         super(

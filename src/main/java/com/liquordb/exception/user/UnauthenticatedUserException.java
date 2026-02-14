@@ -5,7 +5,7 @@ import com.liquordb.exception.LiquordbException;
 
 import java.util.Map;
 
-public class UnauthenticatedUserException extends LiquordbException {
+public class UnauthenticatedUserException extends UserException {
 
     public UnauthenticatedUserException() {
         super(

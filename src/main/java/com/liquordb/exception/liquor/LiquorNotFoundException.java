@@ -1,11 +1,10 @@
 package com.liquordb.exception.liquor;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.EntityNotFoundException;
 
 import java.util.Map;
 
-public class LiquorNotFoundException extends EntityNotFoundException {
+public class LiquorNotFoundException extends LiquorException {
 
     public LiquorNotFoundException(Long liquorId) {
         super(

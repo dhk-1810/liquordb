@@ -1,14 +1,10 @@
 package com.liquordb.exception.report;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.io.Serial;
 import java.util.Map;
 
-public class ReviewReportNotFoundException extends EntityNotFoundException {
+public class ReviewReportNotFoundException extends ReportException {
 
     public ReviewReportNotFoundException(Long reviewReportId) {
         super(
