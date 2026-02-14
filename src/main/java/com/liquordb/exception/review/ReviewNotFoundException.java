@@ -5,7 +5,7 @@ import com.liquordb.exception.EntityNotFoundException;
 
 import java.util.Map;
 
-public class ReviewNotFoundException extends EntityNotFoundException {
+public class ReviewNotFoundException extends ReviewException {
 
     public ReviewNotFoundException(Long reviewId) {
         super(

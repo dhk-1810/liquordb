@@ -5,7 +5,7 @@ import com.liquordb.exception.LiquordbException;
 
 import java.util.Map;
 
-public class InvalidParentCommentException extends LiquordbException {
+public class InvalidParentCommentException extends CommentException {
 
     public InvalidParentCommentException(Long parentId) {
         super(

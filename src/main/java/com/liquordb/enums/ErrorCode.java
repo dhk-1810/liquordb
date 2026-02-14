@@ -27,10 +27,12 @@ public enum ErrorCode {
     LIQUOR_ALREADY_EXISTS (HttpStatus.CONFLICT),
 
     // Review
+    REVIEW_ACCESS_DENIED (HttpStatus.FORBIDDEN),
     REVIEW_NOT_FOUND (HttpStatus.NOT_FOUND),
     REVIEW_ALREADY_EXISTS (HttpStatus.CONFLICT),
 
     // Comment
+    COMMENT_ACCESS_DENIED (HttpStatus.FORBIDDEN),
     COMMENT_NOT_FOUND (HttpStatus.NOT_FOUND),
     INVALID_PARENT_COMMENT (HttpStatus.CONFLICT),
 

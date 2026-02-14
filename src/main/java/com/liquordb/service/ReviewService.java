@@ -6,6 +6,7 @@ import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
+import com.liquordb.exception.review.ReviewAccessDeniedException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
@@ -16,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,13 +58,13 @@ public class ReviewService {
 
     // 리뷰 단건 조회
     @Transactional(readOnly = true)
-    public ReviewResponseDto findById(Long id) {
+    public ReviewResponseDto get(Long id) {
         return reviewRepository.findById(id)
                 .map(ReviewMapper::toDto)
                 .orElseThrow(() -> new ReviewNotFoundException(id));
     }
 
-    // 주류에 따른 리뷰 조회
+    // 주류별 리뷰 목록 조회
     @Transactional(readOnly = true)
     public CursorPageResponse<ReviewResponseDto> getAllByLiquor(Long liquorId, Pageable pageable) {
 
@@ -75,7 +75,7 @@ public class ReviewService {
         return getCursorPageResponse(reviews);
     }
 
-    // 유저에 따른 리뷰 조회
+    // 유저별 리뷰 목록 조회
     @Transactional(readOnly = true)
     public CursorPageResponse<ReviewResponseDto> getAllByUser(UUID authorId, Pageable pageable) {
 
@@ -88,11 +88,14 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public ReviewResponseDto update(Long reviewId, ReviewUpdateRequestDto request, List<MultipartFile> newImages, UUID userId) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        if (!review.getUser().getId().equals(userId)) {
+            throw new ReviewAccessDeniedException(reviewId, userId);
+        }
 
         // 공통 필드 수정
         review.update(request);
@@ -106,31 +109,14 @@ public class ReviewService {
         return ReviewMapper.toDto(reviewRepository.save(review));
     }
 
-    public void addImage(Review review, List<MultipartFile> images) {
-        if (images == null || images.isEmpty()) return;
-        images.forEach(image -> {
-            review.getImages().add(fileService.upload(image));
-        });
-    }
-
-    public void removeImage(Review review, List<Long> imageIdsToDelete) {
-        if (imageIdsToDelete == null || imageIdsToDelete.isEmpty()) return;
-
-        review.getImages().removeIf(image -> {
-            if (imageIdsToDelete.contains(image.getFilePath())) {
-                fileService.delete(image.getId()); // 실제 파일 삭제
-                return true;
-            }
-            return false;
-        });
-    }
-
     // 리뷰 삭제 (Soft Delete)
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public void delete(Long reviewId, UUID userId) {
         Review review = reviewRepository.findByIdAndStatusNot(reviewId, Review.ReviewStatus.DELETED)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        if (!review.getUser().getId().equals(userId)) {
+            throw new ReviewAccessDeniedException(reviewId, userId);
+        }
 
         LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
         commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);
@@ -149,6 +135,25 @@ public class ReviewService {
         }
 
         return CursorPageResponse.from(response, nextCursor);
+    }
+
+    public void addImage(Review review, List<MultipartFile> images) {
+        if (images == null || images.isEmpty()) return;
+        images.forEach(image ->
+                review.getImages().add(fileService.upload(image))
+        );
+    }
+
+    public void removeImage(Review review, List<Long> imageIdsToDelete) {
+        if (imageIdsToDelete == null || imageIdsToDelete.isEmpty()) return;
+
+        review.getImages().removeIf(image -> {
+            if (imageIdsToDelete.contains(image.getFilePath())) {
+                fileService.delete(image.getId()); // 실제 파일 삭제
+                return true;
+            }
+            return false;
+        });
     }
 
     /**

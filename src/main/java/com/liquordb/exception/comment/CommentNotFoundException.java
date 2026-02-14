@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Map;
 
-public class CommentNotFoundException extends EntityNotFoundException {
+public class CommentNotFoundException extends CommentException {
 
     public CommentNotFoundException(Long commentId) {
         super(

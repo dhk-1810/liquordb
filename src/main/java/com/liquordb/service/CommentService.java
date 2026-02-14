@@ -7,8 +7,10 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.enums.UserStatus;
+import com.liquordb.exception.comment.CommentAccessDeniedException;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.comment.InvalidParentCommentException;
+import com.liquordb.exception.review.ReviewAccessDeniedException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
@@ -64,11 +66,13 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public CommentResponseDto update(Long commentId, CommentUpdateRequestDto request, UUID userId) {
 
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentAccessDeniedException(commentId, userId);
+        }
 
         comment.update(request);
         return CommentMapper.toDto(commentRepository.save(comment));
@@ -96,7 +100,6 @@ public class CommentService {
 
     // 본인이 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
-    @PreAuthorize("#userId == authentication.principal.userId")
     public PageResponse<CommentResponseDto> findByUserId(UUID userId, Pageable pageable) {
         Page<Comment> comments = commentRepository.findByUserIdAndStatus(userId, Comment.CommentStatus.ACTIVE, pageable);
         Page<CommentResponseDto> response = comments.map(CommentMapper::toDto);
@@ -105,11 +108,12 @@ public class CommentService {
 
     // 댓글 삭제 (Soft Delete)
     @Transactional
-    @PreAuthorize("#userId == authentication.principal.userId")
     public void deleteByIdAndUser(Long commentId, UUID userId) {
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
-
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentAccessDeniedException(commentId, userId);
+        }
         comment.softDelete(LocalDateTime.now());
         commentRepository.save(comment);
     }
