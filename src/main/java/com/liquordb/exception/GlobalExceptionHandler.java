@@ -1,6 +1,19 @@
 package com.liquordb.exception;
 
 import com.liquordb.enums.ErrorCode;
+import com.liquordb.exception.comment.CommentNotFoundException;
+import com.liquordb.exception.liquor.LiquorNotFoundException;
+import com.liquordb.exception.notice.NoticeNotFoundException;
+import com.liquordb.exception.report.CommentReportAlreadyExistsException;
+import com.liquordb.exception.report.CommentReportNotFoundException;
+import com.liquordb.exception.report.ReviewReportAlreadyExistsException;
+import com.liquordb.exception.report.ReviewReportNotFoundException;
+import com.liquordb.exception.review.ReviewNotFoundException;
+import com.liquordb.exception.tag.LiquorTagAlreadyExistsException;
+import com.liquordb.exception.tag.TagNotFoundException;
+import com.liquordb.exception.tag.UserTagAlreadyExistsException;
+import com.liquordb.exception.tag.UserTagNotFoundException;
+import com.liquordb.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +25,45 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler({
+            CommentNotFoundException.class,
+            LiquorNotFoundException.class,
+            NoticeNotFoundException.class,
+            ReviewNotFoundException.class,
+            UserNotFoundException.class,
+            TagNotFoundException.class,
+            UserTagNotFoundException.class,
+            CommentReportNotFoundException.class,
+            ReviewReportNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleNotFound(LiquordbException e) {
+        ErrorResponse response = ErrorResponse.of(
+                HttpStatus.NOT_FOUND,
+                e.errorCode,
+                e.getMessage(),
+                e.details
+        );
+        log.error("NotFoundException: {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler({
+            CommentReportAlreadyExistsException.class,
+            ReviewReportAlreadyExistsException.class,
+            LiquorTagAlreadyExistsException.class,
+            UserTagAlreadyExistsException.class
+    })
+    public ResponseEntity<ErrorResponse> handleAlreadyExists(LiquordbException e) {
+        ErrorResponse response = ErrorResponse.of(
+                HttpStatus.CONFLICT,
+                e.errorCode,
+                e.getMessage(),
+                e.details
+        );
+        log.error("AlreadyExistsException: {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 
     @ExceptionHandler(LiquordbException.class)
     public ResponseEntity<ErrorResponse> handleLiquordbException(LiquordbException e) {
