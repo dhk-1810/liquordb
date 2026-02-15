@@ -1,6 +1,6 @@
 package com.liquordb.controller;
 
-import com.liquordb.PageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;

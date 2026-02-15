@@ -4,6 +4,7 @@ import com.liquordb.event.CommentLikeEvent;
 import com.liquordb.event.LiquorLikeEvent;
 import com.liquordb.event.ReviewLikeEvent;
 import com.liquordb.repository.*;
+import com.liquordb.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

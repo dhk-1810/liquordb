@@ -1,6 +1,6 @@
 package com.liquordb.service;
 
-import com.liquordb.PageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.liquor.LiquorUpdateRequestDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -12,6 +12,7 @@ import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.*;
+import com.liquordb.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -9,8 +9,8 @@ import com.liquordb.mapper.TagMapper;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
 
+import com.liquordb.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

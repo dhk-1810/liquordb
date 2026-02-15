@@ -1,4 +1,4 @@
-package com.liquordb;
+package com.liquordb.dto;
 
 import org.springframework.data.domain.Slice;
 

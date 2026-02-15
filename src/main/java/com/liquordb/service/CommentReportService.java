@@ -1,6 +1,6 @@
 package com.liquordb.service;
 
-import com.liquordb.PageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.ReportManager;
 import com.liquordb.dto.report.CommentReportRequestDto;
 import com.liquordb.dto.report.CommentReportResponseDto;
@@ -13,6 +13,7 @@ import com.liquordb.exception.report.CommentReportNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.mapper.CommentReportMapper;
 import com.liquordb.repository.*;
+import com.liquordb.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

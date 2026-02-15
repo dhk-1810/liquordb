@@ -1,6 +1,6 @@
 package com.liquordb.controller.admin;
 
-import com.liquordb.PageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.service.CommentService;

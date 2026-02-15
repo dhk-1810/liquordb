@@ -5,13 +5,6 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
-import com.liquordb.exception.comment.CommentNotFoundException;
-import com.liquordb.exception.review.ReviewNotFoundException;
-import com.liquordb.exception.comment.InvalidParentCommentException;
-import com.liquordb.repository.CommentRepository;
-import com.liquordb.repository.ReviewRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 public class CommentMapper {
 

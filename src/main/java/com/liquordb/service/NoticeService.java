@@ -1,6 +1,6 @@
 package com.liquordb.service;
 
-import com.liquordb.PageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.notice.NoticeRequestDto;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;

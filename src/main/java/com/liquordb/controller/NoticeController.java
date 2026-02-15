@@ -1,16 +1,13 @@
 package com.liquordb.controller;
 
-import com.liquordb.PageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.service.NoticeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/notices")

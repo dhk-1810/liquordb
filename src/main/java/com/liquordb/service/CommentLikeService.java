@@ -5,7 +5,7 @@ import com.liquordb.entity.*;
 import com.liquordb.event.CommentLikeEvent;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.repository.CommentLikeRepository;
-import com.liquordb.repository.CommentRepository;
+import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;

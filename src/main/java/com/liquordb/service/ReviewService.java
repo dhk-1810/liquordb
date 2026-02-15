@@ -1,7 +1,7 @@
 package com.liquordb.service;
 
-import com.liquordb.CursorPageResponse;
-import com.liquordb.PageResponse;
+import com.liquordb.dto.CursorPageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
@@ -13,6 +13,7 @@ import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
+import com.liquordb.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

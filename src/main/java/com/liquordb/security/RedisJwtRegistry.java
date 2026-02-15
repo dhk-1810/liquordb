@@ -17,6 +17,25 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * ① while 루프 최적화
+ *
+ * 현재 while 안에서 size()를 계속 호출하는데, Redis 호출 횟수가 많아집니다. 처음에 currentSize를 가져왔으니, 루프 안에서는 currentSize--를 하며 메모리 상에서 계산하고 마지막에 반영하는 것이 더 빠릅니다.
+ * ② @CacheEvict 위치
+ *
+ * @CacheEvict가 메서드 시작 시점에 실행되는데, 만약 아래 로직에서 예외가 발생해 Retryable이 돌게 되면 캐시만 반복적으로 날아갈 수 있습니다. 성공적으로 수행된 후에 캐시를 날리는 것이 데이터 일관성에 더 유리할 수 있습니다.
+ * ③ 예외 처리
+ *
+ * removeTokenIndex에서 oldestTokenObj가 JwtInformation 타입이 아닐 경우에 대한 처리가 누락되면 List에 쓰레기 값이 쌓일 수 있으니 로그를 남기는 등 방어 로직이 필요합니다.
+ *
+ * 다음에 무엇을 도와드릴까요?
+ *
+ *     Set 인덱스 대신 String 키(setex)를 사용해 TTL까지 자동 관리하는 방식으로 리팩토링하기
+ *
+ *     removeTokenIndex 로직을 하나로 합쳐서 실행하는 루아 스크립트 작성하기
+ *
+ *     MAX_ACTIVE_JWT_COUNT를 넘었을 때 가장 오래된 세션을 로그아웃 시키는 알림(Event) 처리 고도화하기
+ */
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -63,7 +82,6 @@ public class RedisJwtRegistry implements JwtRegistry {
 
         eventPublisher.publishEvent(new UserLogInOutEvent(jwtInformation.getUserId(), true));
     }
-
 
     @Override
     @CacheEvict(value = "users", key = "'all'")

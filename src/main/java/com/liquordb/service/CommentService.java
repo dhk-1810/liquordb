@@ -1,7 +1,7 @@
 package com.liquordb.service;
 
-import com.liquordb.CursorPageResponse;
-import com.liquordb.PageResponse;
+import com.liquordb.dto.CursorPageResponse;
+import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.comment.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
@@ -10,11 +10,10 @@ import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.comment.CommentAccessDeniedException;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.comment.InvalidParentCommentException;
-import com.liquordb.exception.review.ReviewAccessDeniedException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
-import com.liquordb.repository.CommentRepository;
+import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.entity.Review;
 import com.liquordb.repository.ReviewRepository;
 import com.liquordb.entity.User;
@@ -23,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
