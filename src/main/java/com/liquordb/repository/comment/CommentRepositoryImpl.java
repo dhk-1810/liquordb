@@ -30,7 +30,7 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
     // 특정 리뷰에 달린 댓글 조회
     @Override
-    public Slice<Comment> findByReview(CommentSearchCondition condition) {
+    public Slice<Comment> findByReviewId(CommentSearchCondition condition) {
 
         int limit = condition.limit();
         List<Comment> comments = queryFactory.selectFrom(comment)
@@ -57,7 +57,7 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
     // 특정 유저가 작성한 댓글 조회
     @Override
-    public Slice<Comment> findByUser(CommentSearchCondition condition) {
+    public Slice<Comment> findByUserId(CommentSearchCondition condition) {
         return null;
     }
 

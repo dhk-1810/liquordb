@@ -1,6 +1,6 @@
 package com.liquordb.enums;
 
 public enum CommentSortBy {
-    CREATED_AT,
+    ID,
     COMMENT_COUNT
 }

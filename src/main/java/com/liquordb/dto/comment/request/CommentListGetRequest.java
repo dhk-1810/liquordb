@@ -15,6 +15,9 @@ public record CommentListGetRequest (
         @Nullable
         Long cursor,
 
+        @Nullable
+        Long idAfter,
+
         @Min(1) @Max(50)
         int limit,
 

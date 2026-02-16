@@ -25,11 +25,11 @@ import com.liquordb.entity.User;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -81,23 +81,33 @@ public class CommentService {
         return CommentMapper.toDto(commentRepository.save(comment));
     }
 
-    // 특정 리뷰의 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
+    // 특정 리뷰에 달린 댓글 조회
     @Transactional(readOnly = true)
     public CursorPageResponse<CommentResponseDto> getByReviewId(Long reviewId, CommentListGetRequest request) {
 
         reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
+        // 기본값 할당
+        CommentSortBy sortBy = request.sortBy() == null ?  CommentSortBy.ID : request.sortBy();
+        SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
+
+        boolean useId = sortBy == CommentSortBy.ID;
+        if (!useId && request.idAfter() == null) {
+            throw new InvalidParameterException(); // TODO 예외
+        }
+
         CommentSearchCondition condition = CommentSearchCondition.builder()
                 .reviewId(reviewId)
                 .commentStatus(Comment.CommentStatus.ACTIVE)
-                .nextCursor(request.cursor())
+                .cursor(request.cursor())
+                .idAfter(request.idAfter())
                 .limit(request.limit())
-                .sortBy(request.sortBy() == null ? CommentSortBy.CREATED_AT : request.sortBy())
-                .sortDirection(request.sortDirection() == null ? SortDirection.DESC : request.sortDirection())
+                .useId(useId)
+                .descending(sortDirection == SortDirection.DESC)
                 .build();
 
-        Slice<Comment> comments = commentRepository.findByReview(condition);
+        Slice<Comment> comments = commentRepository.findByReviewId(condition);
         Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
 
         Long nextCursor = null;
@@ -109,21 +119,23 @@ public class CommentService {
         return CursorPageResponse.from(response, nextCursor);
     }
 
-    // 본인이 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
+    // 특정 유저가 작성한 댓글 조회
     @Transactional(readOnly = true)
     public CursorPageResponse<CommentResponseDto> getByUserId(UUID userId, CommentListGetRequest request) {
+
+        SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
         CommentSearchCondition condition = CommentSearchCondition.builder()
                 .userId(userId)
                 .commentStatus(Comment.CommentStatus.ACTIVE)
-                .nextCursor(request.cursor())
+                .cursor(request.cursor())
                 .limit(request.limit())
-                .sortBy(request.sortBy() == null ? CommentSortBy.CREATED_AT : request.sortBy())
-                .sortDirection(request.sortDirection() == null ? SortDirection.DESC : request.sortDirection())
+                .descending(sortDirection == SortDirection.DESC)
                 .build();
 
-        Slice<Comment> comments = commentRepository.findByUser(condition);
+        Slice<Comment> comments = commentRepository.findByUserId(condition);
         Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
+
         Long nextCursor = null;
         if (response.hasNext()) {
             List<CommentResponseDto> content = response.getContent();
