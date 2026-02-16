@@ -1,6 +1,6 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.comment.request.CommentRequestDto;
+import com.liquordb.dto.comment.request.CommentRequest;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.Review;
@@ -8,7 +8,7 @@ import com.liquordb.entity.User;
 
 public class CommentMapper {
 
-    public static Comment toEntity(CommentRequestDto request, Comment parent, Review review, User requestUser) {
+    public static Comment toEntity(CommentRequest request, Comment parent, Review review, User requestUser) {
         return Comment.create(
                 request.content(),
                 review,

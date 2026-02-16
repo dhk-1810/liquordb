@@ -1,6 +1,6 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.comment.request.CommentUpdateRequestDto;
+import com.liquordb.dto.comment.request.CommentUpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -74,7 +74,7 @@ public class Comment extends LikeableEntity implements ReportableEntity {
                 .build();
     }
 
-    public void update(CommentUpdateRequestDto request) {
+    public void update(CommentUpdateRequest request) {
         this.content = request.content();
     }
 

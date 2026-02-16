@@ -1,21 +1,20 @@
 package com.liquordb.repository.comment;
 
+import com.liquordb.dto.comment.CommentListGetCondition;
 import com.liquordb.dto.comment.CommentSearchCondition;
-import com.liquordb.dto.comment.request.CommentListGetRequest;
 import com.liquordb.dto.comment.request.CommentSearchRequest;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.QComment;
-import com.liquordb.enums.SortDirection;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.*;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,10 +29,10 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
     // 특정 리뷰에 달린 댓글 조회
     @Override
-    public Slice<Comment> findByReviewId(CommentSearchCondition condition) {
+    public Slice<Comment> findByReviewId(CommentListGetCondition condition) {
 
         int limit = condition.limit();
-        List<Comment> comments = queryFactory.selectFrom(comment)
+        List<Comment> content = queryFactory.selectFrom(comment)
                 .where(
                         reviewIdEq(condition.reviewId()),
                         statusEq(condition.commentStatus()),
@@ -47,23 +46,65 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
                 .fetch();
 
         boolean hasNext = false;
-        if (comments.size() > limit) {
-            comments.remove(limit); // 초과분 제거
+        if (content.size() > limit) {
+            content.remove(limit); // 초과분 제거
             hasNext = true;
         }
 
-        return new SliceImpl<>(comments, PageRequest.ofSize(limit), hasNext);
+        return new SliceImpl<>(content, PageRequest.ofSize(limit), hasNext);
     }
 
     // 특정 유저가 작성한 댓글 조회
     @Override
-    public Slice<Comment> findByUserId(CommentSearchCondition condition) {
-        return null;
+    public Slice<Comment> findByUserId(CommentListGetCondition condition) {
+
+        int limit = condition.limit();
+        List<Comment> content = queryFactory.selectFrom(comment)
+                .where(
+                        userIdEq(condition.userId()),
+                        statusEq(condition.commentStatus()),
+                        cursorCondition(condition.cursor(), condition.descending())
+                )
+                .orderBy(
+                        getOrderSpecifier(condition.descending(), true)
+                )
+                .limit(limit + 1)
+                .fetch();
+
+        boolean hasNext = false;
+        if (content.size() > limit) {
+            content.remove(limit);
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(content, PageRequest.ofSize(limit), hasNext);
     }
 
     @Override
-    public Page<Comment> findAll(CommentSearchRequest request) {
-        return null;
+    public Page<Comment> findAll(CommentSearchCondition condition) {
+
+        int limit = condition.limit();
+        int page = condition.page();
+        List<Comment> content = queryFactory.selectFrom(comment)
+                .where(
+                        usernameContains(condition.username()),
+                        statusEq(condition.commentStatus())
+                )
+                .orderBy(
+                        getOrderSpecifier(condition.descending(), true)
+                )
+                .offset((long) page * limit)
+                .limit(limit)
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(comment.count())
+                .from(comment)
+                .where(
+                        usernameContains(condition.username()),
+                        statusEq(condition.commentStatus())
+                );
+        return PageableExecutionUtils.getPage(content, PageRequest.of(page, limit), countQuery::fetchOne);
     }
 
     /**
@@ -97,6 +138,19 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
         }
     }
 
+    private Predicate cursorCondition(Long cursor, boolean descending) {
+        if (cursor == null) {
+            return null; // 첫 페이지 조회
+        }
+
+        // 주 커서
+        if (descending) {
+            return comment.id.lt(cursor);
+        } else {
+            return comment.id.gt(cursor);
+        }
+    }
+
     private Predicate reviewIdEq(Long reviewId) {
         return reviewId != null ? comment.review.id.eq(reviewId) : null;
     }
@@ -109,8 +163,8 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
         return status != null ? comment.status.eq(status) : null;
     }
 
-    private Predicate usernameEq(String username) {
-        return username != null ? comment.user.username.eq(username) : null;
+    private Predicate usernameContains(String username) {
+        return username != null ? comment.user.username.contains(username) : null;
     }
 
     /**

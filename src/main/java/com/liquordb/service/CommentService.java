@@ -2,12 +2,13 @@ package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.comment.CommentListGetCondition;
 import com.liquordb.dto.comment.CommentSearchCondition;
 import com.liquordb.dto.comment.request.CommentListGetRequest;
-import com.liquordb.dto.comment.request.CommentRequestDto;
+import com.liquordb.dto.comment.request.CommentRequest;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.request.CommentSearchRequest;
-import com.liquordb.dto.comment.request.CommentUpdateRequestDto;
+import com.liquordb.dto.comment.request.CommentUpdateRequest;
 import com.liquordb.entity.Comment;
 import com.liquordb.enums.CommentSortBy;
 import com.liquordb.enums.SortDirection;
@@ -44,7 +45,7 @@ public class CommentService {
 
     // 댓글 생성
     @Transactional
-    public CommentResponseDto create(Long reviewId, CommentRequestDto request, UUID userId) {
+    public CommentResponseDto create(Long reviewId, CommentRequest request, UUID userId) {
 
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -69,7 +70,7 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    public CommentResponseDto update(Long commentId, CommentUpdateRequestDto request, UUID userId) {
+    public CommentResponseDto update(Long commentId, CommentUpdateRequest request, UUID userId) {
 
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
@@ -97,7 +98,7 @@ public class CommentService {
             throw new InvalidParameterException(); // TODO 예외
         }
 
-        CommentSearchCondition condition = CommentSearchCondition.builder()
+        CommentListGetCondition condition = CommentListGetCondition.builder()
                 .reviewId(reviewId)
                 .commentStatus(Comment.CommentStatus.ACTIVE)
                 .cursor(request.cursor())
@@ -125,7 +126,7 @@ public class CommentService {
 
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
-        CommentSearchCondition condition = CommentSearchCondition.builder()
+        CommentListGetCondition condition = CommentListGetCondition.builder()
                 .userId(userId)
                 .commentStatus(Comment.CommentStatus.ACTIVE)
                 .cursor(request.cursor())
@@ -141,6 +142,7 @@ public class CommentService {
             List<CommentResponseDto> content = response.getContent();
             nextCursor = content.get(content.size() - 1).id();
         }
+
         return CursorPageResponse.from(response, nextCursor);
     }
 
@@ -165,13 +167,29 @@ public class CommentService {
     public PageResponse<CommentResponseDto> getAll(CommentSearchRequest request) {
 
         String username = request.username();
-        if (request.username() != null) {
+        if (username != null) {
             userRepository.findByUsername(username)
                     .orElseThrow(() -> new UserNotFoundException(username));
         }
-        Page<CommentResponseDto> page = commentRepository.findAll(request)
+
+        CommentSearchCondition condition = getSearchCondition(request, username);
+        Page<CommentResponseDto> page = commentRepository.findAll(condition)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);
+    }
+
+    private CommentSearchCondition getSearchCondition(CommentSearchRequest request, String username) {
+        Comment.CommentStatus status = request.status() == null
+                ? Comment.CommentStatus.ACTIVE
+                : request.status();
+        int page = request.page() == null
+                ? 0
+                : request.page();
+        int limit = request.limit() == null
+                ? 50
+                : request.limit();
+        boolean descending = request.sortDirection() == SortDirection.DESC;
+        return new CommentSearchCondition(username, status, page, limit, descending);
     }
 
 

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 @Builder
-public record CommentRequestDto (
+public record CommentRequest(
 
         Long parentId, // 답글일 경우에만 사용.
 

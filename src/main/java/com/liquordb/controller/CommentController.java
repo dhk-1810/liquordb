@@ -3,9 +3,9 @@ package com.liquordb.controller;
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.comment.request.CommentListGetRequest;
-import com.liquordb.dto.comment.request.CommentRequestDto;
+import com.liquordb.dto.comment.request.CommentRequest;
 import com.liquordb.dto.comment.CommentResponseDto;
-import com.liquordb.dto.comment.request.CommentUpdateRequestDto;
+import com.liquordb.dto.comment.request.CommentUpdateRequest;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.CommentLikeService;
 import com.liquordb.service.CommentService;
@@ -30,7 +30,7 @@ public class CommentController {
     @PostMapping("/reviews/{reviewId}/comments")
     public ResponseEntity<CommentResponseDto> create(
             @PathVariable Long reviewId,
-            @RequestBody @Valid CommentRequestDto request,
+            @RequestBody @Valid CommentRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         CommentResponseDto response = commentService.create(reviewId, request, user.getUserId());
@@ -61,7 +61,7 @@ public class CommentController {
     @PatchMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponseDto> update(
             @PathVariable Long commentId,
-            @RequestBody @Valid CommentUpdateRequestDto request,
+            @RequestBody @Valid CommentUpdateRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         CommentResponseDto response = commentService.update(commentId, request, user.getUserId());
