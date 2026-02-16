@@ -6,6 +6,8 @@ import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.ReviewListGetRequest;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
+import com.liquordb.enums.ReviewSortBy;
+import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.review.ReviewAccessDeniedException;
 import com.liquordb.exception.review.ReviewNotFoundException;
@@ -16,6 +18,7 @@ import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.review.ReviewRepository;
+import com.liquordb.repository.review.condition.ReviewListGetCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -74,7 +77,21 @@ public class ReviewService {
         liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
-        Slice<Review> reviews = reviewRepository.findByLiquorId(liquorId, Review.ReviewStatus.ACTIVE, request);
+        int limit = request.limit() == null ? 20 : request.limit();
+        ReviewSortBy sortBy = request.sortBy() == null ? ReviewSortBy.REVIEW_ID : request.sortBy();
+        SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
+
+        ReviewListGetCondition condition = ReviewListGetCondition.builder()
+                .liquorId(liquorId)
+                .status(Review.ReviewStatus.ACTIVE)
+                .cursor(request.cursor())
+                .idAfter(request.idAfter())
+                .limit(limit)
+                .sortBy(sortBy)
+                .descending(sortDirection == SortDirection.DESC)
+                .build();
+
+        Slice<Review> reviews = reviewRepository.findByLiquorId(condition);
         return getCursorPageResponse(reviews);
     }
 
@@ -82,10 +99,21 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public CursorPageResponse<ReviewResponseDto> getAllByUser(UUID authorId, ReviewListGetRequest request) {
 
-        userRepository.findById(authorId)
-                .orElseThrow(() -> new UserNotFoundException(authorId));
+        int limit = request.limit() == null ? 20 : request.limit();
+        ReviewSortBy sortBy = request.sortBy() == null ? ReviewSortBy.REVIEW_ID : request.sortBy();
+        SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
-        Slice<Review> reviews = reviewRepository.findByUserId(authorId, Review.ReviewStatus.ACTIVE, request);
+        ReviewListGetCondition condition = ReviewListGetCondition.builder()
+                .userId(authorId)
+                .status(Review.ReviewStatus.ACTIVE)
+                .cursor(request.cursor())
+                .idAfter(request.idAfter())
+                .limit(limit)
+                .sortBy(sortBy)
+                .descending(sortDirection == SortDirection.DESC)
+                .build();
+
+        Slice<Review> reviews = reviewRepository.findByUserId(condition);
         return getCursorPageResponse(reviews);
     }
 
@@ -165,10 +193,10 @@ public class ReviewService {
 
     // 전체 리뷰 조회
     @Transactional(readOnly = true)
-    public PageResponse<ReviewResponseDto> findAllByOptionalFilters(UUID userId, Review.ReviewStatus status, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        Page<ReviewResponseDto> page = reviewRepository.findAll(userId, status, pageable)
+    public PageResponse<ReviewResponseDto> findAllByOptionalFilters(String username, Review.ReviewStatus status, Pageable pageable) {
+        userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+        Page<ReviewResponseDto> page = reviewRepository.findAll(username, status, pageable)
                 .map(ReviewMapper::toDto);
         return PageResponse.from(page);
     }

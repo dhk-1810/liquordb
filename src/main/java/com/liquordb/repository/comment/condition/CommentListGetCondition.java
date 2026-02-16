@@ -9,7 +9,7 @@ import java.util.UUID;
 public record CommentListGetCondition(
         Long reviewId,
         UUID userId,
-        Comment.CommentStatus commentStatus,
+        Comment.CommentStatus status,
         Long cursor,
         Long idAfter,
         int limit,

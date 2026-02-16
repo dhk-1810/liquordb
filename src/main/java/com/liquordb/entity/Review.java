@@ -46,6 +46,8 @@ public class Review extends LikeableEntity implements ReportableEntity {
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> images;
 
+    private long commentCount;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime hiddenAt;
@@ -75,6 +77,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
         this.user = user;
         this.liquor = liquor;
         this.detail = detail;
+        this.commentCount = 0;
     }
 
     public static Review create(ReviewRequestDto request, Liquor liquor, User user) {

@@ -34,7 +34,7 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
         List<Comment> content = queryFactory.selectFrom(comment)
                 .where(
                         reviewIdEq(condition.reviewId()),
-                        statusEq(condition.commentStatus()),
+                        statusEq(condition.status()),
                         cursorCondition(condition.cursor(), condition.idAfter(), condition.useId(), condition.descending())
                 )
                 .orderBy(
@@ -61,7 +61,7 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
         List<Comment> content = queryFactory.selectFrom(comment)
                 .where(
                         userIdEq(condition.userId()),
-                        statusEq(condition.commentStatus()),
+                        statusEq(condition.status()),
                         cursorCondition(condition.cursor(), condition.descending())
                 )
                 .orderBy(

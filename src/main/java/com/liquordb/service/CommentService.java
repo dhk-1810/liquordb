@@ -100,7 +100,7 @@ public class CommentService {
 
         CommentListGetCondition condition = CommentListGetCondition.builder()
                 .reviewId(reviewId)
-                .commentStatus(Comment.CommentStatus.ACTIVE)
+                .status(Comment.CommentStatus.ACTIVE)
                 .cursor(request.cursor())
                 .idAfter(request.idAfter())
                 .limit(request.limit())
@@ -128,7 +128,7 @@ public class CommentService {
 
         CommentListGetCondition condition = CommentListGetCondition.builder()
                 .userId(userId)
-                .commentStatus(Comment.CommentStatus.ACTIVE)
+                .status(Comment.CommentStatus.ACTIVE)
                 .cursor(request.cursor())
                 .limit(request.limit())
                 .descending(sortDirection == SortDirection.DESC)

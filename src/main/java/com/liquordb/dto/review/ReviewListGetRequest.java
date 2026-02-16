@@ -16,7 +16,7 @@ public record ReviewListGetRequest (
         Long idAfter,
 
         @Min(1) @Max(50)
-        int limit,
+        Integer limit,
 
         @NotNull
         ReviewSortBy sortBy,

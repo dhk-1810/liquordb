@@ -2,8 +2,10 @@ package com.liquordb.controller.admin;
 
 import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.review.ReviewResponseDto;
+import com.liquordb.dto.review.ReviewSearchRequest;
 import com.liquordb.entity.Review;
 import com.liquordb.service.ReviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +23,11 @@ public class AdminReviewController {
     private final ReviewService reviewService;
 
     // 리뷰 조회 - 작성 유저, 리뷰 상태 필터링 가능
-    @GetMapping("/{userId}")
+    @GetMapping
     public ResponseEntity<PageResponse<ReviewResponseDto>> findByUserIdAndReviewStatus(
-            @PathVariable UUID userId,
-            @RequestParam(required = false) Review.ReviewStatus status,
-            Pageable pageable
+            @ModelAttribute @Valid ReviewSearchRequest request
     ) {
-        PageResponse<ReviewResponseDto> reviews = reviewService.findAllByOptionalFilters(userId, status, pageable);
+        PageResponse<ReviewResponseDto> reviews = reviewService.findAll(request);
         return ResponseEntity.ok(reviews);
     }
 
