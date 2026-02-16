@@ -2,7 +2,7 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.LikeResponseDto;
-import com.liquordb.dto.comment.CommentRequestDto;
+import com.liquordb.dto.comment.request.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.security.CustomUserDetails;

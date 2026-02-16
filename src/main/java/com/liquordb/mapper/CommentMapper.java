@@ -1,6 +1,6 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.comment.CommentRequestDto;
+import com.liquordb.dto.comment.request.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.Review;

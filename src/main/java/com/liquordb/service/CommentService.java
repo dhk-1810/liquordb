@@ -2,7 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
-import com.liquordb.dto.comment.CommentRequestDto;
+import com.liquordb.dto.comment.request.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
@@ -84,7 +84,7 @@ public class CommentService {
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         Slice<Comment> comments
-                = commentRepository.findByReview_IdAndStatus(reviewId, Comment.CommentStatus.ACTIVE, pageable);
+                = commentRepository.findByReviewIdAndStatus(reviewId, Comment.CommentStatus.ACTIVE, pageable);
         Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
 
         Long nextCursor = null;
@@ -127,7 +127,7 @@ public class CommentService {
             userRepository.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException(userId));
         }
-        Page<CommentResponseDto> page = commentRepository.findAllByOptionalFilters(userId, status, pageable)
+        Page<CommentResponseDto> page = commentRepository.findAll(userId, status, pageable)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);
     }
