@@ -10,10 +10,7 @@ import org.hibernate.query.SortDirection;
 /**
  * 커서 페이지네이션 사용
  */
-public record CommentGetByReviewRequest (
-
-        @NotNull
-        Long reviewId,
+public record CommentListGetRequest (
 
         @Nullable
         Long cursor,

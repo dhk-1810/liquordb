@@ -2,19 +2,21 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.LikeResponseDto;
+import com.liquordb.dto.comment.request.CommentListGetRequest;
 import com.liquordb.dto.comment.request.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
-import com.liquordb.dto.comment.CommentUpdateRequestDto;
+import com.liquordb.dto.comment.request.CommentUpdateRequestDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.CommentLikeService;
 import com.liquordb.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -37,11 +39,21 @@ public class CommentController {
 
     // 특정 리뷰의 댓글 조회
     @GetMapping("/reviews/{reviewId}/comments")
-    public ResponseEntity<CursorPageResponse<CommentResponseDto>> findByReviewId(
+    public ResponseEntity<CursorPageResponse<CommentResponseDto>> getByReviewId(
             @PathVariable Long reviewId,
-            Pageable pageable
+            @ModelAttribute @Valid CommentListGetRequest request
     ) {
-        CursorPageResponse<CommentResponseDto> comments = commentService.findByReviewId(reviewId, pageable);
+        CursorPageResponse<CommentResponseDto> comments = commentService.getByReviewId(reviewId, request);
+        return ResponseEntity.ok(comments);
+    }
+
+    // 특정 리뷰의 댓글 조회
+    @GetMapping("/users/{userId}/comments")
+    public ResponseEntity<CursorPageResponse<CommentResponseDto>> getByReviewId(
+            @PathVariable UUID userId,
+            @ModelAttribute @Valid CommentListGetRequest request
+    ) {
+        CursorPageResponse<CommentResponseDto> comments = commentService.getByUserId(userId, request);
         return ResponseEntity.ok(comments);
     }
 

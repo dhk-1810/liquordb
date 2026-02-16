@@ -2,9 +2,11 @@ package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.comment.request.CommentListGetRequest;
 import com.liquordb.dto.comment.request.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
-import com.liquordb.dto.comment.CommentUpdateRequestDto;
+import com.liquordb.dto.comment.request.CommentSearchRequest;
+import com.liquordb.dto.comment.request.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.comment.CommentAccessDeniedException;
@@ -77,14 +79,13 @@ public class CommentService {
     }
 
     // 특정 리뷰의 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
-    // TODO 정렬조건 - 인기순, 최신순
     @Transactional(readOnly = true)
-    public CursorPageResponse<CommentResponseDto> findByReviewId(Long reviewId, Pageable pageable) {
+    public CursorPageResponse<CommentResponseDto> getByReviewId(Long reviewId, CommentListGetRequest request) {
         Review review = reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         Slice<Comment> comments
-                = commentRepository.findByReviewIdAndStatus(reviewId, Comment.CommentStatus.ACTIVE, pageable);
+                = commentRepository.findByReviewIdAndStatus(reviewId, request);
         Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
 
         Long nextCursor = null;
@@ -98,10 +99,15 @@ public class CommentService {
 
     // 본인이 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
-    public PageResponse<CommentResponseDto> findByUserId(UUID userId, Pageable pageable) {
-        Page<Comment> comments = commentRepository.findByUserIdAndStatus(userId, Comment.CommentStatus.ACTIVE, pageable);
-        Page<CommentResponseDto> response = comments.map(CommentMapper::toDto);
-        return PageResponse.from(response);
+    public CursorPageResponse<CommentResponseDto> getByUserId(UUID userId, CommentListGetRequest request) {
+        Slice<Comment> comments = commentRepository.findByUserIdAndStatus(userId, request);
+        Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
+        Long nextCursor = null;
+        if (response.hasNext()) {
+            List<CommentResponseDto> content = response.getContent();
+            nextCursor = content.get(content.size() - 1).id();
+        }
+        return CursorPageResponse.from(response, nextCursor);
     }
 
     // 댓글 삭제 (Soft Delete)
@@ -122,12 +128,14 @@ public class CommentService {
 
     // 유저ID, 리뷰 조회
     @Transactional(readOnly = true)
-    public PageResponse<CommentResponseDto> findAllByOptionalFilters(UUID userId, Comment.CommentStatus status, Pageable pageable) {
-        if (userId != null) {
-            userRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException(userId));
+    public PageResponse<CommentResponseDto> getAll(CommentSearchRequest request) {
+
+        String username = request.username();
+        if (request.username() != null) {
+            userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UserNotFoundException(username));
         }
-        Page<CommentResponseDto> page = commentRepository.findAll(userId, status, pageable)
+        Page<CommentResponseDto> page = commentRepository.findAll(request)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);
     }

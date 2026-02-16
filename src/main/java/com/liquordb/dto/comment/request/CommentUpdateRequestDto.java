@@ -1,4 +1,4 @@
-package com.liquordb.dto.comment;
+package com.liquordb.dto.comment.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;

@@ -1,5 +1,7 @@
 package com.liquordb.repository.comment;
 
+import com.liquordb.dto.comment.request.CommentListGetRequest;
+import com.liquordb.dto.comment.request.CommentSearchRequest;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.QComment;
 import com.querydsl.core.types.Order;
@@ -25,7 +27,7 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
     // 특정 리뷰에 달린 댓글 조회
     @Override
-    public Slice<Comment> findByReviewIdAndStatus(Long reviewId, Comment.CommentStatus status, Pageable pageable) {
+    public Slice<Comment> findByReviewIdAndStatus(Long reviewId, CommentListGetRequest request) {
         queryFactory.selectFrom(comment)
                 .where(
 
@@ -38,12 +40,12 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
     // 특정 유저가 작성한 댓글 조회
     @Override
-    public Page<Comment> findByUserIdAndStatus(UUID userId, Comment.CommentStatus statuses, Pageable pageable) {
+    public Page<Comment> findByUserIdAndStatus(UUID userId, CommentListGetRequest request) {
         return null;
     }
 
     @Override
-    public Page<Comment> findAll(String username, Comment.CommentStatus status, Pageable pageable) { // TODO Condition 도입
+    public Page<Comment> findAll(CommentSearchRequest request) { // TODO Condition 도입
         queryFactory.selectFrom(comment)
                 .where(
                         usernameEq(),

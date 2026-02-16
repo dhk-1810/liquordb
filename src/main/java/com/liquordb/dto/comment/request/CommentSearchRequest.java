@@ -1,4 +1,4 @@
-package com.liquordb.dto.comment;
+package com.liquordb.dto.comment.request;
 
 import com.liquordb.entity.Comment;
 import com.liquordb.enums.CommentSortBy;

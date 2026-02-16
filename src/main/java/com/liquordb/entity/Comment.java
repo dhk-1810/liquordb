@@ -1,13 +1,10 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.comment.CommentUpdateRequestDto;
+import com.liquordb.dto.comment.request.CommentUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
