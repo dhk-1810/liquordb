@@ -2,12 +2,15 @@ package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.comment.CommentSearchCondition;
 import com.liquordb.dto.comment.request.CommentListGetRequest;
 import com.liquordb.dto.comment.request.CommentRequestDto;
 import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.request.CommentSearchRequest;
 import com.liquordb.dto.comment.request.CommentUpdateRequestDto;
 import com.liquordb.entity.Comment;
+import com.liquordb.enums.CommentSortBy;
+import com.liquordb.enums.SortDirection;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.comment.CommentAccessDeniedException;
 import com.liquordb.exception.comment.CommentNotFoundException;
@@ -81,11 +84,20 @@ public class CommentService {
     // 특정 리뷰의 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
     public CursorPageResponse<CommentResponseDto> getByReviewId(Long reviewId, CommentListGetRequest request) {
-        Review review = reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)
+
+        reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
-        Slice<Comment> comments
-                = commentRepository.findByReviewIdAndStatus(reviewId, request);
+        CommentSearchCondition condition = CommentSearchCondition.builder()
+                .reviewId(reviewId)
+                .commentStatus(Comment.CommentStatus.ACTIVE)
+                .nextCursor(request.cursor())
+                .limit(request.limit())
+                .sortBy(request.sortBy() == null ? CommentSortBy.CREATED_AT : request.sortBy())
+                .sortDirection(request.sortDirection() == null ? SortDirection.DESC : request.sortDirection())
+                .build();
+
+        Slice<Comment> comments = commentRepository.findByReview(condition);
         Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
 
         Long nextCursor = null;
@@ -100,7 +112,17 @@ public class CommentService {
     // 본인이 쓴 댓글 전체 조회 - 게시 중인 것만. 숨김, 삭제 제외.
     @Transactional(readOnly = true)
     public CursorPageResponse<CommentResponseDto> getByUserId(UUID userId, CommentListGetRequest request) {
-        Slice<Comment> comments = commentRepository.findByUserIdAndStatus(userId, request);
+
+        CommentSearchCondition condition = CommentSearchCondition.builder()
+                .userId(userId)
+                .commentStatus(Comment.CommentStatus.ACTIVE)
+                .nextCursor(request.cursor())
+                .limit(request.limit())
+                .sortBy(request.sortBy() == null ? CommentSortBy.CREATED_AT : request.sortBy())
+                .sortDirection(request.sortDirection() == null ? SortDirection.DESC : request.sortDirection())
+                .build();
+
+        Slice<Comment> comments = commentRepository.findByUser(condition);
         Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -139,5 +161,6 @@ public class CommentService {
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);
     }
+
 
 }

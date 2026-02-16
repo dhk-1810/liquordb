@@ -1,9 +1,11 @@
 package com.liquordb.repository.comment;
 
+import com.liquordb.dto.comment.CommentSearchCondition;
 import com.liquordb.dto.comment.request.CommentListGetRequest;
 import com.liquordb.dto.comment.request.CommentSearchRequest;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.QComment;
+import com.liquordb.enums.SortDirection;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+// TODO 복합 인덱스 생성 (likeCount, id)
+
 @RequiredArgsConstructor
 @Repository
 public class CommentRepositoryImpl implements CustomCommentRepository {
@@ -24,96 +28,106 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
     private final JPAQueryFactory queryFactory;
     private final QComment comment = QComment.comment;
 
-
     // 특정 리뷰에 달린 댓글 조회
     @Override
-    public Slice<Comment> findByReviewIdAndStatus(Long reviewId, CommentListGetRequest request) {
-        queryFactory.selectFrom(comment)
-                .where(
+    public Slice<Comment> findByReview(CommentSearchCondition condition) {
 
+        int limit = condition.limit();
+        List<Comment> comments = queryFactory.selectFrom(comment)
+                .where(
+                        reviewIdEq(condition.reviewId()),
+                        statusEq(condition.commentStatus()),
+                        cursorCondition(condition.cursor(), condition.idAfter(), condition.useId(), condition.descending())
                 )
-                .orderBy()
-                .limit()
+                .orderBy(
+                        getOrderSpecifier(condition.descending(), condition.useId()),
+                        getTieBreakerOrder(condition.descending())
+                )
+                .limit(limit + 1)
                 .fetch();
-        return new SliceImpl<>(contents, PageRequest.ofSize(limit), hasNext);
+
+        boolean hasNext = false;
+        if (comments.size() > limit) {
+            comments.remove(limit); // 초과분 제거
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(comments, PageRequest.ofSize(limit), hasNext);
     }
 
     // 특정 유저가 작성한 댓글 조회
     @Override
-    public Page<Comment> findByUserIdAndStatus(UUID userId, CommentListGetRequest request) {
+    public Slice<Comment> findByUser(CommentSearchCondition condition) {
         return null;
     }
 
     @Override
-    public Page<Comment> findAll(CommentSearchRequest request) { // TODO Condition 도입
-        queryFactory.selectFrom(comment)
-                .where(
-                        usernameEq(),
-                        statusEq(status)
-                )
-                .orderBy()
-                .limit()
-                .fetch();
+    public Page<Comment> findAll(CommentSearchRequest request) {
+        return null;
     }
 
+    /**
+     * Predicates
+     */
 
-
-    private Predicate cursorCondition(String cursor, LocalDateTime after, boolean ascending, boolean useRating) {
+    private Predicate cursorCondition(Long cursor, Long idAfter, boolean useId, boolean descending) {
         if (cursor == null) {
             return null; // 첫 페이지 조회
         }
 
-        // 주 커서 필드 (rating 또는 createdAt)
-        if (useRating) {
-            // rating 기준
-            if (ascending) { // ASC: rating이 커지거나 (같으면) createdAt이 커지는 경우
-                return qReview.rating.gt(Integer.parseInt(cursor)) // gt = greater than
-                        .or(
-                                qReview.rating.eq(Integer.parseInt(cursor)).and(qReview.createdAt.gt(after))
-                        );
-            } else { // DESC: rating이 작아지거나 (같으면) createdAt이 작아지는 경우
-                return qReview.rating.lt(Integer.parseInt(cursor)) // lt = less than
-                        .or(
-                                qReview.rating.eq(Integer.parseInt(cursor)).and(qReview.createdAt.lt(after))
-                        );
+        // 주 커서
+        if (useId) { // ID로 정렬
+            if (descending) {
+                return comment.id.lt(cursor);
+            } else {
+                return comment.id.gt(cursor);
             }
-        } else {
-            // createdAt 기준
-            if (ascending) { // ASC: createdAt이 커지는 경우 (오래된순)
-                return qReview.createdAt.gt(after);
-            } else { // DESC: createdAt이 작아지는 경우 (최신순)
-                return qReview.createdAt.lt(after);
+        } else { // likeCount로 정렬
+            if (descending) {
+                return comment.likeCount.lt(cursor)
+                        .or(
+                                comment.likeCount.eq(cursor).and(comment.id.lt(idAfter))
+                        );
+            } else {
+                return comment.likeCount.gt(cursor)
+                        .or(
+                                comment.likeCount.eq(cursor).and(comment.id.gt(idAfter))
+                        );
             }
         }
     }
 
-    private Predicate usernameEq(String username) {
-        return username != null ? comment.user.username.eq(username) : null;
+    private Predicate reviewIdEq(Long reviewId) {
+        return reviewId != null ? comment.review.id.eq(reviewId) : null;
+    }
+
+    private Predicate userIdEq(UUID userId) {
+        return userId != null ? comment.user.id.eq(userId) : null;
     }
 
     private Predicate statusEq(Comment.CommentStatus status) {
         return status != null ? comment.status.eq(status) : null;
     }
 
-
-
-    private static OrderSpecifier<?>[] orderByExpressions(String sortDirection, String sortBy) {
-        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
-
-        orderSpecifiers.add(orderByCursor(sortDirection, sortBy));
-        final var orderById = new OrderSpecifier<>(Order.valueOf(sortDirection), playlist.id);
-        orderSpecifiers.add(orderById);
-
-        return orderSpecifiers.toArray(OrderSpecifier[]::new);
+    private Predicate usernameEq(String username) {
+        return username != null ? comment.user.username.eq(username) : null;
     }
 
-    private OrderSpecifier<?> createdAtOrder(boolean ascending) {
-        Order order = ascending ? Order.ASC : Order.DESC;
-        return new OrderSpecifier<>(order, bur.score);
+    /**
+     * OrderSpecifiers
+     */
+
+    private OrderSpecifier<?> getOrderSpecifier(boolean descending, boolean useId) {
+        Order order = descending ? Order.DESC : Order.ASC;
+        if (useId) {
+            return new OrderSpecifier<>(order, comment.id);
+        } else {
+            return new OrderSpecifier<>(order, comment.likeCount);
+        }
     }
 
-    private OrderSpecifier<?> idOrder(boolean ascending) {
-        Order order = ascending ? Order.ASC : Order.DESC;
-        return new OrderSpecifier<>(order, bur.id);
+    private OrderSpecifier<?> getTieBreakerOrder(boolean descending) {
+        Order order = descending ? Order.DESC : Order.ASC;
+        return new OrderSpecifier<>(order, comment.id);
     }
 }

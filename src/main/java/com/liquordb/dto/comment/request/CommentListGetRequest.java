@@ -1,11 +1,11 @@
 package com.liquordb.dto.comment.request;
 
 import com.liquordb.enums.CommentSortBy;
+import com.liquordb.enums.SortDirection;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.query.SortDirection;
 
 /**
  * 커서 페이지네이션 사용
