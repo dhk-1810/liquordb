@@ -1,9 +1,8 @@
 package com.liquordb.repository.comment;
 
-import com.liquordb.dto.comment.CommentListGetCondition;
-import com.liquordb.dto.comment.CommentSearchCondition;
-import com.liquordb.dto.comment.request.CommentSearchRequest;
 import com.liquordb.entity.Comment;
+import com.liquordb.repository.comment.condition.CommentListGetCondition;
+import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 

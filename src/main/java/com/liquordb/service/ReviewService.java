@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
+import com.liquordb.dto.review.ReviewListGetRequest;
 import com.liquordb.dto.review.ReviewUpdateRequestDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -14,6 +15,7 @@ import com.liquordb.repository.*;
 import com.liquordb.dto.review.ReviewRequestDto;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.repository.comment.CommentRepository;
+import com.liquordb.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,23 +69,23 @@ public class ReviewService {
 
     // 주류별 리뷰 목록 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<ReviewResponseDto> getAllByLiquor(Long liquorId, Pageable pageable) {
+    public CursorPageResponse<ReviewResponseDto> getAllByLiquor(Long liquorId, ReviewListGetRequest request) {
 
         liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
-        Slice<Review> reviews = reviewRepository.findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(liquorId, Review.ReviewStatus.ACTIVE, pageable);
+        Slice<Review> reviews = reviewRepository.findByLiquorId(liquorId, Review.ReviewStatus.ACTIVE, request);
         return getCursorPageResponse(reviews);
     }
 
     // 유저별 리뷰 목록 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<ReviewResponseDto> getAllByUser(UUID authorId, Pageable pageable) {
+    public CursorPageResponse<ReviewResponseDto> getAllByUser(UUID authorId, ReviewListGetRequest request) {
 
         userRepository.findById(authorId)
                 .orElseThrow(() -> new UserNotFoundException(authorId));
 
-        Slice<Review> reviews = reviewRepository.findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(authorId, Review.ReviewStatus.ACTIVE, pageable);
+        Slice<Review> reviews = reviewRepository.findByUserId(authorId, Review.ReviewStatus.ACTIVE, request);
         return getCursorPageResponse(reviews);
     }
 
@@ -166,7 +168,7 @@ public class ReviewService {
     public PageResponse<ReviewResponseDto> findAllByOptionalFilters(UUID userId, Review.ReviewStatus status, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        Page<ReviewResponseDto> page = reviewRepository.findAllByOptionalFilters(userId, status, pageable)
+        Page<ReviewResponseDto> page = reviewRepository.findAll(userId, status, pageable)
                 .map(ReviewMapper::toDto);
         return PageResponse.from(page);
     }

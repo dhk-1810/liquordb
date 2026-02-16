@@ -1,4 +1,4 @@
-package com.liquordb.dto.comment;
+package com.liquordb.repository.comment.condition;
 
 import com.liquordb.entity.Comment;
 

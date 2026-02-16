@@ -1,10 +1,9 @@
 package com.liquordb.repository.comment;
 
-import com.liquordb.dto.comment.CommentListGetCondition;
-import com.liquordb.dto.comment.CommentSearchCondition;
-import com.liquordb.dto.comment.request.CommentSearchRequest;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.QComment;
+import com.liquordb.repository.comment.condition.CommentListGetCondition;
+import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;

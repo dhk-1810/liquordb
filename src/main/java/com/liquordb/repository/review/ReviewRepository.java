@@ -1,7 +1,8 @@
-package com.liquordb.repository;
+package com.liquordb.repository.review;
 
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.Review;
+import com.liquordb.repository.comment.CustomCommentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long>, CustomReviewRepository {
 
     // 리뷰 단건 조회
     Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
@@ -26,27 +27,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.liquor.id = :liquorId")
     Double getAverageRatingByLiquorId(@Param("liquorId") Long liquorId);
 
-    // 리뷰 목록 조회
-    Slice<Review> findAllByLiquor_IdAndLiquor_IsDeletedFalseAndStatus(Long liquorId, Review.ReviewStatus status, Pageable pageable);
-    Page<Review> findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(UUID userId, Review.ReviewStatus status, Pageable pageable);
-
     // 좋아요 누른 리뷰 개수
     long countByUser_IdAndStatus(UUID userId, Review.ReviewStatus status);
-
-    // 특정 유저가 작성한 댓글
-    List<Review> findAllByUser_IdAndLiquor_IsDeletedFalseAndStatus(UUID reviewId, Review.ReviewStatus status);
-
-    // 관리자용 - 유저ID나 상태로 리뷰 목록 조회
-    @Query("""
-    SELECT r FROM Review r
-    WHERE (:userId IS NULL OR r.user.id = :userId)
-    AND (:status IS NULL OR r.status = :status)
-    """)
-    Page<Review> findAllByOptionalFilters(
-            @Param("userId") UUID userId,
-            @Param("status") Review.ReviewStatus status,
-            Pageable pageable
-    );
 
     // 주류 연관 리뷰 soft delete (Bulk Update)
     @Modifying(clearAutomatically = true)

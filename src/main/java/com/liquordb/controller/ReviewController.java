@@ -2,9 +2,7 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.LikeResponseDto;
-import com.liquordb.dto.review.ReviewRequestDto;
-import com.liquordb.dto.review.ReviewResponseDto;
-import com.liquordb.dto.review.ReviewUpdateRequestDto;
+import com.liquordb.dto.review.*;
 import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
@@ -45,9 +43,9 @@ public class ReviewController {
     @GetMapping("/liquors/{liquorId}/reviews")
     public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByLiquor(
             @PathVariable Long liquorId,
-            Pageable pageable
+            @ModelAttribute @Valid ReviewListGetRequest request
     ) {
-        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByLiquor(liquorId, pageable);
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByLiquor(liquorId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -55,13 +53,9 @@ public class ReviewController {
     @GetMapping("/users/{authorId}/reviews")
     public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByUser(
             @PathVariable UUID authorId,
-            @AuthenticationPrincipal CustomUserDetails user,
-            Pageable pageable
+            @ModelAttribute @Valid ReviewListGetRequest request
     ) {
-        if (user == null) {
-            throw new UnauthenticatedUserException();
-        }
-        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByUser(authorId, pageable);
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByUser(authorId, request);
         return ResponseEntity.ok(response);
     }
 

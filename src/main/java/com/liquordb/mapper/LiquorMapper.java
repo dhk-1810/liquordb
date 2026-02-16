@@ -3,19 +3,10 @@ package com.liquordb.mapper;
 import com.liquordb.dto.liquor.LiquorRequestDto;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
-import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.*;
-import com.liquordb.repository.LiquorLikeRepository;
-import com.liquordb.repository.LiquorRepository;
-import com.liquordb.repository.LiquorTagRepository;
-import com.liquordb.repository.ReviewRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class LiquorMapper {
 

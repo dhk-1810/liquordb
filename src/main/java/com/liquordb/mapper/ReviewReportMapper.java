@@ -6,7 +6,7 @@ import com.liquordb.entity.ReviewReport;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
 import com.liquordb.exception.review.ReviewNotFoundException;
-import com.liquordb.repository.ReviewRepository;
+import com.liquordb.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

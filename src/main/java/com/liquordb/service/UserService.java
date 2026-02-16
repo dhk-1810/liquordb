@@ -10,6 +10,7 @@ import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
 
 import com.liquordb.repository.comment.CommentRepository;
+import com.liquordb.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

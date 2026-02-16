@@ -9,7 +9,7 @@ import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewReportMapper;
 import com.liquordb.repository.ReviewReportRepository;
-import com.liquordb.repository.ReviewRepository;
+import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

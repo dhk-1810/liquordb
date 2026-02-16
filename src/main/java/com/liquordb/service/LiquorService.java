@@ -13,6 +13,7 @@ import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.*;
 import com.liquordb.repository.comment.CommentRepository;
+import com.liquordb.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
