@@ -1,4 +1,4 @@
-package com.liquordb.repository;
+package com.liquordb.repository.liquor;
 
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
@@ -11,22 +11,10 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface LiquorRepository extends JpaRepository<Liquor, Long> {
+public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiquorRepository{
 
-    // 삭제되지 않은 주류 단건 조회
+    // 주류 단건 조회
     Optional<Liquor> findByIdAndIsDeleted(Long id, boolean deleted);
-
-    // 전체 조회
-    Page<Liquor> findAllByIsDeleted(Pageable pageable, boolean deleted);
-
-    // 검색
-    Page<Liquor> findByNameContainingAndIsDeleted(Pageable pageable, String keyword, boolean deleted);
-
-    // 대분류로 필터링
-    Page<Liquor> findByCategoryAndIsDeleted(Pageable pageable, Liquor.LiquorCategory liquorCategory, boolean deleted);
-
-    // 소분류로 필터링
-    Page<Liquor> findBySubcategoryAndIsDeleted(Pageable pageable, LiquorSubcategory liquorSubcategory, boolean deleted);
 
     // 좋아요 수 변경
     @Modifying(clearAutomatically = true)

@@ -1,22 +1,22 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.PageResponse;
-import com.liquordb.dto.liquor.LiquorUpdateRequestDto;
+import com.liquordb.dto.CursorPageResponse;
+import com.liquordb.dto.comment.CommentResponseDto;
+import com.liquordb.dto.liquor.*;
 import com.liquordb.dto.tag.TagResponseDto;
+import com.liquordb.enums.LiquorSortBy;
+import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
-import com.liquordb.dto.liquor.LiquorRequestDto;
-import com.liquordb.dto.liquor.LiquorResponseDto;
-import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.Liquor;
-import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.*;
 import com.liquordb.repository.comment.CommentRepository;
+import com.liquordb.repository.liquor.LiquorRepository;
+import com.liquordb.repository.liquor.condition.LiquorSearchCondition;
 import com.liquordb.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,15 +37,27 @@ public class LiquorService {
     private final LiquorLikeRepository liquorLikeRepository;
     private final LiquorTagRepository liquorTagRepository;
 
-    // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
+    // 주류 목록 조회 (전체 조회 또는 검색어, 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
-    public PageResponse<LiquorSummaryDto> getLiquorsByFilters(
-            Liquor.LiquorCategory category,
-            LiquorSubcategory subcategory,
-            UUID userId,  // 조회하는 사람, null 허용.
-            Pageable pageable
-    ) {
-        Page<Liquor> liquors = fetchLiquors(category, subcategory, pageable);
+    public CursorPageResponse<LiquorSummaryDto> getAll(LiquorListGetRequest request, UUID userId) {
+
+        int limit = request.limit() == null ? 50 : request.limit();
+        LiquorSortBy sortBy = request.sortBy() == null ? LiquorSortBy.LIQUOR_ID : request.sortBy();
+        SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
+
+        LiquorSearchCondition condition = LiquorSearchCondition.builder()
+                .category(request.category())
+                .subcategory(request.subcategory())
+                .keyword(request.keyword())
+                .searchDeleted(request.searchDeleted())
+                .cursor(request.cursor())
+                .idAfter(request.idAfter())
+                .limit(limit)
+                .sortBy(sortBy)
+                .descending(sortDirection == SortDirection.DESC)
+                .build();
+        Slice<Liquor> liquors = liquorRepository.findAll(condition);
+
         List<Long> liquorIds = liquors.getContent().stream()
                 .map(Liquor::getId)
                 .toList();
@@ -53,33 +65,21 @@ public class LiquorService {
                 ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, liquorIds)
                 : Collections.emptySet();
 
-        Page<LiquorSummaryDto> response = liquors.map(liquor -> {
+        Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
             return LiquorMapper.toSummaryDto(liquor, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
         });
 
-        return PageResponse.from(response);
+        Object nextCursor = null;
+        if (response.hasNext()) {
+            List<LiquorSummaryDto> content = response.getContent();
+            nextCursor = content.get(content.size() - 1).id();
+        }
+
+        return CursorPageResponse.from(response, nextCursor);
     }
 
-    // 주류 목록 검색 (이름으로)
-    @Transactional(readOnly = true)
-    public PageResponse<LiquorSummaryDto> searchLiquorsByName(String keyword, UUID userId, Pageable pageable) {
-
-        Page<Liquor> searchedLiquors = liquorRepository.findByNameContainingAndIsDeleted(pageable, keyword, false);
-        List<Long> liquorIds = searchedLiquors.getContent().stream()
-                .map(Liquor::getId)
-                .toList();
-        Set<Long> likedLiquorIds = (userId != null)
-                ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, liquorIds)
-                : Collections.emptySet();
-        Page<LiquorSummaryDto> response = searchedLiquors.map(liquor -> {
-            boolean isLiked = likedLiquorIds.contains(liquor.getId());
-            return LiquorMapper.toSummaryDto(liquor, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
-        });
-        return PageResponse.from(response);
-    }
-
-    // 주류 상세 페이지
+    // 주류 단건 조회
     @Transactional(readOnly = true)
     public LiquorResponseDto getLiquorDetail(Long liquorId, UUID userId) {
 
@@ -93,20 +93,6 @@ public class LiquorService {
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
 
         return LiquorMapper.toDto(liquor, tags, likedByMe);
-    }
-
-    private Page<Liquor> fetchLiquors(
-            Liquor.LiquorCategory category,
-            LiquorSubcategory subcategory,
-            Pageable pageable
-    ) {
-        if (subcategory != null) {
-            return liquorRepository.findBySubcategoryAndIsDeleted(pageable, subcategory, false);
-        } else if (category != null) {
-            return liquorRepository.findByCategoryAndIsDeleted(pageable, category, false);
-        } else {
-            return liquorRepository.findAllByIsDeleted(pageable, false);
-        }
     }
 
     /**

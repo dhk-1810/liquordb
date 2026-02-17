@@ -1,18 +1,16 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.tag.LiquorTagRequestDto;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.tag.TagNotFoundException;
-import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.LiquorTagMapper;
 import com.liquordb.repository.*;
+import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

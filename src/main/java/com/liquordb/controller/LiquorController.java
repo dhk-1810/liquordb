@@ -1,16 +1,14 @@
 package com.liquordb.controller;
 
-import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.LikeResponseDto;
+import com.liquordb.dto.liquor.LiquorListGetRequest;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
-import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.entity.Liquor;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,27 +26,13 @@ public class LiquorController {
 
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
-    public ResponseEntity<PageResponse<LiquorSummaryDto>> getLiquorsByFilters(
-            @RequestParam(required = false) Liquor.LiquorCategory category,
-            @RequestParam(required = false) LiquorSubcategory subcategory,
-            @AuthenticationPrincipal CustomUserDetails user,
-            Pageable pageable
+    public ResponseEntity<CursorPageResponse<LiquorSummaryDto>> getAll(
+            @ModelAttribute LiquorListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
         UUID userId = (user != null) ? user.getUserId() : null;
-        PageResponse<LiquorSummaryDto> liquor = liquorService.getLiquorsByFilters(category, subcategory, userId, pageable);
+        CursorPageResponse<LiquorSummaryDto> liquor = liquorService.getAll(request, userId);
         return ResponseEntity.ok(liquor);
-    }
-
-    // 주류 검색 (이름으로)
-    @GetMapping("/search")
-    public ResponseEntity<PageResponse<LiquorSummaryDto>> searchLiquors(
-            @RequestParam String keyword,
-            @AuthenticationPrincipal CustomUserDetails user,
-            Pageable pageable
-    ) {
-        UUID userId = (user != null) ? user.getUserId() : null;
-        PageResponse<LiquorSummaryDto> response = liquorService.searchLiquorsByName(keyword, userId, pageable);
-        return ResponseEntity.ok(response);
     }
 
     // 주류 단건 조회
@@ -81,7 +65,5 @@ public class LiquorController {
         LikeResponseDto response = liquorLikeService.cancelLike(liquorId, user.getUserId());
         return ResponseEntity.ok(response);
     }
-
-
 
 }

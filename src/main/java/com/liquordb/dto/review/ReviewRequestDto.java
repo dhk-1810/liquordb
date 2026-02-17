@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 public record ReviewRequestDto (
 
         @NotNull(message = "평점은 필수입니다.")
-        Double rating,
+        Short rating,
 
         String title,
 
