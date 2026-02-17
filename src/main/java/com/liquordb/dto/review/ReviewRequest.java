@@ -2,14 +2,12 @@ package com.liquordb.dto.review;
 
 import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
 import com.liquordb.entity.Liquor;
-import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 
 /**
  * 리뷰 생성 요청 DTO
  */
-@Builder
 public record ReviewRequest(
 
         @NotNull(message = "평점은 필수입니다.")

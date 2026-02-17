@@ -21,16 +21,12 @@ public class LiquorLike {
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
 
-    @Builder
     public LiquorLike(User user, Liquor liquor) {
         this.user = user;
         this.liquor = liquor;
     }
 
     public static LiquorLike create(User user, Liquor liquor) {
-        return LiquorLike.builder()
-                .user(user)
-                .liquor(liquor)
-                .build();
+        return new LiquorLike(user, liquor);
     }
 }

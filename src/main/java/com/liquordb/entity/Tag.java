@@ -50,15 +50,12 @@ public class Tag {
         this.deletedAt = null;
     }
 
-    @Builder
     private Tag(String name) {
         this.name = name;
     }
 
     public static Tag create(String name){
-        return Tag.builder()
-                .name(name)
-                .build();
+        return new Tag(name);
     }
 
 }

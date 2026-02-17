@@ -1,8 +1,5 @@
 package com.liquordb.dto.review.reviewdetaildto;
 
-import lombok.Builder;
-
-@Builder
 public record WhiskyReviewRequest(
         Double aroma,    // 향
         Double taste,    // 맛

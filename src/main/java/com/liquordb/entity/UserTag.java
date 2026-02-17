@@ -33,17 +33,13 @@ public class UserTag {
         createdAt = LocalDateTime.now();
     }
 
-    @Builder
     private UserTag(User user, Tag tag) {
         this.user = user;
         this.tag = tag;
     }
 
     public static UserTag create(User requestUser, Tag tag) {
-        return UserTag.builder()
-                .user(requestUser)
-                .tag(tag)
-                .build();
+        return new UserTag(requestUser, tag);
     }
 
 }

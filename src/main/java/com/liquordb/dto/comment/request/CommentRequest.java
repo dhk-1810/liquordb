@@ -1,9 +1,7 @@
 package com.liquordb.dto.comment.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
 
-@Builder
 public record CommentRequest(
 
         Long parentId, // 답글일 경우에만 사용.

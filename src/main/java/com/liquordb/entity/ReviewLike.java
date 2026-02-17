@@ -21,16 +21,12 @@ public class ReviewLike {
     @JoinColumn(name = "review_id")
     private Review review;
 
-    @Builder
     public ReviewLike(User user, Review review) {
         this.user = user;
         this.review = review;
     }
 
     public static ReviewLike create(User user, Review review) {
-        return ReviewLike.builder()
-                .user(user)
-                .review(review)
-                .build();
+        return new ReviewLike(user, review);
     }
 }

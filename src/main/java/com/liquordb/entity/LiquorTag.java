@@ -32,17 +32,13 @@ public class LiquorTag {
         createdAt = LocalDateTime.now();
     }
 
-    @Builder
     private LiquorTag(Liquor liquor, Tag tag) {
         this.liquor = liquor;
         this.tag = tag;
     }
 
     public static LiquorTag create(Liquor liquor, Tag tag) {
-        return LiquorTag.builder()
-                .liquor(liquor)
-                .tag(tag)
-                .build();
+        return new LiquorTag(liquor, tag);
     }
 
 }

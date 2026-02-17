@@ -12,7 +12,6 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class WineReviewDetail extends ReviewDetail {
     private Double sweetness;       // 당도
     private Double acidity;       // 산도

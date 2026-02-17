@@ -57,7 +57,6 @@ public class CommentReport {
         this.rejectedAt = LocalDateTime.now();
     }
 
-    @Builder
     private CommentReport(Comment comment, String reason, UUID reporterId, String reporterUsername) {
         this.comment = comment;
         this.reason = reason;
@@ -66,12 +65,7 @@ public class CommentReport {
     }
 
     public static CommentReport create(Comment comment, String reason, UUID reporterId, String reporterUsername) {
-        return CommentReport.builder()
-                .comment(comment)
-                .reason(reason)
-                .reporterId(reporterId)
-                .reporterUsername(reporterUsername)
-                .build();
+        return new CommentReport(comment, reason, reporterId, reporterUsername);
     }
 
 }

@@ -23,16 +23,12 @@ public class CommentLike {
     @JoinColumn(name = "comment_id")
     private Comment comment;
 
-    @Builder
     public CommentLike(User user, Comment comment) {
         this.user = user;
         this.comment = comment;
     }
 
     public static CommentLike create(User user, Comment comment) {
-        return CommentLike.builder()
-                .user(user)
-                .comment(comment)
-                .build();
+        return new CommentLike(user, comment);
     }
 }

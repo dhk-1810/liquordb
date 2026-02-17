@@ -2,12 +2,10 @@ package com.liquordb.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.*;
 
 /**
  * 비밀번호 수정 요청 DTO (로그인 상태에서 사용)
  */
-@Builder
 public record PasswordUpdateRequest(
 
         @NotBlank(message = "비밀번호가 공백입니다. 다시 입력해 주세요.")

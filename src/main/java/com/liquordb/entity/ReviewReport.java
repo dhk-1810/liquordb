@@ -49,19 +49,14 @@ public class ReviewReport {
         this.rejectedAt = LocalDateTime.now();
     }
 
-    @Builder
-    private ReviewReport(Review review, Comment comment, UUID requestUserId, String reason) {
+    private ReviewReport(Review review, UUID requestUserId, String reason) {
         this.review = review;
         this.requestUserId = requestUserId;
         this.reason = reason;
     }
 
     public static ReviewReport create(Review review, UUID requestUserId, String reason) {
-        return ReviewReport.builder()
-                .review(review)
-                .requestUserId(requestUserId)
-                .reason(reason)
-                .build();
+        return new ReviewReport(review, requestUserId, reason);
     }
 
 }

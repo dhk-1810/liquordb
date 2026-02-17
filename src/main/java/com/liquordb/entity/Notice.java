@@ -63,7 +63,6 @@ public class Notice {
         this.deletedAt = LocalDateTime.now();
     }
 
-    @Builder
     private Notice(User author, String title, String content) {
         this.author = author;
         this.title = title;
@@ -71,11 +70,7 @@ public class Notice {
     }
 
     public static Notice create(User author, String title, String content){
-        return Notice.builder()
-                .author(author)
-                .title(title)
-                .content(content)
-                .build();
+        return new Notice(author, title, content);
     }
 
 }

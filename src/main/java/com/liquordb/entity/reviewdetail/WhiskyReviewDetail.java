@@ -12,7 +12,6 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class WhiskyReviewDetail extends ReviewDetail  {
     private Double aroma;    // 향
     private Double taste;    // 맛

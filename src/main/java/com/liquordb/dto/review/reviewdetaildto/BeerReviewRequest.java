@@ -1,8 +1,5 @@
 package com.liquordb.dto.review.reviewdetaildto;
 
-import lombok.Builder;
-
-@Builder
 public record BeerReviewRequest(
     Double aroma, // 향 평가
     Double taste, // 맛 평가

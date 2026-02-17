@@ -12,7 +12,6 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class BeerReviewDetail extends ReviewDetail {
     private Double aroma; // 향 평가
     private Double taste; // 맛 평가

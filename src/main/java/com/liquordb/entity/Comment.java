@@ -57,7 +57,6 @@ public class Comment extends LikeableEntity implements ReportableEntity {
     @PreUpdate
     public void onUpdate() { updatedAt = LocalDateTime.now(); }
 
-    @Builder
     public Comment(String content, Review review, Comment parent, User user){
         this.content = content;
         this.review = review;
@@ -66,12 +65,7 @@ public class Comment extends LikeableEntity implements ReportableEntity {
     }
 
     public static Comment create(String content, Review review, Comment parent, User user) {
-        return Comment.builder()
-                .content(content)
-                .review(review)
-                .parent(parent)
-                .user(user)
-                .build();
+        return new Comment(content, review, parent, user);
     }
 
     public void update(CommentUpdateRequest request) {
