@@ -36,8 +36,8 @@ public class LiquorTagController {
 
     // 주류에 태그 추가
     @PostMapping("/{liquorId}/tags")
-    public ResponseEntity<TagResponseDto> createLiquorTag(@RequestBody LiquorTagRequest requestDto) {
-        TagResponseDto responseDto = liquorTagService.add(requestDto);
+    public ResponseEntity<TagResponseDto> createLiquorTag(@RequestBody LiquorTagRequest request) {
+        TagResponseDto responseDto = liquorTagService.add(request);
         return ResponseEntity.ok(responseDto);
     }
 }

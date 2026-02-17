@@ -1,7 +1,6 @@
 package com.liquordb.dto.tag;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
 
 public record TagRequest(
 

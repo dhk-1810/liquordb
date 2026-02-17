@@ -29,11 +29,11 @@ public class ReviewController {
     @PostMapping("/liquors/{liquorId}/reviews")
     public ResponseEntity<ReviewResponseDto> create(
             @PathVariable Long liquorId,
-            @RequestPart @Valid ReviewRequest requestDto,
+            @RequestPart @Valid ReviewRequest request,
             @RequestPart(required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        ReviewResponseDto response = reviewService.create(liquorId, requestDto, images, user.getUserId());
+        ReviewResponseDto response = reviewService.create(liquorId, request, images, user.getUserId());
         return ResponseEntity.ok(response);
     }
 

@@ -18,16 +18,7 @@ public class AdminUserController {
 
     private final UserService userService;
 
-    // 관리자 회원가입
-    // TODO 없애고 가입후 권한변경?
-//    @PostMapping
-//    public ResponseEntity<UserResponseDto> createAdmin(
-//            @RequestBody UserRegisterRequestDto request,
-//            @RequestPart(required = false) MultipartFile profileImage
-//    ) {
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(userService.signUp(request, profileImage, Role.ADMIN));
-//    }
+    // TODO 사용자 권한변경
 
     // 유저 전체 조회 및 검색
     @GetMapping

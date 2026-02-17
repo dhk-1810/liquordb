@@ -2,7 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.dto.tag.UserTagRequestDto;
+import com.liquordb.dto.tag.UserTagRequest;
 import com.liquordb.entity.*;
 import com.liquordb.exception.tag.TagNotFoundException;
 import com.liquordb.exception.tag.UserTagAlreadyExistsException;
@@ -30,7 +30,7 @@ public class UserTagService {
 
     // 선호하는 태그 목록에 추가
     @Transactional
-    public UserTag add(UserTagRequestDto request, UUID userId) {
+    public UserTag add(UserTagRequest request, UUID userId) {
 
         Long tagId = request.tagId();
         Tag tag = tagRepository.findById(tagId)

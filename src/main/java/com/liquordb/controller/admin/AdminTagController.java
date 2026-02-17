@@ -22,8 +22,8 @@ public class AdminTagController {
 
     // 태그 등록
     @PostMapping
-    public ResponseEntity<TagResponseDto> create(@RequestBody @Valid TagRequest requestDto) {
-        TagResponseDto createdTag = tagService.create(requestDto);
+    public ResponseEntity<TagResponseDto> create(@RequestBody @Valid TagRequest request) {
+        TagResponseDto createdTag = tagService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTag);
     }
 
@@ -39,9 +39,9 @@ public class AdminTagController {
     @PatchMapping("/{id}")
     public ResponseEntity<TagResponseDto> rename(
             @PathVariable Long id,
-            @RequestBody @Valid TagRequest requestDto
+            @RequestBody @Valid TagRequest request
     ) {
-        TagResponseDto updatedTag = tagService.rename(id, requestDto);
+        TagResponseDto updatedTag = tagService.rename(id, request);
         return ResponseEntity.ok(updatedTag);
     }
 
