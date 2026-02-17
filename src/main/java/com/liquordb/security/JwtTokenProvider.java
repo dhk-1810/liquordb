@@ -14,8 +14,11 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 import java.util.Date;
 
-@Component
+/**
+ * 토큰 생성, 검증, Claim 추출, 유효성 검사 등 수행.
+ */
 @RequiredArgsConstructor
+@Component
 @Slf4j
 public class JwtTokenProvider {
 

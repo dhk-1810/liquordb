@@ -2,6 +2,9 @@ package com.liquordb.security;
 
 import jakarta.servlet.http.Cookie;
 
+/**
+ * 클라이언트에게 토큰을 쿠키에 저장하도록 지시
+ */
 public class TokenUtil {
 
     private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 14;

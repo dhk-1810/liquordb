@@ -58,3 +58,9 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  issuer: ${JWT_ISSUER}
+  access-token-validity-in-ms: ${JWT_ACCESS_TOKEN_VALIDITY}
+  refresh-token-validity-in-ms: ${JWT_REFRESH_TOKEN_VALIDITY}

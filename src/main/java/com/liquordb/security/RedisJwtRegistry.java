@@ -18,6 +18,10 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
+ * 리프레시 토큰 저장 및 관리
+ */
+
+/**
  * ① while 루프 최적화
  *
  * 현재 while 안에서 size()를 계속 호출하는데, Redis 호출 횟수가 많아집니다. 처음에 currentSize를 가져왔으니, 루프 안에서는 currentSize--를 하며 메모리 상에서 계산하고 마지막에 반영하는 것이 더 빠릅니다.
@@ -57,8 +61,8 @@ public class RedisJwtRegistry implements JwtRegistry {
     @Retryable(retryFor = RedisLockAcquisitionException.class, maxAttempts = 10,
             backoff = @Backoff(delay = 100, multiplier = 2))
     public void registerJwtInformation(JwtInformation jwtInformation) {
-        String userKey = getUserKey(jwtInformation.getUserId());
-        String lockKey = jwtInformation.getUserId().toString();
+        String userKey = getUserKey(jwtInformation.userId());
+        String lockKey = jwtInformation.userId().toString();
 
         redisLockProvider.acquireLock(lockKey);
         try {
@@ -80,7 +84,7 @@ public class RedisJwtRegistry implements JwtRegistry {
             redisLockProvider.releaseLock(lockKey);
         }
 
-        eventPublisher.publishEvent(new UserLogInOutEvent(jwtInformation.getUserId(), true));
+//        eventPublisher.publishEvent(new UserLogInOutEvent(jwtInformation.userId(), true));
     }
 
     @Override
@@ -98,7 +102,7 @@ public class RedisJwtRegistry implements JwtRegistry {
         }
 
         redisTemplate.delete(userKey);
-        eventPublisher.publishEvent(new UserLogInOutEvent(userId, false));
+//        eventPublisher.publishEvent(new UserLogInOutEvent(userId, false));
     }
 
     @Override
@@ -126,8 +130,8 @@ public class RedisJwtRegistry implements JwtRegistry {
     @Retryable(retryFor = RedisLockAcquisitionException.class, maxAttempts = 10,
             backoff = @Backoff(delay = 100, multiplier = 2))
     public void rotateJwtInformation(String refreshToken, JwtInformation newJwtInfo) {
-        String userKey = getUserKey(newJwtInfo.getUserId());
-        String lockKey = newJwtInfo.getUserId().toString();
+        String userKey = getUserKey(newJwtInfo.userId());
+        String lockKey = newJwtInfo.userId().toString();
 
         redisLockProvider.acquireLock(lockKey);
 
@@ -151,7 +155,7 @@ public class RedisJwtRegistry implements JwtRegistry {
                         redisTemplate.opsForList().set(userKey, i, rotatedJwtInfo);
                         addTokenIndex(newJwtInfo.accessToken(), newJwtInfo.refreshToken());
                         redisTemplate.expire(userKey, DEFAULT_TTL);
-                        log.debug("JWT 로테이션 완료: User={}, NewAccessToken={}", oldJwtInfo.getUserId(), rotatedJwtInfo.accessToken());
+                        log.debug("JWT 로테이션 완료: User={}, NewAccessToken={}", oldJwtInfo.userId(), rotatedJwtInfo.accessToken());
                         break;
                     }
                 }

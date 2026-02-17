@@ -9,7 +9,7 @@ public record JwtInformation (
         String accessToken,
         String refreshToken
 ){
-    public UUID getUserId() {
+    public UUID userId() {
         return dto.id();
     }
 }
