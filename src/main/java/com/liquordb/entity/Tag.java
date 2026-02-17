@@ -1,13 +1,10 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.tag.TagRequestDto;
+import com.liquordb.dto.tag.TagRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -38,7 +35,7 @@ public class Tag {
         updatedAt = LocalDateTime.now();
     }
 
-    public void update(TagRequestDto request) {
+    public void update(TagRequest request) {
         this.name = request.name();
         this.updatedAt = LocalDateTime.now();
     }

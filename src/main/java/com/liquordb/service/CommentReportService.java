@@ -2,7 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.PageResponse;
 import com.liquordb.ReportManager;
-import com.liquordb.dto.report.CommentReportRequestDto;
+import com.liquordb.dto.report.CommentReportRequest;
 import com.liquordb.dto.report.CommentReportResponseDto;
 import com.liquordb.dto.report.CommentReportSummaryDto;
 import com.liquordb.entity.*;
@@ -34,7 +34,7 @@ public class CommentReportService {
     private static final int REPORT_THRESHOLD = 3;
 
     // 신고 생성
-    public CommentReportResponseDto create(CommentReportRequestDto request, UUID reporterId, String reporterUsername) {
+    public CommentReportResponseDto create(CommentReportRequest request, UUID reporterId, String reporterUsername) {
 
         Long commentId = request.commentId();
         Comment comment = commentRepository.findByIdAndStatus(commentId, Comment.CommentStatus.ACTIVE)

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Builder
-public record LiquorRequestDto (
+public record LiquorRequest(
 
         @NotBlank String name,
         @NotNull Liquor.LiquorCategory category,

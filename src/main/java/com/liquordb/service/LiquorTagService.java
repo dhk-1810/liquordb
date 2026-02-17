@@ -1,7 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.liquor.LiquorSummaryDto;
-import com.liquordb.dto.tag.LiquorTagRequestDto;
+import com.liquordb.dto.tag.LiquorTagRequest;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -58,7 +58,7 @@ public class LiquorTagService {
      * 관리자용
      */
     // 주류에 태그 추가
-    public TagResponseDto add(LiquorTagRequestDto request) {
+    public TagResponseDto add(LiquorTagRequest request) {
 
         Liquor liquor = liquorRepository.findById(request.liquorId())
                 .orElseThrow(() -> new LiquorNotFoundException(request.liquorId()));

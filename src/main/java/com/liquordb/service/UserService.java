@@ -69,7 +69,7 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
-    public void update(UUID userId, UserUpdateRequestDto request, MultipartFile newProfileImage) {
+    public void update(UUID userId, UserUpdateRequest request, MultipartFile newProfileImage) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -103,7 +103,7 @@ public class UserService {
 
     // 비밀번호 수정 (로그인 상태에서)
     @Transactional
-    public void updatePassword(UUID userId, PasswordUpdateRequestDto request) {
+    public void updatePassword(UUID userId, PasswordUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         if (!user.getId().equals(userId)) {

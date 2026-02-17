@@ -11,7 +11,7 @@ public record ReviewListGetRequest (
 
         @Nullable
         @Min(1) @Max(5)
-        Short rating,
+        Integer rating,
 
         @Nullable
         Long cursor,

@@ -1,6 +1,6 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.report.ReviewReportRequestDto;
+import com.liquordb.dto.report.ReviewReportRequest;
 import com.liquordb.dto.report.ReviewReportResponseDto;
 import com.liquordb.entity.*;
 import com.liquordb.exception.report.ReviewReportAlreadyExistsException;
@@ -30,7 +30,7 @@ public class ReviewReportService {
     private static final int REPORT_THRESHOLD = 3;
 
     // 신고 생성
-    public ReviewReportResponseDto create(ReviewReportRequestDto request, UUID userId) { // 신고자 ID
+    public ReviewReportResponseDto create(ReviewReportRequest request, UUID userId) { // 신고자 ID
 
         User requestUser = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));

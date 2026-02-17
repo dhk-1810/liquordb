@@ -1,6 +1,6 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.tag.TagRequestDto;
+import com.liquordb.dto.tag.TagRequest;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.LiquorTag;
 import com.liquordb.entity.Tag;
@@ -8,7 +8,7 @@ import com.liquordb.entity.UserTag;
 
 public class TagMapper {
 
-    public static Tag toEntity(TagRequestDto request) {
+    public static Tag toEntity(TagRequest request) {
         return Tag.create(request.name());
     }
 

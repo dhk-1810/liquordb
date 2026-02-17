@@ -1,6 +1,6 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.report.ReviewReportRequestDto;
+import com.liquordb.dto.report.ReviewReportRequest;
 import com.liquordb.dto.report.ReviewReportResponseDto;
 import com.liquordb.entity.ReviewReport;
 import com.liquordb.entity.Review;
@@ -16,7 +16,7 @@ public class ReviewReportMapper {
 
     private final ReviewRepository reviewRepository;
 
-    public ReviewReport toEntity(ReviewReportRequestDto request, User requestUser) {
+    public ReviewReport toEntity(ReviewReportRequest request, User requestUser) {
 
         Long reviewId = request.reviewId();
         Review review = reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)

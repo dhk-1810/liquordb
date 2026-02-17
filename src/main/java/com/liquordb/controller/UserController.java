@@ -34,7 +34,7 @@ public class UserController {
     @PatchMapping(path = "/{userId}/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<String> update(
             @PathVariable UUID userId,
-            @ModelAttribute UserUpdateRequestDto request,
+            @ModelAttribute UserUpdateRequest request,
             @RequestPart(required = false) MultipartFile profileImage,
             @AuthenticationPrincipal CustomUserDetails user // 서비스단에서 @PreAuthorize 사용 위해 필요
     ) {
@@ -46,7 +46,7 @@ public class UserController {
     @PatchMapping("/{userId}/update-password")
     public ResponseEntity<Void> updatePassword(
             @PathVariable UUID userId,
-            @RequestBody @Valid PasswordUpdateRequestDto request,
+            @RequestBody @Valid PasswordUpdateRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         userService.updatePassword(userId, request);

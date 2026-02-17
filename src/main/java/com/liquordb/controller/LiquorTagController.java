@@ -1,7 +1,7 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.liquor.LiquorSummaryDto;
-import com.liquordb.dto.tag.LiquorTagRequestDto;
+import com.liquordb.dto.tag.LiquorTagRequest;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorTagService;
@@ -36,7 +36,7 @@ public class LiquorTagController {
 
     // 주류에 태그 추가
     @PostMapping("/{liquorId}/tags")
-    public ResponseEntity<TagResponseDto> createLiquorTag(@RequestBody LiquorTagRequestDto requestDto) {
+    public ResponseEntity<TagResponseDto> createLiquorTag(@RequestBody LiquorTagRequest requestDto) {
         TagResponseDto responseDto = liquorTagService.add(requestDto);
         return ResponseEntity.ok(responseDto);
     }

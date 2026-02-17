@@ -1,9 +1,9 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.review.reviewdetaildto.BeerReviewRequestDto;
+import com.liquordb.dto.review.reviewdetaildto.BeerReviewRequest;
 import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
-import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewRequestDto;
-import com.liquordb.dto.review.reviewdetaildto.WineReviewRequestDto;
+import com.liquordb.dto.review.reviewdetaildto.WhiskyReviewRequest;
+import com.liquordb.dto.review.reviewdetaildto.WineReviewRequest;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.reviewdetail.BeerReviewDetail;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
@@ -13,7 +13,7 @@ import com.liquordb.entity.reviewdetail.WineReviewDetail;
 public class ReviewDetailMapper {
 
     public static ReviewDetail toEntity(ReviewDetailRequest request, Review review) {
-        if (request instanceof BeerReviewRequestDto beer) {
+        if (request instanceof BeerReviewRequest beer) {
             return BeerReviewDetail.builder()
                     .review(review)
                     .aroma(beer.aroma())
@@ -23,7 +23,7 @@ public class ReviewDetailMapper {
                     .build();
         }
 
-        if (request instanceof WhiskyReviewRequestDto whisky) {
+        if (request instanceof WhiskyReviewRequest whisky) {
             return WhiskyReviewDetail.builder()
                     .review(review)
                     .aroma(whisky.aroma())
@@ -33,7 +33,7 @@ public class ReviewDetailMapper {
                     .build();
         }
 
-        if (request instanceof WineReviewRequestDto wine) {
+        if (request instanceof WineReviewRequest wine) {
             return WineReviewDetail.builder()
                     .review(review)
                     .sweetness(wine.sweetness())

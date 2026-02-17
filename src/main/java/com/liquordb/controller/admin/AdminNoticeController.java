@@ -1,6 +1,6 @@
 package com.liquordb.controller.admin;
 
-import com.liquordb.dto.notice.NoticeRequestDto;
+import com.liquordb.dto.notice.NoticeRequest;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.NoticeService;
@@ -22,7 +22,7 @@ public class AdminNoticeController {
     // 공지사항 등록
     @PostMapping
     public ResponseEntity<NoticeResponseDto> createNotice(
-            @RequestBody NoticeRequestDto dto,
+            @RequestBody NoticeRequest dto,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -31,7 +31,7 @@ public class AdminNoticeController {
 
     // 공지사항 수정
     @PatchMapping("/{noticeId}")
-    public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long noticeId, @RequestBody NoticeRequestDto dto) {
+    public ResponseEntity<NoticeResponseDto> updateNotice(@PathVariable Long noticeId, @RequestBody NoticeRequest dto) {
         return ResponseEntity.ok(noticeService.update(noticeId, dto));
     }
 

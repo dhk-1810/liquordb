@@ -1,16 +1,14 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.notice.NoticeRequestDto;
+import com.liquordb.dto.notice.NoticeRequest;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
 import com.liquordb.entity.User;
 
-import java.util.UUID;
-
 public class NoticeMapper {
 
-    public static Notice toEntity(NoticeRequestDto request, User author) {
+    public static Notice toEntity(NoticeRequest request, User author) {
         return Notice.create(author, request.title(), request.content());
     }
 

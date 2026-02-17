@@ -13,7 +13,6 @@ import com.liquordb.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,7 +39,7 @@ public class AuthService {
 
     // 회원가입
     @Transactional
-    public UserResponseDto signUp(SignUpRequestDto request, MultipartFile profileImage, Role role) {
+    public UserResponseDto signUp(SignUpRequest request, MultipartFile profileImage, Role role) {
 
         String email = request.email();
         String username = request.username();
@@ -72,7 +71,7 @@ public class AuthService {
 
     // 로그인
     @Transactional
-    public JwtInformation login(LoginRequestDto request) {
+    public JwtInformation login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(LoginFailedException::new);
 
@@ -123,7 +122,7 @@ public class AuthService {
 
     // 비밀번호 재설정 링크 전송
     @Transactional
-    public void sendPasswordResetLink(PasswordFindRequestDto request) {
+    public void sendPasswordResetLink(PasswordFindRequest request) {
         String email = request.email();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
@@ -168,7 +167,7 @@ public class AuthService {
 
     // 계정 복구
     @Transactional
-    public UserResponseDto restore(LoginRequestDto request) {
+    public UserResponseDto restore(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(LoginFailedException::new);
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {

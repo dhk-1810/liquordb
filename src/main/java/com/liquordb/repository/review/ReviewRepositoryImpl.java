@@ -20,6 +20,8 @@ import java.util.UUID;
 
 import static com.liquordb.enums.SortReviewBy.REVIEW_ID;
 
+// TODO 복합 인덱스 생성 (liquorId, likeCount, reviewId), (liquorId, rating, reviewId), (liquorId, commentCount, reviewId)
+
 @RequiredArgsConstructor
 @Repository
 public class ReviewRepositoryImpl implements CustomReviewRepository {
@@ -165,7 +167,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
         return liquorId != null ? review.liquor.id.eq(liquorId) : null;
     }
 
-    private Predicate ratingEq(Short rating) {
+    private Predicate ratingEq(Integer rating) {
         return rating != null ? review.rating.eq(rating) : null;
     }
 

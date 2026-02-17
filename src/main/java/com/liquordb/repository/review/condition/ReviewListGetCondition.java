@@ -11,7 +11,7 @@ public record ReviewListGetCondition(
         Long liquorId,
         UUID userId,
         Review.ReviewStatus status,
-        Short rating,
+        Integer rating,
         Long cursor,
         Long idAfter,
         int limit,

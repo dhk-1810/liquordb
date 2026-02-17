@@ -3,7 +3,7 @@ package com.liquordb.dto.review.reviewdetaildto;
 import lombok.*;
 
 @Builder
-public record WineReviewRequestDto (
+public record WineReviewRequest(
         Double sweetness,       // 당도
         Double acidity,       // 산도
         Double body,       // 바디

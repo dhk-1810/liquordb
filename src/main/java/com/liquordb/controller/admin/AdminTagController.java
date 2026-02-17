@@ -1,6 +1,6 @@
 package com.liquordb.controller.admin;
 
-import com.liquordb.dto.tag.TagRequestDto;
+import com.liquordb.dto.tag.TagRequest;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.service.TagService;
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ public class AdminTagController {
 
     // 태그 등록
     @PostMapping
-    public ResponseEntity<TagResponseDto> create(@RequestBody @Valid TagRequestDto requestDto) {
+    public ResponseEntity<TagResponseDto> create(@RequestBody @Valid TagRequest requestDto) {
         TagResponseDto createdTag = tagService.create(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTag);
     }
@@ -39,7 +39,7 @@ public class AdminTagController {
     @PatchMapping("/{id}")
     public ResponseEntity<TagResponseDto> rename(
             @PathVariable Long id,
-            @RequestBody @Valid TagRequestDto requestDto
+            @RequestBody @Valid TagRequest requestDto
     ) {
         TagResponseDto updatedTag = tagService.rename(id, requestDto);
         return ResponseEntity.ok(updatedTag);

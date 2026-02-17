@@ -1,10 +1,9 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.notice.NoticeRequestDto;
+import com.liquordb.dto.notice.NoticeRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Entity
@@ -43,7 +42,7 @@ public class Notice {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void update(NoticeRequestDto request) {
+    public void update(NoticeRequest request) {
         if (request.title() != null) {
             this.title = request.title();
         }

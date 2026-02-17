@@ -42,7 +42,7 @@ public class ReviewService {
 
     // 리뷰 등록
     @Transactional
-    public ReviewResponseDto create(Long liquorId, ReviewRequestDto request, List<MultipartFile> images, UUID userId) {
+    public ReviewResponseDto create(Long liquorId, ReviewRequest request, List<MultipartFile> images, UUID userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -118,7 +118,7 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewResponseDto update(Long reviewId, ReviewUpdateRequestDto request, List<MultipartFile> newImages, UUID userId) {
+    public ReviewResponseDto update(Long reviewId, ReviewUpdateRequest request, List<MultipartFile> newImages, UUID userId) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));

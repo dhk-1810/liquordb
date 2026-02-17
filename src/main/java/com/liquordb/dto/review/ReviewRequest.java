@@ -10,10 +10,10 @@ import jakarta.validation.constraints.NotBlank;
  * 리뷰 생성 요청 DTO
  */
 @Builder
-public record ReviewRequestDto (
+public record ReviewRequest(
 
         @NotNull(message = "평점은 필수입니다.")
-        Short rating,
+        Integer rating,
 
         String title,
 

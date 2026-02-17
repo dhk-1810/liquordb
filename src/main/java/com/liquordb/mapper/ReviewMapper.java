@@ -1,7 +1,7 @@
 package com.liquordb.mapper;
 
 import com.liquordb.entity.Liquor;
-import com.liquordb.dto.review.ReviewRequestDto;
+import com.liquordb.dto.review.ReviewRequest;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.File;
@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ReviewMapper {
-    public static Review toEntity(ReviewRequestDto request, Liquor liquor, User user) {
+    public static Review toEntity(ReviewRequest request, Liquor liquor, User user) {
         Review review = Review.create(request, liquor, user);
         ReviewDetail detail = ReviewDetailMapper.toEntity(request.reviewDetailRequest(), review);
         review.addDetail(detail);

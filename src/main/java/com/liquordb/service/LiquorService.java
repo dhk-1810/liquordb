@@ -100,7 +100,7 @@ public class LiquorService {
 
     // 주류 등록
     @Transactional
-    public LiquorResponseDto create(LiquorRequestDto request) {
+    public LiquorResponseDto create(LiquorRequest request) {
         Liquor liquor = LiquorMapper.toEntity(request);
         liquorRepository.save(liquor);
         return LiquorMapper.toDto(liquor, null, false);
@@ -108,7 +108,7 @@ public class LiquorService {
 
     // 주류 수정
     @Transactional
-    public LiquorResponseDto update(Long id, LiquorUpdateRequestDto request) {
+    public LiquorResponseDto update(Long id, LiquorUpdateRequest request) {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
         liquor.updateFromDto(request.isDiscontinued(), request.deleteImage());

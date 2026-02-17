@@ -7,7 +7,7 @@ import lombok.*;
  * 유저 회원정보 수정 DTO
  */
 @Builder
-public record UserUpdateRequestDto (
+public record UserUpdateRequest(
 
         @Email(message = "이메일 형식이 올바르지 않습니다.")
         String email,

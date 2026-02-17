@@ -29,7 +29,7 @@ public class ReviewController {
     @PostMapping("/liquors/{liquorId}/reviews")
     public ResponseEntity<ReviewResponseDto> create(
             @PathVariable Long liquorId,
-            @RequestPart @Valid ReviewRequestDto requestDto,
+            @RequestPart @Valid ReviewRequest requestDto,
             @RequestPart(required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
@@ -61,7 +61,7 @@ public class ReviewController {
     @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
-            @RequestPart @Valid ReviewUpdateRequestDto request,
+            @RequestPart @Valid ReviewUpdateRequest request,
             @RequestPart(required = false) List<MultipartFile> imagesToAdd,
             @AuthenticationPrincipal CustomUserDetails user
     ) {

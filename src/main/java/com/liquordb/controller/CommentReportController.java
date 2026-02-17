@@ -1,6 +1,6 @@
 package com.liquordb.controller;
 
-import com.liquordb.dto.report.CommentReportRequestDto;
+import com.liquordb.dto.report.CommentReportRequest;
 import com.liquordb.dto.report.CommentReportResponseDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.CommentReportService;
@@ -23,7 +23,7 @@ public class CommentReportController {
 
     @PostMapping
     public ResponseEntity<CommentReportResponseDto> create(
-            @RequestBody @Valid CommentReportRequestDto request,
+            @RequestBody @Valid CommentReportRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         CommentReportResponseDto response = commentReportService.create(request, user.getUserId(), user.getUsername());

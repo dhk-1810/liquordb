@@ -1,7 +1,6 @@
 package com.liquordb.dto.review;
 
 import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
-import com.liquordb.entity.reviewdetail.ReviewDetail;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -12,10 +11,10 @@ import java.util.List;
  * 리뷰 수정 요청 DTO
  */
 @Builder
-public record ReviewUpdateRequestDto (
+public record ReviewUpdateRequest(
 
         @NotNull(message = "평점은 필수입니다.")
-        Short rating,
+        Integer rating,
 
         String title,
 

@@ -1,6 +1,6 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.liquor.LiquorRequestDto;
+import com.liquordb.dto.liquor.LiquorRequest;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.dto.tag.TagResponseDto;
@@ -44,7 +44,7 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static Liquor toEntity(LiquorRequestDto request) {
+    public static Liquor toEntity(LiquorRequest request) {
         return Liquor.create(
                 request.name(),
                 request.category(),

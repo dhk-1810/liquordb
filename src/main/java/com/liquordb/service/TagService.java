@@ -1,6 +1,6 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.tag.TagRequestDto;
+import com.liquordb.dto.tag.TagRequest;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.Tag;
 import com.liquordb.exception.tag.TagNotFoundException;
@@ -23,7 +23,7 @@ public class TagService {
      */
     // 태그 등록
     @Transactional
-    public TagResponseDto create(TagRequestDto request) {
+    public TagResponseDto create(TagRequest request) {
         Tag tag = TagMapper.toEntity(request);
         tagRepository.save(tag);
         return TagMapper.toDto(tag);
@@ -31,7 +31,7 @@ public class TagService {
 
     // 태그 이름 변경
     @Transactional
-    public TagResponseDto rename(Long id, TagRequestDto request) {
+    public TagResponseDto rename(Long id, TagRequest request) {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new TagNotFoundException(id));
         tag.update(request);

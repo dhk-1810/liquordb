@@ -1,7 +1,7 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.review.ReviewRequestDto;
-import com.liquordb.dto.review.ReviewUpdateRequestDto;
+import com.liquordb.dto.review.ReviewRequest;
+import com.liquordb.dto.review.ReviewUpdateRequest;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,7 +20,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
     private Long id;
 
     @Column(nullable = false)
-    private short rating;
+    private int rating;
 
     @Column(nullable = false)
     private String title;
@@ -69,7 +69,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
     }
 
     @Builder
-    private Review (Short rating, String title, String content,
+    private Review (Integer rating, String title, String content,
                     User user, Liquor liquor, ReviewDetail detail
     ){
         this.rating = rating;
@@ -81,7 +81,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
         this.commentCount = 0;
     }
 
-    public static Review create(ReviewRequestDto request, Liquor liquor, User user) {
+    public static Review create(ReviewRequest request, Liquor liquor, User user) {
         return Review.builder()
                 .rating(request.rating())
                 .title(request.title())
@@ -96,7 +96,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
         detail.setReview(this);
     }
 
-    public void update(ReviewUpdateRequestDto request) {
+    public void update(ReviewUpdateRequest request) {
         if (request.rating() != null) {
             this.rating = request.rating();
         }

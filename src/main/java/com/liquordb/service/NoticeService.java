@@ -1,7 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.PageResponse;
-import com.liquordb.dto.notice.NoticeRequestDto;
+import com.liquordb.dto.notice.NoticeRequest;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
@@ -60,7 +60,7 @@ public class NoticeService {
      */
     // 공지사항 등록
     @Transactional
-    public NoticeResponseDto create(NoticeRequestDto dto, UUID authorId) {
+    public NoticeResponseDto create(NoticeRequest dto, UUID authorId) {
         User user = userRepository.findById(authorId)
                 .orElseThrow(() -> new UserNotFoundException(authorId));
         Notice notice = toEntity(dto, user);
@@ -70,7 +70,7 @@ public class NoticeService {
 
     // 공지사항 수정
     @Transactional
-    public NoticeResponseDto update(Long id, NoticeRequestDto request) {
+    public NoticeResponseDto update(Long id, NoticeRequest request) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new NoticeNotFoundException(id));
         notice.update(request);

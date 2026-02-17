@@ -25,7 +25,7 @@ public class AuthController {
     // 회원가입
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<UserResponseDto> register(
-            @RequestBody SignUpRequestDto dto,
+            @RequestBody SignUpRequest dto,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ) {
         return ResponseEntity.ok(authService.signUp(dto, profileImage, Role.USER));
@@ -33,7 +33,7 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<JwtInformation> login(@RequestBody @Valid LoginRequestDto request) {
+    public ResponseEntity<JwtInformation> login(@RequestBody @Valid LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
@@ -56,7 +56,7 @@ public class AuthController {
 
     // 비밀번호 재설정 링크 전송
     @PostMapping("/find-password")
-    public ResponseEntity<Void> sendPasswordResetEmail(@RequestBody @Valid PasswordFindRequestDto request) {
+    public ResponseEntity<Void> sendPasswordResetEmail(@RequestBody @Valid PasswordFindRequest request) {
         authService.sendPasswordResetLink(request);
         return ResponseEntity.noContent().build();
     }
@@ -70,7 +70,7 @@ public class AuthController {
 
     // 계정 복구
     @PostMapping("/restore")
-    public ResponseEntity<UserResponseDto> restore(@RequestBody LoginRequestDto request) {
+    public ResponseEntity<UserResponseDto> restore(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.restore(request));
     }
 }

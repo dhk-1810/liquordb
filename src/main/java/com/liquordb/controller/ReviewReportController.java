@@ -1,6 +1,6 @@
 package com.liquordb.controller;
 
-import com.liquordb.dto.report.ReviewReportRequestDto;
+import com.liquordb.dto.report.ReviewReportRequest;
 import com.liquordb.dto.report.ReviewReportResponseDto;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewReportService;
@@ -20,7 +20,7 @@ public class ReviewReportController {
 
     @PostMapping
     public ResponseEntity<ReviewReportResponseDto> create(
-            @RequestBody @Valid ReviewReportRequestDto request,
+            @RequestBody @Valid ReviewReportRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         ReviewReportResponseDto response = reportService.create(request, user.getUserId());
