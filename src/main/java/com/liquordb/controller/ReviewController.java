@@ -3,13 +3,11 @@ package com.liquordb.controller;
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.review.*;
-import com.liquordb.exception.user.UnauthenticatedUserException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
 import com.liquordb.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,7 +43,7 @@ public class ReviewController {
             @PathVariable Long liquorId,
             @ModelAttribute @Valid ReviewListGetRequest request
     ) {
-        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByLiquor(liquorId, request);
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByLiquorId(liquorId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -55,7 +53,7 @@ public class ReviewController {
             @PathVariable UUID authorId,
             @ModelAttribute @Valid ReviewListGetRequest request
     ) {
-        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByUser(authorId, request);
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByUserId(authorId, request);
         return ResponseEntity.ok(response);
     }
 

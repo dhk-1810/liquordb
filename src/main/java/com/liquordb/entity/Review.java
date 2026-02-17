@@ -20,7 +20,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Double rating;
+    private short rating;
 
     @Column(nullable = false)
     private String title;
@@ -46,6 +46,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> images;
 
+    @Column(nullable = false)
     private long commentCount;
 
     private LocalDateTime createdAt;
@@ -68,7 +69,7 @@ public class Review extends LikeableEntity implements ReportableEntity {
     }
 
     @Builder
-    private Review (Double rating, String title, String content,
+    private Review (Short rating, String title, String content,
                     User user, Liquor liquor, ReviewDetail detail
     ){
         this.rating = rating;

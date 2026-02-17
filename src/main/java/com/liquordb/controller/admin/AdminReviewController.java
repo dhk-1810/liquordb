@@ -27,7 +27,7 @@ public class AdminReviewController {
     public ResponseEntity<PageResponse<ReviewResponseDto>> findByUserIdAndReviewStatus(
             @ModelAttribute @Valid ReviewSearchRequest request
     ) {
-        PageResponse<ReviewResponseDto> reviews = reviewService.findAll(request);
+        PageResponse<ReviewResponseDto> reviews = reviewService.getAll(request);
         return ResponseEntity.ok(reviews);
     }
 

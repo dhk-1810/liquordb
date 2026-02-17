@@ -15,7 +15,7 @@ import java.util.List;
 public record ReviewUpdateRequestDto (
 
         @NotNull(message = "평점은 필수입니다.")
-        Double rating,
+        Short rating,
 
         String title,
 

@@ -90,10 +90,10 @@ public class CommentService {
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         // 기본값 할당
-        CommentSortBy sortBy = request.sortBy() == null ?  CommentSortBy.ID : request.sortBy();
+        CommentSortBy sortBy = request.sortBy() == null ?  CommentSortBy.COMMENT_ID : request.sortBy();
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
-        boolean useId = sortBy == CommentSortBy.ID;
+        boolean useId = sortBy == CommentSortBy.COMMENT_ID;
         if (!useId && request.idAfter() == null) {
             throw new InvalidParameterException(); // TODO 예외
         }
@@ -165,20 +165,13 @@ public class CommentService {
     // 유저ID, 리뷰 조회
     @Transactional(readOnly = true)
     public PageResponse<CommentResponseDto> getAll(CommentSearchRequest request) {
-
-        String username = request.username();
-        if (username != null) {
-            userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UserNotFoundException(username));
-        }
-
-        CommentSearchCondition condition = getSearchCondition(request, username);
+        CommentSearchCondition condition = getSearchCondition(request);
         Page<CommentResponseDto> page = commentRepository.findAll(condition)
                 .map(CommentMapper::toDto);
         return PageResponse.from(page);
     }
 
-    private CommentSearchCondition getSearchCondition(CommentSearchRequest request, String username) {
+    private CommentSearchCondition getSearchCondition(CommentSearchRequest request) {
         Comment.CommentStatus status = request.status() == null
                 ? Comment.CommentStatus.ACTIVE
                 : request.status();
@@ -189,7 +182,7 @@ public class CommentService {
                 ? 50
                 : request.limit();
         boolean descending = request.sortDirection() == SortDirection.DESC;
-        return new CommentSearchCondition(username, status, page, limit, descending);
+        return new CommentSearchCondition(request.username(), status, page, limit, descending);
     }
 
 

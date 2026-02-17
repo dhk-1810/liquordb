@@ -2,6 +2,7 @@ package com.liquordb.repository.review;
 
 import com.liquordb.entity.Review;
 import com.liquordb.repository.review.condition.ReviewListGetCondition;
+import com.liquordb.repository.review.condition.ReviewSearchCondition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -19,5 +20,5 @@ public interface CustomReviewRepository {
     Slice<Review> findByUserId(ReviewListGetCondition condition);
 
     // [관리자용] 리뷰 전체 조회 - 유저별로 필터링(선택), 상태별로 필터링(선택)
-    Page<Review> findAll(String username, Review.ReviewStatus status, Pageable pageable);
+    Page<Review> findAll(ReviewSearchCondition condition);
 }

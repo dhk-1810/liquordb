@@ -3,8 +3,8 @@ package com.liquordb.service;
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
-import com.liquordb.dto.review.ReviewListGetRequest;
-import com.liquordb.dto.review.ReviewUpdateRequestDto;
+import com.liquordb.dto.comment.request.CommentSearchRequest;
+import com.liquordb.dto.review.*;
 import com.liquordb.entity.*;
 import com.liquordb.enums.ReviewSortBy;
 import com.liquordb.enums.SortDirection;
@@ -14,11 +14,11 @@ import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.*;
-import com.liquordb.dto.review.ReviewRequestDto;
-import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.repository.comment.CommentRepository;
+import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.review.condition.ReviewListGetCondition;
+import com.liquordb.repository.review.condition.ReviewSearchCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +72,7 @@ public class ReviewService {
 
     // 주류별 리뷰 목록 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<ReviewResponseDto> getAllByLiquor(Long liquorId, ReviewListGetRequest request) {
+    public CursorPageResponse<ReviewResponseDto> getAllByLiquorId(Long liquorId, ReviewListGetRequest request) {
 
         liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
@@ -97,7 +97,7 @@ public class ReviewService {
 
     // 유저별 리뷰 목록 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<ReviewResponseDto> getAllByUser(UUID authorId, ReviewListGetRequest request) {
+    public CursorPageResponse<ReviewResponseDto> getAllByUserId(UUID authorId, ReviewListGetRequest request) {
 
         int limit = request.limit() == null ? 20 : request.limit();
         ReviewSortBy sortBy = request.sortBy() == null ? ReviewSortBy.REVIEW_ID : request.sortBy();
@@ -106,6 +106,7 @@ public class ReviewService {
         ReviewListGetCondition condition = ReviewListGetCondition.builder()
                 .userId(authorId)
                 .status(Review.ReviewStatus.ACTIVE)
+                .rating(request.rating())
                 .cursor(request.cursor())
                 .idAfter(request.idAfter())
                 .limit(limit)
@@ -193,11 +194,24 @@ public class ReviewService {
 
     // 전체 리뷰 조회
     @Transactional(readOnly = true)
-    public PageResponse<ReviewResponseDto> findAllByOptionalFilters(String username, Review.ReviewStatus status, Pageable pageable) {
-        userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
-        Page<ReviewResponseDto> page = reviewRepository.findAll(username, status, pageable)
+    public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
+        ReviewSearchCondition condition = getSearchCondition(request);
+        Page<ReviewResponseDto> page = reviewRepository.findAll(condition)
                 .map(ReviewMapper::toDto);
         return PageResponse.from(page);
+    }
+
+    private ReviewSearchCondition getSearchCondition(ReviewSearchRequest request) {
+        Review.ReviewStatus status = request.status() == null
+                ? Review.ReviewStatus.ACTIVE
+                : request.status();
+        int page = request.page() == null
+                ? 0
+                : request.page();
+        int limit = request.limit() == null
+                ? 20
+                : request.limit();
+        boolean descending = request.sortDirection() == SortDirection.DESC;
+        return new ReviewSearchCondition(request.username(), status, page, limit, descending);
     }
 }

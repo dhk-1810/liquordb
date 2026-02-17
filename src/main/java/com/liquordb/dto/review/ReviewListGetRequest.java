@@ -10,6 +10,10 @@ import jakarta.validation.constraints.NotNull;
 public record ReviewListGetRequest (
 
         @Nullable
+        @Min(1) @Max(5)
+        Short rating,
+
+        @Nullable
         Long cursor,
 
         @Nullable

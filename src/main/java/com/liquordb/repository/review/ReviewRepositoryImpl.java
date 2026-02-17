@@ -2,24 +2,23 @@ package com.liquordb.repository.review;
 
 import com.liquordb.entity.QReview;
 import com.liquordb.entity.Review;
-import com.liquordb.enums.CommentSortBy;
 import com.liquordb.enums.ReviewSortBy;
 import com.liquordb.repository.review.condition.ReviewListGetCondition;
+import com.liquordb.repository.review.condition.ReviewSearchCondition;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
 
-import static com.liquordb.enums.ReviewSortBy.COMMENT_COUNT;
 import static com.liquordb.enums.ReviewSortBy.REVIEW_ID;
-
-// TODO 평점 필터링
 
 @RequiredArgsConstructor
 @Repository
@@ -36,6 +35,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
                 .where(
                         liquorIdEq(condition.liquorId()),
                         statusEq(condition.status()),
+                        ratingEq(condition.rating()),
                         cursorCondition(condition.cursor(), condition.idAfter(), condition.sortBy(), condition.descending())
                 )
                 .orderBy(
@@ -80,8 +80,30 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
     }
 
     @Override
-    public Page<Review> findAll(String username, Review.ReviewStatus status, Pageable pageable) {
-        return null; // TODO
+    public Page<Review> findAll(ReviewSearchCondition condition) {
+
+        int limit = condition.limit();
+        int page = condition.page();
+        List<Review> content = queryFactory.selectFrom(review)
+                .where(
+                        usernameContains(condition.username()),
+                        statusEq(condition.reviewStatus())
+                )
+                .orderBy(
+                        getOrderSpecifier(condition.descending(), REVIEW_ID)
+                )
+                .offset((long) page * limit)
+                .limit(limit)
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(review.count())
+                .from(review)
+                .where(
+                        usernameContains(condition.username()),
+                        statusEq(condition.reviewStatus())
+                );
+        return PageableExecutionUtils.getPage(content, PageRequest.of(page, limit), countQuery::fetchOne);
     }
 
     /**
@@ -143,12 +165,20 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
         return liquorId != null ? review.liquor.id.eq(liquorId) : null;
     }
 
+    private Predicate ratingEq(Short rating) {
+        return rating != null ? review.rating.eq(rating) : null;
+    }
+
     private Predicate userIdEq(UUID userId) {
         return userId != null ? review.user.id.eq(userId) : null;
     }
 
     private Predicate statusEq(Review.ReviewStatus status) {
         return status != null ? review.status.eq(status) : null;
+    }
+
+    private Predicate usernameContains(String username) {
+        return username != null ? review.user.username.contains(username) : null;
     }
 
     /**
