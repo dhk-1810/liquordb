@@ -1,10 +1,9 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
-import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.liquor.*;
 import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.enums.LiquorSortBy;
+import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
@@ -42,7 +41,7 @@ public class LiquorService {
     public CursorPageResponse<LiquorSummaryDto> getAll(LiquorListGetRequest request, UUID userId) {
 
         int limit = request.limit() == null ? 50 : request.limit();
-        LiquorSortBy sortBy = request.sortBy() == null ? LiquorSortBy.LIQUOR_ID : request.sortBy();
+        SortLiquorBy sortBy = request.sortBy() == null ? SortLiquorBy.LIQUOR_ID : request.sortBy();
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
         LiquorSearchCondition condition = LiquorSearchCondition.builder()
@@ -96,7 +95,7 @@ public class LiquorService {
     }
 
     /**
-     * 이하는 관리자용 메서드들입니다.
+     * 관리자용
      */
 
     // 주류 등록

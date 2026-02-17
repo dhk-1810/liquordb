@@ -2,7 +2,7 @@ package com.liquordb.dto.liquor;
 
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.enums.LiquorSortBy;
+import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.enums.SortDirection;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -27,7 +27,7 @@ public record LiquorListGetRequest(
         @Max(value = 50, message = "최대 50개까지 조회 가능합니다.")
         Integer limit,
 
-        LiquorSortBy sortBy,
+        SortLiquorBy sortBy,
 
         SortDirection sortDirection
 

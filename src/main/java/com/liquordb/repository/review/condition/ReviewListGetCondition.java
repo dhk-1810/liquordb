@@ -1,7 +1,7 @@
 package com.liquordb.repository.review.condition;
 
 import com.liquordb.entity.Review;
-import com.liquordb.enums.ReviewSortBy;
+import com.liquordb.enums.SortReviewBy;
 import lombok.Builder;
 
 import java.util.UUID;
@@ -15,7 +15,7 @@ public record ReviewListGetCondition(
         Long cursor,
         Long idAfter,
         int limit,
-        ReviewSortBy sortBy,
+        SortReviewBy sortBy,
         boolean descending
 ) {
 }

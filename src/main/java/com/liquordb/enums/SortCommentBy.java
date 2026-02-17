@@ -1,6 +1,6 @@
 package com.liquordb.enums;
 
-public enum CommentSortBy {
+public enum SortCommentBy {
     COMMENT_ID,
     LIKE_COUNT
 }

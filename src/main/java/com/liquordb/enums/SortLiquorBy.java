@@ -1,7 +1,7 @@
 package com.liquordb.enums;
 
-public enum LiquorSortBy {
+public enum SortLiquorBy {
     LIQUOR_ID,
     LIKE_COUNT,
-    RATING
+    AVERAGE_RATING
 }

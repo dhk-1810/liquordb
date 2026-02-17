@@ -10,7 +10,7 @@ import com.liquordb.dto.comment.CommentResponseDto;
 import com.liquordb.dto.comment.request.CommentSearchRequest;
 import com.liquordb.dto.comment.request.CommentUpdateRequest;
 import com.liquordb.entity.Comment;
-import com.liquordb.enums.CommentSortBy;
+import com.liquordb.enums.SortCommentBy;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.comment.CommentAccessDeniedException;
@@ -90,10 +90,10 @@ public class CommentService {
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         // 기본값 할당
-        CommentSortBy sortBy = request.sortBy() == null ?  CommentSortBy.COMMENT_ID : request.sortBy();
+        SortCommentBy sortBy = request.sortBy() == null ?  SortCommentBy.COMMENT_ID : request.sortBy();
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
-        boolean useId = sortBy == CommentSortBy.COMMENT_ID;
+        boolean useId = sortBy == SortCommentBy.COMMENT_ID;
         if (!useId && request.idAfter() == null) {
             throw new InvalidParameterException(); // TODO 예외
         }

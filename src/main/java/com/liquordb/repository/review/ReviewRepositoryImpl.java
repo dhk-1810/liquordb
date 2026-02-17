@@ -2,7 +2,7 @@ package com.liquordb.repository.review;
 
 import com.liquordb.entity.QReview;
 import com.liquordb.entity.Review;
-import com.liquordb.enums.ReviewSortBy;
+import com.liquordb.enums.SortReviewBy;
 import com.liquordb.repository.review.condition.ReviewListGetCondition;
 import com.liquordb.repository.review.condition.ReviewSearchCondition;
 import com.querydsl.core.types.Order;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
-import static com.liquordb.enums.ReviewSortBy.REVIEW_ID;
+import static com.liquordb.enums.SortReviewBy.REVIEW_ID;
 
 @RequiredArgsConstructor
 @Repository
@@ -110,7 +110,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
      * Predicates
      */
 
-    private Predicate cursorCondition(Long cursor, Long idAfter, ReviewSortBy sortBy, boolean descending) {
+    private Predicate cursorCondition(Long cursor, Long idAfter, SortReviewBy sortBy, boolean descending) {
         if (cursor == null) {
             return null; // 첫 페이지 조회
         }
@@ -185,7 +185,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
      * OrderSpecifiers
      */
 
-    private OrderSpecifier<?> getOrderSpecifier(boolean descending, ReviewSortBy sortBy) {
+    private OrderSpecifier<?> getOrderSpecifier(boolean descending, SortReviewBy sortBy) {
         Order order = descending ? Order.DESC : Order.ASC;
         switch (sortBy) {
             case REVIEW_ID -> {

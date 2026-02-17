@@ -1,6 +1,6 @@
 package com.liquordb.dto.review;
 
-import com.liquordb.enums.ReviewSortBy;
+import com.liquordb.enums.SortReviewBy;
 import com.liquordb.enums.SortDirection;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Max;
@@ -23,7 +23,7 @@ public record ReviewListGetRequest (
         Integer limit,
 
         @NotNull
-        ReviewSortBy sortBy,
+        SortReviewBy sortBy,
 
         @NotNull
         SortDirection sortDirection

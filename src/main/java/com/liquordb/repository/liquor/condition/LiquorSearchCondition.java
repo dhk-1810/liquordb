@@ -2,7 +2,7 @@ package com.liquordb.repository.liquor.condition;
 
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.enums.LiquorSortBy;
+import com.liquordb.enums.SortLiquorBy;
 import lombok.Builder;
 
 @Builder
@@ -14,7 +14,7 @@ public record LiquorSearchCondition (
         Object cursor,
         Long idAfter,
         int limit,
-        LiquorSortBy sortBy,
+        SortLiquorBy sortBy,
         boolean descending
 ) {
 }

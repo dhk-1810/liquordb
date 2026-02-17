@@ -1,6 +1,6 @@
 package com.liquordb.dto.comment.request;
 
-import com.liquordb.enums.CommentSortBy;
+import com.liquordb.enums.SortCommentBy;
 import com.liquordb.enums.SortDirection;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Max;
@@ -22,7 +22,7 @@ public record CommentListGetRequest (
         Integer limit,
 
         @NotNull
-        CommentSortBy sortBy,
+        SortCommentBy sortBy,
 
         @NotNull
         SortDirection sortDirection

@@ -5,7 +5,7 @@ import com.liquordb.dto.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.*;
 import com.liquordb.entity.*;
-import com.liquordb.enums.ReviewSortBy;
+import com.liquordb.enums.SortReviewBy;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.review.ReviewAccessDeniedException;
@@ -76,7 +76,7 @@ public class ReviewService {
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
         int limit = request.limit() == null ? 20 : request.limit();
-        ReviewSortBy sortBy = request.sortBy() == null ? ReviewSortBy.REVIEW_ID : request.sortBy();
+        SortReviewBy sortBy = request.sortBy() == null ? SortReviewBy.REVIEW_ID : request.sortBy();
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
         ReviewListGetCondition condition = ReviewListGetCondition.builder()
@@ -98,7 +98,7 @@ public class ReviewService {
     public CursorPageResponse<ReviewResponseDto> getAllByUserId(UUID authorId, ReviewListGetRequest request) {
 
         int limit = request.limit() == null ? 20 : request.limit();
-        ReviewSortBy sortBy = request.sortBy() == null ? ReviewSortBy.REVIEW_ID : request.sortBy();
+        SortReviewBy sortBy = request.sortBy() == null ? SortReviewBy.REVIEW_ID : request.sortBy();
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
         ReviewListGetCondition condition = ReviewListGetCondition.builder()
