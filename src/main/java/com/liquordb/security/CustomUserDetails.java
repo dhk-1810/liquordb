@@ -1,10 +1,6 @@
 package com.liquordb.security;
 
 import com.liquordb.dto.user.UserResponseDto;
-import com.liquordb.entity.User;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,18 +9,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@RequiredArgsConstructor
-@EqualsAndHashCode(of = "userId")
-public class CustomUserDetails implements UserDetails {
-
-    private final UUID userId;
-    private final UserResponseDto dto;
-    private final String password;
+public record CustomUserDetails (
+        UUID userId,
+        UserResponseDto dto,
+        String password
+) implements UserDetails {
 
     @Override
     public String getUsername() {
-        return dto.username();
+        return dto.email();
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
