@@ -20,8 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Duration;
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -100,7 +100,7 @@ public class AuthService {
                 || !jwtTokenProvider.validateRefreshToken(refreshToken)
                 || !jwtRegistry.isRefreshTokenActive(refreshToken)
         ) {
-            throw new InvalidTokenException(); // TODO Access, Refresh 분리
+            throw new InvalidTokenException(); // TODO Access, Refresh 분리?
         }
 
         // 정보 조회

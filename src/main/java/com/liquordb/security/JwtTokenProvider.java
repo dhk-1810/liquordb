@@ -128,4 +128,21 @@ public class JwtTokenProvider {
             throw new RuntimeException("Invalid Token while extracting username", e);
         }
     }
+
+    public long getRemainingExpiration(String accessToken) {
+        try {
+            JWTClaimsSet claims = getClaims(accessToken);
+            Date expirationTime = claims.getExpirationTime();
+            if (expirationTime == null) {
+                return 0;
+            }
+
+            long diff = expirationTime.getTime() - System.currentTimeMillis();
+            return Math.max(0, diff); // 음수 리턴 방지
+
+        }  catch (Exception e) {
+            log.error("Failed to extract expiration time from token: {}", e.getMessage());
+            return 0;
+        }
+    }
 }
