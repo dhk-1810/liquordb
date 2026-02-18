@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
-@Component
 @RequiredArgsConstructor
+@Component
 @Slf4j
 public class RedisLockProvider {
 

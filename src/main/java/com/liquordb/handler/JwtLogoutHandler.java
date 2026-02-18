@@ -12,8 +12,8 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class JwtLogoutHandler implements LogoutHandler {
 
     private final JwtRegistry jwtRegistry;
@@ -24,8 +24,8 @@ public class JwtLogoutHandler implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            userRepository.findByUsername(userDetails.getUsername())
-                    .ifPresent(user -> jwtRegistry.invalidateJwtInformationByUserId(user.getId()));
+            userRepository.findByEmail(userDetails.getUsername())
+                    .ifPresent(user -> jwtRegistry.invalidateAllRefreshTokensByUserId(user.getId()));
         }
 
         // 쿠키 삭제 명령
