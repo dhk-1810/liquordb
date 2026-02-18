@@ -26,9 +26,12 @@ public class JwtLogoutHandler implements LogoutHandler {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             userRepository.findByEmail(userDetails.getUsername())
                     .ifPresent(user -> jwtRegistry.invalidateAllRefreshTokensByUserId(user.getId()));
+            userDetails.
         }
 
         // 쿠키 삭제 명령
         response.addCookie(TokenUtil.emptyRefreshTokenCookie());
+
+        jwtRegistry.addToBlacklist(u);
     }
 }

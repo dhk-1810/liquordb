@@ -8,12 +8,19 @@ import java.util.UUID;
  * 토큰 유효기간 만료 시 캐시에서 삭제
  */
 public interface JwtRegistry {
+
     void registerRefreshToken(UUID userId, String refreshToken);
+
     void rotateRefreshToken(String oldRefreshToken, String newRefreshToken, UUID userId);
+
     void invalidateAllRefreshTokensByUserId(UUID userId);
+
     boolean isRefreshTokenActive(String refreshToken);
 
+
     void addToBlacklist(String accessToken, long remainingTtlMs);
+
     boolean isBlacklisted(String accessToken);
-    void clearExpiredTokens(); //
+
+    void clearExpiredTokens();
 }

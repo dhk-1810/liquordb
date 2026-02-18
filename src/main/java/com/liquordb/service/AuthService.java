@@ -80,22 +80,25 @@ public class AuthService {
         }
         if (user.getStatus() == UserStatus.WITHDRAWN) {
             throw new WithdrawnUserException();
+        } else if (user.getStatus() == UserStatus.BANNED) {
+            throw new BannedUserException();
         }
 
-        return new JwtInformation(
-                UserMapper.toDto(user),
-                jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole().name()),
-                jwtTokenProvider.createRefreshToken(user.getUsername(), user.getRole().name())
-        );
+        String accessToken = jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole().name());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getUsername(), user.getRole().name());
+
+        jwtRegistry.registerRefreshToken(user.getId(), refreshToken);
+
+        return new JwtInformation(UserMapper.toDto(user), accessToken, refreshToken);
     }
 
-    // 토큰 재발급
+    // 토큰 재발급 (엑세스 토큰 재발급 + 리프레시 토큰도 바꿈)
     public JwtInformation refresh(String refreshToken) {
 
         // 서명 유효성, DB 존재 여부 확인
         if (refreshToken == null
                 || !jwtTokenProvider.validateRefreshToken(refreshToken)
-                || !jwtRegistry.hasActiveJwtInformationByRefreshToken(refreshToken)
+                || !jwtRegistry.isRefreshTokenActive(refreshToken)
         ) {
             throw new InvalidTokenException(); // TODO Access, Refresh 분리
         }
@@ -109,13 +112,13 @@ public class AuthService {
         String newAccess = jwtTokenProvider.createAccessToken(username, user.getRole().name());
         String newRefresh = jwtTokenProvider.createRefreshToken(username, user.getRole().name());
 
-        // DB Rotation
         JwtInformation newInfo = new JwtInformation(
                 UserMapper.toDto(user),
                 newAccess,
                 newRefresh
         );
-        jwtRegistry.rotateJwtInformation(refreshToken, newInfo);
+
+        jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, user.getId());
 
         return newInfo;
     }

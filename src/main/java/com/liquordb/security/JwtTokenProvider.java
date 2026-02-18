@@ -109,7 +109,7 @@ public class JwtTokenProvider {
         }
     }
 
-    // Refresh Token 전용 검증
+    // Refresh Token 검증
     public boolean validateRefreshToken(String token) {
         try {
             JWTClaimsSet claims = getClaims(token);
