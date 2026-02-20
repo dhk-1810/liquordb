@@ -111,7 +111,7 @@ public class LiquorService {
     public LiquorResponseDto update(Long id, LiquorUpdateRequest request) {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
-        liquor.updateFromDto(request.isDiscontinued(), request.deleteImage());
+        liquor.update(request.isDiscontinued(), request.deleteImage());
         liquorRepository.save(liquor);
         return LiquorMapper.toDto(liquor, null, false);
     }

@@ -16,9 +16,9 @@ public class Liquor extends LikeableEntity {
     private Long id;
 
     @Column(nullable = false)
-    private boolean isDeleted = false;
+    private boolean isDeleted;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 50)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -28,17 +28,25 @@ public class Liquor extends LikeableEntity {
     @JoinColumn(name = "category_id")
     private LiquorSubcategory subcategory; // 주종 소분류
 
+    @Column(nullable = false, length = 50)
     private String country; // 제조국
+
+    @Column(nullable = false, length = 50)
     private String manufacturer; // 제조사
+
+    @Column(nullable = false)
     private Double abv; // 도수 (Alcohol by Volume)
+
+    @Column(nullable = false)
     private Double averageRating; // 리뷰 평균 점수
+
+    @Column(nullable = false)
+    private long reviewCount;
 
     @Column(nullable = false)
     private boolean isDiscontinued; // 단종 여부
 
     private String imageUrl; // 대표 이미지 사진 저장경로
-
-    private long reviewCount = 0;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -52,7 +60,6 @@ public class Liquor extends LikeableEntity {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        if (averageRating == null) averageRating = 0.0;
     }
 
     @PreUpdate
@@ -62,14 +69,17 @@ public class Liquor extends LikeableEntity {
 
     @Builder
     private Liquor(String name, LiquorCategory category, LiquorSubcategory subcategory,
-                   String country, String manufacturer, Double abv, String imageUrl){
+                   String country, String manufacturer, Double abv, String imageUrl) {
+        this.isDeleted = false;
         this.name = name;
         this.category = category;
         this.subcategory = subcategory;
         this.country = country;
         this.manufacturer = manufacturer;
         this.abv = abv;
-        this.imageUrl = imageUrl; // TODO 개선필요
+        this.averageRating = 0.0;
+        this.reviewCount = 0L;
+        this.imageUrl = imageUrl;
     }
 
     public static Liquor create(String name, LiquorCategory category, LiquorSubcategory subcategory,
@@ -85,9 +95,30 @@ public class Liquor extends LikeableEntity {
                 .build();
     }
 
-    public void updateFromDto(Boolean isDiscontinued, Boolean deleteImage) {
-        if (isDiscontinued == null) this.isDiscontinued = false;
-        if (deleteImage == null) imageUrl = null; // TODO 개선필요
+    public void update(Boolean discontinued, Boolean deleteImage) {
+        if (discontinued != null) {
+            this.isDiscontinued = discontinued;
+        }
+        if (deleteImage == true) {
+            this.imageUrl = null;
+        }
+    }
+
+    public void updateAverageRating(double newRating) {
+        double totalScore = (this.averageRating * this.reviewCount) + newRating;
+        this.reviewCount++;
+        this.averageRating = totalScore / this.reviewCount;
+    }
+
+    public void removeReviewRating(double deletedRating) {
+        if (this.reviewCount <= 1) {
+            this.averageRating = 0.0;
+            this.reviewCount = 0L;
+            return;
+        }
+        double totalScore = (this.averageRating * this.reviewCount) - deletedRating;
+        this.reviewCount--;
+        this.averageRating = totalScore / this.reviewCount;
     }
 
     public void softDelete(LocalDateTime deletedAt) {

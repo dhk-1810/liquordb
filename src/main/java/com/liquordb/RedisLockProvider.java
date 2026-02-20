@@ -20,8 +20,8 @@ public class RedisLockProvider {
     private static final String LOCK_KEY_PREFIX = "lock:";
 
     private static final String RELEASE_SCRIPT =
-            "if redis.call('get', KEYS[1]) == ARGV[1] then " +
-                    "return redis.call('del', KEYS[1]) " +
+            "if redis.call('get', KEYS[1]) == ARGV[1] then " + // 락 주인 확인
+                    "return redis.call('del', KEYS[1]) " + // 삭제
                     "else return 0 end";
 
     private final RedisTemplate<String, Object> redisTemplate;
