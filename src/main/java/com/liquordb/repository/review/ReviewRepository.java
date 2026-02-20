@@ -22,10 +22,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, CustomRev
     Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
     Optional<Review> findByIdAndStatusNot(Long id, Review.ReviewStatus status);
 
-    // 리뷰 평균 평점
-    // TODO 생성, 수정, 삭제시에 알아서 변경되게 할까싶음
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.liquor.id = :liquorId")
-    Double getAverageRatingByLiquorId(@Param("liquorId") Long liquorId);
+    // 리뷰 + 주류 조회
+    @Query("SELECT r FROM Review r JOIN FETCH r.liquor WHERE r.id = :reviewId AND r.status <> 'DELETED'")
+    Optional<Review> findByIdWithLiquor(@Param("reviewId") Long reviewId);
 
     // 좋아요 누른 리뷰 개수
     long countByUser_IdAndStatus(UUID userId, Review.ReviewStatus status);

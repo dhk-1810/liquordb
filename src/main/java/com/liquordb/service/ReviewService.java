@@ -56,6 +56,8 @@ public class ReviewService {
             review.getImages().add(fileService.upload(file))
         );
 
+        liquor.updateAverageRating(request.rating());
+
         reviewRepository.save(review);
         return ReviewMapper.toDto(review);
     }
@@ -142,14 +144,19 @@ public class ReviewService {
     // 리뷰 삭제 (Soft Delete)
     @Transactional
     public void delete(Long reviewId, UUID userId) {
-        Review review = reviewRepository.findByIdAndStatusNot(reviewId, Review.ReviewStatus.DELETED)
+        Review review = reviewRepository.findByIdWithLiquor(reviewId) // 삭제되지 않은 리뷰와 주류 정보를 FETCH JOIN 조회.
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
         if (!review.getUser().getId().equals(userId)) {
             throw new ReviewAccessDeniedException(reviewId, userId);
         }
 
+        Liquor liquor = review.getLiquor();
+        liquor.removeReviewRating(review.getRating());
+
         LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
         commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);
+
         review.softDelete(reviewDeletedAt);
         reviewRepository.save(review);
     }
