@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +26,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -112,27 +115,30 @@ public class GlobalExceptionHandler {
     }
 
     // Validation 실패
+    // TODO 패스워드는 Map에 담으면 안됨
     @ExceptionHandler(MethodArgumentNotValidException .class)
     public ResponseEntity<ErrorResponse> handleValidationFailure(MethodArgumentNotValidException e) {
 
-        Map<String, Object> details = new HashMap<>();
+        Map<String, Object> details = e.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        error -> Map.of(    // 에러 리스트를 돌면서 실패 정보를 취합
+                                "rejectedValue", error.getRejectedValue() == null ? "" : error.getRejectedValue(),
+                                "message", Objects.requireNonNullElse(error.getDefaultMessage(), "유효하지 않은 입력값입니다.")
+                        ), // 직접 지정한 메시지
+                        (existing, replacement) -> existing
+                ));
 
-        e.getBindingResult().getFieldErrors().forEach(error -> {    // 모든 에러 리스트를 돌면서 정보를 취합
-            Map<String, Object> info = new HashMap<>();
-            info.put("rejectedValue", error.getRejectedValue());
-            info.put("message", error.getDefaultMessage()); // 직접 지정한 메시지
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .findFirst().map(FieldError::getDefaultMessage)
+                .orElse("입력값 검증에 실패하였습니다.");
 
-            details.put(error.getField(), info);
-        });
-
-        String message = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage(); // 직접 지정한 메시지
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.BAD_REQUEST,
                 ErrorCode.INVALID_INPUT_VALUE,
                 message,
                 details
         );
-
         return ResponseEntity.badRequest().body(response);
     }
 
