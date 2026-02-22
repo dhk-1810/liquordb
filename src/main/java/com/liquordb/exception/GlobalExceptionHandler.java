@@ -17,9 +17,13 @@ import com.liquordb.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -77,6 +81,61 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.errorCode.getStatus()).body(response);
     }
 
+    // 타입 불일치 - PathVariable / RequestParam
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+
+        String requiredType = (e.getRequiredType() != null)
+                ? e.getRequiredType().getSimpleName()
+                : "Unknown";
+
+        ErrorResponse response = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                ErrorCode.INVALID_INPUT_VALUE,
+                e.getMessage(),
+                Map.of(e.getName(), requiredType)
+        );
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // 타입 불일치 - JSON 본문 내부
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleJsonError(HttpMessageNotReadableException e) {
+        ErrorResponse response = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                ErrorCode.INVALID_INPUT_VALUE,
+                e.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // Validation 실패
+    @ExceptionHandler(MethodArgumentNotValidException .class)
+    public ResponseEntity<ErrorResponse> handleValidationFailure(MethodArgumentNotValidException e) {
+
+        Map<String, Object> details = new HashMap<>();
+
+        e.getBindingResult().getFieldErrors().forEach(error -> {    // 모든 에러 리스트를 돌면서 정보를 취합
+            Map<String, Object> info = new HashMap<>();
+            info.put("rejectedValue", error.getRejectedValue());
+            info.put("message", error.getDefaultMessage()); // 직접 지정한 메시지
+
+            details.put(error.getField(), info);
+        });
+
+        String message = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage(); // 직접 지정한 메시지
+        ErrorResponse response = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                ErrorCode.INVALID_INPUT_VALUE,
+                message,
+                details
+        );
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
         ErrorResponse error = ErrorResponse.of(
@@ -98,7 +157,7 @@ public class GlobalExceptionHandler {
                 Map.of()
         );
         log.error("IllegalStateException: {}", e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(Exception.class)
