@@ -23,7 +23,7 @@ public class ReviewReportController {
             @RequestBody @Valid ReviewReportRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        ReviewReportResponseDto response = reportService.create(request, user.getUserId());
+        ReviewReportResponseDto response = reportService.create(request, user.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

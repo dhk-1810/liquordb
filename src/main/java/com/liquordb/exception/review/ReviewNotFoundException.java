@@ -1,7 +1,6 @@
 package com.liquordb.exception.review;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.EntityNotFoundException;
 
 import java.util.Map;
 

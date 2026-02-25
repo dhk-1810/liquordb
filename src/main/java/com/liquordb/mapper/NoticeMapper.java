@@ -25,10 +25,10 @@ public class NoticeMapper {
     }
 
     public static NoticeSummaryDto toSummaryDto(Notice notice) {
-        return NoticeSummaryDto.builder()
-                .title(notice.getTitle())
-                .createdAt(notice.getCreatedAt())
-                .isPinned(notice.isPinned())
-                .build();
+        return new NoticeSummaryDto(
+                notice.getTitle(),
+                notice.isPinned(),
+                notice.getCreatedAt()
+        );
     }
 }

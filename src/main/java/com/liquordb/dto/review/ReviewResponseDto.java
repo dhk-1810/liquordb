@@ -12,7 +12,7 @@ public record ReviewResponseDto (
         Long id,
         UUID userId,
         Long liquorId,
-        Double rating,
+        int rating,
         String title,
         String content,
         List<String> imagePaths,

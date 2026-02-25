@@ -1,6 +1,5 @@
 package com.liquordb.config;
 
-import com.liquordb.handler.JwtLoginSuccessHandler;
 import com.liquordb.handler.JwtLogoutHandler;
 import com.liquordb.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
+//    private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
     private final JwtLogoutHandler jwtLogoutHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 

@@ -33,7 +33,7 @@ public class ReviewController {
             @RequestPart(required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        ReviewResponseDto response = reviewService.create(liquorId, request, images, user.getUserId());
+        ReviewResponseDto response = reviewService.create(liquorId, request, images, user.id());
         return ResponseEntity.ok(response);
     }
 
@@ -65,7 +65,7 @@ public class ReviewController {
             @RequestPart(required = false) List<MultipartFile> imagesToAdd,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        ReviewResponseDto response = reviewService.update(reviewId, request, imagesToAdd, user.getUserId());
+        ReviewResponseDto response = reviewService.update(reviewId, request, imagesToAdd, user.id());
         return ResponseEntity.ok(response);
     }
 
@@ -75,7 +75,7 @@ public class ReviewController {
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        reviewService.delete(reviewId, user.getUserId());
+        reviewService.delete(reviewId, user.id());
         return ResponseEntity.noContent().build();
     }
 
@@ -85,7 +85,7 @@ public class ReviewController {
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = reviewLikeService.like(reviewId, user.getUserId());
+        LikeResponseDto response = reviewLikeService.like(reviewId, user.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -95,7 +95,7 @@ public class ReviewController {
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = reviewLikeService.cancelLike(reviewId, user.getUserId());
+        LikeResponseDto response = reviewLikeService.cancelLike(reviewId, user.id());
         return ResponseEntity.ok(response);
     }
 

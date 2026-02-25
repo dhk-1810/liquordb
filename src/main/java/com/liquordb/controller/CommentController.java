@@ -33,7 +33,7 @@ public class CommentController {
             @RequestBody @Valid CommentRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CommentResponseDto response = commentService.create(reviewId, request, user.getUserId());
+        CommentResponseDto response = commentService.create(reviewId, request, user.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -64,7 +64,7 @@ public class CommentController {
             @RequestBody @Valid CommentUpdateRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CommentResponseDto response = commentService.update(commentId, request, user.getUserId());
+        CommentResponseDto response = commentService.update(commentId, request, user.id());
         return ResponseEntity.ok(response);
     }
 
@@ -74,7 +74,7 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        commentService.deleteByIdAndUser(commentId, user.getUserId());
+        commentService.deleteByIdAndUser(commentId, user.id());
         return ResponseEntity.noContent().build();
     }
 
@@ -84,7 +84,7 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = commentLikeService.like(commentId, user.getUserId());
+        LikeResponseDto response = commentLikeService.like(commentId, user.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -94,7 +94,7 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = commentLikeService.cancelLike(commentId, user.getUserId());
+        LikeResponseDto response = commentLikeService.cancelLike(commentId, user.id());
         return ResponseEntity.ok(response);
     }
 

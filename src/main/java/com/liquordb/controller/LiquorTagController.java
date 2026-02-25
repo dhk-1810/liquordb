@@ -25,7 +25,7 @@ public class LiquorTagController {
             @PathVariable String tagName,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        return ResponseEntity.ok(liquorTagService.getLiquorsByTagName(tagName, user.getUserId()));
+        return ResponseEntity.ok(liquorTagService.getLiquorsByTagName(tagName, user.id()));
     }
 
     // 주류 ID로 연결된 태그 검색

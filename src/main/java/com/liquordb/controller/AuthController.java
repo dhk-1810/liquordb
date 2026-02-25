@@ -46,10 +46,7 @@ public class AuthController {
         JwtInformation newInfo = authService.refresh(refreshToken);
         Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(newInfo.refreshToken());
         response.addCookie(refreshCookie);
-        JwtDto jwtDto = JwtDto.builder()
-                .accessToken(newInfo.accessToken())
-                .userDto(newInfo.dto())
-                .build();
+        JwtDto jwtDto = new JwtDto(newInfo.dto(), newInfo.accessToken());
 
         return ResponseEntity.ok(jwtDto);
     }

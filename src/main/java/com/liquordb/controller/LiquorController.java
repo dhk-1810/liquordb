@@ -30,7 +30,7 @@ public class LiquorController {
             @ModelAttribute LiquorListGetRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        UUID userId = (user != null) ? user.getUserId() : null;
+        UUID userId = (user != null) ? user.id() : null;
         CursorPageResponse<LiquorSummaryDto> liquor = liquorService.getAll(request, userId);
         return ResponseEntity.ok(liquor);
     }
@@ -41,7 +41,7 @@ public class LiquorController {
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        UUID userId = (user != null) ? user.getUserId() : null;
+        UUID userId = (user != null) ? user.id() : null;
         LiquorResponseDto dto = liquorService.getLiquorDetail(liquorId, userId);
         return ResponseEntity.ok(dto);
     }
@@ -52,7 +52,7 @@ public class LiquorController {
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = liquorLikeService.like(liquorId, user.getUserId());
+        LikeResponseDto response = liquorLikeService.like(liquorId, user.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -62,7 +62,7 @@ public class LiquorController {
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = liquorLikeService.cancelLike(liquorId, user.getUserId());
+        LikeResponseDto response = liquorLikeService.cancelLike(liquorId, user.id());
         return ResponseEntity.ok(response);
     }
 

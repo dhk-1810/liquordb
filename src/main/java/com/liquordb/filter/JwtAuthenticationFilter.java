@@ -25,8 +25,8 @@ import java.util.List;
 /**
  * 인증 수행 - 엑세스 토큰 검증
  */
-@Component
 @RequiredArgsConstructor
+@Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -85,12 +85,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // 토큰 상태 검증
-    private boolean isTokenValidInRegistry(String token) {
-        if (jwtRegistry.hasActiveJwtInformationByAccessToken(token)) { // 서비스 로직에 맞는 메서드 호출
-            return true;
-        } else {
+    private boolean isTokenValidInRegistry(String accessToken) {
+
+        if (jwtRegistry.isBlacklisted(accessToken)) {
             log.warn("유효하지 않은 토큰입니다.");
             return false;
         }
+        return true;
+
     }
 }

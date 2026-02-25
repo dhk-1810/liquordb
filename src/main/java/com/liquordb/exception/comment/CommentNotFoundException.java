@@ -1,9 +1,6 @@
 package com.liquordb.exception.comment;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Map;
 

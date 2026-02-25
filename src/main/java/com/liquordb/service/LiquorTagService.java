@@ -8,6 +8,7 @@ import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.tag.TagNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.LiquorTagMapper;
+import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.*;
 import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +51,7 @@ public class LiquorTagService {
     @Transactional(readOnly = true)
     public List<TagResponseDto> getTagsByLiquorId(Long liquorId) {
         return liquorTagRepository.findTagsByLiquorId(liquorId).stream()
-                .map(LiquorTagMapper::toTagDto)
+                .map(TagMapper::toDto)
                 .toList();
     }
 
@@ -69,6 +70,6 @@ public class LiquorTagService {
         LiquorTag liquorTag = LiquorTagMapper.toEntity(liquor, tag);
         liquorTagRepository.save(liquorTag);
 
-        return LiquorTagMapper.toTagDto(liquorTag);
+        return TagMapper.toDto(liquorTag);
     }
 }

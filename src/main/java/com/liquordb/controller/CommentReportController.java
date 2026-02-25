@@ -26,7 +26,7 @@ public class CommentReportController {
             @RequestBody @Valid CommentReportRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CommentReportResponseDto response = commentReportService.create(request, user.getUserId(), user.getUsername());
+        CommentReportResponseDto response = commentReportService.create(request, user.id(), user.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

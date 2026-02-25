@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record CustomUserDetails (
-        UUID userId,
+        UUID id,
         UserResponseDto dto,
         String password
 ) implements UserDetails {

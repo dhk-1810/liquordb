@@ -1,6 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.entity.User;
+import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -57,17 +58,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         // 이메일로 유저 조회 또는 새로 생성
-        User user = userRepository.findByEmailAndStatusNot(email, UserStatus.BANNED)
-                .orElseGet(() -> userRepository.save(User.builder()
-                        .email(email)
-                        .username(name != null ? name : "noname")
-                        .role(User.Role.USER)
-                        .build()
-                ));
+
 
         // OAuth 인증된 사용자 반환
         return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_")), // TODO
                 attributes,
                 userNameAttributeName // → provider의 고유 사용자 식별 key
         );

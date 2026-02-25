@@ -59,6 +59,7 @@ public class UserTagService {
     }
 
     // 유저가 선호하는 태그로 주류 목록 조회
+    // TODO 페이지네이션 predicate 추가
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getRecommendedLiquors(UUID userId) {
 

@@ -26,7 +26,7 @@ public class AdminNoticeController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(noticeService.create(dto, user.getUserId()));
+                .body(noticeService.create(dto, user.id()));
     }
 
     // 공지사항 수정
