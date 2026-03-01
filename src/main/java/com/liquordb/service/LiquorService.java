@@ -26,8 +26,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class LiquorService {
 
     private final LiquorRepository liquorRepository;

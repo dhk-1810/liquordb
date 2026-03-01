@@ -10,23 +10,26 @@ import com.liquordb.exception.tag.UserTagNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.mapper.TagMapper;
+import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.repository.TagRepository;
 import com.liquordb.repository.UserRepository;
 import com.liquordb.repository.UserTagRepository;
+import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class UserTagService {
 
     private final UserRepository userRepository;
     private final UserTagRepository userTagRepository;
     private final TagRepository tagRepository;
+    private final LiquorRepository reviewRepository;
+    private final LiquorLikeRepository liquorLikeRepository;
 
     // 선호하는 태그 목록에 추가
     @Transactional
@@ -63,13 +66,15 @@ public class UserTagService {
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getRecommendedLiquors(UUID userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
         List<Liquor> liquors = userTagRepository.findLiquorsByUser_Id(userId);
+        List<Long> liquorIds = liquors.stream().map(Liquor::getId).toList();
+        Set<Long> likedLiquorIds = liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, liquorIds);
 
         return liquors.stream()
-                .map(liquor -> LiquorMapper.toSummaryDto(liquor, user))
+                .map(liquor -> {
+                    boolean likedByMe = likedLiquorIds.contains(liquor.getId());
+                    return LiquorMapper.toSummaryDto(liquor, likedByMe, liquor.getReviewCount(), liquor.getLikeCount());
+                })
                 .toList();
     }
 

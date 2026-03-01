@@ -15,12 +15,12 @@ import java.util.UUID;
 public interface LiquorLikeRepository extends JpaRepository<LiquorLike, Long> {
 
     long countByLiquor_Id(Long liquorId);
+
     long countByUser_IdAndLiquorIsDeletedFalse(UUID userId);
 
     boolean existsByLiquor_IdAndUser_Id(Long liquorId, UUID userId);
-    Optional<LiquorLike> findByLiquor_IdAndUser_Id(Long liquorId, UUID userId);
 
-    List<LiquorLike> findByUser_IdAndLiquor_IsDeletedFalse(UUID userId);
+    Optional<LiquorLike> findByLiquor_IdAndUser_Id(Long liquorId, UUID userId);
 
     @Query("SELECT ll.liquor.id FROM LiquorLike ll WHERE ll.user.id = :userId AND ll.liquor.id IN :liquorIds")
     Set<Long> findLikedLiquorIdsByUserIdAndLiquorIds(@Param("userId") UUID userId,
