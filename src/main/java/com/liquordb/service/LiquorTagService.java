@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class LiquorTagService {
 
     private final LiquorRepository liquorRepository;
@@ -30,6 +30,7 @@ public class LiquorTagService {
     private final LiquorLikeRepository liquorLikeRepository;
 
     // 태그 이름으로 주류 검색
+    // TODO LiquorService.getAll()로 처리
     @Transactional(readOnly = true)
     public List<LiquorSummaryDto> getLiquorsByTagName(String tagName, UUID userId) {
         List<Liquor> liquors = liquorTagRepository.findLiquorsByTagName(tagName);

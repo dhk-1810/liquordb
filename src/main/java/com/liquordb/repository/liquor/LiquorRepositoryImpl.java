@@ -1,5 +1,6 @@
 package com.liquordb.repository.liquor;
 
+import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.entity.QLiquor;
@@ -110,6 +111,10 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
 
     private Predicate isDeletedEq(Boolean searchDeleted) {
         return searchDeleted != null ? liquor.isDeleted.eq(searchDeleted) : null;
+    }
+
+    private Predicate liquorTagContains(List<Long> tagId) {
+
     }
 
     /**
