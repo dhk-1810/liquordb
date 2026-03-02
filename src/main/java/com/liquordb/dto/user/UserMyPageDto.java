@@ -15,9 +15,7 @@ public record UserMyPageDto(
         long likedReviewCount,
         long likedCommentCount,
         long reviewCount,
-        long commentCount,
-
-        List<TagResponseDto> preferredTags
+        long commentCount
 ){
 
 }

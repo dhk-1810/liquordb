@@ -35,8 +35,7 @@ public class UserMapper {
             long commentCount,
             long likedLiquorCount,
             long likedReviewCount,
-            long likedCommentCount,
-            List<TagResponseDto> preferredTags
+            long likedCommentCount
     ) {
         return new UserMyPageDto(
                 user.getId(),
@@ -46,8 +45,7 @@ public class UserMapper {
                 commentCount,
                 likedLiquorCount,
                 likedReviewCount,
-                likedCommentCount,
-                preferredTags
+                likedCommentCount
         );
     }
 }

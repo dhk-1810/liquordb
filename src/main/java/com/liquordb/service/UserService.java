@@ -29,7 +29,6 @@ public class UserService {
     private final LiquorLikeRepository liquorLikeRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
-    private final UserTagRepository userTagRepository;
     private final FileService fileService;
 
     private final PasswordEncoder passwordEncoder;
@@ -53,8 +52,6 @@ public class UserService {
         long likedCommentCount = commentLikeRepository.countByUser_IdAndCommentStatus(userId, Comment.CommentStatus.ACTIVE);
 
         // 등록한(=선호하는) 태그 목록
-        List<TagResponseDto> preferredTags = userTagRepository.findAllByUser_IdWithTag(userId)
-                .stream().map(TagMapper::toDto).toList();
 
         return UserMapper.toMyPageDto(
                 user,
@@ -62,8 +59,7 @@ public class UserService {
                 commentCount,
                 likedLiquorCount,
                 likedReviewCount,
-                likedCommentCount,
-                preferredTags
+                likedCommentCount
         );
     }
 
