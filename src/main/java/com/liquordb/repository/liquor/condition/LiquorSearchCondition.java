@@ -5,12 +5,15 @@ import com.liquordb.entity.LiquorSubcategory;
 import com.liquordb.enums.SortLiquorBy;
 import lombok.Builder;
 
+import java.util.List;
+
 @Builder
 public record LiquorSearchCondition (
         Liquor.LiquorCategory category,
         LiquorSubcategory subcategory,
         String keyword,
         Boolean searchDeleted, // null -> 전체 조회, true -> 삭제 리뷰 조회, false -> 활성 리뷰 조회
+        List<Long> tagIds,
         Object cursor,
         Long idAfter,
         int limit,

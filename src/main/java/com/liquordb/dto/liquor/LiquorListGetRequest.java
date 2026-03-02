@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 public record LiquorListGetRequest(
 
         Liquor.LiquorCategory category,
@@ -18,6 +20,8 @@ public record LiquorListGetRequest(
         String keyword,
 
         Boolean searchDeleted,
+
+        List<Long> tagIds,
 
         Object cursor,
 

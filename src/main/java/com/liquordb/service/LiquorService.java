@@ -49,6 +49,7 @@ public class LiquorService {
                 .subcategory(request.subcategory())
                 .keyword(request.keyword())
                 .searchDeleted(request.searchDeleted())
+                .tagIds(request.tagIds())
                 .cursor(request.cursor())
                 .idAfter(request.idAfter())
                 .limit(limit)
