@@ -1,14 +1,13 @@
 package com.liquordb.repository.liquor;
 
-import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.entity.Liquor;
-import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.entity.QLiquor;
+import com.liquordb.entity.*;
 import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.repository.liquor.condition.LiquorSearchCondition;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -18,12 +17,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.querydsl.jpa.JPAExpressions.select;
+
 @RequiredArgsConstructor
 @Repository
 public class LiquorRepositoryImpl implements CustomLiquorRepository{
 
     private final JPAQueryFactory queryFactory;
     private final QLiquor liquor = QLiquor.liquor;
+    private final QLiquorTag liquorTag = QLiquorTag.liquorTag;
 
     @Override
     public Slice<Liquor> findAll(LiquorSearchCondition condition) {
@@ -35,6 +37,7 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
                         subcategoryEq(condition.subcategory()),
                         keywordContains(condition.keyword()),
                         isDeletedEq(condition.searchDeleted()),
+                        tagsAllMatch(condition.tagIds()),
                         cursorCondition(condition.cursor(), condition.idAfter(), condition.sortBy(), condition.descending())
                 )
                 .orderBy(
@@ -113,8 +116,20 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
         return searchDeleted != null ? liquor.isDeleted.eq(searchDeleted) : null;
     }
 
-    private Predicate liquorTagContains(List<Long> tagId) {
+    private Predicate tagsAllMatch(List<Long> tagIds) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return null;
+        }
+        QLiquorTag subLiquorTag = new QLiquorTag("subLiquorTag"); // 서브쿼리의 LiquorTag는 메인쿼리와 분리 필요.
 
+        return liquor.id.in(
+                select(subLiquorTag.liquor.id)
+                        .from(subLiquorTag)
+                        .where(subLiquorTag.tag.id.in(tagIds))
+                        .groupBy(subLiquorTag.liquor.id)
+                        // 그룹화된 liquor_id 중 태그 개수 == 선택한 개수인 것만 필터링
+                        .having(subLiquorTag.liquor.id.count().eq((long) tagIds.size()))
+        );
     }
 
     /**
