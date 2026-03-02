@@ -27,7 +27,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) {
-        DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+        /*DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
         OAuth2User oauth2User = delegate.loadUser(request);
 
         // 어떤 OAuth provider인지 (google, naver 등)
@@ -65,6 +65,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_")), // TODO
                 attributes,
                 userNameAttributeName // → provider의 고유 사용자 식별 key
-        );
+        );*/
+        return null;
     }
+
 }

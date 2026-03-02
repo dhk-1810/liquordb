@@ -15,16 +15,9 @@ import java.util.UUID;
  * 동시 로그인 기기 대수 제한, 무효화된 엑세스 토큰 거부
  * 토큰 유효기간 만료 시 캐시에서 삭제
  */
-@RequiredArgsConstructor
 @Component
 @Slf4j
 public class RedisJwtRegistry implements JwtRegistry {
-
-    private final JwtProperties jwtProperties;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final ApplicationEventPublisher eventPublisher;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisLockProvider redisLockProvider;
 
     private static final String REFRESH_USER_LIST_PREFIX = "jwt:refresh:user";
     private static final String REFRESH_TOKEN_PREFIX = "jwt:refresh:token";
@@ -32,7 +25,22 @@ public class RedisJwtRegistry implements JwtRegistry {
     private static final String BLACKLIST_TOKEN_PREFIX = "jwt:blacklist:index:";
     private static final String BLACKLIST_LOCK_KEY_PREFIX = "lock:jwt:blacklist:";
     private static final int MAX_ACTIVE_JWT_COUNT = 3; // 동시 접속 제한
-    private final Duration REFRESH_TOKEN_VALIDITY = Duration.ofMillis(jwtProperties.getRefreshTokenValidityInMs());
+
+    private final Duration refreshTokenValidity;
+//    private final JwtTokenProvider jwtTokenProvider;
+//    private final ApplicationEventPublisher eventPublisher;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisLockProvider redisLockProvider;
+
+    public RedisJwtRegistry(
+            JwtProperties jwtProperties,
+            RedisTemplate<String, Object> redisTemplate,
+            RedisLockProvider redisLockProvider
+    ) {
+        this.redisTemplate = redisTemplate;
+        this.redisLockProvider = redisLockProvider;
+        this.refreshTokenValidity = Duration.ofMillis(jwtProperties.getRefreshTokenValidityInMs());
+    }
 
     @Override
     public void registerRefreshToken(UUID userId, String refreshToken) {
@@ -49,9 +57,9 @@ public class RedisJwtRegistry implements JwtRegistry {
                 currentSize--;
             }
             redisTemplate.opsForList().rightPush(userKey, refreshToken);
-            redisTemplate.expire(userKey, REFRESH_TOKEN_VALIDITY);
+            redisTemplate.expire(userKey, refreshTokenValidity);
 
-            redisTemplate.opsForValue().set(tokenIndexKey, userId.toString(), REFRESH_TOKEN_VALIDITY);
+            redisTemplate.opsForValue().set(tokenIndexKey, userId.toString(), refreshTokenValidity);
 
         } finally {
             redisLockProvider.releaseLock(lockKey);
@@ -72,10 +80,10 @@ public class RedisJwtRegistry implements JwtRegistry {
             redisTemplate.opsForList().remove(userKey, 1, oldRefreshToken);
 
             redisTemplate.opsForList().rightPush(userKey, newRefreshToken);
-            redisTemplate.opsForValue().set(newTokenIndexKey, userId.toString(), REFRESH_TOKEN_VALIDITY);
+            redisTemplate.opsForValue().set(newTokenIndexKey, userId.toString(), refreshTokenValidity);
 
             // 전체 리스트 만료 시간 갱신
-            redisTemplate.expire(userKey, REFRESH_TOKEN_VALIDITY);
+            redisTemplate.expire(userKey, refreshTokenValidity);
 
         } finally {
             redisLockProvider.releaseLock(lockKey);

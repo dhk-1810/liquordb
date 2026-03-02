@@ -1,6 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.entity.File;
+import com.liquordb.exception.file.FileNotFoundException;
 import com.liquordb.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,14 +82,14 @@ public class FileService {
     @Transactional(readOnly = true)
     public File findImageById(Long id) {
         return fileRepository.findById(id)
-                .orElseThrow(() -> new FileNotFoundException("존재하지 않는 파일입니다."));
+                .orElseThrow(() -> new com.liquordb.exception.file.FileNotFoundException(id));
     }
 
     @Transactional
-    public void delete(Long imageId) {
+    public void delete(Long id) {
 
-        File image = fileRepository.findById(imageId)
-                .orElseThrow(() -> new FileNotFoundException("파일을 찾을 수 없습니다."));
+        File image = fileRepository.findById(id)
+                .orElseThrow(() -> new FileNotFoundException(id));
 
 
         // 로컬 파일 삭제
