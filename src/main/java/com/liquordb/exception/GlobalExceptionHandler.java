@@ -4,10 +4,6 @@ import com.liquordb.enums.ErrorCode;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.notice.NoticeNotFoundException;
-import com.liquordb.exception.report.CommentReportAlreadyExistsException;
-import com.liquordb.exception.report.CommentReportNotFoundException;
-import com.liquordb.exception.report.ReviewReportAlreadyExistsException;
-import com.liquordb.exception.report.ReviewReportNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.tag.LiquorTagAlreadyExistsException;
 import com.liquordb.exception.tag.TagNotFoundException;
@@ -41,8 +37,6 @@ public class GlobalExceptionHandler {
             UserNotFoundException.class,
             TagNotFoundException.class,
             UserTagNotFoundException.class,
-            CommentReportNotFoundException.class,
-            ReviewReportNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFound(LiquordbException e) {
         ErrorResponse response = ErrorResponse.of(
@@ -56,8 +50,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-            CommentReportAlreadyExistsException.class,
-            ReviewReportAlreadyExistsException.class,
             LiquorTagAlreadyExistsException.class,
             UserTagAlreadyExistsException.class
     })

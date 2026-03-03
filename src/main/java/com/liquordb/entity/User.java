@@ -37,8 +37,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    private int reportCount; // 신고된 건수
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private File profileImage; // TODO S3에 저장
 
@@ -73,7 +71,6 @@ public class User {
         this.socialProvider = socialProvider;
         this.role = role;
         this.status = UserStatus.ACTIVE;
-        this.reportCount = 0;
         this.profileImage = profileImage;
     }
 
@@ -107,11 +104,6 @@ public class User {
 
     public void deleteProfileImage() {
         this.profileImage = null;
-    }
-
-    public void increaseReportCount() {
-        if (this.reportCount <= 0) return;
-        this.reportCount++;
     }
 
     public void ban(){

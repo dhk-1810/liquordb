@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comments")
-public class Comment extends LikeableEntity implements ReportableEntity {
+public class Comment extends LikeableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

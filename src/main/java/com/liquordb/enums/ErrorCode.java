@@ -44,12 +44,6 @@ public enum ErrorCode {
     LIQUID_NOT_FOUND (HttpStatus.NOT_FOUND),
     LIQUOR_TAG_ALREADY_EXISTS (HttpStatus.CONFLICT),
 
-    // Report
-    COMMENT_REPORT_NOT_FOUND (HttpStatus.NOT_FOUND),
-    COMMENT_REPORT_ALREADY_EXISTS (HttpStatus.CONFLICT),
-    REVIEW_REPORT_NOT_FOUND (HttpStatus.NOT_FOUND),
-    REVIEW_REPORT_ALREADY_EXISTS (HttpStatus.CONFLICT),
-
     // Notice
     NOTICE_NOT_FOUND (HttpStatus.NOT_FOUND),
 

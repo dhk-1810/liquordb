@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "reviews")
-public class Review extends LikeableEntity implements ReportableEntity {
+public class Review extends LikeableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
