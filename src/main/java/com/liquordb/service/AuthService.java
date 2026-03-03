@@ -147,7 +147,7 @@ public class AuthService {
                 resetLink + "\n\n" +
                 "이 링크는 5분 동안만 유효합니다.";
 
-        mailService.sendMail(user.getEmail(), RESET_MAIL_SUBJECT, resetMailText); // 비동기
+//        mailService.sendMail(user.getEmail(), RESET_MAIL_SUBJECT, resetMailText); // 비동기
     }
 
     // 비밀번호 재설정

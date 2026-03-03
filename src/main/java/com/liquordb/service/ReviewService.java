@@ -144,7 +144,9 @@ public class ReviewService {
     // 리뷰 삭제 (Soft Delete)
     @Transactional
     public void delete(Long reviewId, UUID userId) {
-        Review review = reviewRepository.findByIdWithLiquor(reviewId) // 삭제되지 않은 리뷰와 주류 정보를 FETCH JOIN 조회.
+
+        // 삭제되지 않은 리뷰와 주류 정보를 FETCH JOIN 조회.
+        Review review = reviewRepository.findByIdWithLiquorAndStatusNot(reviewId, Review.ReviewStatus.DELETED)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
         if (!review.getUser().getId().equals(userId)) {
@@ -155,7 +157,7 @@ public class ReviewService {
         liquor.removeReviewRating(review.getRating());
 
         LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
-        commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt);
+        commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt, Comment.CommentStatus.DELETED);
 
         review.softDelete(reviewDeletedAt);
         reviewRepository.save(review);
@@ -186,7 +188,7 @@ public class ReviewService {
 
         review.getImages().removeIf(image -> {
             if (imageIdsToDelete.contains(image.getFilePath())) {
-                fileService.delete(image.getId()); // 실제 파일 삭제
+//                fileService.delete(image.getId()); // 실제 파일 삭제
                 return true;
             }
             return false;

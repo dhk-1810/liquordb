@@ -26,9 +26,6 @@ import java.util.UUID;
 @Slf4j
 public class FileService {
 
-    @Value("${file.upload-dir}") // application.yml에서 지정
-    private String uploadDir;
-
     private final FileRepository fileRepository;
 
     @Transactional
@@ -85,23 +82,23 @@ public class FileService {
                 .orElseThrow(() -> new FileNotFoundException(id));
     }
 
-    @Transactional
-    public void delete(Long id) {
-
-        File image = fileRepository.findById(id)
-                .orElseThrow(() -> new FileNotFoundException(id));
-
-
-        // 로컬 파일 삭제
-        Path filePath = Paths.get(uploadDir).resolve(image.getFilePath()).normalize();
-        try{
-            Files.delete(filePath);
-        } catch (IOException e){
-            throw new RuntimeException("파일 삭제 실패: " + e.getMessage(), e);
-        }
-
-        // 메타데이터 삭제
-        fileRepository.delete(image);
-    }
+//    @Transactional
+//    public void delete(Long id) {
+//
+//        File image = fileRepository.findById(id)
+//                .orElseThrow(() -> new FileNotFoundException(id));
+//
+//
+//        // 로컬 파일 삭제
+//        Path filePath = Paths.get(uploadDir).resolve(image.getFilePath()).normalize();
+//        try{
+//            Files.delete(filePath);
+//        } catch (IOException e){
+//            throw new RuntimeException("파일 삭제 실패: " + e.getMessage(), e);
+//        }
+//
+//        // 메타데이터 삭제
+//        fileRepository.delete(image);
+//    }
 
 }

@@ -1,11 +1,9 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
-import com.liquordb.mapper.TagMapper;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
 
@@ -85,7 +83,7 @@ public class UserService {
         }
 
         if (request.deleteProfileImage()) {
-            fileService.delete(user.getProfileImage().getId());
+//            fileService.delete(user.getProfileImage().getId());
             user.setProfileImage(null);
         }
 

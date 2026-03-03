@@ -20,7 +20,7 @@ public class Comment extends LikeableEntity implements ReportableEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private CommentStatus status = CommentStatus.ACTIVE;
+    private CommentStatus status;
 
     @ManyToOne
     @JoinColumn(name = "review_id")
@@ -62,6 +62,7 @@ public class Comment extends LikeableEntity implements ReportableEntity {
         this.review = review;
         this.parent = parent;
         this.user = user;
+        this.status = CommentStatus.ACTIVE;
     }
 
     public static Comment create(String content, Review review, Comment parent, User user) {

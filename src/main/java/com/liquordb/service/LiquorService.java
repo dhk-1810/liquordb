@@ -3,6 +3,8 @@ package com.liquordb.service;
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.liquor.*;
 import com.liquordb.dto.tag.TagResponseDto;
+import com.liquordb.entity.Comment;
+import com.liquordb.entity.Review;
 import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -124,8 +126,8 @@ public class LiquorService {
                 .orElseThrow(() -> new LiquorNotFoundException(id));
 
         LocalDateTime liquorDeletedAt = LocalDateTime.now().withNano(0);
-        commentRepository.softDeleteCommentsByLiquor(liquor, liquorDeletedAt);
-        reviewRepository.softDeleteReviewsByLiquor(liquor, liquorDeletedAt);
+        commentRepository.softDeleteCommentsByLiquor(liquor, liquorDeletedAt, Comment.CommentStatus.DELETED);
+        reviewRepository.softDeleteReviewsByLiquor(liquor, liquorDeletedAt, Review.ReviewStatus.DELETED);
         liquor.softDelete(liquorDeletedAt);
 
         liquorRepository.save(liquor);
