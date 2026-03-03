@@ -22,7 +22,7 @@ public class ReviewReport {
     private Review review;
 
     @Column(nullable = false)
-    private UUID requestUserId; // 단순한 정보 표기 역할이기 떄문에 연관관계 대신 id만 사용
+    private UUID reporterId; // 단순한 정보 표기 역할이기 떄문에 연관관계 대신 id만 사용
 
     private String reason;
 
@@ -49,9 +49,9 @@ public class ReviewReport {
         this.rejectedAt = LocalDateTime.now();
     }
 
-    private ReviewReport(Review review, UUID requestUserId, String reason) {
+    private ReviewReport(Review review, UUID reporterId, String reason) {
         this.review = review;
-        this.requestUserId = requestUserId;
+        this.reporterId = reporterId;
         this.reason = reason;
     }
 

@@ -37,7 +37,7 @@ public class ReviewReportService {
         Long reviewId = request.reviewId();
 
         // 중복 신고 방지
-        boolean exists = reviewReportRepository.existsByReviewIdAndUser_Id(reviewId, userId);
+        boolean exists = reviewReportRepository.existsByReviewIdAndReporterId(reviewId, userId);
         if (exists) {
             throw new ReviewReportAlreadyExistsException(reviewId, userId);
         }

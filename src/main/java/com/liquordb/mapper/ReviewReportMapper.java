@@ -28,7 +28,7 @@ public class ReviewReportMapper {
     public ReviewReportResponseDto toDto(ReviewReport report){
         return new ReviewReportResponseDto(
                 report.getReview().getId(), // TODO N+1 ??
-                report.getRequestUserId(),
+                report.getReporterId(),
                 report.getReason(),
                 report.getStatus(),
                 report.getCreatedAt(),

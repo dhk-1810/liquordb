@@ -41,7 +41,7 @@ public class CommentReportService {
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
         // 중복 신고 방지
-        boolean exists = commentReportRepository.existsByCommentIdAndUser_Id(commentId, reporterId);
+        boolean exists = commentReportRepository.existsByCommentIdAndReporterId(commentId, reporterId);
         if (exists) {
             throw new CommentReportAlreadyExistsException(commentId, reporterId);
         }
