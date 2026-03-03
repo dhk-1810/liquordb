@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.entity.id.LiquorTagId;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,17 +12,19 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@IdClass(LiquorTag.class)
 @Table(name = "liquor_tags")
 public class LiquorTag {
 
-    @Id
-    @ManyToOne
+    @EmbeddedId
+    private LiquorTagId id;
+
+    @MapsId("liquorId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
 
-    @Id
-    @ManyToOne
+    @MapsId("tagId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
@@ -33,6 +36,7 @@ public class LiquorTag {
     }
 
     private LiquorTag(Liquor liquor, Tag tag) {
+        this.id = new LiquorTagId(liquor.getId(), tag.getId());
         this.liquor = liquor;
         this.tag = tag;
     }

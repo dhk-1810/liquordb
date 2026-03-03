@@ -20,7 +20,7 @@ public class SecurityConfig {
 
 //    private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
     private final JwtLogoutHandler jwtLogoutHandler;
-    private final CustomOAuth2UserService customOAuth2UserService;
+//    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -39,12 +39,12 @@ public class SecurityConfig {
 
                 // 인증 설정
                 .formLogin(AbstractHttpConfigurer::disable)
-                .oauth2Login(oauth2 -> oauth2 // TODO 점검
-                        .loginPage("/login") // 소셜 로그인도 같은 로그인 페이지 사용
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                )
+//                .oauth2Login(oauth2 -> oauth2 // TODO 점검
+//                        .loginPage("/login") // 소셜 로그인도 같은 로그인 페이지 사용
+//                        .userInfoEndpoint(userInfo -> userInfo
+//                                .userService(customOAuth2UserService)
+//                        )
+//                )
                 .logout(logout -> logout.addLogoutHandler(jwtLogoutHandler))
 
                 // 인가 설정

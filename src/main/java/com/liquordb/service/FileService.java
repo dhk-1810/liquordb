@@ -82,7 +82,7 @@ public class FileService {
     @Transactional(readOnly = true)
     public File findImageById(Long id) {
         return fileRepository.findById(id)
-                .orElseThrow(() -> new com.liquordb.exception.file.FileNotFoundException(id));
+                .orElseThrow(() -> new FileNotFoundException(id));
     }
 
     @Transactional

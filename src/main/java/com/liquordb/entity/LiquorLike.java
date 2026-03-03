@@ -6,22 +6,25 @@ import lombok.*;
 
 @Entity
 @Getter
-@IdClass(LiquorLikeId.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "liquor_likes")
 public class LiquorLike {
 
-    @Id
-    @ManyToOne
+    @EmbeddedId
+    private LiquorLikeId id;
+
+    @MapsId("userId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Id
-    @ManyToOne
+    @MapsId("liquorId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "liquor_id")
     private Liquor liquor;
 
     public LiquorLike(User user, Liquor liquor) {
+        this.id = new LiquorLikeId(user.getId(), liquor.getId());
         this.user = user;
         this.liquor = liquor;
     }
