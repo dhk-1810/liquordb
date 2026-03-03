@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
@@ -54,9 +57,6 @@ spring:
 #          auth: true
 #          starttls:
 #            enable: true
-
-server:
-  port: 8080
 
 logging:
   level:

@@ -12,4 +12,12 @@ public class FileNotFoundException extends FIleException {
                 Map.of("fileId", fileId)
         );
     }
+
+    public FileNotFoundException() {
+        super(
+                ErrorCode.FILE_NOT_FOUND,
+                "파일을 찾을 수 없습니다.",
+                Map.of()
+        );
+    }
 }

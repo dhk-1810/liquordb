@@ -21,8 +21,8 @@ import java.util.UUID;
  * 업로드된 파일에 대한 접근 경로나 URL 매핑도 따로 설정해야 함.
  */
 
-@Service
 @RequiredArgsConstructor
+@Service
 @Slf4j
 public class FileService {
 
@@ -35,7 +35,7 @@ public class FileService {
     public File upload(MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 없습니다.");
+            throw new FileNotFoundException();
         }
 
         try {
