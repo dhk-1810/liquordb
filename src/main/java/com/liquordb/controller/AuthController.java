@@ -23,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     // 회원가입
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(name = "/sign-up",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<UserResponseDto> register(
             @RequestBody SignUpRequest dto,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage

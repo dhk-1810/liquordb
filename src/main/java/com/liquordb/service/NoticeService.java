@@ -50,7 +50,7 @@ public class NoticeService {
                 pageable.getPageSize(),
                 sort
         );
-        Page<Notice> notices = noticeRepository.findAllAndIsDeletedFalse(sortedPageable);
+        Page<Notice> notices = noticeRepository.findAllByIsDeletedFalse(sortedPageable);
         Page<NoticeSummaryDto> response = notices.map(NoticeMapper::toSummaryDto);
         return PageResponse.from(response);
     }

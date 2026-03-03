@@ -49,7 +49,8 @@ public class SecurityConfig {
 
                 // 인가 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "api/auth/signup").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/", "api/auth/sign-up").permitAll()
                         .requestMatchers("/api//users/*/reviews").authenticated()
                         .requestMatchers("/api/auth/token-refresh").permitAll()// TODO 로그인, 소셜로그인?
                         .anyRequest().authenticated()
