@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -107,17 +107,28 @@ public class GlobalExceptionHandler {
     }
 
     // Validation 실패
-    // TODO 패스워드는 Map에 담으면 안됨
     @ExceptionHandler(MethodArgumentNotValidException .class)
     public ResponseEntity<ErrorResponse> handleValidationFailure(MethodArgumentNotValidException e) {
+
+        List<String> sensitiveFields = List.of("password", "currentPassword", "newPassword");
 
         Map<String, Object> details = e.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(
                         FieldError::getField,
-                        error -> Map.of(    // 에러 리스트를 돌면서 실패 정보를 취합
-                                "rejectedValue", error.getRejectedValue() == null ? "" : error.getRejectedValue(),
-                                "message", Objects.requireNonNullElse(error.getDefaultMessage(), "유효하지 않은 입력값입니다.")
-                        ), // 직접 지정한 메시지
+                        error -> { // 에러 리스트를 돌면서 실패 정보를 취합
+                            String fieldName = error.getField();
+                            Object rejectedValue = error.getRejectedValue();
+
+                            // 민감 필드인 경우 마스킹 처리
+                            Object displayValue = sensitiveFields.contains(fieldName)
+                                    ? "***"
+                                    : (rejectedValue == null ? "" : rejectedValue);
+
+                            return Map.of(
+                                    "rejectedValue", displayValue,
+                                    "message", Objects.requireNonNullElse(error.getDefaultMessage(), "유효하지 않은 입력값입니다.")
+                            );
+                        },
                         (existing, replacement) -> existing
                 ));
 

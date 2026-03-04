@@ -11,7 +11,6 @@ import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
 
 import com.liquordb.repository.comment.CommentRepository;
-import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.user.UserRepository;
 import com.liquordb.repository.user.UserSearchCondition;

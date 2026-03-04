@@ -4,15 +4,12 @@ import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.user.UserListGetRequest;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.enums.Role;
-import com.liquordb.enums.UserStatus;
 import com.liquordb.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
