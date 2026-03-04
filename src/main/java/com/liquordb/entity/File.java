@@ -16,37 +16,26 @@ public class File {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String filePath;
-    private String fileName;
-    private String fileExtension;
-    private Long size;
+    private String key;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_id")
-    private Review review;
+    private String presignedUrl;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Enumerated(EnumType.STRING)
+    private FileType type;
 
-    @Builder
-    private File(String filePath, String fileName, String fileExtension, Long size, Review review, User user) {
-        this.filePath = filePath;
-        this.fileName = fileName;
-        this.fileExtension = fileExtension;
-        this.size = size;
-        this.review = review;
-        this.user = user;
+    public enum FileType {
+        PROFILE,
+        LIQUOR,
+        REVIEW
     }
 
-    public static File create(String filePath, String fileName, String fileExtension, Long size, Review review, User user){
-        return File.builder()
-                .filePath(filePath)
-                .fileName(fileName)
-                .fileExtension(fileExtension)
-                .size(size)
-                .review(review)
-                .user(user)
-                .build();
+    private File(String key, String presignedUrl, FileType type) {
+        this.key = key;
+        this.presignedUrl = presignedUrl;
+        this.type = type;
+    }
+
+    public static File create(String filePath, String fileName, FileType fileType) {
+        return new File(filePath, fileName, fileType);
     }
 }
