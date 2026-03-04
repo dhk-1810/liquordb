@@ -15,7 +15,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -25,7 +24,6 @@ import java.util.UUID;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final FileService fileService;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
 
@@ -39,7 +37,7 @@ public class AuthService {
 
     // 회원가입
     @Transactional
-    public UserResponseDto signUp(SignUpRequest request, MultipartFile profileImage, Role role) {
+    public UserResponseDto signUp(SignUpRequest request, Role role) {
 
         String email = request.email();
         String username = request.username();
@@ -61,9 +59,7 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(request.password());
         User user = UserMapper.toEntity(request, encodedPassword, role);
-        if (profileImage != null) {
-            user.setProfileImage(fileService.upload(profileImage));
-        }
+
         userRepository.save(user);
 
         return UserMapper.toDto(user);

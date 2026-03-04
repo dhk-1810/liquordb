@@ -37,8 +37,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private File profileImage; // TODO S3에 저장
+    private String profileImageKey;
 
     // 활동 제한 해제 일시
     @Column
@@ -64,24 +63,22 @@ public class User {
     }
 
     @Builder
-    private User(String email, String username, String password, String socialProvider, Role role, File profileImage) {
+    private User(String email, String username, String password, String socialProvider, Role role) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.socialProvider = socialProvider;
         this.role = role;
         this.status = UserStatus.ACTIVE;
-        this.profileImage = profileImage;
     }
 
-    public static User create(String email, String username, String password, String socialProvider, Role role, File profileImage){
+    public static User create(String email, String username, String password, String socialProvider, Role role){
         return User.builder()
                 .email(email)
                 .username(username)
                 .password(password)
                 .socialProvider(socialProvider)
                 .role(role)
-                .profileImage(profileImage)
                 .build();
     }
 
@@ -102,12 +99,12 @@ public class User {
         this.password = newPassword;
     }
 
-    public void setProfileImage(File profileImage) {
-        this.profileImage = profileImage;
+    public void setProfileImage(String profileImageKey) {
+        this.profileImageKey = profileImageKey;
     }
 
     public void deleteProfileImage() {
-        this.profileImage = null;
+        this.profileImageKey = null;
     }
 
     public void ban(){

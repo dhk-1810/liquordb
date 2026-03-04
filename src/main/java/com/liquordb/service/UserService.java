@@ -1,5 +1,6 @@
 package com.liquordb.service;
 
+import com.liquordb.dto.FileResponseDto;
 import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
@@ -69,7 +70,7 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
-    public void update(UUID userId, UserUpdateRequest request, MultipartFile newProfileImage) {
+    public void update(UUID userId, UserUpdateRequest request, MultipartFile profileImage) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -89,13 +90,13 @@ public class UserService {
         }
 
         if (request.deleteProfileImage()) {
-//            fileService.delete(user.getProfileImage().getId());
+            // TODO fileService.delete(user.getProfileImageKey());
             user.setProfileImage(null);
         }
 
-        if (newProfileImage != null && !newProfileImage.isEmpty()) {
-            File profileImage = fileService.upload(newProfileImage);
-            user.setProfileImage(profileImage);
+        if (profileImage != null && !profileImage.isEmpty()) {
+            FileResponseDto file = fileService.upload(profileImage, File.FileType.PROFILE);
+            user.setProfileImage(file.key());
         }
 
         userRepository.save(user);

@@ -20,7 +20,7 @@ public class File {
 
     private String key;
 
-    private String presignedUrl;
+    private String name;
 
     @Enumerated(EnumType.STRING)
     private FileType type;
@@ -31,13 +31,13 @@ public class File {
         REVIEW
     }
 
-    private File(String key, String presignedUrl, FileType type) {
+    private File(String key, String name, FileType type) {
         this.key = key;
-        this.presignedUrl = presignedUrl;
+        this.name = name;
         this.type = type;
     }
 
-    public static File create(String filePath, String fileName, FileType fileType) {
-        return new File(filePath, fileName, fileType);
+    public static File create(String key, String name, FileType type) {
+        return new File(key, name, type);
     }
 }

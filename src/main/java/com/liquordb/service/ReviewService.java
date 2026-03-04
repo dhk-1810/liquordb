@@ -38,7 +38,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
-    private final FileService fileService;
+    private final FileService fileService; // 단방향 참조
 
     // 리뷰 등록
     @Transactional
@@ -53,7 +53,7 @@ public class ReviewService {
         Review review = ReviewMapper.toEntity(request, liquor, user);
 
         images.forEach(file ->
-            review.getImages().add(fileService.upload(file))
+            review.getImageKeys().add(fileService.upload(file, File.FileType.REVIEW).key())
         );
 
         liquor.updateAverageRating(request.rating());
@@ -132,9 +132,6 @@ public class ReviewService {
         // 공통 필드 수정
         review.update(request);
 
-        removeImage(review, request.imageIdsToDelete());
-        addImage(review, newImages);
-
         // 주종별 디테일 수정
         reviewDetailUpdater.updateDetail(review.getDetail(), request.detailRequest());
 
@@ -174,25 +171,6 @@ public class ReviewService {
         }
 
         return CursorPageResponse.from(response, nextCursor);
-    }
-
-    public void addImage(Review review, List<MultipartFile> images) {
-        if (images == null || images.isEmpty()) return;
-        images.forEach(image ->
-                review.getImages().add(fileService.upload(image))
-        );
-    }
-
-    public void removeImage(Review review, List<Long> imageIdsToDelete) {
-        if (imageIdsToDelete == null || imageIdsToDelete.isEmpty()) return;
-
-        review.getImages().removeIf(image -> {
-            if (imageIdsToDelete.contains(image.getFilePath())) {
-//                fileService.delete(image.getId()); // 실제 파일 삭제
-                return true;
-            }
-            return false;
-        });
     }
 
     /**

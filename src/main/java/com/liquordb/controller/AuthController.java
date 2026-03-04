@@ -24,11 +24,8 @@ public class AuthController {
 
     // 회원가입
     @PostMapping(name = "/sign-up",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<UserResponseDto> register(
-            @RequestBody SignUpRequest dto,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
-    ) {
-        return ResponseEntity.ok(authService.signUp(dto, profileImage, Role.USER));
+    public ResponseEntity<UserResponseDto> register(@RequestBody SignUpRequest request) {
+        return ResponseEntity.ok(authService.signUp(request, Role.USER));
     }
 
     // 로그인

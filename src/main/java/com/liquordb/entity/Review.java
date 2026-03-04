@@ -43,8 +43,7 @@ public class Review extends LikeableEntity {
     @OneToOne(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private ReviewDetail detail;
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<File> images;
+    private List<String> imageKeys;
 
     @Column(nullable = false)
     private long commentCount;
@@ -123,7 +122,7 @@ public class Review extends LikeableEntity {
     public void softDelete(LocalDateTime deletedAt) {
         if (this.status == ReviewStatus.DELETED) return;
         this.status = ReviewStatus.DELETED;
-        this.deletedAt = LocalDateTime.now();
+        this.deletedAt = deletedAt;
         // 연관 댓글 삭제는 서비스단에서 수행.
     }
 

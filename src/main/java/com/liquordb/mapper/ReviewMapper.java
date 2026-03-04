@@ -21,7 +21,7 @@ public class ReviewMapper {
 
     public static ReviewResponseDto toDto(Review review) {
         List<String> imagePaths = review.getImages() != null
-                ? review.getImages().stream().map(File::getFilePath).toList()
+                ? review.getImages().stream().map(File::getKey).toList()
                 : Collections.emptyList();
 
         return ReviewResponseDto.builder()

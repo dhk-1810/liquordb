@@ -1,18 +1,23 @@
 package com.liquordb.service;
 
+import com.liquordb.dto.FileResponseDto;
 import com.liquordb.entity.File;
 import com.liquordb.exception.file.FileNotFoundException;
 import com.liquordb.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -20,79 +25,53 @@ import java.util.UUID;
 @Slf4j
 public class FileService {
 
+    private final S3Service s3Service; // 단방향 참조
     private final FileRepository fileRepository;
 
     @Transactional
-    public File upload(MultipartFile file) {
+    public FileResponseDto upload(MultipartFile file, File.FileType type) {
 
         if (file == null || file.isEmpty()) {
             throw new FileNotFoundException();
         }
 
+        if (file.getSize() <= 0 || file.getSize() > 1024 * 30) {
+            throw new RuntimeException("File size must be between 1 and 30MB");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = extractExtension(originalFilename);
+
+        String key = generateS3Key(type, extension);
+
         try {
-            // 디렉토리 없으면 생성
-            // 프로젝트 루트 아래 uploads 폴더에 저장
-            String uploadDir = "images/";
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            // 파일명 생성 (UUID + 원본 확장자)
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-
-            String newFileName = UUID.randomUUID() + extension;
-            Path filePath = uploadPath.resolve(newFileName);
-
-            // 파일 로컬 저장
-            file.transferTo(filePath.toFile());
-
-            // DB에 메타데이터 저장
-            File metadata = File.builder()
-                    .filePath(uploadDir + newFileName)
-                    .fileName(originalFilename)
-                    .fileExtension(extension.replace(".", ""))
-                    .size(file.getSize())
-                    .build();
-
-            fileRepository.save(metadata);
-
-            // 메타데이터 객체 반환
-            return metadata;
-
+            s3Service.uploadFile(key, file);
         } catch (IOException e) {
             log.error("파일 업로드 실패", e);
             throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.");
         }
+
+        File metadata = File.create(key, file.getName(), type);
+        fileRepository.save(metadata);
+
+        return FileResponseDto.toDto(metadata);
     }
 
-    @Transactional(readOnly = true)
-    public File findImageById(Long id) {
-        return fileRepository.findById(id)
-                .orElseThrow(() -> new FileNotFoundException(id));
+    // Key 예시: reviews/2026/03/04/abc-123-def.jpg
+    private String generateS3Key(File.FileType type, String extension) {
+        String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        return String.format("%s/%s/%s%s",
+                type.name().toLowerCase(),
+                datePath,
+                UUID.randomUUID(),
+                extension
+        );
     }
 
-//    @Transactional
-//    public void delete(Long id) {
-//
-//        File image = fileRepository.findById(id)
-//                .orElseThrow(() -> new FileNotFoundException(id));
-//
-//
-//        // 로컬 파일 삭제
-//        Path filePath = Paths.get(uploadDir).resolve(image.getFilePath()).normalize();
-//        try{
-//            Files.delete(filePath);
-//        } catch (IOException e){
-//            throw new RuntimeException("파일 삭제 실패: " + e.getMessage(), e);
-//        }
-//
-//        // 메타데이터 삭제
-//        fileRepository.delete(image);
-//    }
+    private String extractExtension(String filename) {
+        if (filename == null || !filename.contains(".")) return "";
+        return filename.substring(filename.lastIndexOf("."));
+    }
 
+    // TODO 삭제?
 }
