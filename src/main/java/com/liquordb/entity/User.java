@@ -94,6 +94,10 @@ public class User {
         }
     }
 
+    public void updateRole(Role role){
+        this.role = role;
+    }
+
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }

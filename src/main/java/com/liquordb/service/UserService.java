@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
+import com.liquordb.enums.Role;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
@@ -134,9 +135,16 @@ public class UserService {
      * 관리자용 메서드
      */
 
-    // TODO 사용자 권한변경
+    @Transactional
+    public void updateRole(Role role, UUID userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        user.updateRole(role);
+        userRepository.save(user);
+    }
 
     // 유저 조회 - 전체 또는 검색
+    @Transactional(readOnly = true)
     public PageResponse<UserResponseDto> getAll(UserListGetRequest request) {
 
         UserStatus status = request.status() == null
