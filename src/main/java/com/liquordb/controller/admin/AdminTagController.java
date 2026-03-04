@@ -1,5 +1,7 @@
 package com.liquordb.controller.admin;
 
+import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.tag.TagListGetRequest;
 import com.liquordb.dto.tag.TagRequest;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.service.TagService;
@@ -12,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/admin/tags")
 @RequiredArgsConstructor
+@RestController
+@RequestMapping("/admin/tags")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminTagController {
 
     private final TagService tagService;
@@ -28,10 +30,9 @@ public class AdminTagController {
     }
 
     // 태그 전체 조회
-    // TODO 페이지네이션
     @GetMapping
-    public ResponseEntity<List<TagResponseDto>> getAll() {
-        List<TagResponseDto> response = tagService.findAll();
+    public ResponseEntity<PageResponse<TagResponseDto>> getAll(TagListGetRequest request) {
+        PageResponse<TagResponseDto> response = tagService.getAll(request);
         return ResponseEntity.ok().body(response);
     }
 

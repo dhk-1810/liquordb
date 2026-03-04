@@ -9,6 +9,7 @@ import com.liquordb.mapper.LiquorTagMapper;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.*;
 import com.liquordb.repository.liquor.LiquorRepository;
+import com.liquordb.repository.tag.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

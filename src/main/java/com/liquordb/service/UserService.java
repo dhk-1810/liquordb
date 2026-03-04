@@ -156,7 +156,7 @@ public class UserService {
                 ? 50
                 : request.limit();
         boolean descending = request.sortDirection() == SortDirection.DESC;
-        UserSearchCondition condition = new UserSearchCondition(request.username(), request.username(), status, page, limit, descending);
+        UserSearchCondition condition = new UserSearchCondition(request.username(), request.email(), status, page, limit, descending);
 
         Page<UserResponseDto> data = userRepository.findAll(condition)
                 .map(UserMapper::toDto);

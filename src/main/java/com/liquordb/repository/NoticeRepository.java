@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
-    Page<Notice> findAllByIsDeletedFalse(Pageable pageable);
+    Page<Notice> findAllByIsDeletedFalse(Pageable pageable); // TODO
 
 }
