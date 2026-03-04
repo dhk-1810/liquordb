@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class LiquorMapper {
 
-    public static LiquorResponseDto toDto(Liquor liquor, Set<TagResponseDto> tags, boolean likedByMe) {
+    public static LiquorResponseDto toDto(Liquor liquor, String presignedUrl, Set<TagResponseDto> tags, boolean likedByMe) {
 
         return LiquorResponseDto.builder()
                 .id(liquor.getId())
@@ -21,7 +21,7 @@ public class LiquorMapper {
                 .manufacturer(liquor.getManufacturer())
                 .abv(liquor.getAbv())
                 .isDiscontinued(liquor.isDiscontinued())
-                .imageUrl(liquor.getImageUrl())
+                .presignedUrl(presignedUrl)
 
                 .averageRating(liquor.getAverageRating())
                 .reviewCount(liquor.getReviewCount())
@@ -32,11 +32,11 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static LiquorSummaryDto toSummaryDto(Liquor liquor, boolean likedByMe, long reviewCount, long likeCount) {
+    public static LiquorSummaryDto toSummaryDto(Liquor liquor, String presignedUrl, boolean likedByMe, long reviewCount, long likeCount) {
         return LiquorSummaryDto.builder()
                 .id(liquor.getId())
                 .name(liquor.getName())
-                .imageUrl(liquor.getImageUrl())
+                .presignedUrl(presignedUrl)
                 .averageRating(liquor.getAverageRating())
                 .reviewCount(reviewCount)
                 .likeCount(likeCount)
@@ -51,7 +51,7 @@ public class LiquorMapper {
                 request.subcategory(),
                 request.country(),
                 request.manufacturer(),
-                request.abv(),
-                request.imageUrl());
+                request.abv()
+        );
     }
 }

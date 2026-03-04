@@ -35,6 +35,7 @@ public class UserService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final FileService fileService;
+    private final S3Service s3Service;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -58,8 +59,10 @@ public class UserService {
 
         // 등록한(=선호하는) 태그 목록
 
+        String presignedUrl = s3Service.createPresignedUrl(user.getProfileImageKey());
         return UserMapper.toMyPageDto(
                 user,
+                presignedUrl,
                 reviewCount,
                 commentCount,
                 likedLiquorCount,

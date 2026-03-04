@@ -37,6 +37,7 @@ public class LiquorService {
     private final ReviewRepository reviewRepository;
     private final LiquorLikeRepository liquorLikeRepository;
     private final LiquorTagRepository liquorTagRepository;
+    private final S3Service s3Service;
 
     // 주류 목록 조회 (전체 조회 또는 검색어, 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
@@ -69,7 +70,8 @@ public class LiquorService {
 
         Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
-            return LiquorMapper.toSummaryDto(liquor, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
+            String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+            return LiquorMapper.toSummaryDto(liquor, presignedUrl, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
         });
 
         Object nextCursor = null;
@@ -106,8 +108,8 @@ public class LiquorService {
     public LiquorResponseDto create(LiquorRequest request) {
         Liquor liquor = LiquorMapper.toEntity(request);
         liquorRepository.save(liquor);
-        return LiquorMapper.toDto(liquor, null, false);
-        // TODO 이미지
+        String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+        return LiquorMapper.toDto(liquor, presignedUrl, null, false);
     }
 
     // 주류 수정

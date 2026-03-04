@@ -7,9 +7,11 @@ import com.liquordb.service.LiquorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
@@ -20,16 +22,23 @@ public class AdminLiquorController {
     private final LiquorService liquorService;
 
     // 주류 추가
-    @PostMapping
-    public ResponseEntity<LiquorResponseDto> createLiquor(@RequestBody @Valid LiquorRequest request) {
-        liquorService.create(request);
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<LiquorResponseDto> createLiquor(
+            @RequestPart @Valid LiquorRequest request,
+            @RequestPart MultipartFile image
+    ) {
+        liquorService.create(request, image);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 주류 수정
-    @PatchMapping("/{liquorId}")
-    public ResponseEntity<LiquorResponseDto> updateLiquor(@PathVariable Long liquorId, @RequestBody LiquorUpdateRequest request) {
-        liquorService.update(liquorId, request);
+    @PatchMapping(path = "/{liquorId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<LiquorResponseDto> updateLiquor(
+            @PathVariable Long liquorId,
+            @RequestPart LiquorUpdateRequest request,
+            @RequestPart MultipartFile image
+    ) {
+        liquorService.update(liquorId, request, image);
         return ResponseEntity.ok().build();
     }
 

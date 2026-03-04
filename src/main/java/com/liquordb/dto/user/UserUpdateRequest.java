@@ -12,7 +12,7 @@ public record UserUpdateRequest(
 
         String username,
 
-        boolean deleteProfileImage
+        Boolean deleteProfileImage
 ){
 
 }

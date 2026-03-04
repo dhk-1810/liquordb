@@ -46,7 +46,7 @@ public class Liquor extends LikeableEntity {
     @Column(nullable = false)
     private boolean isDiscontinued; // 단종 여부
 
-    private String imageUrl; // 대표 이미지 사진 저장경로
+    private String imageKey; // 대표 이미지 사진 저장경로
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -69,7 +69,7 @@ public class Liquor extends LikeableEntity {
 
     @Builder
     private Liquor(String name, LiquorCategory category, LiquorSubcategory subcategory,
-                   String country, String manufacturer, Double abv, String imageUrl) {
+                   String country, String manufacturer, Double abv, String imageKey) {
         this.isDeleted = false;
         this.name = name;
         this.category = category;
@@ -79,11 +79,11 @@ public class Liquor extends LikeableEntity {
         this.abv = abv;
         this.averageRating = 0.0;
         this.reviewCount = 0L;
-        this.imageUrl = imageUrl;
+        this.imageKey = imageKey;
     }
 
     public static Liquor create(String name, LiquorCategory category, LiquorSubcategory subcategory,
-                                String country, String manufacturer, Double abv, String imageUrl) {
+                                String country, String manufacturer, Double abv) {
         return Liquor.builder()
                 .name(name)
                 .category(category)
@@ -91,7 +91,6 @@ public class Liquor extends LikeableEntity {
                 .country(country)
                 .manufacturer(manufacturer)
                 .abv(abv)
-                .imageUrl(imageUrl)
                 .build();
     }
 
@@ -100,8 +99,16 @@ public class Liquor extends LikeableEntity {
             this.isDiscontinued = discontinued;
         }
         if (deleteImage == true) {
-            this.imageUrl = null;
+            this.imageKey = null;
         }
+    }
+
+    public void updateImage(String imageKey) {
+        this.imageKey = imageKey;
+    }
+
+    public void deleteImage() {
+        this.imageKey = null;
     }
 
     public void updateAverageRating(double newRating) {
