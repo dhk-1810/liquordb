@@ -1,7 +1,9 @@
 package com.liquordb.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 파일 메타데이터 엔터티

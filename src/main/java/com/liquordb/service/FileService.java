@@ -5,7 +5,6 @@ import com.liquordb.exception.file.FileNotFoundException;
 import com.liquordb.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,11 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-
-/**
- * 실제 서비스에서 AWS S3 같은 클라우드 스토리지를 사용하려면 별도 SDK 연동 필요.
- * 업로드된 파일에 대한 접근 경로나 URL 매핑도 따로 설정해야 함.
- */
 
 @RequiredArgsConstructor
 @Service
