@@ -7,7 +7,7 @@ import com.liquordb.exception.user.BannedUserException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.exception.user.WithdrawnUserException;
 import com.liquordb.mapper.UserMapper;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

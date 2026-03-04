@@ -8,7 +8,7 @@ import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.entity.Liquor;
 import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.entity.User;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;

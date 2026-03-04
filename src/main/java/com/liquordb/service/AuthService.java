@@ -6,7 +6,7 @@ import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
 import com.liquordb.mapper.UserMapper;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import com.liquordb.security.JwtInformation;
 import com.liquordb.security.JwtRegistry;
 import com.liquordb.security.JwtTokenProvider;

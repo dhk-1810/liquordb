@@ -6,7 +6,7 @@ import com.liquordb.event.CommentLikeEvent;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.repository.comment.CommentRepository;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;

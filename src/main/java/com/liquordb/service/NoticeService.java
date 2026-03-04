@@ -10,7 +10,7 @@ import com.liquordb.exception.notice.NoticeNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.NoticeMapper;
 import com.liquordb.repository.NoticeRepository;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

@@ -6,7 +6,7 @@ import com.liquordb.event.ReviewLikeEvent;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.repository.review.ReviewRepository;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;

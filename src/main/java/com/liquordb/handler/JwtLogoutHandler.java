@@ -1,6 +1,6 @@
 package com.liquordb.handler;
 
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import com.liquordb.security.JwtRegistry;
 import com.liquordb.security.JwtTokenProvider;
 import com.liquordb.security.TokenUtil;

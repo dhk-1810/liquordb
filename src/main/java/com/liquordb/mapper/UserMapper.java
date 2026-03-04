@@ -1,13 +1,10 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.dto.user.SignUpRequest;
 import com.liquordb.dto.user.UserMyPageDto;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
 import com.liquordb.enums.Role;
-
-import java.util.List;
 
 public class UserMapper {
 

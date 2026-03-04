@@ -1,19 +1,22 @@
 package com.liquordb.controller.admin;
 
+import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.user.UserListGetRequest;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/admin/users")
 @RequiredArgsConstructor
+@RestController
+@RequestMapping("/admin/users")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
 
     private final UserService userService;
@@ -22,11 +25,10 @@ public class AdminUserController {
 
     // 유저 전체 조회 및 검색
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> userList(
-            @RequestParam(required = false) String keyword, // 닉네임 또는 이메일 검색어
-            @RequestParam(required = false) UserStatus status
+    public ResponseEntity<PageResponse<UserResponseDto>> userList(
+            @ModelAttribute UserListGetRequest request
     ) {
-        List<UserResponseDto> users = userService.getUsers(keyword, status);
+        PageResponse<UserResponseDto> users = userService.getAll(request);
         return ResponseEntity.ok(users);
     }
 

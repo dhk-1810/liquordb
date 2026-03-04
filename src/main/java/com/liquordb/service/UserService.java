@@ -1,15 +1,21 @@
 package com.liquordb.service;
 
+import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.*;
+import com.liquordb.enums.SortDirection;
 import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.user.*;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
 
 import com.liquordb.repository.comment.CommentRepository;
+import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import com.liquordb.repository.review.ReviewRepository;
+import com.liquordb.repository.user.UserRepository;
+import com.liquordb.repository.user.UserSearchCondition;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,20 +134,27 @@ public class UserService {
      * 관리자용 메서드
      */
 
+    // TODO 사용자 권한변경
+
     // 유저 조회 - 전체 또는 검색
-    // TODO 페이지네이션
-    public List<UserResponseDto> getUsers(String keyword, UserStatus status) {
-        if ((keyword == null || keyword.isBlank()) && status == null) {
-            return userRepository.findAll().stream()
-                    .map(UserMapper::toDto)
-                    .toList();
-        }
+    public PageResponse<UserResponseDto> getAll(UserListGetRequest request) {
 
-        // 조건 검색이 가능하도록 사용자 정의 메서드 또는 Specification 사용
-        return userRepository.search(keyword, status).stream()
-                .map(UserMapper::toDto)
-                .toList();
+        UserStatus status = request.status() == null
+                ? UserStatus.ACTIVE
+                : request.status();
+        int page = request.page() == null
+                ? 0
+                : request.page();
+        int limit = request.limit() == null
+                ? 50
+                : request.limit();
+        boolean descending = request.sortDirection() == SortDirection.DESC;
+        UserSearchCondition condition = new UserSearchCondition(request.username(), request.username(), status, page, limit, descending);
+
+        Page<UserResponseDto> data = userRepository.findAll(condition)
+                .map(UserMapper::toDto);
+
+        return PageResponse.from(data);
     }
-
 }
 

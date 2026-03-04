@@ -23,7 +23,7 @@ import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.entity.Review;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.entity.User;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;

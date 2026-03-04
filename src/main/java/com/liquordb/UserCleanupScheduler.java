@@ -2,7 +2,7 @@ package com.liquordb;
 
 import com.liquordb.entity.User;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.repository.UserRepository;
+import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class UserCleanupScheduler {
 
     private final UserRepository userRepository;
