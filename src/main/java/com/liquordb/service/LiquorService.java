@@ -107,6 +107,7 @@ public class LiquorService {
         Liquor liquor = LiquorMapper.toEntity(request);
         liquorRepository.save(liquor);
         return LiquorMapper.toDto(liquor, null, false);
+        // TODO 이미지
     }
 
     // 주류 수정

@@ -1,6 +1,7 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
+import com.liquordb.dto.FileResponseDto;
 import com.liquordb.dto.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.*;
@@ -24,8 +25,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +42,7 @@ public class ReviewService {
     private final CommentRepository commentRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService; // 단방향 참조
+    private final S3Service s3Service; // 단방향 참조
 
     // 리뷰 등록
     @Transactional
@@ -52,22 +56,32 @@ public class ReviewService {
 
         Review review = ReviewMapper.toEntity(request, liquor, user);
 
-        images.forEach(file ->
-            review.getImageKeys().add(fileService.upload(file, File.FileType.REVIEW).key())
-        );
-
         liquor.updateAverageRating(request.rating());
 
+        List<String> presignedUrls = new ArrayList<>();
+        images.forEach(file -> {
+                    FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW);
+                    review.getImageKeys().add(dto.key());
+                    presignedUrls.add(s3Service.createPresignedUrl(dto.key()));
+                }
+        );
+
         reviewRepository.save(review);
-        return ReviewMapper.toDto(review);
+        return ReviewMapper.toDto(review, presignedUrls);
     }
 
     // 리뷰 단건 조회
     @Transactional(readOnly = true)
     public ReviewResponseDto get(Long id) {
-        return reviewRepository.findById(id)
-                .map(ReviewMapper::toDto)
+
+        Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ReviewNotFoundException(id));
+
+        List<String> presignedUrls = review.getImageKeys().stream()
+                .map(s3Service::createPresignedUrl)
+                .toList();
+
+        return ReviewMapper.toDto(review, presignedUrls);
     }
 
     // 주류별 리뷰 목록 조회
@@ -134,8 +148,12 @@ public class ReviewService {
 
         // 주종별 디테일 수정
         reviewDetailUpdater.updateDetail(review.getDetail(), request.detailRequest());
+        reviewRepository.save(review);
 
-        return ReviewMapper.toDto(reviewRepository.save(review));
+        List<String> presignedUrls = review.getImageKeys().stream()
+                .map(s3Service::createPresignedUrl)
+                .toList();
+        return ReviewMapper.toDto(review, presignedUrls);
     }
 
     // 리뷰 삭제 (Soft Delete)

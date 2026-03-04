@@ -8,17 +8,15 @@ import java.util.UUID;
 
 @Builder
 public record ReviewResponseDto (
-
         Long id,
         UUID userId,
         Long liquorId,
         int rating,
         String title,
         String content,
-        List<String> imagePaths,
+        List<String> presignedUrls,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-
 ){
 
 }

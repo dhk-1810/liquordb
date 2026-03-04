@@ -19,10 +19,7 @@ public class ReviewMapper {
         return review;
     }
 
-    public static ReviewResponseDto toDto(Review review) {
-        List<String> imagePaths = review.getImages() != null
-                ? review.getImages().stream().map(File::getKey).toList()
-                : Collections.emptyList();
+    public static ReviewResponseDto toDto(Review review, List<String> presignedUrls) {
 
         return ReviewResponseDto.builder()
                 .id(review.getId())
@@ -30,7 +27,7 @@ public class ReviewMapper {
                 .liquorId(review.getLiquor().getId())
                 .content(review.getContent())
                 .rating(review.getRating())
-                .imagePaths(imagePaths)
+                .presignedUrls(presignedUrls)
                 .build();
     }
 

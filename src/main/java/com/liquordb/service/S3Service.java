@@ -17,13 +17,13 @@ import java.time.Duration;
 @Service
 public class S3Service {
 
-    private final S3Properties properties;
+    private final S3Properties s3Properties;
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
     public void uploadFile(String key, MultipartFile file) throws IOException {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(properties.bucketName())
+                .bucket(s3Properties.bucketName())
                 .key(key)
                 .contentType(file.getContentType())
                 .contentLength(file.getSize())
@@ -32,10 +32,10 @@ public class S3Service {
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
     }
 
-    public String createPresignedUrl(String key, Duration timeout) {
+    public String createPresignedUrl(String key) {
         GetObjectPresignRequest presignedRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(timeout)
-                .getObjectRequest(builder -> builder.bucket(properties.bucketName()).key(key))
+                .signatureDuration(Duration.ofMinutes(s3Properties.presignedUrlExpiration()))
+                .getObjectRequest(builder -> builder.bucket(s3Properties.bucketName()).key(key))
                 .build();
         return s3Presigner.presignGetObject(presignedRequest).url().toString();
     }
