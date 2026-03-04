@@ -44,14 +44,15 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static Liquor toEntity(LiquorRequest request) {
+    public static Liquor toEntity(LiquorRequest request, String imageKey) {
         return Liquor.create(
                 request.name(),
                 request.category(),
                 request.subcategory(),
                 request.country(),
                 request.manufacturer(),
-                request.abv()
+                request.abv(),
+                imageKey
         );
     }
 }

@@ -25,7 +25,7 @@ public class AdminLiquorController {
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<LiquorResponseDto> createLiquor(
             @RequestPart @Valid LiquorRequest request,
-            @RequestPart MultipartFile image
+            @RequestPart(required = false) MultipartFile image
     ) {
         liquorService.create(request, image);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -36,7 +36,7 @@ public class AdminLiquorController {
     public ResponseEntity<LiquorResponseDto> updateLiquor(
             @PathVariable Long liquorId,
             @RequestPart LiquorUpdateRequest request,
-            @RequestPart MultipartFile image
+            @RequestPart(required = false) MultipartFile image
     ) {
         liquorService.update(liquorId, request, image);
         return ResponseEntity.ok().build();

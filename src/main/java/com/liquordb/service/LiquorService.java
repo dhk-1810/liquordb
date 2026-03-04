@@ -1,9 +1,11 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
+import com.liquordb.dto.FileResponseDto;
 import com.liquordb.dto.liquor.*;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.Comment;
+import com.liquordb.entity.File;
 import com.liquordb.entity.Review;
 import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.enums.SortDirection;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -37,7 +40,8 @@ public class LiquorService {
     private final ReviewRepository reviewRepository;
     private final LiquorLikeRepository liquorLikeRepository;
     private final LiquorTagRepository liquorTagRepository;
-    private final S3Service s3Service;
+    private final FileService fileService; // 단방향 참조
+    private final S3Service s3Service; // 단방향 참조
 
     // 주류 목록 조회 (전체 조회 또는 검색어, 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
@@ -95,8 +99,8 @@ public class LiquorService {
                 .collect(Collectors.toSet());
 
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
-
-        return LiquorMapper.toDto(liquor, tags, likedByMe);
+        String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+        return LiquorMapper.toDto(liquor, presignedUrl, tags, likedByMe);
     }
 
     /**
@@ -105,21 +109,31 @@ public class LiquorService {
 
     // 주류 등록
     @Transactional
-    public LiquorResponseDto create(LiquorRequest request) {
-        Liquor liquor = LiquorMapper.toEntity(request);
+    public LiquorResponseDto create(LiquorRequest request, MultipartFile file) {
+        FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR);
+        Liquor liquor = LiquorMapper.toEntity(request, fileResponseDto.key());
         liquorRepository.save(liquor);
+
         String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
         return LiquorMapper.toDto(liquor, presignedUrl, null, false);
     }
 
     // 주류 수정
     @Transactional
-    public LiquorResponseDto update(Long id, LiquorUpdateRequest request) {
+    public LiquorResponseDto update(Long id, LiquorUpdateRequest request, MultipartFile file) {
+
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
+
+        if (!file.isEmpty()) {
+            FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR);
+            liquor.updateImage(fileResponseDto.key());
+        }
         liquor.update(request.isDiscontinued(), request.deleteImage());
+
         liquorRepository.save(liquor);
-        return LiquorMapper.toDto(liquor, null, false);
+        String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+        return LiquorMapper.toDto(liquor, presignedUrl, null, false);
     }
 
     // 주류 삭제 (Soft Delete)

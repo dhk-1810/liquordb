@@ -15,8 +15,7 @@ public record LiquorRequest(
         @NotBlank String country,
         @NotBlank String manufacturer,
         @NotNull Double abv,
-        @NotNull Boolean isDiscontinued, // 단종 여부
-        String imageUrl
+        @NotNull Boolean isDiscontinued // 단종 여부
 ) {
 
 }

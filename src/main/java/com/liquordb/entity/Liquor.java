@@ -83,7 +83,7 @@ public class Liquor extends LikeableEntity {
     }
 
     public static Liquor create(String name, LiquorCategory category, LiquorSubcategory subcategory,
-                                String country, String manufacturer, Double abv) {
+                                String country, String manufacturer, Double abv, String imageKey) {
         return Liquor.builder()
                 .name(name)
                 .category(category)
@@ -91,6 +91,7 @@ public class Liquor extends LikeableEntity {
                 .country(country)
                 .manufacturer(manufacturer)
                 .abv(abv)
+                .imageKey(imageKey)
                 .build();
     }
 
