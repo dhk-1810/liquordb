@@ -57,9 +57,9 @@ public class UserService {
         long likedReviewCount = reviewLikeRepository.countByUser_IdAndReviewStatus(userId, Review.ReviewStatus.ACTIVE);
         long likedCommentCount = commentLikeRepository.countByUser_IdAndCommentStatus(userId, Comment.CommentStatus.ACTIVE);
 
-        // 등록한(=선호하는) 태그 목록
-
-        String presignedUrl = s3Service.createPresignedUrl(user.getProfileImageKey());
+        String presignedUrl = user.getProfileImageKey() != null
+                ? s3Service.createPresignedUrl(user.getProfileImageKey())
+                : null;
         return UserMapper.toMyPageDto(
                 user,
                 presignedUrl,

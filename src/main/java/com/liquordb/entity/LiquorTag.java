@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 /**
  * 주류-태그 간 다대다 관계 처리 위한 클래스
  */
-@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 @Table(name = "liquor_tags")
 public class LiquorTag {
 

@@ -12,7 +12,7 @@ public record UserResponseDto (
         UUID id,
         String email,
         String username,
-        String profileImageUrl,
+        String presignedUrl,
         LocalDateTime createdAt,
         UserStatus status,
         Role role
