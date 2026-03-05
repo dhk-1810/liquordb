@@ -43,6 +43,9 @@ public class Review extends LikeableEntity {
     @OneToOne(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private ReviewDetail detail;
 
+    @OneToMany(mappedBy = "review_id")
+    private List<ReviewImageKey> imageKeys;
+
     @Column(nullable = false)
     private long commentCount;
 

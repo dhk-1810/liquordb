@@ -15,4 +15,13 @@ public class ReviewImageKey {
     @EmbeddedId
     private ReviewImageKeyId id;
 
+    @MapsId("reviewId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id")
+    private Review review;
+
+    public ReviewImageKey(Review review, String imageKey) {
+        this.id = new ReviewImageKeyId(review.getId(), imageKey);
+        this.review = review;
+    }
 }

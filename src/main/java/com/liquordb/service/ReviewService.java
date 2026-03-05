@@ -6,6 +6,7 @@ import com.liquordb.dto.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.*;
 import com.liquordb.entity.*;
+import com.liquordb.entity.id.ReviewImageKeyId;
 import com.liquordb.enums.SortReviewBy;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -15,6 +16,7 @@ import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
+import com.liquordb.repository.review.ReviewImageKeyRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.review.condition.ReviewListGetCondition;
 import com.liquordb.repository.review.condition.ReviewSearchCondition;
@@ -39,6 +41,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final LiquorRepository liquorRepository;
     private final ReviewRepository reviewRepository;
+    private final ReviewImageKeyRepository reviewImageKeyRepository;
     private final CommentRepository commentRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService; // 단방향 참조
@@ -59,13 +62,14 @@ public class ReviewService {
         liquor.updateAverageRating(request.rating());
 
         List<String> presignedUrls = new ArrayList<>();
+        List<ReviewImageKey> keys = new ArrayList<>();
         images.forEach(file -> {
                     FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW);
-                    review.getImageKeys().add(dto.key());
+                    keys.add(new ReviewImageKey(review, dto.key()));
                     presignedUrls.add(s3Service.createPresignedUrl(dto.key()));
                 }
         );
-
+        reviewImageKeyRepository.saveAll(keys);
         reviewRepository.save(review);
         return ReviewMapper.toDto(review, presignedUrls);
     }
@@ -74,13 +78,10 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public ReviewResponseDto get(Long id) {
 
-        Review review = reviewRepository.findById(id)
+        Review review = reviewRepository.findByIdWithImageKeys(id)
                 .orElseThrow(() -> new ReviewNotFoundException(id));
 
-        List<String> presignedUrls = review.getImageKeys().stream()
-                .map(s3Service::createPresignedUrl)
-                .toList();
-
+        List<String> presignedUrls = getPresignedUrl(review);
         return ReviewMapper.toDto(review, presignedUrls);
     }
 
@@ -150,9 +151,7 @@ public class ReviewService {
         reviewDetailUpdater.updateDetail(review.getDetail(), request.detailRequest());
         reviewRepository.save(review);
 
-        List<String> presignedUrls = review.getImageKeys().stream()
-                .map(s3Service::createPresignedUrl)
-                .toList();
+        List<String> presignedUrls = getPresignedUrl(review);
         return ReviewMapper.toDto(review, presignedUrls);
     }
 
@@ -178,9 +177,15 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
+    private List<String> getPresignedUrl(Review review) {
+        return review.getImageKeys().stream()
+                .map(reviewImageKey-> s3Service.createPresignedUrl(reviewImageKey.getId().toString()))
+                .toList();
+    }
+
     // 페이지네이션 헬퍼 메서드
     private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews) {
-        Slice<ReviewResponseDto> response = reviews.map(ReviewMapper::toDto);
+        Slice<ReviewResponseDto> response = reviews.map(r -> ReviewMapper.toDto(r, getPresignedUrl(r)));
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -200,7 +205,7 @@ public class ReviewService {
     public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
         ReviewSearchCondition condition = getSearchCondition(request);
         Page<ReviewResponseDto> page = reviewRepository.findAll(condition)
-                .map(ReviewMapper::toDto);
+                .map(r -> ReviewMapper.toDto(r, getPresignedUrl(r)));
         return PageResponse.from(page);
     }
 
