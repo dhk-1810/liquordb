@@ -24,15 +24,6 @@ public class LiquorTagService {
     private final TagRepository tagRepository;
     private final LiquorTagRepository liquorTagRepository;
 
-    // 특정 주류에 연결된 태그 이름 목록 반환
-    // TODO 주류 단건조회로 이동, FETCH JOIN?
-    @Transactional(readOnly = true)
-    public List<TagResponseDto> getTagsByLiquorId(Long liquorId) {
-        return liquorTagRepository.findTagsByLiquorId(liquorId).stream()
-                .map(TagMapper::toDto)
-                .toList();
-    }
-
     /**
      * 관리자용
      */
@@ -50,4 +41,6 @@ public class LiquorTagService {
 
         return TagMapper.toDto(liquorTag);
     }
+
+    // TODO 삭제
 }

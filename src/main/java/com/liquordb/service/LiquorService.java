@@ -91,13 +91,12 @@ public class LiquorService {
     @Transactional(readOnly = true)
     public LiquorResponseDto getLiquorDetail(Long liquorId, UUID userId) {
 
-        Liquor liquor = liquorRepository.findByIdAndIsDeleted(liquorId, false)
+        Liquor liquor = liquorRepository.findByIdAndIsDeletedWithTags(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
-        Set<TagResponseDto> tags = liquorTagRepository.findAllByLiquor_Id(liquorId).stream()
-                .map(liquorTag -> TagMapper.toDto(liquorTag.getTag()))
+        Set<TagResponseDto> tags = liquor.getLiquorTags().stream()
+                .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
-
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
         String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
         return LiquorMapper.toDto(liquor, presignedUrl, tags, likedByMe);

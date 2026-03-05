@@ -22,6 +22,7 @@ public class S3Service {
     private final S3Presigner s3Presigner;
 
     public void uploadFile(String key, MultipartFile file) throws IOException {
+
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(s3Properties.bucketName())
                 .key(key)
@@ -33,6 +34,7 @@ public class S3Service {
     }
 
     public String createPresignedUrl(String key) {
+
         GetObjectPresignRequest presignedRequest = GetObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(s3Properties.presignedUrlExpiration()))
                 .getObjectRequest(builder -> builder.bucket(s3Properties.bucketName()).key(key))

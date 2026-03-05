@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -45,6 +47,9 @@ public class Liquor extends LikeableEntity {
 
     @Column(nullable = false)
     private boolean isDiscontinued; // 단종 여부
+
+    @OneToMany(mappedBy = "liquor")
+    private Set<LiquorTag> liquorTags = new HashSet<>();
 
     private String imageKey; // 대표 이미지 사진 저장경로
 
