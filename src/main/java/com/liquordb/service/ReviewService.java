@@ -9,6 +9,7 @@ import com.liquordb.entity.*;
 import com.liquordb.entity.id.ReviewImageKeyId;
 import com.liquordb.enums.SortReviewBy;
 import com.liquordb.enums.SortDirection;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.review.ReviewAccessDeniedException;
 import com.liquordb.exception.review.ReviewNotFoundException;
@@ -51,7 +52,7 @@ public class ReviewService {
     @Transactional
     public ReviewResponseDto create(Long liquorId, ReviewRequest request, List<MultipartFile> images, UUID userId) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Liquor liquor = liquorRepository.findById(liquorId)
@@ -86,6 +87,7 @@ public class ReviewService {
     }
 
     // 주류별 리뷰 목록 조회
+    // TODO PresignedURL
     @Transactional(readOnly = true)
     public CursorPageResponse<ReviewResponseDto> getAllByLiquorId(Long liquorId, ReviewListGetRequest request) {
 
@@ -111,6 +113,7 @@ public class ReviewService {
     }
 
     // 유저별 리뷰 목록 조회
+    // TODO PresignedURL
     @Transactional(readOnly = true)
     public CursorPageResponse<ReviewResponseDto> getAllByUserId(UUID authorId, ReviewListGetRequest request) {
 
@@ -135,7 +138,7 @@ public class ReviewService {
 
     // 리뷰 수정
     @Transactional
-    public ReviewResponseDto update(Long reviewId, ReviewUpdateRequest request, List<MultipartFile> newImages, UUID userId) {
+    public ReviewResponseDto update(Long reviewId, ReviewUpdateRequest request, UUID userId) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));

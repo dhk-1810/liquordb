@@ -52,9 +52,7 @@ public class AuthService {
         User existingUser = userRepository.findByEmail(email)
                 .orElse(null);
         if (existingUser != null) {
-            if (existingUser.getStatus().equals(UserStatus.BANNED)) {
-                throw new BannedUserException();
-            } else if (existingUser.getStatus().equals(UserStatus.WITHDRAWN)) {
+            if (existingUser.getStatus().equals(UserStatus.WITHDRAWN)) {
                 throw new WithdrawnUserException();
             } else {
                 throw new DuplicateEmailException(email);
@@ -83,8 +81,6 @@ public class AuthService {
         }
         if (user.getStatus() == UserStatus.WITHDRAWN) {
             throw new WithdrawnUserException();
-        } else if (user.getStatus() == UserStatus.BANNED) {
-            throw new BannedUserException();
         }
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole().name());
@@ -132,10 +128,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if (user.getStatus().equals(UserStatus.BANNED)) {
-            throw new BannedUserException();
-        }
-        // 자발적으로 탈퇴한 유저의 비밀번호 재설정은 허용됨. 계정 복구를 위해선 로그인이 필요하기 때문.
+        // 탈퇴한 유저의 비밀번호 재설정 허용. 계정 복구를 위해선 로그인이 필요하기 때문.
 
         // 재전송 시 기존 링크 파기
         String oldTokenKey = "reset_token_email:" + email; // 이메일별 토큰 추적용 키

@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,7 @@ public class ReviewController {
 
     // 리뷰 등록
     @PostMapping("/liquors/{liquorId}/reviews")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReviewResponseDto> create(
             @PathVariable Long liquorId,
             @RequestPart @Valid ReviewRequest request,
@@ -49,6 +51,7 @@ public class ReviewController {
 
     // 리뷰 목록 조회 - 유저별
     @GetMapping("/users/{authorId}/reviews")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByUser(
             @PathVariable UUID authorId,
             @ModelAttribute @Valid ReviewListGetRequest request
@@ -59,18 +62,19 @@ public class ReviewController {
 
     // 리뷰 수정
     @PatchMapping("/reviews/{reviewId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
-            @RequestPart @Valid ReviewUpdateRequest request,
-            @RequestPart(required = false) List<MultipartFile> imagesToAdd,
+            @RequestBody @Valid ReviewUpdateRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        ReviewResponseDto response = reviewService.update(reviewId, request, imagesToAdd, user.id());
+        ReviewResponseDto response = reviewService.update(reviewId, request, user.id());
         return ResponseEntity.ok(response);
     }
 
     // 리뷰 삭제
     @DeleteMapping("/reviews/{reviewId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> delete(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
@@ -81,6 +85,7 @@ public class ReviewController {
 
     // 좋아요
     @PostMapping("/reviews/{reviewId}/like")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<LikeResponseDto> like(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
@@ -91,6 +96,7 @@ public class ReviewController {
 
     // 좋아요 취소
     @DeleteMapping("/reviews/{reviewId}/cancel-like")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<LikeResponseDto> cancelLike(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
