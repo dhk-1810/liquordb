@@ -1,6 +1,6 @@
 package com.liquordb.mapper;
 
-import com.liquordb.dto.user.SignUpRequest;
+import com.liquordb.dto.auth.SignUpRequest;
 import com.liquordb.dto.user.UserMyPageDto;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;

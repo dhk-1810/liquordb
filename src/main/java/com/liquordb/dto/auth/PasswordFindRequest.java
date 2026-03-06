@@ -1,4 +1,4 @@
-package com.liquordb.dto.user;
+package com.liquordb.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

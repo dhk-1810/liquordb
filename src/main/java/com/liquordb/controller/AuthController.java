@@ -1,8 +1,11 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.JwtDto;
+import com.liquordb.dto.auth.LoginRequest;
+import com.liquordb.dto.auth.PasswordFindRequest;
+import com.liquordb.dto.auth.PasswordResetRequest;
+import com.liquordb.dto.auth.SignUpRequest;
 import com.liquordb.dto.user.*;
-import com.liquordb.enums.Role;
 import com.liquordb.security.JwtInformation;
 import com.liquordb.security.TokenUtil;
 import com.liquordb.service.AuthService;
@@ -10,10 +13,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController

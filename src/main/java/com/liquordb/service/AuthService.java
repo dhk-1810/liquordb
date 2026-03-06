@@ -1,5 +1,9 @@
 package com.liquordb.service;
 
+import com.liquordb.dto.auth.LoginRequest;
+import com.liquordb.dto.auth.PasswordFindRequest;
+import com.liquordb.dto.auth.PasswordResetRequest;
+import com.liquordb.dto.auth.SignUpRequest;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.User;
 import com.liquordb.enums.UserStatus;
