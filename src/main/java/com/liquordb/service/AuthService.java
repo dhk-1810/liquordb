@@ -70,6 +70,7 @@ public class AuthService {
     }
 
     // 로그인
+    // TODO 삭제
     @Transactional
     public JwtInformation login(LoginRequest request) {
 

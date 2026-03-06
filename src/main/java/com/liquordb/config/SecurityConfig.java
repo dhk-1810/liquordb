@@ -1,5 +1,6 @@
 package com.liquordb.config;
 
+import com.liquordb.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.liquordb.handler.JwtLogoutHandler;
 import com.liquordb.security.JwtLoginSuccessHandler;
 import com.liquordb.service.CustomOAuth2UserService;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,6 +25,7 @@ public class SecurityConfig {
 
     private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
     private final JwtLogoutHandler jwtLogoutHandler;
+    private final AuthenticationConfiguration authenticationConfiguration;
 //    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
@@ -60,6 +63,16 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public JsonUsernamePasswordAuthenticationFilter jsonLoginFilter() throws Exception {
+        JsonUsernamePasswordAuthenticationFilter filter =
+                new JsonUsernamePasswordAuthenticationFilter(authenticationConfiguration.getAuthenticationManager());
+
+        filter.setFilterProcessesUrl("/api/auth/login");
+        filter.setAuthenticationSuccessHandler(jwtLoginSuccessHandler);
+        return filter;
     }
 
     @Bean
