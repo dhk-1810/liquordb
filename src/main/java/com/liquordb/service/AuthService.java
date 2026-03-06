@@ -124,8 +124,6 @@ public class AuthService {
     @Transactional
     public void sendPasswordResetLink(PasswordFindRequest request) {
 
-        // TODO 재전송 시 기존 링크 파기
-
         String email = request.email();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
@@ -135,11 +133,19 @@ public class AuthService {
         }
         // 자발적으로 탈퇴한 유저의 비밀번호 재설정은 허용됨. 계정 복구를 위해선 로그인이 필요하기 때문.
 
+        // 재전송 시 기존 링크 파기
+        String oldTokenKey = "reset_token_email:" + email; // 이메일별 토큰 추적용 키
+        String oldToken = stringRedisTemplate.opsForValue().get(oldTokenKey);
+        if (oldToken != null) {
+            stringRedisTemplate.delete(oldToken); // 기존 UUID 토큰 삭제 (링크 무효화)
+        }
+
         String resetToken = UUID.randomUUID().toString();
-        stringRedisTemplate.opsForValue().set(resetToken, email, Duration.ofMinutes(RESET_TOKEN_EXPIRATION_MINUTES));
+        Duration expiration = Duration.ofMinutes(RESET_TOKEN_EXPIRATION_MINUTES);
+        stringRedisTemplate.opsForValue().set(resetToken, email, expiration);
+        stringRedisTemplate.opsForValue().set(oldTokenKey, resetToken, expiration);
 
         String resetLink = RESET_LINK_PREFIX + resetToken;
-
         final String resetMailText
                 = "안녕하세요. LiquorDB입니다.\n\n" +
                 "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" +
