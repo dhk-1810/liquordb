@@ -34,18 +34,20 @@ public class UserService {
     private final LiquorLikeRepository liquorLikeRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
-    private final FileService fileService;
-    private final S3Service s3Service;
+    private final FileService fileService; // 단방향 참조
+    private final S3Service s3Service; // 단방향 참조
 
     private final PasswordEncoder passwordEncoder;
 
     // 마이페이지
-    @Transactional
+    @Transactional(readOnly = true)
     public UserMyPageDto getMyPageInfo(UUID userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
+        // 마이페이지 조회 횟수가 많지 않을 것이라 판단,
+        // 매 활동마다 User 엔터티의 count 정보도 업데이트 하지 않고 리포지토리 직접 조회.
         long reviewCount = reviewRepository.countByUser_IdAndStatus(userId, Review.ReviewStatus.ACTIVE);
         long commentCount = commentRepository.countByUser_IdAndStatus(userId, Comment.CommentStatus.ACTIVE);
 
@@ -128,6 +130,7 @@ public class UserService {
 
     @Transactional
     public void updateRole(Role role, UUID userId){
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         user.updateRole(role);

@@ -34,7 +34,7 @@ public class UserController {
 
     // 회원정보 수정 (프로필사진, 닉네임)
     @PatchMapping(path = "/{userId}/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<String> update(
+    public ResponseEntity<Void> update(
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
             @RequestPart(required = false) MultipartFile profileImage,
@@ -42,7 +42,7 @@ public class UserController {
     ) {
         authorizeUser(userId, user);
         userService.update(userId, request, profileImage);
-        return ResponseEntity.ok("회원 정보가 수정되었습니다.");
+        return ResponseEntity.noContent().build();
     }
 
     // 비밀번호 수정 (로그인 상태에서)

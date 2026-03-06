@@ -39,15 +39,9 @@ public class User {
 
     private String profileImageKey;
 
-    // 활동 제한 해제 일시
-    @Column
-    private LocalDateTime suspendedUntil;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime bannedAt;
     private LocalDateTime withdrawnAt;
-
 
     @PrePersist
     protected void onCreate() {
@@ -107,12 +101,6 @@ public class User {
         this.profileImageKey = null;
     }
 
-    public void ban(){
-        if (!this.status.isAvailable()) return;
-        this.status = UserStatus.BANNED;
-        this.bannedAt = LocalDateTime.now();
-    }
-
     public void withdraw() {
         if (!this.status.isAvailable()) return;
         this.status = UserStatus.WITHDRAWN;
@@ -121,23 +109,7 @@ public class User {
 
     public void restore() {
         if (this.status.isAvailable()) return;
-        if (this.suspendedUntil != null && LocalDateTime.now().isBefore(this.suspendedUntil)) {
-            this.status = UserStatus.SUSPENDED;
-        } else {
-            this.status = UserStatus.ACTIVE;
-        }
-    }
-
-    // 유저 활동 제한 (댓글, 리뷰 작성)
-    public void suspend(LocalDateTime suspendedUntil) {
-        this.status = UserStatus.SUSPENDED;
-        this.suspendedUntil = suspendedUntil;
-    }
-
-    // 유저 제한 해제 (신고 반려 또는 제재 기한 만료)
-    public void lift() {
         this.status = UserStatus.ACTIVE;
     }
-
 
 }
