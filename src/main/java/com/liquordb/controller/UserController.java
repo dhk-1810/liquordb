@@ -1,6 +1,7 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.user.*;
+import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.UserService;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ public class UserController {
             @PathVariable UUID userId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
+        authorizeUser(userId, user);
         UserMyPageDto myPage = userService.getMyPageInfo(userId);
         return ResponseEntity.ok(myPage);
     }
@@ -36,8 +38,9 @@ public class UserController {
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
             @RequestPart(required = false) MultipartFile profileImage,
-            @AuthenticationPrincipal CustomUserDetails user // 서비스단에서 @PreAuthorize 사용 위해 필요
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
+        authorizeUser(userId, user);
         userService.update(userId, request, profileImage);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
     }
@@ -49,6 +52,7 @@ public class UserController {
             @RequestBody @Valid PasswordUpdateRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
+        authorizeUser(userId, user);
         userService.updatePassword(userId, request);
         return ResponseEntity.noContent().build();
     }
@@ -59,8 +63,14 @@ public class UserController {
             @PathVariable UUID userId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
+        authorizeUser(userId, user);
         userService.withdraw(userId);
         return ResponseEntity.noContent().build();
     }
 
+    private void authorizeUser(UUID userId, CustomUserDetails user) {
+        if (!user.id().equals(userId)) {
+            throw new UserAccessDeniedException(user.id());
+        }
+    }
 }

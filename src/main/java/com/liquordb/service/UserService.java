@@ -46,10 +46,6 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (!user.getId().equals(userId)) {
-            throw new UserAccessDeniedException(userId);
-        }
-
         long reviewCount = reviewRepository.countByUser_IdAndStatus(userId, Review.ReviewStatus.ACTIVE);
         long commentCount = commentRepository.countByUser_IdAndStatus(userId, Comment.CommentStatus.ACTIVE);
 
@@ -78,10 +74,6 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (!user.getId().equals(userId)) {
-            throw new UserAccessDeniedException(userId);
-        }
-
         String email = request.email();
         if (email != null && !userRepository.existsByEmail(email)) {
             throw new DuplicateEmailException(email);
@@ -108,11 +100,9 @@ public class UserService {
     // 비밀번호 수정 (로그인 상태에서)
     @Transactional
     public void updatePassword(UUID userId, PasswordUpdateRequest request) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        if (!user.getId().equals(userId)) {
-            throw new UserAccessDeniedException(userId);
-        }
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new InvalidPasswordException();
@@ -125,11 +115,9 @@ public class UserService {
     // 회원 탈퇴 (soft delete)
     @Transactional
     public void withdraw(UUID userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        if (!user.getId().equals(userId)) {
-            throw new UserAccessDeniedException(userId);
-        }
         user.withdraw();
         userRepository.save(user);
     }
