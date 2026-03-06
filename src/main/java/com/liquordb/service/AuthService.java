@@ -159,11 +159,10 @@ public class AuthService {
         mailService.sendMail(user.getEmail(), RESET_MAIL_SUBJECT, resetMailText); // 비동기
     }
 
-    // 비밀번호 재설정
+    // 비밀번호 초기화
     @Transactional
-    public void resetPasswordByToken(PasswordResetRequest request) {
+    public void resetPasswordByToken(String token, PasswordResetRequest request) {
 
-        String token = request.token();
         String email = stringRedisTemplate.opsForValue().get(token);
         if (email == null) {
             throw new InvalidTokenException();
@@ -175,6 +174,7 @@ public class AuthService {
         userRepository.save(user);
 
         stringRedisTemplate.delete(token);
+        stringRedisTemplate.delete("reset_token_email:" + email);
     }
 
     // 계정 복구

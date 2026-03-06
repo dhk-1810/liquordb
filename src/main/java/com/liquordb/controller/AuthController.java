@@ -57,9 +57,12 @@ public class AuthController {
     }
 
     // 비밀번호 초기화
-    @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestBody @Valid PasswordResetRequest request){
-        authService.resetPasswordByToken(request);
+    @PostMapping("/reset-password/{token}")
+    public ResponseEntity<Void> resetPassword(
+            @PathVariable String token,
+            @RequestBody @Valid PasswordResetRequest request
+    ) {
+        authService.resetPasswordByToken(token, request);
         return ResponseEntity.noContent().build();
     }
 
