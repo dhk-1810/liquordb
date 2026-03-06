@@ -23,9 +23,9 @@ public class AuthController {
     private final AuthService authService;
 
     // 회원가입
-    @PostMapping(name = "/sign-up",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<UserResponseDto> register(@RequestBody SignUpRequest request) {
-        return ResponseEntity.ok(authService.signUp(request, Role.USER));
+    @PostMapping("/sign-up")
+    public ResponseEntity<UserResponseDto> signUp(@RequestBody @Valid SignUpRequest request) {
+        return ResponseEntity.ok(authService.signUp(request));
     }
 
     // 로그인

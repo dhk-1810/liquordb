@@ -72,13 +72,13 @@ public class User {
         this.status = UserStatus.ACTIVE;
     }
 
-    public static User create(String email, String username, String password, String socialProvider, Role role){
+    public static User create(String email, String username, String password, String socialProvider){
         return User.builder()
                 .email(email)
                 .username(username)
                 .password(password)
                 .socialProvider(socialProvider)
-                .role(role)
+                .role(Role.USER)
                 .build();
     }
 

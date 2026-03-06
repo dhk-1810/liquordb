@@ -4,17 +4,16 @@ import com.liquordb.dto.user.SignUpRequest;
 import com.liquordb.dto.user.UserMyPageDto;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
-import com.liquordb.enums.Role;
 
 public class UserMapper {
 
-    public static User toEntity(SignUpRequest request, String encodedPassword, Role role){
-        return User.builder()
-                .email(request.email())
-                .password(encodedPassword)
-                .username(request.username())
-                .role(role)
-                .build();
+    public static User toEntity(SignUpRequest request, String encodedPassword){
+        return User.create(
+                request.email(),
+                request.username(),
+                encodedPassword,
+                null // TODO 소셜로그인
+        );
     }
 
     public static UserResponseDto toDto(User user){

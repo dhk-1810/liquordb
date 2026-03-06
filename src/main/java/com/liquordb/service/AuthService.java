@@ -37,7 +37,7 @@ public class AuthService {
 
     // 회원가입
     @Transactional
-    public UserResponseDto signUp(SignUpRequest request, Role role) {
+    public UserResponseDto signUp(SignUpRequest request) {
 
         String email = request.email();
         String username = request.username();
@@ -58,7 +58,7 @@ public class AuthService {
         }
 
         String encodedPassword = passwordEncoder.encode(request.password());
-        User user = UserMapper.toEntity(request, encodedPassword, role);
+        User user = UserMapper.toEntity(request, encodedPassword);
 
         userRepository.save(user);
 
