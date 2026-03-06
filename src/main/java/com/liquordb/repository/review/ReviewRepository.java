@@ -19,8 +19,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, CustomRev
 
     Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
 
-
-
     // 리뷰 + 주류 조회
     @Query("SELECT r FROM Review r JOIN FETCH r.liquor WHERE r.id = :reviewId AND r.status != :deleted")
     Optional<Review> findByIdWithLiquorAndStatusNot(

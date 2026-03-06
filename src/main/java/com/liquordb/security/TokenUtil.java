@@ -7,7 +7,7 @@ import jakarta.servlet.http.Cookie;
  */
 public class TokenUtil {
 
-    private static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 14;
+    public static final int REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 14;
 
     // 리프레시 토큰을 쿠키에 저장 지시. 엑세스 토큰은 클라이언트측 메모리의 변수로 저장
     public static Cookie createRefreshTokenCookie(String refreshToken) {
