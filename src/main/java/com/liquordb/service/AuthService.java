@@ -123,6 +123,9 @@ public class AuthService {
     // 비밀번호 재설정 링크 전송
     @Transactional
     public void sendPasswordResetLink(PasswordFindRequest request) {
+
+        // TODO 재전송 시 기존 링크 파기
+
         String email = request.email();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
@@ -133,7 +136,6 @@ public class AuthService {
         // 자발적으로 탈퇴한 유저의 비밀번호 재설정은 허용됨. 계정 복구를 위해선 로그인이 필요하기 때문.
 
         String resetToken = UUID.randomUUID().toString();
-
         stringRedisTemplate.opsForValue().set(resetToken, email, Duration.ofMinutes(RESET_TOKEN_EXPIRATION_MINUTES));
 
         String resetLink = RESET_LINK_PREFIX + resetToken;
@@ -144,7 +146,7 @@ public class AuthService {
                 resetLink + "\n\n" +
                 "이 링크는 5분 동안만 유효합니다.";
 
-//        mailService.sendMail(user.getEmail(), RESET_MAIL_SUBJECT, resetMailText); // 비동기
+        mailService.sendMail(user.getEmail(), RESET_MAIL_SUBJECT, resetMailText); // 비동기
     }
 
     // 비밀번호 재설정
