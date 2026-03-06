@@ -2,6 +2,7 @@ package com.liquordb.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liquordb.dto.JwtDto;
+import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.user.UserRepository;
@@ -26,7 +27,6 @@ import static com.liquordb.security.TokenUtil.REFRESH_TOKEN_MAX_AGE;
 @Component
 public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final UserRepository userRepository;
     private final JwtProperties jwtProperties;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
@@ -38,23 +38,22 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException {
 
         // 사용자 정보 추출
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user =  userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        UserResponseDto userDto = userDetails.dto();
 
         // 토큰 발행, 레지스트리 등록
         String accessToken = jwtTokenProvider.generateToken(
-                user.getUsername(),
-                user.getRole().name(),
+                userDto.username(),
+                userDto.role().name(),
                 jwtProperties.getAccessTokenValidityInMs()
         );
         String refreshToken = jwtTokenProvider.generateToken(
-                user.getUsername(),
-                user.getRole().name(),
+                userDto.username(),
+                userDto.role().name(),
                 jwtProperties.getRefreshTokenValidityInMs()
         );
 
-        jwtRegistry.registerRefreshToken(user.getId(), refreshToken); // 동시 로그인 제한 처리도 수행됨.
+        jwtRegistry.registerRefreshToken(userDto.id(), refreshToken); // 동시 로그인 제한 처리도 수행됨.
 
         // 토큰 전달 - 엑세스 토큰은 JSON 바디로, 리프레시 토큰은 쿠키로.
         Cookie refreshCookie = new Cookie("REFRESH_TOKEN", refreshToken);
@@ -67,7 +66,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        JwtDto jwtDto = new JwtDto(UserMapper.toDto(user), accessToken);
+        JwtDto jwtDto = new JwtDto(userDto, accessToken);
 
         response.getWriter().write(objectMapper.writeValueAsString(jwtDto));
     }
