@@ -64,7 +64,7 @@ public class AuthController {
 
     // 계정 복구
     @PostMapping("/restore")
-    public ResponseEntity<UserResponseDto> restore(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.restore(request));
+    public ResponseEntity<UserResponseDto> restore(@RequestParam String email) {
+        return ResponseEntity.ok(authService.restore(email));
     }
 }

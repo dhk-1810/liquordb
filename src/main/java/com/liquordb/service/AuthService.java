@@ -169,12 +169,10 @@ public class AuthService {
 
     // 계정 복구
     @Transactional
-    public UserResponseDto restore(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
+    public UserResponseDto restore(String email) {
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(LoginFailedException::new);
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new LoginFailedException();
-        }
         user.restore();
         userRepository.save(user);
         return UserMapper.toDto(user);

@@ -16,7 +16,7 @@ public record PasswordResetRequest(
         )
         String password,
 
-        @NotNull(message = "토큰 정보는 필수입니다.")
+        @NotBlank(message = "토큰 정보는 필수입니다.")
         String token
 ) {
 }
