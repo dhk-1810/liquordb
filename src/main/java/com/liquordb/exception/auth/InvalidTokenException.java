@@ -1,11 +1,11 @@
-package com.liquordb.exception.user;
+package com.liquordb.exception.auth;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.LiquordbException;
+import com.liquordb.exception.user.UserException;
 
 import java.util.Map;
 
-public class InvalidTokenException extends UserException {
+public class InvalidTokenException extends AuthException {
 
     public InvalidTokenException() {
         super(

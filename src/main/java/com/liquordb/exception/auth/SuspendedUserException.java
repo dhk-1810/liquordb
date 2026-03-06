@@ -1,13 +1,11 @@
-package com.liquordb.exception.user;
+package com.liquordb.exception.auth;
 
 import com.liquordb.enums.ErrorCode;
-import com.liquordb.exception.LiquordbException;
 
-import java.io.Serial;
 import java.util.Map;
 import java.util.UUID;
 
-public class SuspendedUserException extends UserException {
+public class SuspendedUserException extends AuthException {
 
     public SuspendedUserException(UUID userId) {
         super(

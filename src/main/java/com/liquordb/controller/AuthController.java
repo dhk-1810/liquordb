@@ -34,12 +34,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    // 토큰 재발급
+    // 토큰 재발급 - 엑세스 토큰이 만료되면 호출.
     @PostMapping("/token-refresh")
     public ResponseEntity<JwtDto> refreshToken(
             @CookieValue(value = "REFRESH_TOKEN", required = false) String refreshToken,
-            HttpServletResponse response){
-
+            HttpServletResponse response
+    ) {
         JwtInformation newInfo = authService.refresh(refreshToken);
         Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(newInfo.refreshToken());
         response.addCookie(refreshCookie);

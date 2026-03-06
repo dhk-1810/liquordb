@@ -1,6 +1,6 @@
 package com.liquordb.security;
 
-import com.liquordb.exception.user.InvalidTokenException;
+import com.liquordb.exception.auth.InvalidTokenException;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -119,15 +119,15 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getUsernameFromToken(String token) {
-        try {
-            JWTClaimsSet claims = getClaims(token);
-            return claims.getSubject();
-        } catch (Exception e) {
-            log.error("Failed to extract username from token: {}", e.getMessage());
-            throw new RuntimeException("Invalid Token while extracting username", e);
-        }
-    }
+//    public String getUsernameFromToken(String token) {
+//        try {
+//            JWTClaimsSet claims = getClaims(token);
+//            return claims.getSubject();
+//        } catch (Exception e) {
+//            log.error("Failed to extract username from token: {}", e.getMessage());
+//            throw new RuntimeException("Invalid Token while extracting username", e);
+//        }
+//    }
 
     public long getRemainingExpiration(String accessToken) {
         try {

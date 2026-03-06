@@ -2,8 +2,11 @@ package com.liquordb.service;
 
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.User;
-import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
+import com.liquordb.exception.auth.BannedUserException;
+import com.liquordb.exception.auth.InvalidTokenException;
+import com.liquordb.exception.auth.LoginFailedException;
+import com.liquordb.exception.auth.WithdrawnUserException;
 import com.liquordb.exception.user.*;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.user.UserRepository;
@@ -59,7 +62,6 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(request.password());
         User user = UserMapper.toEntity(request, encodedPassword);
-
         userRepository.save(user);
 
         return UserMapper.toDto(user);
@@ -68,6 +70,7 @@ public class AuthService {
     // 로그인
     @Transactional
     public JwtInformation login(LoginRequest request) {
+
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(LoginFailedException::new);
 
@@ -88,7 +91,7 @@ public class AuthService {
         return new JwtInformation(UserMapper.toDto(user), accessToken, refreshToken);
     }
 
-    // 토큰 재발급 (엑세스 토큰 재발급 + 리프레시 토큰도 바꿈)
+    // 토큰 재발급 - 엑세스 토큰이 만료되면 호출.
     public JwtInformation refresh(String refreshToken) {
 
         // 서명 유효성, DB 존재 여부 확인
@@ -96,7 +99,7 @@ public class AuthService {
                 || !jwtTokenProvider.validateRefreshToken(refreshToken)
                 || !jwtRegistry.isRefreshTokenActive(refreshToken)
         ) {
-            throw new InvalidTokenException(); // TODO Access, Refresh 분리?
+            throw new InvalidTokenException();
         }
 
         // 정보 조회
@@ -108,15 +111,13 @@ public class AuthService {
         String newAccess = jwtTokenProvider.createAccessToken(username, user.getRole().name());
         String newRefresh = jwtTokenProvider.createRefreshToken(username, user.getRole().name());
 
-        JwtInformation newInfo = new JwtInformation(
+        jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, user.getId());
+
+        return new JwtInformation(
                 UserMapper.toDto(user),
                 newAccess,
                 newRefresh
         );
-
-        jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, user.getId());
-
-        return newInfo;
     }
 
     // 비밀번호 재설정 링크 전송

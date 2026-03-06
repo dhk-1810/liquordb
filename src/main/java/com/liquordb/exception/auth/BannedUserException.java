@@ -1,4 +1,4 @@
-package com.liquordb.exception.user;
+package com.liquordb.exception.auth;
 
 import org.springframework.security.authentication.DisabledException;
 
