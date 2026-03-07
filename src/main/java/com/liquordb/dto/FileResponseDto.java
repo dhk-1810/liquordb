@@ -9,6 +9,6 @@ public record FileResponseDto (
         File.FileType type
 ) {
     public static FileResponseDto toDto(File file) {
-        return new FileResponseDto(file.getId(), file.getKey(), file.getName(), file.getType());
+        return new FileResponseDto(file.getId(), file.getS3key(), file.getName(), file.getType());
     }
 }

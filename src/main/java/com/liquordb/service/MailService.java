@@ -16,7 +16,7 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${liquordb.mail.username}")
+    @Value("${spring.mail.username}")
     private String senderAddress;
 
     @Async

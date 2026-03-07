@@ -16,12 +16,6 @@ public class LiquorTagController {
 
     private final LiquorTagService liquorTagService;
 
-    // 주류 ID로 연결된 태그 검색
-    @GetMapping("/{liquorId}/tags")
-    public ResponseEntity<List<TagResponseDto>> getTagsByLiquorId(@PathVariable Long liquorId) {
-        return ResponseEntity.ok(liquorTagService.getTagsByLiquorId(liquorId));
-    }
-
     // 주류에 태그 추가
     @PostMapping("/{liquorId}/tags")
     public ResponseEntity<TagResponseDto> createLiquorTag(@RequestBody LiquorTagRequest request) {

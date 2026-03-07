@@ -18,7 +18,7 @@ public class File {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String key;
+    private String s3key;
 
     private String name;
 
@@ -32,7 +32,7 @@ public class File {
     }
 
     private File(String key, String name, FileType type) {
-        this.key = key;
+        this.s3key = key;
         this.name = name;
         this.type = type;
     }

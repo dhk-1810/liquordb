@@ -13,9 +13,9 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class CommentLikeId implements Serializable {
 
-    @Column(name = "userId")
+    @Column(name = "user_id")
     private UUID userId;
 
-    @Column(name = "commentId")
+    @Column(name = "comment_id")
     private Long commentId;
 }
