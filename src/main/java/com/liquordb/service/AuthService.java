@@ -68,28 +68,7 @@ public class AuthService {
         return UserMapper.toDto(user);
     }
 
-    // 로그인
-    // TODO 삭제
-    @Transactional
-    public JwtInformation login(LoginRequest request) {
-
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(LoginFailedException::new);
-
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new LoginFailedException();
-        }
-        if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new WithdrawnUserException();
-        }
-
-        String accessToken = jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole().name());
-        String refreshToken = jwtTokenProvider.createRefreshToken(user.getUsername(), user.getRole().name());
-
-        jwtRegistry.registerRefreshToken(user.getId(), refreshToken);
-
-        return new JwtInformation(UserMapper.toDto(user), accessToken, refreshToken);
-    }
+    // 로그인 - 필터에서 처리
 
     // 토큰 재발급 - 엑세스 토큰이 만료되면 호출.
     public JwtInformation refresh(String refreshToken) {

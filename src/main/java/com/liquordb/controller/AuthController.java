@@ -29,11 +29,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.signUp(request));
     }
 
-    // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<JwtInformation> login(@RequestBody @Valid LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
-    }
+    // 로그인 - 필터에서 처리
 
     // 토큰 재발급 - 엑세스 토큰이 만료되면 호출.
     @PostMapping("/token-refresh")

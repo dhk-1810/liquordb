@@ -47,7 +47,7 @@ public class JwtTokenProvider {
     }
 
     // JWT 토큰 생성
-    public String generateToken(String username, String role, long validityInMilliseconds) {
+    private String generateToken(String username, String role, long validityInMilliseconds) {
         try {
             Date now = new Date();
             Date expirationTime = new Date(now.getTime() + validityInMilliseconds);

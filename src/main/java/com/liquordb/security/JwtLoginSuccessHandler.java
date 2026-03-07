@@ -27,7 +27,6 @@ import static com.liquordb.security.TokenUtil.REFRESH_TOKEN_MAX_AGE;
 @Component
 public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JwtProperties jwtProperties;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
     private final ObjectMapper objectMapper; // JSON 변환
@@ -42,15 +41,13 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         UserResponseDto userDto = userDetails.dto();
 
         // 토큰 발행, 레지스트리 등록
-        String accessToken = jwtTokenProvider.generateToken(
+        String accessToken = jwtTokenProvider.createAccessToken(
                 userDto.username(),
-                userDto.role().name(),
-                jwtProperties.getAccessTokenValidityInMs()
+                userDto.role().name()
         );
-        String refreshToken = jwtTokenProvider.generateToken(
+        String refreshToken = jwtTokenProvider.createRefreshToken(
                 userDto.username(),
-                userDto.role().name(),
-                jwtProperties.getRefreshTokenValidityInMs()
+                userDto.role().name()
         );
 
         jwtRegistry.registerRefreshToken(userDto.id(), refreshToken); // 동시 로그인 제한 처리도 수행됨.
