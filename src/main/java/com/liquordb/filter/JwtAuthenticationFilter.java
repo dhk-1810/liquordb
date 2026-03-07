@@ -1,5 +1,7 @@
 package com.liquordb.filter;
 
+import com.liquordb.security.CustomUserDetails;
+import com.liquordb.security.CustomUserDetailsService;
 import com.liquordb.security.JwtRegistry;
 import com.liquordb.security.JwtTokenProvider;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -32,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 
@@ -55,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(username) && role != null) {
                 if (isTokenValidInRegistry(token)) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username); // TODO DB조회 대신 토큰 자체에서 추출
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,

@@ -1,12 +1,14 @@
 package com.liquordb.config;
 
 import com.liquordb.filter.JsonUsernamePasswordAuthenticationFilter;
+import com.liquordb.filter.JwtAuthenticationFilter;
 import com.liquordb.handler.JwtLogoutHandler;
 import com.liquordb.security.JwtLoginSuccessHandler;
 import com.liquordb.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -17,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -26,6 +29,7 @@ public class SecurityConfig {
     private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
     private final JwtLogoutHandler jwtLogoutHandler;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 //    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
@@ -53,12 +57,15 @@ public class SecurityConfig {
 //                )
                 .logout(logout -> logout.addLogoutHandler(jwtLogoutHandler))
 
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
                 // 인가 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/", "api/auth/sign-up").permitAll()
-                        .requestMatchers("/api//users/*/reviews").authenticated()
-                        .requestMatchers("/api/auth/token-refresh").permitAll()// TODO 로그인, 소셜로그인?
+                        .requestMatchers("/", "/api/auth/*").permitAll()
+                        .requestMatchers("/api/auth/token-refresh").permitAll() // TODO 소셜로그인?
+                        .requestMatchers(HttpMethod.GET, "/api/liquors/**").permitAll() // 주류, 리뷰 조회 허용
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/*/comments/**").permitAll() // 댓글 조회 허용
                         .anyRequest().authenticated()
                 );
 

@@ -18,8 +18,6 @@ public enum ErrorCode {
     USER_ALREADY_EXISTS (HttpStatus.CONFLICT),
     DUPLICATE_USERNAME (HttpStatus.CONFLICT),
     DUPLICATE_EMAIL (HttpStatus.CONFLICT),
-    SUSPENDED_USER (HttpStatus.FORBIDDEN), // 활동제한
-    BANNED_USER (HttpStatus.FORBIDDEN), // 강제탈퇴
     WITHDRAWN_USER (HttpStatus.CONFLICT), // 자발적 탈퇴 (회원가입 시 기존 정보 존재)
 
     // Liquor

@@ -3,7 +3,6 @@ package com.liquordb.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liquordb.enums.ErrorCode;
 import com.liquordb.exception.ErrorResponse;
-import com.liquordb.exception.auth.BannedUserException;
 import com.liquordb.exception.auth.WithdrawnUserException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,9 +38,6 @@ public class JwtAuthenticationFailureHandler implements AuthenticationFailureHan
         // CustomUserDetailsService에서 던진 예외에 따라 분기
         if (exception instanceof WithdrawnUserException) {
             errorCode = ErrorCode.WITHDRAWN_USER;
-            errorMessage = exception.getMessage();
-        } else if (exception instanceof BannedUserException) {
-            errorCode = ErrorCode.BANNED_USER;
             errorMessage = exception.getMessage();
         } else if (exception instanceof BadCredentialsException) {
             errorMessage = "아이디 또는 비밀번호가 일치하지 않습니다.";

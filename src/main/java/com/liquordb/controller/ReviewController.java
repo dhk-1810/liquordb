@@ -28,7 +28,6 @@ public class ReviewController {
 
     // 리뷰 등록
     @PostMapping("/liquors/{liquorId}/reviews")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReviewResponseDto> create(
             @PathVariable Long liquorId,
             @RequestPart @Valid ReviewRequest request,
@@ -51,7 +50,6 @@ public class ReviewController {
 
     // 리뷰 목록 조회 - 유저별
     @GetMapping("/users/{authorId}/reviews")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByUser(
             @PathVariable UUID authorId,
             @ModelAttribute @Valid ReviewListGetRequest request
@@ -62,7 +60,6 @@ public class ReviewController {
 
     // 리뷰 수정
     @PatchMapping("/reviews/{reviewId}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReviewResponseDto> update(
             @PathVariable Long reviewId,
             @RequestBody @Valid ReviewUpdateRequest request,
@@ -74,7 +71,6 @@ public class ReviewController {
 
     // 리뷰 삭제
     @DeleteMapping("/reviews/{reviewId}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> delete(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
@@ -85,7 +81,6 @@ public class ReviewController {
 
     // 좋아요
     @PostMapping("/reviews/{reviewId}/like")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<LikeResponseDto> like(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
@@ -96,7 +91,6 @@ public class ReviewController {
 
     // 좋아요 취소
     @DeleteMapping("/reviews/{reviewId}/cancel-like")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<LikeResponseDto> cancelLike(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user

@@ -7,7 +7,6 @@ import com.liquordb.dto.auth.SignUpRequest;
 import com.liquordb.dto.user.*;
 import com.liquordb.entity.User;
 import com.liquordb.enums.UserStatus;
-import com.liquordb.exception.auth.BannedUserException;
 import com.liquordb.exception.auth.InvalidTokenException;
 import com.liquordb.exception.auth.LoginFailedException;
 import com.liquordb.exception.auth.WithdrawnUserException;

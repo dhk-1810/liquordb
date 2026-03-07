@@ -33,8 +33,8 @@ public class JsonUsernamePasswordAuthenticationFilter extends UsernamePasswordAu
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response) throws AuthenticationException {
 
         // JSON 요청인지 확인
         if (!request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
