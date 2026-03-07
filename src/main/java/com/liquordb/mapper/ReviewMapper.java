@@ -5,11 +5,9 @@ import com.liquordb.entity.Liquor;
 import com.liquordb.dto.review.ReviewRequest;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.entity.Review;
-import com.liquordb.entity.File;
 import com.liquordb.entity.User;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 

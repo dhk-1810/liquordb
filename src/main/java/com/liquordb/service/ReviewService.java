@@ -17,6 +17,7 @@ import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.LiquorTagRepository;
+import com.liquordb.repository.ReviewTagRepository;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.repository.review.ReviewImageKeyRepository;
@@ -50,6 +51,7 @@ public class ReviewService {
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
+    private final ReviewTagRepository reviewTagRepository;
 
     // 리뷰 등록
     @Transactional
@@ -72,11 +74,15 @@ public class ReviewService {
                 .collect(Collectors.toSet());
 
         Set<LiquorTag> liquorTags = new HashSet<>();
+        Set<ReviewTag> reviewTags = new HashSet<>();
         tags.forEach(tag -> {
             LiquorTag liquorTag = LiquorTag.create(liquor, tag);
+            ReviewTag reviewTag = ReviewTag.create(review, tag);
             liquorTags.add(liquorTag);
+            reviewTags.add(reviewTag);
         });
         liquorTagRepository.saveAll(liquorTags);
+        reviewTagRepository.saveAll(reviewTags);
 
         List<String> presignedUrls = new ArrayList<>();
         List<ReviewImageKey> keys = new ArrayList<>();
@@ -102,8 +108,8 @@ public class ReviewService {
                 .orElseThrow(() -> new ReviewNotFoundException(id));
 
         List<String> presignedUrls = getPresignedUrl(review);
-        Set<TagResponseDto> tags; // TODO ReviewTagRepository 필요
-        return ReviewMapper.toDto(review, presignedUrls);
+        Set<TagResponseDto> tags = getTags(id);
+        return ReviewMapper.toDto(review, tags, presignedUrls);
     }
 
     // 주류별 리뷰 목록 조회
@@ -175,7 +181,8 @@ public class ReviewService {
         reviewRepository.save(review);
 
         List<String> presignedUrls = getPresignedUrl(review);
-        return ReviewMapper.toDto(review, presignedUrls);
+        Set<TagResponseDto> tags = getTags(reviewId);
+        return ReviewMapper.toDto(review, tags, presignedUrls);
     }
 
     // 리뷰 삭제 (Soft Delete)
@@ -200,6 +207,12 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
+    private Set<TagResponseDto> getTags(Long id) {
+        return reviewTagRepository.findByReview_Id(id)
+                .stream().map(TagMapper::toDto)
+                .collect(Collectors.toSet());
+    }
+
     private List<String> getPresignedUrl(Review review) {
         return review.getImageKeys().stream()
                 .map(reviewImageKey-> s3Service.createPresignedUrl(reviewImageKey.getId().toString()))
@@ -208,7 +221,8 @@ public class ReviewService {
 
     // 페이지네이션 헬퍼 메서드
     private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews) {
-        Slice<ReviewResponseDto> response = reviews.map(r -> ReviewMapper.toDto(r, getPresignedUrl(r)));
+        Slice<ReviewResponseDto> response = reviews
+                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getPresignedUrl(r)));
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -228,7 +242,7 @@ public class ReviewService {
     public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
         ReviewSearchCondition condition = getSearchCondition(request);
         Page<ReviewResponseDto> page = reviewRepository.findAll(condition)
-                .map(r -> ReviewMapper.toDto(r, getPresignedUrl(r)));
+                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getPresignedUrl(r)));
         return PageResponse.from(page);
     }
 
