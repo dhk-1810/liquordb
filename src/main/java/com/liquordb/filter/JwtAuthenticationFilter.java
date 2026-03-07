@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(username) && role != null) {
                 if (isTokenValidInRegistry(token)) {
-                    CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username); // TODO DB조회 대신 토큰 자체에서 추출
+                    CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username); // TODO DB조회 대신 토큰 자체에서 추출?
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,

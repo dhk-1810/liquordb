@@ -5,6 +5,7 @@ import com.liquordb.filter.JwtAuthenticationFilter;
 import com.liquordb.handler.JwtLogoutHandler;
 import com.liquordb.security.JwtLoginSuccessHandler;
 import com.liquordb.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,9 +22,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
@@ -55,15 +56,25 @@ public class SecurityConfig {
 //                                .userService(customOAuth2UserService)
 //                        )
 //                )
-                .logout(logout -> logout.addLogoutHandler(jwtLogoutHandler))
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .addLogoutHandler(jwtLogoutHandler)
+                        .logoutSuccessHandler(
+                                (req, res, auth) ->
+                                        res.setStatus(HttpServletResponse.SC_NO_CONTENT)
+                        ))
 
+                // 인증된 사용자인지 확인
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-                // 인가 설정
+                // 로그인
+                .addFilterAt(jsonLoginFilter(), UsernamePasswordAuthenticationFilter.class)
+
+                // 인가
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/", "/api/auth/*").permitAll()
-                        .requestMatchers("/api/auth/token-refresh").permitAll() // TODO 소셜로그인?
+                        .requestMatchers("/", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/api/auth/restore").authenticated()
+                        .requestMatchers( "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/liquors/**").permitAll() // 주류, 리뷰 조회 허용
                         .requestMatchers(HttpMethod.GET, "/api/reviews/*/comments/**").permitAll() // 댓글 조회 허용
                         .anyRequest().authenticated()
