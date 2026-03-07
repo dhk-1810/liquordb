@@ -1,6 +1,5 @@
 package com.liquordb.entity;
 
-import com.liquordb.dto.tag.TagRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,35 +18,11 @@ public class Tag {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
-    private boolean isDeleted = false;
-
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
 
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    public void update(TagRequest request) {
-        this.name = request.name();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void softDelete(){
-        this.isDeleted = true;
-        this.deletedAt = LocalDateTime.now();
-    }
-
-    public void restore(){
-        this.isDeleted = false;
-        this.deletedAt = null;
     }
 
     private Tag(String name) {

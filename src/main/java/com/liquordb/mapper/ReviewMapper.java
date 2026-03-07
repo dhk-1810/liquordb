@@ -1,5 +1,6 @@
 package com.liquordb.mapper;
 
+import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.Liquor;
 import com.liquordb.dto.review.ReviewRequest;
 import com.liquordb.dto.review.ReviewResponseDto;
@@ -10,6 +11,7 @@ import com.liquordb.entity.reviewdetail.ReviewDetail;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class ReviewMapper {
 
@@ -21,7 +23,7 @@ public class ReviewMapper {
         return review;
     }
 
-    public static ReviewResponseDto toDto(Review review, List<String> presignedUrls) {
+    public static ReviewResponseDto toDto(Review review, Set<TagResponseDto> tags, List<String> presignedUrls) {
 
         return ReviewResponseDto.builder()
                 .id(review.getId())
@@ -29,6 +31,7 @@ public class ReviewMapper {
                 .liquorId(review.getLiquor().getId())
                 .content(review.getContent())
                 .rating(review.getRating())
+                .tags(tags)
                 .presignedUrls(presignedUrls)
                 .build();
     }

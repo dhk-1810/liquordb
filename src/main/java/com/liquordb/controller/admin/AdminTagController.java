@@ -2,17 +2,12 @@ package com.liquordb.controller.admin;
 
 import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.tag.TagListGetRequest;
-import com.liquordb.dto.tag.TagRequest;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.service.TagService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,13 +17,6 @@ public class AdminTagController {
 
     private final TagService tagService;
 
-    // 태그 등록
-    @PostMapping
-    public ResponseEntity<TagResponseDto> create(@RequestBody @Valid TagRequest request) {
-        TagResponseDto createdTag = tagService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTag);
-    }
-
     // 태그 전체 조회
     @GetMapping
     public ResponseEntity<PageResponse<TagResponseDto>> getAll(TagListGetRequest request) {
@@ -36,20 +24,4 @@ public class AdminTagController {
         return ResponseEntity.ok().body(response);
     }
 
-    // 태그 이름 변경
-    @PatchMapping("/{id}")
-    public ResponseEntity<TagResponseDto> rename(
-            @PathVariable Long id,
-            @RequestBody @Valid TagRequest request
-    ) {
-        TagResponseDto updatedTag = tagService.rename(id, request);
-        return ResponseEntity.ok(updatedTag);
-    }
-
-    // 태그 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        tagService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
 }

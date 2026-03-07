@@ -5,8 +5,8 @@ import com.liquordb.dto.FileResponseDto;
 import com.liquordb.dto.PageResponse;
 import com.liquordb.ReviewDetailUpdater;
 import com.liquordb.dto.review.*;
+import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.entity.*;
-import com.liquordb.entity.id.ReviewImageKeyId;
 import com.liquordb.enums.SortReviewBy;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.enums.UserStatus;
@@ -15,12 +15,15 @@ import com.liquordb.exception.review.ReviewAccessDeniedException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.ReviewMapper;
+import com.liquordb.mapper.TagMapper;
+import com.liquordb.repository.LiquorTagRepository;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.repository.review.ReviewImageKeyRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.review.condition.ReviewListGetCondition;
 import com.liquordb.repository.review.condition.ReviewSearchCondition;
+import com.liquordb.repository.tag.TagRepository;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,12 +31,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -44,6 +45,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewImageKeyRepository reviewImageKeyRepository;
     private final CommentRepository commentRepository;
+    private final TagRepository tagRepository;
+    private final LiquorTagRepository liquorTagRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
@@ -62,6 +65,19 @@ public class ReviewService {
 
         liquor.updateAverageRating(request.rating());
 
+        // 태그 추가, 없으면 새로 생성
+        Set<Tag> tags = request.tags().stream()
+                .map(name -> tagRepository.findByName(name)
+                        .orElseGet(() -> tagRepository.save(Tag.create(name))))
+                .collect(Collectors.toSet());
+
+        Set<LiquorTag> liquorTags = new HashSet<>();
+        tags.forEach(tag -> {
+            LiquorTag liquorTag = LiquorTag.create(liquor, tag);
+            liquorTags.add(liquorTag);
+        });
+        liquorTagRepository.saveAll(liquorTags);
+
         List<String> presignedUrls = new ArrayList<>();
         List<ReviewImageKey> keys = new ArrayList<>();
         images.forEach(file -> {
@@ -72,7 +88,10 @@ public class ReviewService {
         );
         reviewImageKeyRepository.saveAll(keys);
         reviewRepository.save(review);
-        return ReviewMapper.toDto(review, presignedUrls);
+        Set<TagResponseDto> tagDtos = tags.stream()
+                .map(TagMapper::toDto)
+                .collect(Collectors.toSet());
+        return ReviewMapper.toDto(review, tagDtos, presignedUrls);
     }
 
     // 리뷰 단건 조회
@@ -83,6 +102,7 @@ public class ReviewService {
                 .orElseThrow(() -> new ReviewNotFoundException(id));
 
         List<String> presignedUrls = getPresignedUrl(review);
+        Set<TagResponseDto> tags; // TODO ReviewTagRepository 필요
         return ReviewMapper.toDto(review, presignedUrls);
     }
 

@@ -9,13 +9,24 @@ import lombok.*;
 @Builder
 public record LiquorRequest(
 
-        @NotBlank String name,
-        @NotNull Liquor.LiquorCategory category,
-        @NotNull LiquorSubcategory subcategory,
-        @NotBlank String country,
-        @NotBlank String manufacturer,
-        @NotNull Double abv,
-        @NotNull Boolean isDiscontinued // 단종 여부
+        @NotBlank(message = "주류 이름은 필수입니다.")
+        String name,
+
+        @NotNull(message = "주류 분류는 필수입니다.")
+        Liquor.LiquorCategory category,
+
+        LiquorSubcategory subcategory,
+
+        @NotBlank(message = "주류 제조국 정보는 필수입니다.")
+        String country,
+
+        @NotBlank(message = "주류 제조사 정보는 필수입니다.")
+        String manufacturer,
+
+        @NotNull(message = "주류 도수 정보는 필수입니다.")
+        Double abv,
+
+        Boolean isDiscontinued // 단종 여부
 ) {
 
 }

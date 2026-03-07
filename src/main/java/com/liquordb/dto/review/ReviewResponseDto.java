@@ -1,9 +1,11 @@
 package com.liquordb.dto.review;
 
+import com.liquordb.dto.tag.TagResponseDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Builder
@@ -14,6 +16,7 @@ public record ReviewResponseDto (
         int rating,
         String title,
         String content,
+        Set<TagResponseDto> tags,
         List<String> presignedUrls,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

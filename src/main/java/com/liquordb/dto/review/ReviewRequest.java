@@ -2,10 +2,9 @@ package com.liquordb.dto.review;
 
 import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
 import com.liquordb.entity.Liquor;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
+
+import java.util.List;
 
 /**
  * 리뷰 생성 요청 DTO
@@ -23,6 +22,9 @@ public record ReviewRequest(
 
         @NotNull(message = "주종 카테고리를 선택해주세요.")
         Liquor.LiquorCategory category,
+
+        @Size(max = 10, message = "태그는 최대 10개까지 지정 가능합니다.")
+        List<String> tags,
 
         ReviewDetailRequest reviewDetailRequest
 
