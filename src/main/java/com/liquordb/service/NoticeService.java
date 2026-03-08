@@ -23,14 +23,14 @@ import java.util.UUID;
 
 import static com.liquordb.mapper.NoticeMapper.*;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class NoticeService {
 
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
 
-    // 공지사항 단건 조회
+    // 단건 조회
     @Transactional(readOnly = true)
     public NoticeResponseDto getNotice(Long id) {
         Notice notice = noticeRepository.findById(id)
@@ -38,7 +38,7 @@ public class NoticeService {
         return NoticeMapper.toDto(notice);
     }
 
-    // 공지사항 목록 조회
+    // 목록 조회
     @Transactional(readOnly = true)
     public PageResponse<NoticeSummaryDto> getAllNotices(Pageable pageable) {
 

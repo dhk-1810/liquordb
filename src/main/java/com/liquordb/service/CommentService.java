@@ -95,7 +95,7 @@ public class CommentService {
 
         boolean useId = sortBy == SortCommentBy.COMMENT_ID;
         if (!useId && request.idAfter() == null) {
-            throw new InvalidParameterException(); // TODO 예외
+            throw new InvalidParameterException("Tie-breaker Parameter Not Found");
         }
 
         CommentListGetCondition condition = CommentListGetCondition.builder()

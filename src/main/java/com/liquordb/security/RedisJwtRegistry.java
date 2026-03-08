@@ -1,9 +1,7 @@
 package com.liquordb.security;
 
-import com.liquordb.RedisLockProvider;
-import lombok.RequiredArgsConstructor;
+import com.liquordb.redis.RedisLockProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 

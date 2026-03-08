@@ -1,4 +1,4 @@
-package com.liquordb;
+package com.liquordb.redis;
 
 import com.liquordb.exception.redis.RedisLockAcquisitionException;
 import lombok.RequiredArgsConstructor;

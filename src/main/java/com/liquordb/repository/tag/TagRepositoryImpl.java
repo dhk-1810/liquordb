@@ -29,7 +29,6 @@ public class TagRepositoryImpl implements CustomTagRepository {
         List<Tag> content = queryFactory.selectFrom(tag)
                 .where(
                         keywordContains(condition.keyword())
-                        // TODO 삭제된 태그 조회?
                 )
                 .orderBy(
                         getOrderSpecifier(condition.descending())
