@@ -39,7 +39,6 @@ public class LiquorService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final LiquorLikeRepository liquorLikeRepository;
-    private final LiquorTagRepository liquorTagRepository;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
 

@@ -11,11 +11,13 @@ public class TagMapper {
         return new TagResponseDto(tag.getId(), tag.getName());
     }
 
+    // FETCH JOIN 사용 전제
     public static TagResponseDto toDto(LiquorTag liquorTag) {
-        return new TagResponseDto(liquorTag.getTag().getId(), liquorTag.getTag().getName()); // TODO N+1
+        return new TagResponseDto(liquorTag.getTag().getId(), liquorTag.getTag().getName());
     }
 
+    // FETCH JOIN 사용 전제
     public static TagResponseDto toDto(ReviewTag reviewTag) {
-        return new TagResponseDto(reviewTag.getTag().getId(), reviewTag.getTag().getName()); // TODO N+1
+        return new TagResponseDto(reviewTag.getTag().getId(), reviewTag.getTag().getName());
     }
 }

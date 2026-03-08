@@ -104,16 +104,19 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public ReviewResponseDto get(Long id) {
 
-        Review review = reviewRepository.findByIdWithImageKeys(id)
+        Review review = reviewRepository.findByIdWithTags(id)
                 .orElseThrow(() -> new ReviewNotFoundException(id));
 
+        Set<TagResponseDto> tags = review.getReviewTags().stream()
+                .map(TagMapper::toDto)
+                .collect(Collectors.toSet());
+
+        // default_batch_fetch_size로 N+1 방지
         List<String> presignedUrls = getPresignedUrl(review);
-        Set<TagResponseDto> tags = getTags(id);
         return ReviewMapper.toDto(review, tags, presignedUrls);
     }
 
     // 주류별 리뷰 목록 조회
-    // TODO PresignedURL
     @Transactional(readOnly = true)
     public CursorPageResponse<ReviewResponseDto> getAllByLiquorId(Long liquorId, ReviewListGetRequest request) {
 
@@ -139,7 +142,6 @@ public class ReviewService {
     }
 
     // 유저별 리뷰 목록 조회
-    // TODO PresignedURL
     @Transactional(readOnly = true)
     public CursorPageResponse<ReviewResponseDto> getAllByUserId(UUID authorId, ReviewListGetRequest request) {
 

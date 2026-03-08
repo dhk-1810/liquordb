@@ -14,8 +14,11 @@ import java.util.UUID;
 public interface ReviewRepository extends JpaRepository<Review, Long>, CustomReviewRepository {
 
     // 리뷰 단건 조회
-    @Query("SELECT r FROM Review r LEFT JOIN FETCH r.imageKeys WHERE r.id = :id")
-    Optional<Review> findByIdWithImageKeys(@Param("id") Long id);
+    @Query("SELECT r FROM Review r " +
+            "LEFT JOIN FETCH r.reviewTags rt " +
+            "LEFT JOIN FETCH rt.tag " +
+            "WHERE r.id = :id")
+    Optional<Review> findByIdWithTags(@Param("id") Long id);
 
     Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
 
