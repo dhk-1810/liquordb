@@ -54,7 +54,6 @@ public class Review extends LikeableEntity {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime hiddenAt;
     private LocalDateTime deletedAt;
 
     public enum ReviewStatus {
@@ -109,18 +108,6 @@ public class Review extends LikeableEntity {
         if (request.content() != null) {
             this.content = request.content();
         }
-    }
-
-    public void hide(LocalDateTime hiddenAt) {
-        if (this.status == ReviewStatus.HIDDEN) return;
-        this.status = ReviewStatus.HIDDEN;
-        this.hiddenAt = hiddenAt;
-    }
-
-    public void unhide(){
-        if (this.status != ReviewStatus.HIDDEN) return;
-        this.status = ReviewStatus.ACTIVE;
-        this.hiddenAt = null;
     }
 
     public void softDelete(LocalDateTime deletedAt) {

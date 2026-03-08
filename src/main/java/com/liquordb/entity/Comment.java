@@ -40,7 +40,6 @@ public class Comment extends LikeableEntity {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime hiddenAt;
     private LocalDateTime deletedAt;
 
     public enum CommentStatus {
@@ -71,18 +70,6 @@ public class Comment extends LikeableEntity {
 
     public void update(CommentUpdateRequest request) {
         this.content = request.content();
-    }
-
-    public void hide(LocalDateTime deletedAt) {
-        if (this.status == CommentStatus.HIDDEN) return;
-        this.status = CommentStatus.HIDDEN;
-        this.hiddenAt = deletedAt;
-    }
-
-    public void unhide(){
-        if (this.status != CommentStatus.HIDDEN) return;
-        this.status = CommentStatus.ACTIVE;
-        this.hiddenAt = null;
     }
 
     public void softDelete(LocalDateTime deletedAt) {

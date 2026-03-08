@@ -16,16 +16,18 @@ public class Notice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User author;
-
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private boolean isPinned = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User author;
+
+    // TODO 이미지
+
+    private boolean isPinned;
     private boolean isDeleted;
 
     private LocalDateTime createdAt;
@@ -46,11 +48,8 @@ public class Notice {
         if (request.title() != null) {
             this.title = request.title();
         }
-        if (this.content != null) {
+        if (request.content() != null) {
             this.content = request.content();
-        }
-        if (this.title != null || this.content != null){
-            this.updatedAt = LocalDateTime.now();
         }
     }
 
@@ -67,6 +66,7 @@ public class Notice {
         this.author = author;
         this.title = title;
         this.content = content;
+        this.isPinned = false;
     }
 
     public static Notice create(User author, String title, String content){

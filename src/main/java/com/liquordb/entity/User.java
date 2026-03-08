@@ -21,7 +21,6 @@ public class User {
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 100)
-    @Email
     private String email; // 로그인은 이메일로만 가능.
 
     @Column(nullable = false, unique = true, length = 30)
@@ -90,8 +89,8 @@ public class User {
         this.role = role;
     }
 
-    public void updatePassword(String newPassword) {
-        this.password = newPassword;
+    public void updatePassword(String newEncryptedPassword) {
+        this.password = newEncryptedPassword;
     }
 
     public void setProfileImage(String profileImageKey) {
@@ -100,7 +99,7 @@ public class User {
 
     public void deleteProfileImage() {
         this.profileImageKey = null;
-    }
+    } // TODO
 
     public void withdraw() {
         if (!this.status.isAvailable()) return;
