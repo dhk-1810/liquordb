@@ -1,6 +1,8 @@
 package com.liquordb.repository.review;
 
 import com.liquordb.entity.QReview;
+import com.liquordb.entity.QReviewTag;
+import com.liquordb.entity.QTag;
 import com.liquordb.entity.Review;
 import com.liquordb.enums.SortReviewBy;
 import com.liquordb.repository.review.condition.ReviewListGetCondition;
@@ -28,12 +30,16 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QReview review = QReview.review;
+    private final QReviewTag reviewTag = QReviewTag.reviewTag;
+    private final QTag tag = QTag.tag;
 
     @Override
-    public Slice<Review> findByLiquorId(ReviewListGetCondition condition) {
+    public Slice<Review> findByLiquorIdWithTags(ReviewListGetCondition condition) {
 
         int limit = condition.limit();
         List<Review> content = queryFactory.selectFrom(review)
+                .leftJoin(review.reviewTags, reviewTag).fetchJoin()
+                .leftJoin(reviewTag.tag, tag).fetchJoin()
                 .where(
                         liquorIdEq(condition.liquorId()),
                         statusEq(condition.status()),
@@ -57,7 +63,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
     }
 
     @Override
-    public Slice<Review> findByUserId(ReviewListGetCondition condition) {
+    public Slice<Review> findByUserIdWithTags(ReviewListGetCondition condition) {
 
         int limit = condition.limit();
         List<Review> content = queryFactory.selectFrom(review)
@@ -82,7 +88,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
     }
 
     @Override
-    public Page<Review> findAll(ReviewSearchCondition condition) {
+    public Page<Review> findAllWithTags(ReviewSearchCondition condition) {
 
         int limit = condition.limit();
         int page = condition.page();

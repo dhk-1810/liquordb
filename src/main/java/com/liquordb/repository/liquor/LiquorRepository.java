@@ -11,12 +11,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiquorRepository{
+public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiquorRepository {
 
     // 주류 단건 조회
     Optional<Liquor> findByIdAndIsDeleted(Long id, boolean isDeleted);
 
-    // 주류 + 태그 조회
+    // 주류 단건 + 태그 조회
     @Query("SELECT l FROM Liquor l " +
             "LEFT JOIN FETCH l.liquorTags lt " +
             "LEFT JOIN FETCH lt.tag " +

@@ -137,7 +137,7 @@ public class ReviewService {
                 .descending(sortDirection == SortDirection.DESC)
                 .build();
 
-        Slice<Review> reviews = reviewRepository.findByLiquorId(condition);
+        Slice<Review> reviews = reviewRepository.findByLiquorIdWithTags(condition);
         return getCursorPageResponse(reviews);
     }
 
@@ -160,7 +160,7 @@ public class ReviewService {
                 .descending(sortDirection == SortDirection.DESC)
                 .build();
 
-        Slice<Review> reviews = reviewRepository.findByUserId(condition);
+        Slice<Review> reviews = reviewRepository.findByUserIdWithTags(condition);
         return getCursorPageResponse(reviews);
     }
 
@@ -216,6 +216,7 @@ public class ReviewService {
     }
 
     private List<String> getPresignedUrl(Review review) {
+        // default_batch_fetch_size: 100 옵션으로 N+1 문제 방지
         return review.getImageKeys().stream()
                 .map(reviewImageKey-> s3Service.createPresignedUrl(reviewImageKey.getId().toString()))
                 .toList();
@@ -243,7 +244,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
         ReviewSearchCondition condition = getSearchCondition(request);
-        Page<ReviewResponseDto> page = reviewRepository.findAll(condition)
+        Page<ReviewResponseDto> page = reviewRepository.findAllWithTags(condition)
                 .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getPresignedUrl(r)));
         return PageResponse.from(page);
     }
