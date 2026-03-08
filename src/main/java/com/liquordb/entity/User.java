@@ -3,8 +3,10 @@ package com.liquordb.entity;
 import com.liquordb.enums.Role;
 import com.liquordb.enums.UserStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -12,6 +14,7 @@ import java.util.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "users")
 public class User {
 
@@ -39,41 +42,25 @@ public class User {
 
     private String profileImageKey;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
+
     private LocalDateTime withdrawnAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        if (status == null) status = UserStatus.ACTIVE;
-        if (role == null) role = Role.USER;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    @Builder
-    private User(String email, String username, String password, String socialProvider, Role role) {
+    private User(String email, String username, String password, String socialProvider, UserStatus status, Role role) {
         this.email = email;
         this.username = username;
         this.password = password;
-        this.socialProvider = socialProvider;
+        this.status = status;
         this.role = role;
-        this.status = UserStatus.ACTIVE;
+        this.socialProvider = socialProvider;
     }
 
     public static User create(String email, String username, String password, String socialProvider){
-        return User.builder()
-                .email(email)
-                .username(username)
-                .password(password)
-                .socialProvider(socialProvider)
-                .role(Role.USER)
-                .build();
+        return new User(email, username, password, socialProvider, UserStatus.ACTIVE, Role.USER);
     }
 
     public void update(String email, String username){

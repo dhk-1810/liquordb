@@ -17,12 +17,13 @@ public class UserMapper {
     }
 
     public static UserResponseDto toDto(User user){
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .role(user.getRole())
-                .build();
+        return new UserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getStatus(),
+                user.getRole()
+        );
     }
 
     public static UserMyPageDto toMyPageDto(

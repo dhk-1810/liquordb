@@ -7,13 +7,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
 public record UserResponseDto (
         UUID id,
         String email,
         String username,
-        String presignedUrl,
-        LocalDateTime createdAt,
         UserStatus status,
         Role role
 ){
