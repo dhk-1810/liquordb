@@ -12,16 +12,13 @@ import java.util.List;
 public record ReviewRequest(
 
         @NotNull(message = "평점은 필수입니다.")
-        @Min(1) @Max(5)
+        @Min(1) @Max(10)
         Integer rating,
 
         String title,
 
         @NotBlank(message = "내용을 입력해주세요.")
         String content,
-
-        @NotNull(message = "주종 카테고리를 선택해주세요.")
-        Liquor.LiquorCategory category,
 
         @Size(max = 10, message = "태그는 최대 10개까지 지정 가능합니다.")
         List<String> tags,

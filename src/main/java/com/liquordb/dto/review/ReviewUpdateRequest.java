@@ -1,6 +1,8 @@
 package com.liquordb.dto.review;
 
 import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -12,6 +14,7 @@ import java.util.List;
 public record ReviewUpdateRequest(
 
         @NotNull(message = "평점은 필수입니다.")
+        @Min(1) @Max(10)
         Integer rating,
 
         String title,
@@ -20,10 +23,8 @@ public record ReviewUpdateRequest(
         String content,
 
         // 주종별 디테일 정보
-        ReviewDetailRequest detailRequest,
+        ReviewDetailRequest detailRequest
 
-        // 삭제할 이미지 목록 (File 객체의 ID)
-        List<Long> imageIdsToDelete
 ) {
 
 }

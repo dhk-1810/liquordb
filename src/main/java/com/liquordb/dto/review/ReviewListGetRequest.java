@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 public record ReviewListGetRequest (
 
         @Nullable
-        @Min(1) @Max(5)
+        @Min(1) @Max(10)
         Integer rating,
 
         @Nullable

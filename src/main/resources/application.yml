@@ -21,6 +21,18 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  cache:
+    type: redis
+    cache-names:
+      - jwt
+      - notice
+    redis:
+      enable-statistics: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
   mail:
     host: ${MAIL_HOST}
     port: 587
@@ -70,10 +82,10 @@ liquordb:
 #            user-name-attribute: response
 
 
-#logging:
-#  level:
-#    org.hibernate.SQL: debug
-#    org.hibernate.type.descriptor.sql: trace
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
 
 jwt:
   secret: ${JWT_SECRET_KEY}

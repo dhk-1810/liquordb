@@ -37,6 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String authHeader = request.getHeader("Authorization");
+        log.info("Authorization Header Value: {}", authHeader);
+
         String token = resolveToken(request);
 
         // 엑세스 토큰 서명 유효성, 만료 여부 검증

@@ -36,6 +36,7 @@ public class AdminNoticeController {
     }
 
     // 고정 토글
+    // TODO 멱등성
     @PatchMapping("/{noticeId}/pin")
     public ResponseEntity<NoticeResponseDto> togglePin(@PathVariable Long noticeId){
         return ResponseEntity.ok(noticeService.togglePin(noticeId));

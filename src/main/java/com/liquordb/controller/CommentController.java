@@ -47,9 +47,9 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
-    // 특정 리뷰의 댓글 조회
+    // 특정 사용자의 댓글 조회
     @GetMapping("/users/{userId}/comments")
-    public ResponseEntity<CursorPageResponse<CommentResponseDto>> getByReviewId(
+    public ResponseEntity<CursorPageResponse<CommentResponseDto>> getByUserId(
             @PathVariable UUID userId,
             @ModelAttribute @Valid CommentListGetRequest request
     ) {

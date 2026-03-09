@@ -38,6 +38,14 @@ services:
     volumes:
       - mysql_data:/mysql_data:/var/lib/mysql # 데이터 영속성 보장
       - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql # 초기 스키마 설정
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes: # 데이터 영구 저장 설정
+      - redis-data:/data
+    command: redis-server --appendonly yes # 실행 명령 - 데이터 변경시 디스크에 로그 낭김
 
 networks:
   liquordb-network:
@@ -46,3 +54,4 @@ networks:
 volumes:
   backend_uploads:
   mysql_data:
+  redis-data:
