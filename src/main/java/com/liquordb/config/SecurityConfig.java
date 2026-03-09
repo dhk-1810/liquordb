@@ -92,10 +92,10 @@ public class SecurityConfig {
         return filter;
     }
 
-//    @Bean
-//    public RoleHierarchy roleHierarchy() {
-//        return RoleHierarchyImpl.withDefaultRolePrefix()
-//                .role("ADMIN").implies("USER")
-//                .build();
-//    }
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("ADMIN").implies("USER")
+                .build();
+    }
 }

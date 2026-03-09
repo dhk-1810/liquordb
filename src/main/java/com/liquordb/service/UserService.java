@@ -15,6 +15,8 @@ import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.user.UserRepository;
 import com.liquordb.repository.user.UserSearchCondition;
+import com.liquordb.security.JwtTokenProvider;
+import com.liquordb.security.RedisJwtRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +38,8 @@ public class UserService {
     private final CommentLikeRepository commentLikeRepository;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
+    private final JwtTokenProvider jwtTokenProvider;
+    private final RedisJwtRegistry jwtRegistry;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -98,6 +102,7 @@ public class UserService {
         }
 
         userRepository.save(user);
+        // TODO userDetails 교체
     }
 
     // 비밀번호 수정 (로그인 상태에서)
@@ -117,12 +122,15 @@ public class UserService {
 
     // 회원 탈퇴 (soft delete)
     @Transactional
-    public void withdraw(UUID userId) {
+    public void withdraw(UUID userId, String accessToken) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         user.withdraw();
         userRepository.save(user);
+        jwtRegistry.invalidateAllRefreshTokensByUserId(user.getId());
+        long remainingMs = jwtTokenProvider.getRemainingExpiration(accessToken);
+        jwtRegistry.addToBlacklist(accessToken, remainingMs);
     }
 
     /**

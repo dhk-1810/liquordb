@@ -61,10 +61,12 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID userId,
+            @RequestHeader("Authorization") String authHeader,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         authorizeUser(userId, user);
-        userService.withdraw(userId);
+        String accessToken = authHeader.substring(7);
+        userService.withdraw(userId, accessToken);
         return ResponseEntity.noContent().build();
     }
 
