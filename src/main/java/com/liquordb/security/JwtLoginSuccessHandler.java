@@ -42,7 +42,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 토큰 발행, 레지스트리 등록
         String accessToken = jwtTokenProvider.createAccessToken(
-                userDto.username(),
+                userDto.email(),
                 userDto.role().name()
         );
         String refreshToken = jwtTokenProvider.createRefreshToken(

@@ -50,14 +50,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response); // 인증되지 않은 익명 사용자로 처리
                 return;
             }
-            String username = claims.getSubject();
+            String email = claims.getSubject();
             String role = (String) claims.getClaim("role");
 
-            log.info("추출된 username: {}, role: {}", username, role);
+            log.info("추출된 email: {}, role: {}", email, role);
 
-            if (StringUtils.hasText(username) && role != null) {
+            if (StringUtils.hasText(email) && role != null) {
                 if (isTokenValidInRegistry(token)) {
-                    CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username); // TODO DB조회 대신 토큰 자체에서 추출?
+                    CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(email); // TODO DB조회 대신 토큰 자체에서 추출?
                     log.info("DB 조회 성공: {}", userDetails.getUsername());
 
                     // 권한 확인
@@ -69,14 +69,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             );
                     log.debug("사용자 권한: {}", userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("사용자 인증 완료: {}", username);
+                    log.debug("사용자 인증 완료: {}", email);
                 } else {
                     log.warn("토큰이 유효하지 않습니다.");
 
                 }
-
             } else {
-                log.warn("토큰 내에 필수 사용자 정보가 누락되었습니다. (subject: {}, role: {})", username, role);
+                log.warn("토큰 내에 필수 사용자 정보가 누락되었습니다. (subject: {}, role: {})", email, role);
             }
         }
         filterChain.doFilter(request, response);

@@ -40,12 +40,12 @@ public class JwtTokenProvider {
         }
     }
 
-    public String createAccessToken(String username, String role) {
-        return generateToken(username, role, jwtProperties.getAccessTokenValidityInMs(), TOKEN_TYPE_ACCESS);
+    public String createAccessToken(String email, String role) {
+        return generateToken(email, role, jwtProperties.getAccessTokenValidityInMs(), TOKEN_TYPE_ACCESS);
     }
 
-    public String createRefreshToken(String username, String role) {
-        return generateToken(username, role, jwtProperties.getRefreshTokenValidityInMs(), TOKEN_TYPE_REFRESH);
+    public String createRefreshToken(String email, String role) {
+        return generateToken(email, role, jwtProperties.getRefreshTokenValidityInMs(), TOKEN_TYPE_REFRESH);
     }
 
     // JWT 토큰 생성

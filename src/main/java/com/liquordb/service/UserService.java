@@ -77,16 +77,17 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         String email = request.email();
-        if (email != null && !userRepository.existsByEmail(email)) {
+        if (email != null && userRepository.existsByEmail(email)) {
             throw new DuplicateEmailException(email);
         }
 
         String username = request.username();
-        if (username != null && !userRepository.existsByUsername(username)) {
+        if (username != null && userRepository.existsByUsername(username)) {
             throw new DuplicateUsernameException(username);
         }
 
-        if (request.deleteProfileImage()) {
+        Boolean deleteImage = request.deleteProfileImage();
+        if (deleteImage != null && deleteImage) {
             // TODO fileService.delete(user.getProfileImageKey());
             user.setProfileImage(null);
         }
