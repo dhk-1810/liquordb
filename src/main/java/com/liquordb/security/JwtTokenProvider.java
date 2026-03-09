@@ -25,6 +25,8 @@ public class JwtTokenProvider {
     private final JwtProperties jwtProperties;
     private JWSSigner signer;
     private JWSVerifier verifier;
+    private static final String TOKEN_TYPE_ACCESS = "ACCESS";
+    private static final String TOKEN_TYPE_REFRESH = "REFRESH";
 
     // 토큰 서명과 검증에 필요한 암호화 도구를 초기화
     @PostConstruct
@@ -39,15 +41,15 @@ public class JwtTokenProvider {
     }
 
     public String createAccessToken(String username, String role) {
-        return generateToken(username, role, jwtProperties.getAccessTokenValidityInMs());
+        return generateToken(username, role, jwtProperties.getAccessTokenValidityInMs(), TOKEN_TYPE_ACCESS);
     }
 
     public String createRefreshToken(String username, String role) {
-        return generateToken(username, role, jwtProperties.getRefreshTokenValidityInMs());
+        return generateToken(username, role, jwtProperties.getRefreshTokenValidityInMs(), TOKEN_TYPE_REFRESH);
     }
 
     // JWT 토큰 생성
-    private String generateToken(String username, String role, long validityInMilliseconds) {
+    private String generateToken(String username, String role, long validityInMilliseconds, String type) {
         try {
             Date now = new Date();
             Date expirationTime = new Date(now.getTime() + validityInMilliseconds);
@@ -59,6 +61,7 @@ public class JwtTokenProvider {
                     .issueTime(now)
                     .expirationTime(expirationTime)
                     .claim("role", role)
+                    .claim("type", type)
                     .build();
 
             SignedJWT signedJWT = new SignedJWT(

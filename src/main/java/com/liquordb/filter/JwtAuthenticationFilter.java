@@ -53,18 +53,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = claims.getSubject();
             String role = (String) claims.getClaim("role");
 
+            log.info("추출된 username: {}, role: {}", username, role);
+
             if (StringUtils.hasText(username) && role != null) {
                 if (isTokenValidInRegistry(token)) {
                     CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username); // TODO DB조회 대신 토큰 자체에서 추출?
+                    log.info("DB 조회 성공: {}", userDetails.getUsername());
+
+                    // 권한 확인
+                    log.info("UserDetails 권한 목록: {}", userDetails.getAuthorities());
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,
                                     userDetails.getAuthorities()
                             );
+                    log.debug("사용자 권한: {}", userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     log.debug("사용자 인증 완료: {}", username);
                 } else {
                     log.warn("토큰이 유효하지 않습니다.");
+
                 }
 
             } else {

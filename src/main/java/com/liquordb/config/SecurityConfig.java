@@ -4,7 +4,6 @@ import com.liquordb.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.liquordb.filter.JwtAuthenticationFilter;
 import com.liquordb.handler.JwtLogoutHandler;
 import com.liquordb.security.JwtLoginSuccessHandler;
-import com.liquordb.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -93,10 +92,10 @@ public class SecurityConfig {
         return filter;
     }
 
-    @Bean
-    public RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.withDefaultRolePrefix()
-                .role("ADMIN").implies("USER")
-                .build();
-    }
+//    @Bean
+//    public RoleHierarchy roleHierarchy() {
+//        return RoleHierarchyImpl.withDefaultRolePrefix()
+//                .role("ADMIN").implies("USER")
+//                .build();
+//    }
 }
