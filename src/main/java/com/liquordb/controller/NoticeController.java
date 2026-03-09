@@ -1,6 +1,7 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.notice.NoticeListGetRequest;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.service.NoticeService;
@@ -18,11 +19,11 @@ public class NoticeController {
 
     @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeResponseDto> getNotice(@PathVariable Long noticeId) {
-        return ResponseEntity.ok(noticeService.getNotice(noticeId));
+        return ResponseEntity.ok(noticeService.get(noticeId));
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<NoticeSummaryDto>> getAllNotices(Pageable pageable) {
-        return ResponseEntity.ok(noticeService.getAllNotices(pageable));
+    public ResponseEntity<PageResponse<NoticeSummaryDto>> getAllNotices(@ModelAttribute NoticeListGetRequest request) {
+        return ResponseEntity.ok(noticeService.getAll(request));
     }
 }

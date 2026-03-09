@@ -26,7 +26,7 @@ public class AdminUserController {
     public ResponseEntity<JwtInformation> updateRole(
             @PathVariable UUID userId,
             @RequestParam Role role,
-            @CookieValue(value = "REFRESH_TOKEN") String refreshToken
+            @CookieValue(value = "REFRESH_TOKEN") String refreshToken // TODO 간소화?
     ) {
         JwtInformation response = userService.updateRole(role, userId, refreshToken);
         return ResponseEntity.ok(response);

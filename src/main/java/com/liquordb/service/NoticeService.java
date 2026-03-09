@@ -1,21 +1,21 @@
 package com.liquordb.service;
 
 import com.liquordb.dto.PageResponse;
+import com.liquordb.dto.notice.NoticeListGetRequest;
 import com.liquordb.dto.notice.NoticeRequest;
 import com.liquordb.dto.notice.NoticeResponseDto;
 import com.liquordb.dto.notice.NoticeSummaryDto;
 import com.liquordb.entity.Notice;
 import com.liquordb.entity.User;
+import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.notice.NoticeNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.NoticeMapper;
-import com.liquordb.repository.NoticeRepository;
+import com.liquordb.repository.notice.NoticeListGetCondition;
+import com.liquordb.repository.notice.NoticeRepository;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,25 +32,23 @@ public class NoticeService {
 
     // 단건 조회
     @Transactional(readOnly = true)
-    public NoticeResponseDto getNotice(Long id) {
-        Notice notice = noticeRepository.findById(id)
+    public NoticeResponseDto get(Long id) {
+        Notice notice = noticeRepository.findByIdAndIsDeleted(id, false)
                 .orElseThrow(() -> new NoticeNotFoundException(id));
         return NoticeMapper.toDto(notice);
     }
 
     // 목록 조회
     @Transactional(readOnly = true)
-    public PageResponse<NoticeSummaryDto> getAllNotices(Pageable pageable) {
+    public PageResponse<NoticeSummaryDto> getAll(NoticeListGetRequest request) {
 
-        Sort sort = Sort.by(Sort.Order.desc("isPinned")) // 고정된 공지 우선 - 첫 페이지에만 표시됨
-                .and(pageable.getSort());
+        boolean deleted = request.deleted() != null && request.deleted();
+        int page = request.page() == null ? 0 : request.page();
+        int limit = request.limit() == null ? 50 : request.limit();
+        boolean descending = request.sortDirection() == null || request.sortDirection() == SortDirection.DESC;
 
-        Pageable sortedPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                sort
-        );
-        Page<Notice> notices = noticeRepository.findAllByIsDeletedFalse(sortedPageable);
+        NoticeListGetCondition condition = new NoticeListGetCondition(deleted, page, limit, descending);
+        Page<Notice> notices = noticeRepository.findAll(condition);
         Page<NoticeSummaryDto> response = notices.map(NoticeMapper::toSummaryDto);
         return PageResponse.from(response);
     }
