@@ -15,11 +15,13 @@ import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.user.UserRepository;
 import com.liquordb.repository.user.UserSearchCondition;
+import com.liquordb.security.JwtInformation;
 import com.liquordb.security.JwtTokenProvider;
 import com.liquordb.security.RedisJwtRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,19 +77,27 @@ public class UserService {
 
     // 회원정보수정 (닉네임, 프사)
     @Transactional
-    public void update(UUID userId, UserUpdateRequest request, MultipartFile profileImage) {
-
+    public JwtInformation update(
+            UUID userId,
+            UserUpdateRequest request,
+            MultipartFile profileImage,
+            String refreshToken
+    ) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        String email = request.email();
-        if (email != null && userRepository.existsByEmail(email)) {
-            throw new DuplicateEmailException(email);
+        boolean isIdentifierChanged = false;
+
+        if (request.email() != null && !request.email().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.email())) throw new DuplicateEmailException(request.email());
+            user.updateEmail(request.email());
+            isIdentifierChanged = true;
         }
 
-        String username = request.username();
-        if (username != null && userRepository.existsByUsername(username)) {
-            throw new DuplicateUsernameException(username);
+        if (request.username() != null && !request.username().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.username())) throw new DuplicateUsernameException(request.username());
+            user.updateUsername(request.username());
+            isIdentifierChanged = true;
         }
 
         Boolean deleteImage = request.deleteProfileImage();
@@ -102,7 +112,16 @@ public class UserService {
         }
 
         userRepository.save(user);
-        // TODO userDetails 교체
+
+        String newAccess = null;
+        String newRefresh = null;
+        if (isIdentifierChanged) {
+            newAccess = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
+            newRefresh = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
+            jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
+        }
+
+        return new JwtInformation(UserMapper.toDto(user), newAccess, newRefresh);
     }
 
     // 비밀번호 수정 (로그인 상태에서)
@@ -138,12 +157,22 @@ public class UserService {
      */
 
     @Transactional
-    public void updateRole(Role role, UUID userId){
+    public JwtInformation updateRole(Role role, UUID userId, String refreshToken) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        user.updateRole(role);
-        userRepository.save(user);
+
+        String newAccess = null;
+        String newRefresh = null;
+
+        if (!role.equals(user.getRole())) {
+            user.updateRole(role);
+            userRepository.save(user);
+            newAccess = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
+            newRefresh = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
+            jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
+        }
+        return new JwtInformation(UserMapper.toDto(user), newAccess, newRefresh);
     }
 
     // 유저 조회 - 전체 또는 검색

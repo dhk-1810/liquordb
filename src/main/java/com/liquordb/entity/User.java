@@ -63,17 +63,22 @@ public class User {
         return new User(email, username, password, socialProvider, UserStatus.ACTIVE, Role.USER);
     }
 
-    public void update(String email, String username){
+    public void updateEmail(String email){
         if (email != null) {
             this.email = email;
         }
+    }
+
+    public void updateUsername(String username){
         if (username != null) {
             this.username = username;
         }
     }
 
     public void updateRole(Role role){
-        this.role = role;
+        if (role != null) {
+            this.role = role;
+        }
     }
 
     public void updatePassword(String newEncryptedPassword) {

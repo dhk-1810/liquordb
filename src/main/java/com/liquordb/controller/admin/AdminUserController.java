@@ -4,6 +4,7 @@ import com.liquordb.dto.PageResponse;
 import com.liquordb.dto.user.UserListGetRequest;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.enums.Role;
+import com.liquordb.security.JwtInformation;
 import com.liquordb.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,14 @@ public class AdminUserController {
     private final UserService userService;
 
     // 사용자 권한 변경
-    @PatchMapping("/role")
-    public ResponseEntity<Void> updateRole(Role role, UUID userId){
-        userService.updateRole(role, userId);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{userId}/role")
+    public ResponseEntity<JwtInformation> updateRole(
+            @PathVariable UUID userId,
+            @RequestParam Role role,
+            @CookieValue(value = "REFRESH_TOKEN") String refreshToken
+    ) {
+        JwtInformation response = userService.updateRole(role, userId, refreshToken);
+        return ResponseEntity.ok(response);
     }
 
     // 사용자 전체 조회 및 검색

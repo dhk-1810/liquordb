@@ -3,6 +3,7 @@ package com.liquordb.controller;
 import com.liquordb.dto.user.*;
 import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
+import com.liquordb.security.JwtInformation;
 import com.liquordb.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,15 +35,16 @@ public class UserController {
 
     // 회원정보 수정 (프로필사진, 닉네임)
     @PatchMapping(path = "/{userId}/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> update(
+    public ResponseEntity<JwtInformation> update(
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
             @RequestPart(required = false) MultipartFile profileImage,
+            @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         authorizeUser(userId, user);
-        userService.update(userId, request, profileImage);
-        return ResponseEntity.noContent().build();
+        JwtInformation response = userService.update(userId, request, profileImage, refreshToken);
+        return ResponseEntity.ok(response);
     }
 
     // 비밀번호 수정 (로그인 상태에서)
