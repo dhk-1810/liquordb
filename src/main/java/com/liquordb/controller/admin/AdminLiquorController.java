@@ -13,30 +13,30 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@RequiredArgsConstructor
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin/liquors")
-@RequiredArgsConstructor
 public class AdminLiquorController {
 
     private final LiquorService liquorService;
 
     // 주류 추가
-    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<LiquorResponseDto> createLiquor(
-            @RequestPart @Valid LiquorRequest request,
-            @RequestPart(required = false) MultipartFile image
+            @ModelAttribute(value = "request") @Valid LiquorRequest request,
+            @RequestPart(value = "image") MultipartFile image
     ) {
         liquorService.create(request, image);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 주류 수정
-    @PatchMapping(path = "/{liquorId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PatchMapping(path = "/{liquorId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<LiquorResponseDto> updateLiquor(
             @PathVariable Long liquorId,
-            @RequestPart LiquorUpdateRequest request,
-            @RequestPart(required = false) MultipartFile image
+            @ModelAttribute(value = "request") LiquorUpdateRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         liquorService.update(liquorId, request, image);
         return ResponseEntity.ok().build();

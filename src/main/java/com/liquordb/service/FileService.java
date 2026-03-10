@@ -28,6 +28,8 @@ public class FileService {
     private final S3Service s3Service; // 단방향 참조
     private final FileRepository fileRepository;
 
+    private static final long MAX_FILE_SIZE = 30 * 1024 * 1024;
+
     @Transactional
     public FileResponseDto upload(MultipartFile file, File.FileType type) {
 
@@ -35,7 +37,7 @@ public class FileService {
             throw new FileNotFoundException();
         }
 
-        if (file.getSize() <= 0 || file.getSize() > 1024 * 30) {
+        if (file.getSize() <= 0 || file.getSize() > MAX_FILE_SIZE) {
             throw new RuntimeException("File size must be between 1 and 30MB");
         }
 
