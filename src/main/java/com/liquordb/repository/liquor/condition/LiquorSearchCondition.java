@@ -13,7 +13,7 @@ public record LiquorSearchCondition (
         String keyword,
         boolean searchDeleted,
         List<Long> tagIds,
-        Object cursor,
+        String cursor,
         Long idAfter,
         int limit,
         SortLiquorBy sortBy,

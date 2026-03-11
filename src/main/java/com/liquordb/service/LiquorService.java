@@ -76,7 +76,7 @@ public class LiquorService {
 
         Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
-            String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+            String presignedUrl = liquor.getImageKey() == null ? null : s3Service.createPresignedUrl(liquor.getImageKey());
             return LiquorMapper.toSummaryDto(liquor, presignedUrl, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
         });
 
@@ -100,7 +100,7 @@ public class LiquorService {
                 .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
-        String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+        String presignedUrl = liquor.getImageKey() == null ? null : s3Service.createPresignedUrl(liquor.getImageKey());
         return LiquorMapper.toDto(liquor, presignedUrl, tags, likedByMe);
     }
 

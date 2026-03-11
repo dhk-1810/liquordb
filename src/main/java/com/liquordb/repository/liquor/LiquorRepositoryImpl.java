@@ -9,10 +9,12 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -20,11 +22,11 @@ import static com.querydsl.jpa.JPAExpressions.select;
 
 @RequiredArgsConstructor
 @Repository
+@Slf4j
 public class LiquorRepositoryImpl implements CustomLiquorRepository{
 
     private final JPAQueryFactory queryFactory;
     private final QLiquor liquor = QLiquor.liquor;
-    private final QLiquorTag liquorTag = QLiquorTag.liquorTag;
 
     @Override
     public Slice<Liquor> findAll(LiquorSearchCondition condition) {
@@ -59,44 +61,41 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
      * Predicates
      */
 
-    private Predicate cursorCondition(Object cursor, Long idAfter, SortLiquorBy sortBy, boolean descending) {
-        if (cursor == null) {
+    private Predicate cursorCondition(String cursor, Long idAfter, SortLiquorBy sortBy, boolean descending) {
+        if (!StringUtils.hasText(cursor)) {
             return null; // 첫 페이지 조회
         }
         // 주 커서
-        switch (sortBy) {
-            case LIQUOR_ID -> {
-                Long idCursor = (Long) cursor;
-                if (descending) {
-                    return liquor.id.lt(idCursor);
-                } else {
-                    return liquor.id.gt(idCursor);
+        try {
+            return switch (sortBy) {
+                case LIQUOR_ID -> {
+                    Long idCursor = Long.parseLong(cursor);
+                    yield descending ? liquor.id.lt(idCursor) : liquor.id.gt(idCursor);
                 }
-            }
-            case LIKE_COUNT -> {
-                Long likeCountCursor = (Long) cursor;
-                if (descending) {
-                    return liquor.likeCount.lt(likeCountCursor)
-                            .or(liquor.likeCount.eq(likeCountCursor).and(liquor.id.lt(idAfter)));
-                } else {
-                    return liquor.likeCount.gt(likeCountCursor)
+                case LIKE_COUNT -> {
+                    Long likeCountCursor = Long.parseLong(cursor);
+                    yield descending
+                            ? liquor.likeCount.lt(likeCountCursor)
+                            .or(liquor.likeCount.eq(likeCountCursor).and(liquor.id.lt(idAfter)))
+                            : liquor.likeCount.gt(likeCountCursor)
                             .or(liquor.likeCount.eq(likeCountCursor).and(liquor.id.gt(idAfter)));
                 }
-            }
-            case AVERAGE_RATING -> {
-                Double avgRatingCursor = (Double) cursor;
-                if (descending) {
-                    return liquor.averageRating.lt(avgRatingCursor)
-                            .or(liquor.averageRating.eq(avgRatingCursor).and(liquor.id.lt(idAfter)));
-                } else {
-                    return liquor.averageRating.gt(avgRatingCursor)
+                case AVERAGE_RATING -> {
+                    Double avgRatingCursor = Double.parseDouble(cursor);
+                    yield descending
+                            ? liquor.averageRating.lt(avgRatingCursor)
+                            .or(liquor.averageRating.eq(avgRatingCursor).and(liquor.id.lt(idAfter)))
+                            : liquor.averageRating.gt(avgRatingCursor)
                             .or(liquor.averageRating.eq(avgRatingCursor).and(liquor.id.gt(idAfter)));
+
                 }
-            }
-            default ->  {
-                return null;
-            }
+                default -> null;
+            };
+        } catch (NumberFormatException e) {
+            log.warn("잘못된 형식의 커서 값이 입력되었습니다: {}", cursor);
+            return null;
         }
+
     }
 
     private Predicate categoryEq(LiquorCategory category) {

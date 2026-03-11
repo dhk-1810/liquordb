@@ -1,8 +1,6 @@
 package com.liquordb.controller.admin;
 
 import com.liquordb.dto.liquor.*;
-import com.liquordb.entity.LiquorSubcategory;
-import com.liquordb.repository.liquor.LiquorSubcategoryRepository;
 import com.liquordb.service.LiquorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminLiquorController {
 
     private final LiquorService liquorService;
-    private final LiquorSubcategoryRepository liquorSubcategoryRepository;
 
     // 주류 추가
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})

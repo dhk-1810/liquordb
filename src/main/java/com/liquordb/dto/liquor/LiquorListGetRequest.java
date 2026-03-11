@@ -22,7 +22,7 @@ public record LiquorListGetRequest(
 
         List<Long> tagIds,
 
-        Object cursor,
+        String cursor, // Long or Double
 
         Long idAfter,
 
