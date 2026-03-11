@@ -28,7 +28,7 @@ public class LiquorController {
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
     public ResponseEntity<CursorPageResponse<LiquorSummaryDto>> getAll(
-            @ModelAttribute LiquorListGetRequest request, // TODO 관리자용이랑 분리?
+            @ModelAttribute LiquorListGetRequest request,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         UUID viewerId = (user != null) ? user.id() : null;

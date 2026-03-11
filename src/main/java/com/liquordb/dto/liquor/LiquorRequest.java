@@ -15,7 +15,7 @@ public record LiquorRequest(
         @NotNull(message = "주류 분류는 필수입니다.")
         Liquor.LiquorCategory category,
 
-        Long subcategory,
+        Long subcategoryId,
 
         @NotBlank(message = "주류 제조국 정보는 필수입니다.")
         String country,

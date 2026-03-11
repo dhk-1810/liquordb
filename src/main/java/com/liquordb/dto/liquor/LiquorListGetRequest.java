@@ -14,7 +14,7 @@ public record LiquorListGetRequest(
 
         Liquor.LiquorCategory category,
 
-        LiquorSubcategory subcategory,
+        Long subcategoryId,
 
         @Size(max = 20, message = "키워드는 20자 이내여야 합니다.")
         String keyword,

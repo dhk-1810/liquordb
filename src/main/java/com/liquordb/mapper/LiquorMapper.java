@@ -44,11 +44,11 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static Liquor toEntity(LiquorRequest request, String imageKey) {
+    public static Liquor toEntity(LiquorRequest request, LiquorSubcategory subcategory, String imageKey) {
         return Liquor.create(
                 request.name(),
                 request.category(),
-                request.subcategory(),
+                subcategory,
                 request.country(),
                 request.manufacturer(),
                 request.abv(),

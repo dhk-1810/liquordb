@@ -50,7 +50,7 @@ public class LiquorService {
             boolean isViewerRoleAdmin
     ) {
         int limit = request.limit() == null ? 50 : request.limit();
-        boolean searchDeleted = isViewerRoleAdmin ? request.searchDeleted() : false;
+        boolean searchDeleted = isViewerRoleAdmin && request.searchDeleted() != null ? request.searchDeleted() : false;
         SortLiquorBy sortBy = request.sortBy() == null ? SortLiquorBy.LIQUOR_ID : request.sortBy();
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
@@ -58,7 +58,7 @@ public class LiquorService {
                 .category(request.category())
                 .subcategory(request.subcategory())
                 .keyword(request.keyword())
-                .searchDeleted(request.searchDeleted())
+                .searchDeleted(searchDeleted)
                 .tagIds(request.tagIds())
                 .cursor(request.cursor())
                 .idAfter(request.idAfter())

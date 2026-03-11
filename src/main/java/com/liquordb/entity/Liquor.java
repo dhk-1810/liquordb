@@ -27,7 +27,7 @@ public class Liquor extends LikeableEntity {
     private LiquorCategory category; // 주종 대분류
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "subcategory_id")
     private LiquorSubcategory subcategory; // 주종 소분류
 
     @Column(nullable = false, length = 50)
