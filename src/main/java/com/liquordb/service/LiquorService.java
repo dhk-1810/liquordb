@@ -123,7 +123,7 @@ public class LiquorService {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
 
-        if (!file.isEmpty()) {
+        if (file != null && !file.isEmpty()) {
             FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR);
             liquor.updateImage(fileResponseDto.key());
         }

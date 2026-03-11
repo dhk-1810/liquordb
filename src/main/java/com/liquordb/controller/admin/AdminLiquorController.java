@@ -24,7 +24,7 @@ public class AdminLiquorController {
     // 주류 추가
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<LiquorResponseDto> createLiquor(
-            @ModelAttribute(value = "request") @Valid LiquorRequest request,
+            @RequestPart(value = "request") @Valid LiquorRequest request,
             @RequestPart(value = "image") MultipartFile image
     ) {
         liquorService.create(request, image);
@@ -35,11 +35,11 @@ public class AdminLiquorController {
     @PatchMapping(path = "/{liquorId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<LiquorResponseDto> updateLiquor(
             @PathVariable Long liquorId,
-            @ModelAttribute(value = "request") LiquorUpdateRequest request,
+            @RequestPart(value = "request") LiquorUpdateRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         liquorService.update(liquorId, request, image);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     // 주류 삭제 (Soft Delete)
