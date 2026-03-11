@@ -1,13 +1,12 @@
 package com.liquordb.repository.liquor;
 
 import com.liquordb.entity.*;
+import com.liquordb.enums.LiquorCategory;
 import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.repository.liquor.condition.LiquorSearchCondition;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +33,7 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
         List<Liquor> content = queryFactory.selectFrom(liquor)
                 .where(
                         categoryEq(condition.category()),
-                        subcategoryEq(condition.subcategory()),
+                        subcategoryIdEq(condition.subcategoryId()),
                         keywordContains(condition.keyword()),
                         isDeletedEq(condition.searchDeleted()),
                         tagsAllMatch(condition.tagIds()),
@@ -100,12 +99,12 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
         }
     }
 
-    private Predicate categoryEq(Liquor.LiquorCategory category) {
+    private Predicate categoryEq(LiquorCategory category) {
         return category != null ? liquor.category.eq(category) : null;
     }
 
-    private Predicate subcategoryEq(LiquorSubcategory subcategory) {
-        return subcategory != null ? liquor.subcategory.eq(subcategory) : null;
+    private Predicate subcategoryIdEq(Long subcategoryId) {
+        return subcategoryId != null ? liquor.subcategoryId.eq(subcategoryId) : null;
     }
 
     private Predicate keywordContains(String keyword) {

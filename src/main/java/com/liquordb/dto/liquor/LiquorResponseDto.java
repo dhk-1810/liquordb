@@ -1,8 +1,7 @@
 package com.liquordb.dto.liquor;
 
 import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.entity.Liquor;
-import com.liquordb.entity.LiquorSubcategory;
+import com.liquordb.enums.LiquorCategory;
 import lombok.*;
 
 import java.util.Set;
@@ -12,22 +11,23 @@ import java.util.Set;
  */
 @Builder
 public record LiquorResponseDto (
-    Long id,
-    String name,
-    Liquor.LiquorCategory category,
-    LiquorSubcategory subcategory,
-    String country,
-    String manufacturer,
-    double abv,
-    boolean isDiscontinued, // 단종 여부
-    String presignedUrl,
+        Long id,
+        String name,
+        LiquorCategory category,
+        Long subcategoryId,
+        Long subcategoryName,
+        String country,
+        String manufacturer,
+        double abv,
+        boolean isDiscontinued, // 단종 여부
+        String presignedUrl,
 
-    double averageRating,
-    long reviewCount,
-    Set<TagResponseDto> tags,
+        double averageRating,
+        long reviewCount,
 
-    long likeCount,
-    boolean likedByMe
+        Set<TagResponseDto> tags,
+        long likeCount,
+        boolean likedByMe
 ) {
 
 }

@@ -18,11 +18,13 @@ public enum ErrorCode {
     USER_ALREADY_EXISTS (HttpStatus.CONFLICT),
     DUPLICATE_USERNAME (HttpStatus.CONFLICT),
     DUPLICATE_EMAIL (HttpStatus.CONFLICT),
-    WITHDRAWN_USER (HttpStatus.CONFLICT), // 자발적 탈퇴 (회원가입 시 기존 정보 존재)
+    WITHDRAWN_USER (HttpStatus.CONFLICT),
 
     // Liquor
     LIQUOR_NOT_FOUND (HttpStatus.NOT_FOUND),
-    LIQUOR_ALREADY_EXISTS (HttpStatus.CONFLICT),
+    DUPLICATE_LIQUOR_NAME (HttpStatus.CONFLICT),
+    LIQUOR_SUBCATEGORY_NOT_FOUND (HttpStatus.NOT_FOUND),
+    DUPLICATE_LIQUOR_SUBCATEGORY (HttpStatus.CONFLICT),
 
     // Review
     REVIEW_ACCESS_DENIED (HttpStatus.FORBIDDEN),

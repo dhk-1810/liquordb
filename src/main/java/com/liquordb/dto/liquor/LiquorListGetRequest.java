@@ -1,7 +1,6 @@
 package com.liquordb.dto.liquor;
 
-import com.liquordb.entity.Liquor;
-import com.liquordb.entity.LiquorSubcategory;
+import com.liquordb.enums.LiquorCategory;
 import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.enums.SortDirection;
 import jakarta.validation.constraints.Max;
@@ -12,7 +11,7 @@ import java.util.List;
 
 public record LiquorListGetRequest(
 
-        Liquor.LiquorCategory category,
+        LiquorCategory category,
 
         Long subcategoryId,
 

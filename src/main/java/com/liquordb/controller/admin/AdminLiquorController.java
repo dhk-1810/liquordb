@@ -1,8 +1,8 @@
 package com.liquordb.controller.admin;
 
-import com.liquordb.dto.liquor.LiquorRequest;
-import com.liquordb.dto.liquor.LiquorResponseDto;
-import com.liquordb.dto.liquor.LiquorUpdateRequest;
+import com.liquordb.dto.liquor.*;
+import com.liquordb.entity.LiquorSubcategory;
+import com.liquordb.repository.liquor.LiquorSubcategoryRepository;
 import com.liquordb.service.LiquorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminLiquorController {
 
     private final LiquorService liquorService;
+    private final LiquorSubcategoryRepository liquorSubcategoryRepository;
 
     // 주류 추가
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -46,6 +47,18 @@ public class AdminLiquorController {
     @DeleteMapping("/{liquorId}")
     public ResponseEntity<Void> toggleHidden(@PathVariable Long liquorId) {
         liquorService.deleteById(liquorId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/subcategory")
+    public ResponseEntity<LiquorSubcategoryResponse> createSubcategory(LiquorSubcategoryRequest request){
+        LiquorSubcategoryResponse subcategory = liquorService.createSubcategory(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(subcategory);
+    }
+
+    @DeleteMapping("/subcategory/{id}")
+    public ResponseEntity<Void> deleteSubcategory(@PathVariable Long id){
+        liquorService.deleteSubcategory(id);
         return ResponseEntity.noContent().build();
     }
 }

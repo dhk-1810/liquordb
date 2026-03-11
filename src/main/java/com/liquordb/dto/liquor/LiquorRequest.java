@@ -1,7 +1,6 @@
 package com.liquordb.dto.liquor;
 
-import com.liquordb.entity.Liquor;
-import com.liquordb.entity.LiquorSubcategory;
+import com.liquordb.enums.LiquorCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -13,7 +12,7 @@ public record LiquorRequest(
         String name,
 
         @NotNull(message = "주류 분류는 필수입니다.")
-        Liquor.LiquorCategory category,
+        LiquorCategory category,
 
         Long subcategoryId,
 

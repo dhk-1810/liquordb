@@ -16,7 +16,7 @@ public class LiquorMapper {
                 .id(liquor.getId())
                 .name(liquor.getName())
                 .category(liquor.getCategory())
-                .subcategory(liquor.getSubcategory())
+                .subcategoryId(liquor.getSubcategoryId())
                 .country(liquor.getCountry())
                 .manufacturer(liquor.getManufacturer())
                 .abv(liquor.getAbv())
@@ -44,11 +44,11 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static Liquor toEntity(LiquorRequest request, LiquorSubcategory subcategory, String imageKey) {
+    public static Liquor toEntity(LiquorRequest request, String imageKey) {
         return Liquor.create(
                 request.name(),
                 request.category(),
-                subcategory,
+                request.subcategoryId(),
                 request.country(),
                 request.manufacturer(),
                 request.abv(),

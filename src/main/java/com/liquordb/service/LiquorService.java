@@ -4,18 +4,16 @@ import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.FileResponseDto;
 import com.liquordb.dto.liquor.*;
 import com.liquordb.dto.tag.TagResponseDto;
-import com.liquordb.entity.Comment;
-import com.liquordb.entity.File;
-import com.liquordb.entity.Review;
+import com.liquordb.entity.*;
 import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.enums.SortDirection;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.mapper.LiquorMapper;
-import com.liquordb.entity.Liquor;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.*;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
+import com.liquordb.repository.liquor.LiquorSubcategoryRepository;
 import com.liquordb.repository.liquor.condition.LiquorSearchCondition;
 import com.liquordb.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +37,7 @@ public class LiquorService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final LiquorLikeRepository liquorLikeRepository;
+    private final LiquorSubcategoryRepository liquorSubcategoryRepository;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
 
@@ -56,7 +55,7 @@ public class LiquorService {
 
         LiquorSearchCondition condition = LiquorSearchCondition.builder()
                 .category(request.category())
-                .subcategory(request.subcategory())
+                .subcategoryId(request.subcategoryId())
                 .keyword(request.keyword())
                 .searchDeleted(searchDeleted)
                 .tagIds(request.tagIds())
@@ -154,4 +153,18 @@ public class LiquorService {
         liquorRepository.save(liquor);
     }
 
+    // 주류 소분류 추가
+    @Transactional
+    public LiquorSubcategoryResponse createSubcategory(LiquorSubcategoryRequest request){
+        LiquorSubcategory subcategory = LiquorSubcategory
+                .create(request.name(), request.description(), request.category());
+        liquorSubcategoryRepository.save(subcategory);
+        return LiquorSubcategoryResponse.toDto(subcategory);
+    }
+
+    // 주류 소분류 삭제
+    @Transactional
+    public void deleteSubcategory(Long id){
+        liquorSubcategoryRepository.deleteById(id);
+    }
 }

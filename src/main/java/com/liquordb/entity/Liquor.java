@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.enums.LiquorCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,9 +27,8 @@ public class Liquor extends LikeableEntity {
     @Enumerated(EnumType.STRING)
     private LiquorCategory category; // 주종 대분류
 
-    @ManyToOne
-    @JoinColumn(name = "subcategory_id")
-    private LiquorSubcategory subcategory; // 주종 소분류
+    @Column(nullable = false, length = 50)
+    private Long subcategoryId; // 주종 소분류
 
     @Column(nullable = false, length = 50)
     private String country; // 제조국
@@ -57,11 +57,6 @@ public class Liquor extends LikeableEntity {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
-    // 주종 대분류
-    public enum LiquorCategory {
-        BEER, WINE, WHISKY, OTHER
-    }
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -73,12 +68,12 @@ public class Liquor extends LikeableEntity {
     }
 
     @Builder
-    private Liquor(String name, LiquorCategory category, LiquorSubcategory subcategory,
+    private Liquor(String name, LiquorCategory category, Long subcategoryId,
                    String country, String manufacturer, Double abv, String imageKey) {
         this.isDeleted = false;
         this.name = name;
         this.category = category;
-        this.subcategory = subcategory;
+        this.subcategoryId = subcategoryId;
         this.country = country;
         this.manufacturer = manufacturer;
         this.abv = abv;
@@ -87,12 +82,12 @@ public class Liquor extends LikeableEntity {
         this.imageKey = imageKey;
     }
 
-    public static Liquor create(String name, LiquorCategory category, LiquorSubcategory subcategory,
+    public static Liquor create(String name, LiquorCategory category, Long subcategoryId,
                                 String country, String manufacturer, Double abv, String imageKey) {
         return Liquor.builder()
                 .name(name)
                 .category(category)
-                .subcategory(subcategory)
+                .subcategoryId(subcategoryId)
                 .country(country)
                 .manufacturer(manufacturer)
                 .abv(abv)
