@@ -5,6 +5,7 @@ import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.liquor.LiquorListGetRequest;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
+import com.liquordb.enums.Role;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorService;
@@ -27,11 +28,12 @@ public class LiquorController {
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
     public ResponseEntity<CursorPageResponse<LiquorSummaryDto>> getAll(
-            @ModelAttribute LiquorListGetRequest request,
+            @ModelAttribute LiquorListGetRequest request, // TODO 관리자용이랑 분리?
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        UUID userId = (user != null) ? user.id() : null;
-        CursorPageResponse<LiquorSummaryDto> liquor = liquorService.getAll(request, userId);
+        UUID viewerId = (user != null) ? user.id() : null;
+        boolean isViewerRoleAdmin = user != null && (user.dto().role() == Role.ADMIN);
+        CursorPageResponse<LiquorSummaryDto> liquor = liquorService.getAll(request, viewerId, isViewerRoleAdmin);
         return ResponseEntity.ok(liquor);
     }
 

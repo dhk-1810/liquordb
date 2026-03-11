@@ -38,13 +38,13 @@ public class AdminLiquorController {
             @RequestPart(value = "request") LiquorUpdateRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        liquorService.update(liquorId, request, image);
-        return ResponseEntity.noContent().build();
+        LiquorResponseDto response = liquorService.update(liquorId, request, image);
+        return ResponseEntity.ok(response);
     }
 
     // 주류 삭제 (Soft Delete)
     @DeleteMapping("/{liquorId}")
-    public ResponseEntity<LiquorResponseDto> toggleHidden(@PathVariable Long liquorId) {
+    public ResponseEntity<Void> toggleHidden(@PathVariable Long liquorId) {
         liquorService.deleteById(liquorId);
         return ResponseEntity.noContent().build();
     }

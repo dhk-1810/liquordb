@@ -44,9 +44,13 @@ public class LiquorService {
 
     // 주류 목록 조회 (전체 조회 또는 검색어, 대분류, 소분류별로 필터링)
     @Transactional(readOnly = true)
-    public CursorPageResponse<LiquorSummaryDto> getAll(LiquorListGetRequest request, UUID userId) {
-
+    public CursorPageResponse<LiquorSummaryDto> getAll(
+            LiquorListGetRequest request,
+            UUID userId,
+            boolean isViewerRoleAdmin
+    ) {
         int limit = request.limit() == null ? 50 : request.limit();
+        boolean searchDeleted = isViewerRoleAdmin ? request.searchDeleted() : false;
         SortLiquorBy sortBy = request.sortBy() == null ? SortLiquorBy.LIQUOR_ID : request.sortBy();
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
@@ -123,15 +127,17 @@ public class LiquorService {
         Liquor liquor = liquorRepository.findById(id)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
 
+        String presignedUrl = null;
         if (file != null && !file.isEmpty()) {
             FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR);
             liquor.updateImage(fileResponseDto.key());
+            presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
         }
         liquor.update(request.isDiscontinued(), request.deleteImage());
 
         liquorRepository.save(liquor);
-        String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
-        return LiquorMapper.toDto(liquor, presignedUrl, null, false);
+
+        return LiquorMapper.toDto(liquor, presignedUrl, null, false); // TODO Tags
     }
 
     // 주류 삭제 (Soft Delete)
