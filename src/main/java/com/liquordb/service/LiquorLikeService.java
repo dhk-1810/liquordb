@@ -1,6 +1,5 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.entity.LiquorLike;
 import com.liquordb.event.LiquorLikeEvent;
 import com.liquordb.exception.liquor.LiquorLikeAlreadyExistsException;
@@ -31,14 +30,12 @@ public class LiquorLikeService {
     @Transactional
     public void like(Long liquorId, UUID userId) {
 
-         // TODO 좋아요 전체 멱등성 ? 예외?
         if (liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId)) {
-            throw new LiquorLikeAlreadyExistsException(liquorId);
+            throw new LiquorLikeAlreadyExistsException(liquorId, userId);
         }
 
         User user = userRepository.getReferenceById(userId);
         Liquor liquor = liquorRepository.getReferenceById(liquorId);
-
         LiquorLike liquorLike = LiquorLike.create(user, liquor);
 
         // 주류 페이지 접근 이후, 좋아요 누르기 이전 시점에 주류가 삭제된 경우의 예외 처리
@@ -55,10 +52,10 @@ public class LiquorLikeService {
     @Transactional
     public void cancelLike(Long liquorId, UUID userId) {
 
-        if (liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId)){
-            throw new LiquorLikeNotFoundException(liquorId);
-        }
+        LiquorLike liquorlike = liquorLikeRepository.findByLiquor_IdAndUser_Id(liquorId, userId)
+                .orElseThrow(() -> new LiquorLikeNotFoundException(liquorId, userId));
 
+        liquorLikeRepository.delete(liquorlike);
         eventPublisher.publishEvent(new LiquorLikeEvent(liquorId, false)); // 엔터티의 likeCount 1 감소
     }
 

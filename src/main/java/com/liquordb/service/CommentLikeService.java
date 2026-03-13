@@ -1,8 +1,11 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.LikeResponseDto;
-import com.liquordb.entity.*;
+import com.liquordb.entity.Comment;
+import com.liquordb.entity.CommentLike;
+import com.liquordb.entity.User;
 import com.liquordb.event.CommentLikeEvent;
+import com.liquordb.exception.comment.CommentLikeAlreadyExistsException;
+import com.liquordb.exception.comment.CommentLikeNotFoundException;
 import com.liquordb.exception.comment.CommentNotFoundException;
 import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.repository.comment.CommentRepository;
@@ -13,7 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -25,15 +28,14 @@ public class CommentLikeService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public LikeResponseDto like(Long commentId, UUID userId) {
+    public void like(Long commentId, UUID userId) {
 
         if (commentLikeRepository.existsByComment_IdAndUser_Id(commentId, userId)) {
-            return new LikeResponseDto(true, commentLikeRepository.countByComment_Id(commentId));
+            throw new CommentLikeAlreadyExistsException(commentId, userId);
         }
 
         User user = userRepository.getReferenceById(userId);
         Comment comment = commentRepository.getReferenceById(commentId);
-
         CommentLike commentLike = CommentLike.create(user, comment);
 
         try {
@@ -43,19 +45,16 @@ public class CommentLikeService {
         }
 
         eventPublisher.publishEvent(new CommentLikeEvent(commentId, true));
-
-        long likeCount = commentLikeRepository.countByComment_Id(commentId);
-        return new LikeResponseDto(true, likeCount);
     }
 
     @Transactional
-    public LikeResponseDto cancelLike(Long commentId, UUID userId) {
-        commentLikeRepository.findByCommentIdAndUser_Id(commentId, userId)
-                .ifPresent(commentLikeRepository::delete);
+    public void cancelLike(Long commentId, UUID userId) {
 
+        CommentLike commentLike = commentLikeRepository.findByComment_IdAndUser_Id(commentId, userId)
+                .orElseThrow(() -> new CommentLikeNotFoundException(commentId, userId));
+
+        commentLikeRepository.delete(commentLike);
         eventPublisher.publishEvent(new CommentLikeEvent(commentId, false));
-        long likeCount = commentLikeRepository.countByComment_Id(commentId);
-        return new LikeResponseDto(false, likeCount);
     }
 
 }

@@ -1,8 +1,11 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.LikeResponseDto;
-import com.liquordb.entity.*;
+import com.liquordb.entity.Review;
+import com.liquordb.entity.ReviewLike;
+import com.liquordb.entity.User;
 import com.liquordb.event.ReviewLikeEvent;
+import com.liquordb.exception.review.ReviewLikeAlreadyExistsException;
+import com.liquordb.exception.review.ReviewLikeNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.repository.review.ReviewRepository;
@@ -25,15 +28,14 @@ public class ReviewLikeService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public LikeResponseDto like(Long reviewId, UUID userId) {
+    public void like(Long reviewId, UUID userId) {
 
         if (reviewLikeRepository.existsByReview_IdAndUser_Id(reviewId, userId)) {
-            return new LikeResponseDto(true, reviewLikeRepository.countByReview_Id(reviewId));
+            throw new ReviewLikeAlreadyExistsException(reviewId, userId);
         }
 
         User user = userRepository.getReferenceById(userId);
         Review review = reviewRepository.getReferenceById(reviewId);
-
         ReviewLike reviewLike = ReviewLike.create(user, review);
 
         try {
@@ -43,19 +45,16 @@ public class ReviewLikeService {
         }
 
         eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, true));
-
-        long likeCount = reviewLikeRepository.countByReview_Id(reviewId);
-        return new LikeResponseDto(true, likeCount);
     }
 
     @Transactional
-    public LikeResponseDto cancelLike(Long reviewId, UUID userId) {
-        reviewLikeRepository.findByReview_IdAndUser_Id(reviewId, userId)
-                .ifPresent(reviewLikeRepository::delete);
+    public void cancelLike(Long reviewId, UUID userId) {
 
+        ReviewLike reviewLike = reviewLikeRepository.findByReview_IdAndUser_Id(reviewId, userId)
+                .orElseThrow(() -> new ReviewLikeNotFoundException(reviewId, userId));
+
+        reviewLikeRepository.delete(reviewLike);
         eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, false));
-        long likeCount = reviewLikeRepository.countByReview_Id(reviewId);
-        return new LikeResponseDto(false, likeCount);
     }
 
 }
