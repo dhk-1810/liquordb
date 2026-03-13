@@ -8,6 +8,7 @@ import com.liquordb.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +26,11 @@ public class ReviewController {
     private final ReviewLikeService reviewLikeService;
 
     // 리뷰 등록
-    @PostMapping("/liquors/{liquorId}/reviews")
+    @PostMapping(value = "/liquors/{liquorId}/reviews", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ReviewResponseDto> create(
             @PathVariable Long liquorId,
-            @RequestPart @Valid ReviewRequest request,
-            @RequestPart(required = false) List<MultipartFile> images,
+            @RequestPart(value = "request") @Valid ReviewRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         ReviewResponseDto response = reviewService.create(liquorId, request, images, user.id());

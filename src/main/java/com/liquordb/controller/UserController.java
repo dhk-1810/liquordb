@@ -38,7 +38,7 @@ public class UserController {
     public ResponseEntity<JwtInformation> update(
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
-            @RequestPart(required = false) MultipartFile profileImage,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
