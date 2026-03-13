@@ -68,35 +68,39 @@ public class ReviewService {
         liquor.updateAverageRating(request.rating());
 
         // 태그 추가, 없으면 새로 생성
-        Set<Tag> tags = request.tags().stream()
-                .map(name -> tagRepository.findByName(name)
-                        .orElseGet(() -> tagRepository.save(Tag.create(name))))
-                .collect(Collectors.toSet());
-
-        Set<LiquorTag> liquorTags = new HashSet<>();
-        Set<ReviewTag> reviewTags = new HashSet<>();
-        tags.forEach(tag -> {
-            LiquorTag liquorTag = LiquorTag.create(liquor, tag);
-            ReviewTag reviewTag = ReviewTag.create(review, tag);
-            liquorTags.add(liquorTag);
-            reviewTags.add(reviewTag);
-        });
-        liquorTagRepository.saveAll(liquorTags);
-        reviewTagRepository.saveAll(reviewTags);
+        Set<TagResponseDto> tagDtos = new HashSet<>();
+        if (request.tags() != null && !request.tags().isEmpty()) {
+            Set<Tag> tags = request.tags().stream()
+                    .map(name -> tagRepository.findByName(name)
+                            .orElseGet(() -> tagRepository.save(Tag.create(name))))
+                    .collect(Collectors.toSet());
+            Set<LiquorTag> liquorTags = new HashSet<>();
+            Set<ReviewTag> reviewTags = new HashSet<>();
+            tags.forEach(tag -> {
+                LiquorTag liquorTag = LiquorTag.create(liquor, tag);
+                ReviewTag reviewTag = ReviewTag.create(review, tag);
+                liquorTags.add(liquorTag);
+                reviewTags.add(reviewTag);
+            });
+            liquorTagRepository.saveAll(liquorTags);
+            reviewTagRepository.saveAll(reviewTags);
+            tagDtos = tags.stream()
+                    .map(TagMapper::toDto)
+                    .collect(Collectors.toSet());
+        }
 
         List<String> presignedUrls = new ArrayList<>();
         List<ReviewImageKey> keys = new ArrayList<>();
-        images.forEach(file -> {
-                    FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW);
-                    keys.add(new ReviewImageKey(review, dto.key()));
-                    presignedUrls.add(s3Service.createPresignedUrl(dto.key()));
-                }
-        );
+        if (images != null && !images.isEmpty()) {
+            images.forEach(file -> {
+                        FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW);
+                        keys.add(new ReviewImageKey(review, dto.key()));
+                        presignedUrls.add(s3Service.createPresignedUrl(dto.key()));
+                    }
+            );
+        }
         reviewImageKeyRepository.saveAll(keys);
         reviewRepository.save(review);
-        Set<TagResponseDto> tagDtos = tags.stream()
-                .map(TagMapper::toDto)
-                .collect(Collectors.toSet());
         return ReviewMapper.toDto(review, tagDtos, presignedUrls);
     }
 
