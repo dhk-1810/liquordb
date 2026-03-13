@@ -3,6 +3,8 @@ package com.liquordb.service;
 import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.entity.LiquorLike;
 import com.liquordb.event.LiquorLikeEvent;
+import com.liquordb.exception.liquor.LiquorLikeAlreadyExistsException;
+import com.liquordb.exception.liquor.LiquorLikeNotFoundException;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.entity.Liquor;
@@ -27,10 +29,11 @@ public class LiquorLikeService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public LikeResponseDto like(Long liquorId, UUID userId) {
+    public void like(Long liquorId, UUID userId) {
 
+         // TODO 좋아요 전체 멱등성 ? 예외?
         if (liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId)) {
-            return new LikeResponseDto(true, liquorLikeRepository.countByLiquor_Id(liquorId));
+            throw new LiquorLikeAlreadyExistsException(liquorId);
         }
 
         User user = userRepository.getReferenceById(userId);
@@ -47,19 +50,16 @@ public class LiquorLikeService {
 
         // 비동기로 엔터티의 likeCount 1 증가
         eventPublisher.publishEvent(new LiquorLikeEvent(liquorId, true));
-
-        long likeCount = liquorLikeRepository.countByLiquor_Id(liquorId);
-        return new LikeResponseDto(true, likeCount);
     }
 
     @Transactional
-    public LikeResponseDto cancelLike(Long liquorId, UUID userId) {
-        liquorLikeRepository.findByLiquor_IdAndUser_Id(liquorId, userId)
-                .ifPresent(liquorLikeRepository::delete);
+    public void cancelLike(Long liquorId, UUID userId) {
+
+        if (liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId)){
+            throw new LiquorLikeNotFoundException(liquorId);
+        }
 
         eventPublisher.publishEvent(new LiquorLikeEvent(liquorId, false)); // 엔터티의 likeCount 1 감소
-        long likeCount = liquorLikeRepository.countByLiquor_Id(liquorId);
-        return new LikeResponseDto(false, likeCount);
     }
 
 }

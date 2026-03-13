@@ -80,22 +80,22 @@ public class CommentController {
 
     // 좋아요
     @PostMapping("/comments/{commentId}/like")
-    public ResponseEntity<LikeResponseDto> like(
+    public ResponseEntity<Void> like(
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = commentLikeService.like(commentId, user.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        commentLikeService.like(commentId, user.id());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 좋아요 취소
     @DeleteMapping("/comments/{commentId}/cancel-like")
-    public ResponseEntity<LikeResponseDto> cancelLike(
+    public ResponseEntity<Void> cancelLike(
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = commentLikeService.cancelLike(commentId, user.id());
-        return ResponseEntity.ok(response);
+        commentLikeService.cancelLike(commentId, user.id());
+        return ResponseEntity.noContent().build();
     }
 
 }

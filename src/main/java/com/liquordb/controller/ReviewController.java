@@ -81,22 +81,22 @@ public class ReviewController {
 
     // 좋아요
     @PostMapping("/reviews/{reviewId}/like")
-    public ResponseEntity<LikeResponseDto> like(
+    public ResponseEntity<Void> like(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = reviewLikeService.like(reviewId, user.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        reviewLikeService.like(reviewId, user.id());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 좋아요 취소
     @DeleteMapping("/reviews/{reviewId}/cancel-like")
-    public ResponseEntity<LikeResponseDto> cancelLike(
+    public ResponseEntity<Void> cancelLike(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = reviewLikeService.cancelLike(reviewId, user.id());
-        return ResponseEntity.ok(response);
+        reviewLikeService.cancelLike(reviewId, user.id());
+        return ResponseEntity.noContent().build();
     }
 
 }

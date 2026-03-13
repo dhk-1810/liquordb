@@ -50,22 +50,22 @@ public class LiquorController {
 
     // 좋아요
     @PostMapping("/{liquorId}/like")
-    public ResponseEntity<LikeResponseDto> like(
+    public ResponseEntity<Void> like(
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = liquorLikeService.like(liquorId, user.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        liquorLikeService.like(liquorId, user.id());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 좋아요 취소
     @DeleteMapping("/{liquorId}/cancel-like")
-    public ResponseEntity<LikeResponseDto> cancelLike(
+    public ResponseEntity<Void> cancelLike(
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        LikeResponseDto response = liquorLikeService.cancelLike(liquorId, user.id());
-        return ResponseEntity.ok(response);
+        liquorLikeService.cancelLike(liquorId, user.id());
+        return ResponseEntity.noContent().build();
     }
 
 }
