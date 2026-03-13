@@ -1,7 +1,6 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.CursorPageResponse;
-import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.review.*;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
@@ -10,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

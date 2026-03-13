@@ -1,7 +1,6 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.CursorPageResponse;
-import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.comment.request.CommentListGetRequest;
 import com.liquordb.dto.comment.request.CommentRequest;
 import com.liquordb.dto.comment.CommentResponseDto;

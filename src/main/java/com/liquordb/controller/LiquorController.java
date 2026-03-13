@@ -1,7 +1,6 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.CursorPageResponse;
-import com.liquordb.dto.LikeResponseDto;
 import com.liquordb.dto.liquor.LiquorListGetRequest;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
