@@ -17,8 +17,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, CustomRev
     @Query("SELECT r FROM Review r " +
             "LEFT JOIN FETCH r.reviewTags rt " +
             "LEFT JOIN FETCH rt.tag " +
-            "WHERE r.id = :id")
-    Optional<Review> findByIdWithTags(@Param("id") Long id);
+            "WHERE r.id = :id AND r.status = :status")
+    Optional<Review> findByIdAndStatusWithTags(@Param("id") Long id, @Param("status") Review.ReviewStatus status);
 
     Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
 

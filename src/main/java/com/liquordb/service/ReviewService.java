@@ -27,6 +27,7 @@ import com.liquordb.repository.review.condition.ReviewSearchCondition;
 import com.liquordb.repository.tag.TagRepository;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ReviewService {
 
     private final UserRepository userRepository;
@@ -64,7 +66,7 @@ public class ReviewService {
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
 
         Review review = ReviewMapper.toEntity(request, liquor, user);
-
+        reviewRepository.save(review);
         liquor.updateAverageRating(request.rating());
 
         // 태그 추가, 없으면 새로 생성
@@ -98,9 +100,8 @@ public class ReviewService {
                         presignedUrls.add(s3Service.createPresignedUrl(dto.key()));
                     }
             );
+            reviewImageKeyRepository.saveAll(keys);
         }
-        reviewImageKeyRepository.saveAll(keys);
-        reviewRepository.save(review);
         return ReviewMapper.toDto(review, tagDtos, presignedUrls);
     }
 
@@ -108,7 +109,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public ReviewResponseDto get(Long id) {
 
-        Review review = reviewRepository.findByIdWithTags(id)
+        Review review = reviewRepository.findByIdAndStatusWithTags(id, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(id));
 
         Set<TagResponseDto> tags = review.getReviewTags().stream()

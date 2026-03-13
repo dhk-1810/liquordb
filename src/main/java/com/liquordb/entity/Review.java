@@ -30,6 +30,7 @@ public class Review extends LikeableEntity {
     private String content;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ReviewStatus status = ReviewStatus.ACTIVE;
 
     @ManyToOne
