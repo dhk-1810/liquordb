@@ -17,8 +17,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
-// TODO 복합 인덱스 생성 (reviewId, likeCount, commentId)
-
 @RequiredArgsConstructor
 @Repository
 public class CommentRepositoryImpl implements CustomCommentRepository {

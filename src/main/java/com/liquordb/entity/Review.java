@@ -12,7 +12,10 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "reviews")
+@Table(
+        name = "reviews",
+        indexes = { @Index(name = "idx_rating_id", columnList = "liquorId, rating, id") }
+)
 public class Review extends LikeableEntity {
 
     @Id

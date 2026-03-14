@@ -75,5 +75,4 @@ public class FileService {
         return filename.substring(filename.lastIndexOf("."));
     }
 
-    // TODO 삭제?
 }

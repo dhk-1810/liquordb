@@ -123,7 +123,7 @@ public class LiquorService {
     @Transactional
     public LiquorResponseDto update(Long id, LiquorUpdateRequest request, MultipartFile file) {
 
-        Liquor liquor = liquorRepository.findById(id)
+        Liquor liquor = liquorRepository.findByIdAndIsDeletedWithTags(id, false)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
 
         String presignedUrl = null;
@@ -136,7 +136,10 @@ public class LiquorService {
 
         liquorRepository.save(liquor);
 
-        return LiquorMapper.toDto(liquor, presignedUrl, null, false); // TODO Tags
+        Set<TagResponseDto> tags = liquor.getLiquorTags().stream()
+                .map(TagMapper::toDto)
+                .collect(Collectors.toSet());
+        return LiquorMapper.toDto(liquor, presignedUrl, tags, false);
     }
 
     // 주류 삭제 (Soft Delete)

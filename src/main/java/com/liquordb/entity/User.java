@@ -91,7 +91,7 @@ public class User {
 
     public void deleteProfileImage() {
         this.profileImageKey = null;
-    } // TODO
+    }
 
     public void withdraw() {
         if (!this.status.isAvailable()) return;
