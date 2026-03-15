@@ -32,7 +32,8 @@ public class NoticeRepositoryImpl implements CustomNoticeRepository {
                         isDeletedEq(condition.deleted())
                 )
                 .orderBy(
-                        getOrderSpecifier(condition.descending())
+                        notice.isPinned.desc(),
+                        notice.id.desc()
                 )
                 .offset((long) page * limit)
                 .limit(limit)
