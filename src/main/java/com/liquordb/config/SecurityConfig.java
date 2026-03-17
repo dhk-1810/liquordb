@@ -71,7 +71,8 @@ public class SecurityConfig {
 
                 // 인가
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/","/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/index.html").permitAll()
                         .requestMatchers("/api/auth/restore").authenticated()
                         .requestMatchers( "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/liquors/**").permitAll() // 주류, 리뷰 조회 허용
