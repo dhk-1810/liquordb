@@ -18,6 +18,8 @@ public class S3Service {
     private final S3Properties s3Properties;
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
+    private static final String DEFAULT_LIQUOR_IMAGE_SUFFIX = "default-liquor-image.png";
+    private static final String DEFAULT_PROFILE_IMAGE_SUFFIX = "default-profile-image.png";
 
     public void uploadFile(String key, MultipartFile file) throws IOException {
 
@@ -33,7 +35,7 @@ public class S3Service {
 
     public String getLiquorImageUrl(String key) {
         if (key == null || !key.isBlank()) {
-            return s3Properties.cloudfrontDomain() + "default-liquor-image.png";
+            return s3Properties.cloudfrontDomain() + DEFAULT_LIQUOR_IMAGE_SUFFIX;
         }
         return s3Properties.cloudfrontDomain() + key;
     }
@@ -44,7 +46,7 @@ public class S3Service {
 
     public String getProfileImageUrl(String key) {
         if (key == null || key.isBlank()) {
-            return s3Properties.cloudfrontDomain() + "default-profile-image.png";
+            return s3Properties.cloudfrontDomain() + DEFAULT_PROFILE_IMAGE_SUFFIX;
         }
         return s3Properties.cloudfrontDomain() + key;
     }
