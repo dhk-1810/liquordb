@@ -8,7 +8,8 @@ public record S3Properties (
         String accessKey,
         String secretKey,
         String bucketName,
-        long presignedUrlExpiration
+        String cloudfrontDomain
+//        long presignedUrlExpiration
 ) {
 
 }

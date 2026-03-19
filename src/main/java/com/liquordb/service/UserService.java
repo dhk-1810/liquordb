@@ -21,7 +21,6 @@ import com.liquordb.security.RedisJwtRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,12 +60,10 @@ public class UserService {
         long likedReviewCount = reviewLikeRepository.countByUser_IdAndReviewStatus(userId, Review.ReviewStatus.ACTIVE);
         long likedCommentCount = commentLikeRepository.countByUser_IdAndCommentStatus(userId, Comment.CommentStatus.ACTIVE);
 
-        String presignedUrl = user.getProfileImageKey() != null
-                ? s3Service.createPresignedUrl(user.getProfileImageKey())
-                : null;
+        String imageUrl = s3Service.getProfileImageUrl(user.getProfileImageKey()); // null-safe 메서드.
         return UserMapper.toMyPageDto(
                 user,
-                presignedUrl,
+                imageUrl,
                 reviewCount,
                 commentCount,
                 likedLiquorCount,
@@ -107,7 +104,7 @@ public class UserService {
         }
 
         if (profileImage != null && !profileImage.isEmpty()) {
-            FileResponseDto file = fileService.upload(profileImage, File.FileType.PROFILE);
+            FileResponseDto file = fileService.upload(profileImage, File.FileType.PROFILE, userId);
             user.setProfileImage(file.key());
         }
 

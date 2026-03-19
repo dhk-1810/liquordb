@@ -52,7 +52,8 @@ liquordb:
       access-key: ${AWS_ACCESS_KEY}
       secret-key: ${AWS_SECRET_KEY}
       bucket-name: ${AWS_S3_BUCKET}
-      presigned-url-expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:600}
+      cloudfront-domain: ${AWS_CLOUDFRONT_DOMAIN}
+#      presigned-url-expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:600}
 
 #  security:
 #    oauth2:

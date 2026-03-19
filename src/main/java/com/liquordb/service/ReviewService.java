@@ -95,9 +95,9 @@ public class ReviewService {
         List<ReviewImageKey> keys = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             images.forEach(file -> {
-                        FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW);
+                        FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW, review.getId());
                         keys.add(new ReviewImageKey(review, dto.key()));
-                        presignedUrls.add(s3Service.createPresignedUrl(dto.key()));
+                        presignedUrls.add(s3Service.getReviewImageUrl(dto.key()));
                     }
             );
             reviewImageKeyRepository.saveAll(keys);
@@ -223,7 +223,7 @@ public class ReviewService {
     private List<String> getPresignedUrl(Review review) {
         // default_batch_fetch_size: 100 옵션으로 N+1 문제 방지
         return review.getImageKeys().stream()
-                .map(reviewImageKey-> s3Service.createPresignedUrl(reviewImageKey.getId().toString()))
+                .map(reviewImageKey-> s3Service.getReviewImageUrl(reviewImageKey.getId().toString()))
                 .toList();
     }
 

@@ -8,10 +8,8 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
-import java.time.Duration;
 
 @RequiredArgsConstructor
 @Service
@@ -33,14 +31,31 @@ public class S3Service {
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
     }
 
-    public String createPresignedUrl(String key) {
-
-        GetObjectPresignRequest presignedRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(s3Properties.presignedUrlExpiration()))
-                .getObjectRequest(builder -> builder.bucket(s3Properties.bucketName()).key(key))
-                .build();
-        return s3Presigner.presignGetObject(presignedRequest).url().toString();
+    public String getLiquorImageUrl(String key) {
+        if (key == null || !key.isBlank()) {
+            return s3Properties.cloudfrontDomain() + "default-liquor-image.png";
+        }
+        return s3Properties.cloudfrontDomain() + key;
     }
 
+    public String getReviewImageUrl(String key) {
+        return s3Properties.cloudfrontDomain() + key;
+    }
+
+    public String getProfileImageUrl(String key) {
+        if (key == null || key.isBlank()) {
+            return s3Properties.cloudfrontDomain() + "default-profile-image.png";
+        }
+        return s3Properties.cloudfrontDomain() + key;
+    }
+
+//    public String createPresignedUrl(String key) {
+//
+//        GetObjectPresignRequest presignedRequest = GetObjectPresignRequest.builder()
+//                .signatureDuration(Duration.ofMinutes(s3Properties.presignedUrlExpiration()))
+//                .getObjectRequest(builder -> builder.bucket(s3Properties.bucketName()).key(key))
+//                .build();
+//        return s3Presigner.presignGetObject(presignedRequest).url().toString();
+//    }
 
 }

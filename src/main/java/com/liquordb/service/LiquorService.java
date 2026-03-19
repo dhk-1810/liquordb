@@ -76,7 +76,7 @@ public class LiquorService {
 
         Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
-            String presignedUrl = liquor.getImageKey() == null ? null : s3Service.createPresignedUrl(liquor.getImageKey());
+            String presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
             return LiquorMapper.toSummaryDto(liquor, presignedUrl, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
         });
 
@@ -100,7 +100,7 @@ public class LiquorService {
                 .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
-        String presignedUrl = liquor.getImageKey() == null ? null : s3Service.createPresignedUrl(liquor.getImageKey());
+        String presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
         return LiquorMapper.toDto(liquor, presignedUrl, tags, likedByMe);
     }
 
@@ -111,11 +111,12 @@ public class LiquorService {
     // 주류 등록
     @Transactional
     public LiquorResponseDto create(LiquorRequest request, MultipartFile file) {
-        FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR);
-        Liquor liquor = LiquorMapper.toEntity(request, fileResponseDto.key());
+        Liquor liquor = LiquorMapper.toEntity(request, null);
+        FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR, liquor.getId());
+        liquor.updateImage(fileResponseDto.key());
         liquorRepository.save(liquor);
 
-        String presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+        String presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
         return LiquorMapper.toDto(liquor, presignedUrl, null, false);
     }
 
@@ -128,9 +129,9 @@ public class LiquorService {
 
         String presignedUrl = null;
         if (file != null && !file.isEmpty()) {
-            FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR);
+            FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR, id);
             liquor.updateImage(fileResponseDto.key());
-            presignedUrl = s3Service.createPresignedUrl(liquor.getImageKey());
+            presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
         }
         liquor.update(request.isDiscontinued(), request.deleteImage());
 
