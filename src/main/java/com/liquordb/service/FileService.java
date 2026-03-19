@@ -31,7 +31,7 @@ public class FileService {
     private static final long MAX_FILE_SIZE = 30 * 1024 * 1024;
 
     @Transactional
-    public FileResponseDto upload(MultipartFile file, File.FileType type) {
+    public FileResponseDto upload(MultipartFile file, File.FileType type, Object id) {
 
         if (file == null || file.isEmpty()) {
             throw new FileNotFoundException();
@@ -44,7 +44,7 @@ public class FileService {
         String originalFilename = file.getOriginalFilename();
         String extension = extractExtension(originalFilename);
 
-        String key = generateS3Key(type, extension);
+        String key = generateS3Key(type, extension, id);
 
         try {
             s3Service.uploadFile(key, file);
@@ -59,12 +59,12 @@ public class FileService {
         return FileResponseDto.toDto(metadata);
     }
 
-    // Key 예시: reviews/2026/03/04/abc-123-def.jpg
-    private String generateS3Key(File.FileType type, String extension) {
-        String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+    // Key 예시: reviews/id/abc-123-def.jpg
+    private String generateS3Key(File.FileType type, String extension, Object id) {
+        String idPath = String.valueOf(id);
         return String.format("%s/%s/%s%s",
                 type.name().toLowerCase(),
-                datePath,
+                idPath,
                 UUID.randomUUID(),
                 extension
         );
