@@ -2,6 +2,7 @@ package com.liquordb.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -18,12 +19,8 @@ public class Tag {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
+    @CreatedDate
     private LocalDateTime createdAt;
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     private Tag(String name) {
         this.name = name;

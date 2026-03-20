@@ -1,4 +1,4 @@
-package com.liquordb.dto;
+package com.liquordb;
 
 import java.time.Instant;
 import java.util.UUID;

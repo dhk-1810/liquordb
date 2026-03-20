@@ -3,6 +3,8 @@ package com.liquordb.entity;
 import com.liquordb.dto.comment.request.CommentUpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -38,8 +40,12 @@ public class Comment extends LikeableEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
+
     private LocalDateTime deletedAt;
 
     public enum CommentStatus {
@@ -47,14 +53,6 @@ public class Comment extends LikeableEntity {
         HIDDEN, // 신고 누적시 자동 숨김처리. 관리자 복구 전까지 유효.
         DELETED // 작성자 스스로 삭제
     }
-
-    @PrePersist // JPA(EntityManager)가 엔티티를 DB에 처음 저장(Persist=영속화)하기 바로 직전에 자동 호출
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void onUpdate() { updatedAt = LocalDateTime.now(); }
 
     public Comment(String content, Review review, Comment parent, User user){
         this.content = content;

@@ -5,6 +5,8 @@ import com.liquordb.dto.review.ReviewUpdateRequest;
 import com.liquordb.entity.reviewdetail.ReviewDetail;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,22 +58,16 @@ public class Review extends LikeableEntity {
     @Column(nullable = false)
     private long commentCount;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
+
     private LocalDateTime deletedAt;
 
     public enum ReviewStatus {
         ACTIVE, HIDDEN, DELETED
-    }
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 
     @Builder

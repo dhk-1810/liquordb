@@ -1,6 +1,6 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.SseMessage;
+import com.liquordb.SseMessage;
 import com.liquordb.repository.SseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

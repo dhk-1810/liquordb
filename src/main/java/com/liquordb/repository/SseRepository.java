@@ -1,6 +1,6 @@
 package com.liquordb.repository;
 
-import com.liquordb.dto.SseMessage;
+import com.liquordb.SseMessage;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -72,11 +72,11 @@ public class SseRepository {
 
     public void saveMessage(SseMessage message, UUID userId) {
         messages.compute(userId, (id, history) -> {
-            List<SseMessage> list = (history == null) ? new CopyOnWriteArrayList<>() : history;
+            List<SseMessage> list = (history == null) ? new CopyOnWriteArrayList<>() : history; // TODO 자료구조 수정?
             list.add(message);
 
             while (list.size() > MAX_MESSAGE_HISTORY) {
-                list.removeFirst();
+                list.remove(0);
             }
             return list;
         });

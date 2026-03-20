@@ -3,6 +3,7 @@ package com.liquordb.entity;
 import com.liquordb.entity.id.LiquorTagId;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -28,12 +29,8 @@ public class LiquorTag {
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
+    @CreatedDate
     private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     private LiquorTag(Liquor liquor, Tag tag) {
         this.id = new LiquorTagId(liquor.getId(), tag.getId());

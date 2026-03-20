@@ -3,6 +3,8 @@ package com.liquordb.entity;
 import com.liquordb.enums.LiquorCategory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -56,19 +58,13 @@ public class Liquor extends LikeableEntity {
 
     private String imageKey; // 대표 이미지 사진 저장경로
 
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
+
     private LocalDateTime deletedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
     @Builder
     private Liquor(String name, LiquorCategory category, Long subcategoryId,

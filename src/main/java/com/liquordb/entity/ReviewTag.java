@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -30,12 +31,8 @@ public class ReviewTag {
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
+    @CreatedDate
     private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     private ReviewTag(Review review, Tag tag) {
         this.id = new ReviewTagId(review.getId(), tag.getId());

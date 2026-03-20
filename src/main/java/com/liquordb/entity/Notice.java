@@ -3,6 +3,8 @@ package com.liquordb.entity;
 import com.liquordb.dto.notice.NoticeRequest;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -30,19 +32,13 @@ public class Notice {
     private boolean isPinned;
     private boolean isDeleted;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
+
     private LocalDateTime deletedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public void update(NoticeRequest request) {
         if (request.title() != null) {
