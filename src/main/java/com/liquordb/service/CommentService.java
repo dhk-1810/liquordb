@@ -2,6 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
+import com.liquordb.event.CommentCreatedEvent;
 import com.liquordb.repository.comment.condition.CommentListGetCondition;
 import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import com.liquordb.dto.comment.request.CommentListGetRequest;
@@ -25,6 +26,7 @@ import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.entity.User;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 댓글 생성
     @Transactional
@@ -65,6 +68,8 @@ public class CommentService {
 
         Comment comment = CommentMapper.toEntity(request, parent, review, user);
         commentRepository.save(comment);
+
+        eventPublisher.publishEvent(new CommentCreatedEvent(review.getUser().getId(), comment.getId(), user.getUsername()));
         return CommentMapper.toDto(comment);
     }
 

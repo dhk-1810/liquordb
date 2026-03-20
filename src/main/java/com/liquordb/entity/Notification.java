@@ -1,12 +1,12 @@
 package com.liquordb.entity;
 
-import com.liquordb.enums.NotificationLevel;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,21 +28,17 @@ public class Notification {
     @Column(name = "content")
     private String content;
 
-    @Column(name = "level", nullable = false)
-    private NotificationLevel level;
-
+    @CreatedDate
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
-    private Notification(UUID receiverId, String title, String content, NotificationLevel level) {
+    private Notification(UUID receiverId, String title, String content) {
         this.receiverId = receiverId;
         this.title = title;
         this.content = content;
-        this.level = level;
-        this.createdAt = Instant.now();
     }
 
-    public static Notification create(UUID receiverId, String title, String content, NotificationLevel level){
-        return new Notification(receiverId, title, content, level);
+    public static Notification create(UUID receiverId, String title, String content){
+        return new Notification(receiverId, title, content);
     }
 }
