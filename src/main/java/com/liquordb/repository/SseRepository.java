@@ -86,21 +86,6 @@ public class SseRepository {
         messagesToSave.forEach((userId, message) -> saveMessage(message, userId));
     }
 
-    public List<SseMessage> findAllMissedMessageByUserIdAndIdAfter(UUID userId, UUID lastMessageId) {
-
-        List<SseMessage> history = messages.getOrDefault(userId, Collections.emptyList());
-
-        // lastMessageId가 위치한 인덱스 찾기
-        int lastSeenIndex = -1;
-        for (int i = 0; i < history.size(); i++) {
-            if (history.get(i).id().equals(lastMessageId)) {
-                lastSeenIndex = i;
-                break;
-            }
-        }
-        return new ArrayList<>(history.subList(lastSeenIndex + 1, history.size()));
-    }
-
     // 사용자의 모든 SseMessage 삭제 (로그아웃)
     public void deleteAllMessagesByUserId(UUID userId) {
         messages.remove(userId);

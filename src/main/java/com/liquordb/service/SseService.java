@@ -37,14 +37,6 @@ public class SseService {
         // 연결되면 더미 이벤트 전송, 연결 확인
         ping(emitter, receiverId, "connect check");
 
-        // 마지막으로 받은 메시지 이후 유실된 메시지 재전송
-        if (lastEventId != null) {
-            List<SseMessage> missedMessages = sseRepository.findAllMissedMessageByUserIdAndIdAfter(receiverId, lastEventId);
-            missedMessages.forEach(message ->
-                    sendToClient(emitter, receiverId, message.eventName(), message.data(), message.id().toString())
-            );
-        }
-
         return emitter;
     }
 
