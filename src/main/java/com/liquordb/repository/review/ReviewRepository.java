@@ -1,5 +1,6 @@
 package com.liquordb.repository.review;
 
+import com.liquordb.entity.Comment;
 import com.liquordb.entity.Liquor;
 import com.liquordb.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, CustomRev
             "LEFT JOIN FETCH rt.tag " +
             "WHERE r.id = :id AND r.status = :status")
     Optional<Review> findByIdAndStatusWithTags(@Param("id") Long id, @Param("status") Review.ReviewStatus status);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.id = :reviewId AND r.status = :status")
+    Optional<Review> findByIdAndStatusWithUser(@Param("reviewId") Long reviewId, @Param("status") Review.ReviewStatus status);
 
     Optional<Review> findByIdAndStatus(Long id, Review.ReviewStatus status);
 

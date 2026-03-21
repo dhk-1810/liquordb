@@ -35,7 +35,8 @@ public class ReviewLikeService {
         }
 
         User user = userRepository.getReferenceById(userId);
-        Review review = reviewRepository.getReferenceById(reviewId);
+        Review review = reviewRepository.findByIdAndStatusWithUser(reviewId, Review.ReviewStatus.ACTIVE)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
         ReviewLike reviewLike = ReviewLike.create(user, review);
 
         try {
@@ -44,7 +45,7 @@ public class ReviewLikeService {
             throw new ReviewNotFoundException(reviewId);
         }
 
-        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, true));
+        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, true, review.getUser().getUsername(), review.getUser().getId()));
     }
 
     @Transactional
@@ -54,7 +55,7 @@ public class ReviewLikeService {
                 .orElseThrow(() -> new ReviewLikeNotFoundException(reviewId, userId));
 
         reviewLikeRepository.delete(reviewLike);
-        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, false));
+        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, false, null, null));
     }
 
 }

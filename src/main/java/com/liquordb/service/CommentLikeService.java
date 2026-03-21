@@ -34,8 +34,11 @@ public class CommentLikeService {
             throw new CommentLikeAlreadyExistsException(commentId, userId);
         }
 
+        // 작성자
         User user = userRepository.getReferenceById(userId);
-        Comment comment = commentRepository.getReferenceById(commentId);
+
+        Comment comment = commentRepository.findByIdWAndStatusWithUser(commentId, Comment.CommentStatus.ACTIVE)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
         CommentLike commentLike = CommentLike.create(user, comment);
 
         try {
@@ -44,7 +47,7 @@ public class CommentLikeService {
             throw new CommentNotFoundException(commentId);
         }
 
-        eventPublisher.publishEvent(new CommentLikeEvent(commentId, true));
+        eventPublisher.publishEvent(new CommentLikeEvent(commentId, true, comment.getUser().getUsername(), comment.getUser().getId()));
     }
 
     @Transactional
@@ -54,7 +57,7 @@ public class CommentLikeService {
                 .orElseThrow(() -> new CommentLikeNotFoundException(commentId, userId));
 
         commentLikeRepository.delete(commentLike);
-        eventPublisher.publishEvent(new CommentLikeEvent(commentId, false));
+        eventPublisher.publishEvent(new CommentLikeEvent(commentId, false, null, null));
     }
 
 }
