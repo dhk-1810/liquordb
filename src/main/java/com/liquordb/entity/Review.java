@@ -58,12 +58,17 @@ public class Review extends LikeableEntity {
     @Column(nullable = false)
     private long commentCount;
 
+    @Column(nullable = false)
+    private long likeCount;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(nullable = true)
     private LocalDateTime updatedAt;
 
+    @Column(nullable = true)
     private LocalDateTime deletedAt;
 
     public enum ReviewStatus {
@@ -80,6 +85,7 @@ public class Review extends LikeableEntity {
         this.user = user;
         this.liquor = liquor;
         this.detail = detail;
+        this.likeCount = 0;
         this.commentCount = 0;
     }
 

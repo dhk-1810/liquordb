@@ -16,6 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE) // 부모, 자식 클래스를 하나의 테이블로 관리
 @DiscriminatorColumn(name = "liquor_type")
+@Table(name = "review_details")
 public abstract class ReviewDetail {
 
     @Id

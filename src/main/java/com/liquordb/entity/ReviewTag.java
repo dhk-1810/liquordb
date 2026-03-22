@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "review_tags")
+@Table(name = "reviews_tags")
 public class ReviewTag {
 
     @EmbeddedId

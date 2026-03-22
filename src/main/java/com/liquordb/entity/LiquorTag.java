@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "liquor_tags")
+@Table(name = "liquors_tags")
 public class LiquorTag {
 
     @EmbeddedId

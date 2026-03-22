@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "review_image_key")
+@Table(name = "review_image_keys")
 public class ReviewImageKey {
 
     @EmbeddedId
