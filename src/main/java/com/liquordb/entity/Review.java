@@ -27,11 +27,10 @@ public class Review extends LikeableEntity {
     @Column(nullable = false)
     private int rating;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = false)

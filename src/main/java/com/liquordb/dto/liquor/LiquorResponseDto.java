@@ -1,6 +1,7 @@
 package com.liquordb.dto.liquor;
 
 import com.liquordb.dto.tag.TagResponseDto;
+import com.liquordb.enums.Country;
 import com.liquordb.enums.LiquorCategory;
 import lombok.*;
 
@@ -16,7 +17,7 @@ public record LiquorResponseDto (
         LiquorCategory category,
         Long subcategoryId,
         Long subcategoryName,
-        String country,
+        Country country, // TODO 국가별 필터링 추가?
         String manufacturer,
         double abv,
         boolean isDiscontinued, // 단종 여부

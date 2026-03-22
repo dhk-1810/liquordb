@@ -1,5 +1,6 @@
 package com.liquordb.dto.liquor;
 
+import com.liquordb.enums.Country;
 import com.liquordb.enums.LiquorCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +18,7 @@ public record LiquorRequest(
         Long subcategoryId,
 
         @NotBlank(message = "주류 제조국 정보는 필수입니다.")
-        String country,
+        Country country,
 
         @NotBlank(message = "주류 제조사 정보는 필수입니다.")
         String manufacturer,

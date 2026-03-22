@@ -18,11 +18,15 @@ public class Comment extends LikeableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CommentStatus status;
+
+    @Column(nullable = false)
+    private long likeCount;
 
     @ManyToOne
     @JoinColumn(name = "review_id")
@@ -60,6 +64,7 @@ public class Comment extends LikeableEntity {
         this.parent = parent;
         this.user = user;
         this.status = CommentStatus.ACTIVE;
+        likeCount = 0;
     }
 
     public static Comment create(String content, Review review, Comment parent, User user) {

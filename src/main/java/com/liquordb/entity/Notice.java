@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -24,9 +25,8 @@ public class Notice {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    @Column(nullable = false, columnDefinition = "BINARY(16)")
+    private UUID authorId;
 
     // TODO 이미지
 
@@ -63,16 +63,16 @@ public class Notice {
         this.deletedAt = LocalDateTime.now();
     }
 
-    private Notice(User author, String title, String content) {
-        this.author = author;
+    private Notice(UUID authorId, String title, String content) {
+        this.authorId = authorId;
         this.title = title;
         this.content = content;
         this.isDeleted = false;
         this.isPinned = false;
     }
 
-    public static Notice create(User author, String title, String content){
-        return new Notice(author, title, content);
+    public static Notice create(UUID authorId, String title, String content){
+        return new Notice(authorId, title, content);
     }
 
 }

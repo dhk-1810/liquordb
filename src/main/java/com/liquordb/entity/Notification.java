@@ -19,7 +19,7 @@ public class Notification {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "receiver_id", nullable = false)
+    @Column(name = "receiver_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID receiverId;
 
     @Column(name = "title", nullable = false)
