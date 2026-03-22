@@ -32,17 +32,20 @@ public class User {
     @Column(nullable = false, length = 100)
     private String password;
 
-    private String socialProvider; // 소셜로그인 제공자 (google, kakao 등)
+//    private String socialProvider; // 소셜로그인 제공자 (google, kakao 등)
 
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     private String profileImageKey;
 
     @CreatedDate
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -56,7 +59,7 @@ public class User {
         this.password = password;
         this.status = status;
         this.role = role;
-        this.socialProvider = socialProvider;
+//        this.socialProvider = socialProvider;
     }
 
     public static User create(String email, String username, String password, String socialProvider){

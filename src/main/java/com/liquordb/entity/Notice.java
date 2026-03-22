@@ -18,21 +18,26 @@ public class Notice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     // TODO 이미지
 
+    @Column(nullable = false)
     private boolean isPinned;
+
+    @Column(nullable = false)
     private boolean isDeleted;
 
     @CreatedDate
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -62,6 +67,7 @@ public class Notice {
         this.author = author;
         this.title = title;
         this.content = content;
+        this.isDeleted = false;
         this.isPinned = false;
     }
 

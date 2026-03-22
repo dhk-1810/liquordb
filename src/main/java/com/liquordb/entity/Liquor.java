@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.enums.Country;
 import com.liquordb.enums.LiquorCategory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,13 +31,14 @@ public class Liquor extends LikeableEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private LiquorCategory category; // 주종 대분류
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false)
     private Long subcategoryId; // 주종 소분류
 
     @Column(nullable = false, length = 50)
-    private String country; // 제조국
+    private Country country; // 제조국
 
     @Column(nullable = false, length = 50)
     private String manufacturer; // 제조사
@@ -59,6 +61,7 @@ public class Liquor extends LikeableEntity {
     private String imageKey; // 대표 이미지 사진 저장경로
 
     @CreatedDate
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -68,7 +71,7 @@ public class Liquor extends LikeableEntity {
 
     @Builder
     private Liquor(String name, LiquorCategory category, Long subcategoryId,
-                   String country, String manufacturer, Double abv, String imageKey) {
+                   Country country, String manufacturer, Double abv, String imageKey) {
         this.isDeleted = false;
         this.name = name;
         this.category = category;
@@ -82,7 +85,7 @@ public class Liquor extends LikeableEntity {
     }
 
     public static Liquor create(String name, LiquorCategory category, Long subcategoryId,
-                                String country, String manufacturer, Double abv, String imageKey) {
+                                Country country, String manufacturer, Double abv, String imageKey) {
         return Liquor.builder()
                 .name(name)
                 .category(category)
