@@ -7,12 +7,21 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory();
+    }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(
@@ -51,5 +60,26 @@ public class RedisConfig {
                 JsonTypeInfo.As.PROPERTY // 타입 정보를 JSON 속성(@class)으로 포함
         );
         return new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+    }
+
+    /**
+     * Pub-Sub 관련 설정
+     */
+
+    @Bean
+    public MessageListenerAdapter messageListenerAdapter(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "onMessage");
+    }
+
+    // Redis 채널을 구독하고 메시지를 대기하는 컨테이너
+    @Bean
+    public RedisMessageListenerContainer redisContainer(
+            RedisConnectionFactory factory,
+            MessageListenerAdapter adapter
+    ) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(factory);
+        container.addMessageListener(adapter, new ChannelTopic("sse-notifications"));
+        return container;
     }
 }
