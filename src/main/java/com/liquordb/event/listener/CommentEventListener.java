@@ -1,10 +1,13 @@
 package com.liquordb.event.listener;
 
+import com.liquordb.SseMessage;
+import com.liquordb.dto.NotificationResponseDto;
 import com.liquordb.entity.Notification;
 import com.liquordb.event.CommentCreatedEvent;
 import com.liquordb.repository.NotificationRepository;
 import com.liquordb.repository.notice.NoticeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,12 +21,15 @@ public class CommentEventListener {
 
     private static final String MESSAGE_SUFFIX = "님이 리뷰에 댓글을 남겼습니다.";
 
+    private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationRepository notificationRepository;
 
     @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(CommentCreatedEvent event) {
+
+        // 알림 목록에 추가
         Notification notification = Notification.create(
                 event.receiverId(),
                 event.writerUsername() + MESSAGE_SUFFIX,
@@ -31,6 +37,10 @@ public class CommentEventListener {
         );
         notificationRepository.save(notification);
 
+        // 알림 발송
+        NotificationResponseDto response = NotificationResponseDto.toDto(notification);
+        SseMessage message = SseMessage.create(event.receiverId(), "notification", response);
+        redisTemplate.convertAndSend("sse-notifications", message);
     }
 
 }

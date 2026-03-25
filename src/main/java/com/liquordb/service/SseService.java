@@ -54,7 +54,7 @@ public class SseService {
     }
 
     public void send(Object data, String eventName, UUID receiverId) {
-        SseMessage sseMessage = SseMessage.create(eventName, data);
+        SseMessage sseMessage = SseMessage.create(receiverId, eventName, data);
         sseRepository.saveMessage(sseMessage, receiverId);
 
         List<SseEmitter> emitters = sseRepository.findEmittersByUserId(receiverId);
@@ -68,7 +68,7 @@ public class SseService {
         Map<UUID, SseMessage> sseMessageMap = objectMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> SseMessage.create(eventName, entry.getValue())
+                        entry -> SseMessage.create(entry.getKey(), eventName, entry.getValue())
                 ));
         sseRepository.saveAllMessages(sseMessageMap);
 
