@@ -3,6 +3,7 @@ package com.liquordb.config;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.liquordb.redis.RedisSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +26,7 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(
-            RedisConnectionFactory connectionFactory, // Redis 사버와 연결 맺는 factory
+            RedisConnectionFactory connectionFactory, // Redis 사버와 연결하는 factory
             @Qualifier("redisSerializer") GenericJackson2JsonRedisSerializer redisSerializer
     ) {
         // Redis 연결을 위한 팩토리 설정

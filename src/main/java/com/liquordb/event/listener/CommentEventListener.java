@@ -5,7 +5,6 @@ import com.liquordb.dto.NotificationResponseDto;
 import com.liquordb.entity.Notification;
 import com.liquordb.event.CommentCreatedEvent;
 import com.liquordb.repository.NotificationRepository;
-import com.liquordb.repository.notice.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -21,8 +20,8 @@ public class CommentEventListener {
 
     private static final String MESSAGE_SUFFIX = "님이 리뷰에 댓글을 남겼습니다.";
 
-    private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationRepository notificationRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)

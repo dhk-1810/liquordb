@@ -18,12 +18,12 @@ import java.io.IOException;
 public class RedisSubscriber implements MessageListener {
 
     private final ObjectMapper objectMapper;
-    private final SseService sseService; // 인메모리 SseEmitter 저장소
+    private final SseService sseService; // 인메모리 SseEmitter 탐색 및 메시지 전송
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            // Redis에서 온 JSON 메시지를 DTO로 변환
+            // 역직렬화
             SseMessage sseMessage = objectMapper.readValue(message.getBody(), SseMessage.class);
 
             NotificationResponseDto notification = objectMapper.convertValue(
@@ -31,8 +31,8 @@ public class RedisSubscriber implements MessageListener {
                     NotificationResponseDto.class
             );
 
-            // 내 서버에 연결된 사용자라면 SSE 전송 (없으면 무시)
-            sseService.send(notification, sseMessage.eventName(), notification.receiverId());
+            // 내 서버에 연결된 사용자라면 SseMessage 전송 (없으면 무시)
+            sseService.pushToClient(notification, sseMessage.eventName(), notification.receiverId());
         } catch (IOException e) {
             log.error("Redis 메시지 역직렬화 실패", e);
         }

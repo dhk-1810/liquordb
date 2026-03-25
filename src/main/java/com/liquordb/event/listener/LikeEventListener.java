@@ -1,5 +1,6 @@
 package com.liquordb.event.listener;
 
+import com.liquordb.SseMessage;
 import com.liquordb.dto.NotificationResponseDto;
 import com.liquordb.entity.Notification;
 import com.liquordb.event.CommentLikeEvent;
@@ -11,12 +12,15 @@ import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.service.SseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Component
@@ -31,6 +35,7 @@ public class LikeEventListener {
     private final CommentRepository commentRepository;
     private final NotificationRepository notificationRepository;
     private final SseService sseService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -48,15 +53,7 @@ public class LikeEventListener {
 
         int delta = event.isLiked() ? 1 : -1;
         reviewRepository.updateLikeCount(event.reviewId(), delta);
-        if (event.isLiked()) {
-            Notification notification = Notification.create(
-                    event.receiverId(),
-                    event.username() + REVIEW_LIKE_MESSAGE_SUFFIX,
-                    null
-            );
-            notificationRepository.save(notification);
-            sseService.send(NotificationResponseDto.toDto(notification), EVENT_NAME, event.receiverId());
-        }
+        saveAndSendNotification(event.isLiked(), event.receiverId(), event.username(), REVIEW_LIKE_MESSAGE_SUFFIX, event);
     }
 
     @Async("eventTaskExecutor")
@@ -66,14 +63,21 @@ public class LikeEventListener {
 
         int delta = event.isLiked() ? 1 : -1;
         commentRepository.updateLikeCount(event.commentId(), delta);
-        if (event.isLiked()) {
+        saveAndSendNotification(event.isLiked(), event.receiverId(), event.username(), COMMENT_LIKE_MESSAGE_SUFFIX, event);
+    }
+
+    private void saveAndSendNotification(boolean liked, UUID uuid, String username, String reviewLikeMessageSuffix, Object event) {
+        if (liked) {
             Notification notification = Notification.create(
-                    event.receiverId(),
-                    event.username() + COMMENT_LIKE_MESSAGE_SUFFIX,
+                    uuid,
+                    username + reviewLikeMessageSuffix,
                     null
             );
             notificationRepository.save(notification);
-            sseService.send(NotificationResponseDto.toDto(notification), EVENT_NAME, event.receiverId());
+
+            NotificationResponseDto response = NotificationResponseDto.toDto(notification);
+            SseMessage message = SseMessage.create(uuid, "notification", response);
+            redisTemplate.convertAndSend("sse-notifications", message);
         }
     }
 }

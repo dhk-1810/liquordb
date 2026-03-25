@@ -4,6 +4,7 @@ import com.liquordb.SseMessage;
 import com.liquordb.repository.SseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -20,8 +21,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SseService {
 
-    private final SseRepository sseRepository;
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 30; // 30분
+
+    private final SseRepository sseRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public SseEmitter connect(UUID receiverId, UUID lastEventId) {
 
@@ -53,7 +56,14 @@ public class SseService {
         log.debug("Sent SSE heartbeat to {} users", connectedUsers.size());
     }
 
-    public void send(Object data, String eventName, UUID receiverId) {
+    public void send(Object data, String eventName, UUID receiverId){
+        SseMessage redisMessage = SseMessage.create(receiverId, eventName, data);
+        redisTemplate.convertAndSend("sse-notifications", redisMessage);
+
+        log.info("Redis로 알림 발행 완료: receiverId={}, event={}", receiverId, eventName);
+    }
+
+    public void pushToClient(Object data, String eventName, UUID receiverId) {
         SseMessage sseMessage = SseMessage.create(receiverId, eventName, data);
         sseRepository.saveMessage(sseMessage, receiverId);
 
