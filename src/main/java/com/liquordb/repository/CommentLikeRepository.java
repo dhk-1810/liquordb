@@ -4,7 +4,6 @@ import com.liquordb.entity.Comment;
 import com.liquordb.entity.CommentLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
