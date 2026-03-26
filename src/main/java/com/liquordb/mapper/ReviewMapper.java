@@ -21,7 +21,7 @@ public class ReviewMapper {
         return review;
     }
 
-    public static ReviewResponseDto toDto(Review review, Set<TagResponseDto> tags, List<String> presignedUrls) {
+    public static ReviewResponseDto toDto(Review review, Set<TagResponseDto> tags, List<String> imageUrls) {
 
         return ReviewResponseDto.builder()
                 .id(review.getId())
@@ -30,7 +30,7 @@ public class ReviewMapper {
                 .content(review.getContent())
                 .rating(review.getRating())
                 .tags(tags)
-                .presignedUrls(presignedUrls)
+                .imageUrls(imageUrls)
                 .build();
     }
 

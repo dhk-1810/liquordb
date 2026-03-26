@@ -17,7 +17,7 @@ public record ReviewResponseDto (
         String title,
         String content,
         Set<TagResponseDto> tags,
-        List<String> presignedUrls,
+        List<String> imageUrls,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ){

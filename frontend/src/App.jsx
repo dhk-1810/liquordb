@@ -53,7 +53,7 @@ function App() {
                 {/* Image Container */}
                 <div className="relative aspect-[4/3] w-full bg-slate-100 overflow-hidden">
                   <img
-                    src={liquor.presignedUrl || 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80'} 
+                    src={liquor.imageUrl || 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80'}
                     alt={liquor.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                     onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80' }}

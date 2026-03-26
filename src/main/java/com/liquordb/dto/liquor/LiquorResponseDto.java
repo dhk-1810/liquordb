@@ -21,7 +21,7 @@ public record LiquorResponseDto (
         String manufacturer,
         double abv,
         boolean isDiscontinued, // 단종 여부
-        String presignedUrl,
+        String imageUrl,
 
         double averageRating,
         long reviewCount,

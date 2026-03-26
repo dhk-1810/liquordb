@@ -76,8 +76,8 @@ public class LiquorService {
 
         Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
-            String presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
-            return LiquorMapper.toSummaryDto(liquor, presignedUrl, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
+            String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
+            return LiquorMapper.toSummaryDto(liquor, imageUrl, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
         });
 
         Object nextCursor = null;
@@ -100,8 +100,8 @@ public class LiquorService {
                 .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
-        String presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
-        return LiquorMapper.toDto(liquor, presignedUrl, tags, likedByMe);
+        String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
+        return LiquorMapper.toDto(liquor, imageUrl, tags, likedByMe);
     }
 
     /**
@@ -116,8 +116,8 @@ public class LiquorService {
         liquor.updateImage(fileResponseDto.key());
         liquorRepository.save(liquor);
 
-        String presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
-        return LiquorMapper.toDto(liquor, presignedUrl, null, false);
+        String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
+        return LiquorMapper.toDto(liquor, imageUrl, null, false);
     }
 
     // 주류 수정
@@ -127,11 +127,11 @@ public class LiquorService {
         Liquor liquor = liquorRepository.findByIdAndIsDeletedWithTags(id, false)
                 .orElseThrow(() -> new LiquorNotFoundException(id));
 
-        String presignedUrl = null;
+        String imageUrl = null;
         if (file != null && !file.isEmpty()) {
             FileResponseDto fileResponseDto = fileService.upload(file, File.FileType.LIQUOR, id);
             liquor.updateImage(fileResponseDto.key());
-            presignedUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
+            imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
         }
         liquor.update(request.isDiscontinued(), request.deleteImage());
 
@@ -140,7 +140,7 @@ public class LiquorService {
         Set<TagResponseDto> tags = liquor.getLiquorTags().stream()
                 .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
-        return LiquorMapper.toDto(liquor, presignedUrl, tags, false);
+        return LiquorMapper.toDto(liquor, imageUrl, tags, false);
     }
 
     // 주류 삭제 (Soft Delete)

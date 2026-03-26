@@ -91,18 +91,18 @@ public class ReviewService {
                     .collect(Collectors.toSet());
         }
 
-        List<String> presignedUrls = new ArrayList<>();
+        List<String> imageUrls = new ArrayList<>();
         List<ReviewImageKey> keys = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             images.forEach(file -> {
                         FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW, review.getId());
                         keys.add(new ReviewImageKey(review, dto.key()));
-                        presignedUrls.add(s3Service.getReviewImageUrl(dto.key()));
+                        imageUrls.add(s3Service.getReviewImageUrl(dto.key()));
                     }
             );
             reviewImageKeyRepository.saveAll(keys);
         }
-        return ReviewMapper.toDto(review, tagDtos, presignedUrls);
+        return ReviewMapper.toDto(review, tagDtos, imageUrls);
     }
 
     // 리뷰 단건 조회
@@ -117,8 +117,8 @@ public class ReviewService {
                 .collect(Collectors.toSet());
 
         // default_batch_fetch_size로 N+1 방지
-        List<String> presignedUrls = getPresignedUrl(review);
-        return ReviewMapper.toDto(review, tags, presignedUrls);
+        List<String> imageUrls = getImageUrls(review);
+        return ReviewMapper.toDto(review, tags, imageUrls);
     }
 
     // 주류별 리뷰 목록 조회
@@ -187,9 +187,9 @@ public class ReviewService {
         reviewDetailUpdater.updateDetail(review.getDetail(), request.detailRequest());
         reviewRepository.save(review);
 
-        List<String> presignedUrls = getPresignedUrl(review);
+        List<String> imageUrls = getImageUrls(review);
         Set<TagResponseDto> tags = getTags(reviewId);
-        return ReviewMapper.toDto(review, tags, presignedUrls);
+        return ReviewMapper.toDto(review, tags, imageUrls);
     }
 
     // 리뷰 삭제 (Soft Delete)
@@ -220,7 +220,7 @@ public class ReviewService {
                 .collect(Collectors.toSet());
     }
 
-    private List<String> getPresignedUrl(Review review) {
+    private List<String> getImageUrls(Review review) {
         // default_batch_fetch_size: 100 옵션으로 N+1 문제 방지
         return review.getImageKeys().stream()
                 .map(reviewImageKey-> s3Service.getReviewImageUrl(reviewImageKey.getId().toString()))
@@ -230,7 +230,7 @@ public class ReviewService {
     // 페이지네이션 헬퍼 메서드
     private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews) {
         Slice<ReviewResponseDto> response = reviews
-                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getPresignedUrl(r)));
+                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r)));
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -250,7 +250,7 @@ public class ReviewService {
     public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
         ReviewSearchCondition condition = getSearchCondition(request);
         Page<ReviewResponseDto> page = reviewRepository.findAllWithTags(condition)
-                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getPresignedUrl(r)));
+                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r)));
         return PageResponse.from(page);
     }
 

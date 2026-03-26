@@ -6,7 +6,7 @@ public record UserMyPageDto(
         UUID userId,
         String email,
         String username,
-        String presignedUrl,
+        String imageUrl,
         long likedLiquorCount,
         long likedReviewCount,
         long likedCommentCount,

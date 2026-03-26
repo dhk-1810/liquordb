@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class LiquorMapper {
 
-    public static LiquorResponseDto toDto(Liquor liquor, String presignedUrl, Set<TagResponseDto> tags, boolean likedByMe) {
+    public static LiquorResponseDto toDto(Liquor liquor, String imageUrl, Set<TagResponseDto> tags, boolean likedByMe) {
 
         return LiquorResponseDto.builder()
                 .id(liquor.getId())
@@ -21,7 +21,7 @@ public class LiquorMapper {
                 .manufacturer(liquor.getManufacturer())
                 .abv(liquor.getAbv())
                 .isDiscontinued(liquor.isDiscontinued())
-                .presignedUrl(presignedUrl)
+                .imageUrl(imageUrl)
 
                 .averageRating(liquor.getAverageRating())
                 .reviewCount(liquor.getReviewCount())
@@ -32,11 +32,11 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static LiquorSummaryDto toSummaryDto(Liquor liquor, String presignedUrl, boolean likedByMe, long reviewCount, long likeCount) {
+    public static LiquorSummaryDto toSummaryDto(Liquor liquor, String imageUrl, boolean likedByMe, long reviewCount, long likeCount) {
         return LiquorSummaryDto.builder()
                 .id(liquor.getId())
                 .name(liquor.getName())
-                .presignedUrl(presignedUrl)
+                .imageUrl(imageUrl)
                 .averageRating(liquor.getAverageRating())
                 .reviewCount(reviewCount)
                 .likeCount(likeCount)

@@ -28,7 +28,7 @@ public class UserMapper {
 
     public static UserMyPageDto toMyPageDto(
             User user,
-            String presignedUrl,
+            String imageUrl,
             long reviewCount,
             long commentCount,
             long likedLiquorCount,
@@ -39,7 +39,7 @@ public class UserMapper {
                 user.getId(),
                 user.getEmail(),
                 user.getUsername(),
-                presignedUrl,
+                imageUrl,
                 reviewCount,
                 commentCount,
                 likedLiquorCount,
