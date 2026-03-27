@@ -41,7 +41,7 @@ public class NoticeService {
 
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    `private final RedisTemplate<String, Object> redisTemplate;`
     private final RedisLockProvider redisLockProvider;
 
     // 단건 조회

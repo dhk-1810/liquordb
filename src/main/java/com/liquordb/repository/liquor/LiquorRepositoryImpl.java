@@ -1,5 +1,7 @@
 package com.liquordb.repository.liquor;
 
+import com.liquordb.dto.liquor.LiquorScoreDto;
+import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.*;
 import com.liquordb.enums.LiquorCategory;
 import com.liquordb.enums.SortLiquorBy;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.querydsl.jpa.JPAExpressions.select;
 
@@ -55,6 +58,21 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
         }
 
         return new SliceImpl<>(content, PageRequest.ofSize(limit), hasNext);
+    }
+
+    @Override
+    public List<LiquorSummaryDto> findTrendingLiquors(int limit) {
+
+    }
+
+    @Override
+    public List<LiquorScoreDto> findScoresByIds(List<Long> id) {
+        return queryFactory.selectFrom(liquor)
+                .where()
+                .orderBy()
+                .limit()
+                .fetch()
+                ;
     }
 
     /**

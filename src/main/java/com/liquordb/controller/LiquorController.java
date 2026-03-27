@@ -7,6 +7,7 @@ import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.enums.Role;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
+import com.liquordb.service.LiquorRankingService;
 import com.liquordb.service.LiquorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -22,7 +24,15 @@ import java.util.UUID;
 public class LiquorController {
 
     private final LiquorService liquorService;
+    private final LiquorRankingService rankingService;
     private final LiquorLikeService liquorLikeService;
+
+    // 인기 주류 조회
+    @GetMapping("/trending")
+    public ResponseEntity<List<LiquorSummaryDto>> getTrending(){
+        List<LiquorSummaryDto> trending = rankingService.getTopRankings(10);
+        return ResponseEntity.ok(trending);
+    }
 
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
     @GetMapping
