@@ -1,6 +1,6 @@
 package com.liquordb;
 
-import com.liquordb.enums.TrendingLiquorPeriod;
+import com.liquordb.enums.PeriodType;
 import com.liquordb.service.LiquorRankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,22 +26,22 @@ public class PopularLiquorScheduler {
     // 3시간 랭킹
     @Scheduled(fixedRate = 1000 * 60 * 60 * 3)
     public void update3HourRanking() {
-        processRanking(TrendingLiquorPeriod.THREE_HOURS);
+        processRanking(PeriodType.THREE_HOURS);
     }
 
     // 일간 랭킹
     @Scheduled(cron = "0 0 4 * * *")
     public void updateDailyRanking() {
-        processRanking(TrendingLiquorPeriod.DAILY);
+        processRanking(PeriodType.DAILY);
     }
 
     // 주간 랭킹
     @Scheduled(cron = "0 0 5 * * 1")
     public void updateWeeklyRanking() {
-        processRanking(TrendingLiquorPeriod.WEEKLY);
+        processRanking(PeriodType.WEEKLY);
     }
 
-    private void processRanking(TrendingLiquorPeriod period) {
+    private void processRanking(PeriodType period) {
         String activeKey = ACTIVE_KEY_PREFIX + period.name();
         String rankingKey = RANKING_KEY_PREFIX + period.name();
 

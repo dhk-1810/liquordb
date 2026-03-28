@@ -5,7 +5,7 @@ import com.liquordb.dto.liquor.LiquorListGetRequest;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.enums.Role;
-import com.liquordb.enums.TrendingLiquorPeriod;
+import com.liquordb.enums.PeriodType;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorRankingService;
@@ -31,7 +31,7 @@ public class LiquorController {
     // 인기 주류 조회
     @GetMapping("/trending")
     public ResponseEntity<List<LiquorSummaryDto>> getTrending(
-            @RequestParam(defaultValue = "THREE_HOURS") TrendingLiquorPeriod period
+            @RequestParam(defaultValue = "THREE_HOURS") PeriodType period
     ) {
         List<LiquorSummaryDto> response = rankingService.getTrending(period);
         return ResponseEntity.ok(response);

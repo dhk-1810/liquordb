@@ -1,6 +1,6 @@
 package com.liquordb.enums;
 
-public enum TrendingLiquorPeriod {
+public enum PeriodType {
     THREE_HOURS,
     DAILY,
     WEEKLY
