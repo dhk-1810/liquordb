@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,25 +29,31 @@ public class LiquorRankingService {
 
         if (topIds != null && !topIds.isEmpty()) {
             List<Long> ids = topIds.stream().map(Long::valueOf).toList();
-            return liquorRepository.findTrendingLiquorSummaries(ids, LIMIT);
+            return liquorRepository.findTrendingLiquorSummaries(ids, LIMIT); // TODO Redis에서 가져오도록 변경
         }
 
-        return null; // TODO 레디스에 데이터가 없을때 처리
+        return null; // TODO 레디스에 데이터가 없을땐 DB에서 조회
     }
 
+    /**
+     * 스케줄러에서만 호출
+     */
     public void calculateAndSaveRanking(Set<Long> activeIds, String rankingKey) {
 
-        List<Long> ids = activeIds.stream().map(Long::valueOf).toList();
+        Set<Long> ids = activeIds.stream().map(Long::valueOf).collect(Collectors.toSet());
 
-        // Querydsl 등을 사용해 ID별로 리뷰/좋아요/댓글 개수를 가져옴
+        // 주류별 + 단위기간별로 리뷰/좋아요/댓글 개수를 조회
         List<LiquorScoreDto> scores = liquorRepository.findScoresByIds(ids);
 
-        // Redis Sorted Set(ZSet)에 저장
-        redisTemplate.delete(rankingKey); // 기존 랭킹 삭제
+        // 기존 랭킹 삭제
+        redisTemplate.delete(rankingKey);
 
+        // ZSet에 저장
         for (LiquorScoreDto score : scores) {
             double totalScore = (score.reviewCount() * 10) + (score.likeCount() * 5) + (score.commentCount() * 2);
             redisTemplate.opsForZSet().add(rankingKey, String.valueOf(score.liquorId()), totalScore);
         }
+
+        // TODO SummaryDto 자체를 캐싱
     }
 }

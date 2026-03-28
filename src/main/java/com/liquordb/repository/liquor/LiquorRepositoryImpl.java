@@ -6,9 +6,8 @@ import com.liquordb.entity.*;
 import com.liquordb.enums.LiquorCategory;
 import com.liquordb.enums.SortLiquorBy;
 import com.liquordb.repository.liquor.condition.LiquorSearchCondition;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.*;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +29,9 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
 
     private final JPAQueryFactory queryFactory;
     private final QLiquor liquor = QLiquor.liquor;
+    private final QReview review = QReview.review;
+    private final QComment comment = QComment.comment;
+    private final QLiquorLike liquorLike = QLiquorLike.liquorLike;
 
     @Override
     public Slice<Liquor> findAll(LiquorSearchCondition condition) {
@@ -66,13 +68,20 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
     }
 
     @Override
-    public List<LiquorScoreDto> findScoresByIds(List<Long> id) {
-        return queryFactory.selectFrom(liquor)
-                .where()
-                .orderBy()
-                .limit()
-                .fetch()
-                ;
+    public List<LiquorScoreDto> findScoresByIds(Set<Long> activeIds) {
+        return queryFactory
+                .select(Projections.constructor(LiquorScoreDto.class,
+                        liquor.id,
+                        ExpressionUtils.as(
+                                JPAExpressions.select(review.count()).from(review).where(review.liquor.id.eq(liquor.id)), "reviewCount"),
+                        ExpressionUtils.as(
+                                JPAExpressions.select(liquorLike.count()).from(liquorLike).where(liquorLike.liquor.id.eq(liquor.id)), "likeCount"),
+                        ExpressionUtils.as(
+                                JPAExpressions.select(comment.count()).from(comment).where(comment.review.liquor.id.eq(liquor.id)), "commentCount")
+                ))
+                .from(liquor)
+                .where(liquor.id.in(activeIds))
+                .fetch();
     }
 
     /**

@@ -7,15 +7,16 @@ import com.liquordb.repository.liquor.condition.LiquorSearchCondition;
 import org.springframework.data.domain.Slice;
 
 import java.util.List;
+import java.util.Set;
 
 public interface CustomLiquorRepository {
 
     // 전체 조회
     Slice<Liquor> findAll(LiquorSearchCondition condition);
 
-    // 인기 주류 조회
+    // 인기 주류 조회 - fallback
     List<LiquorSummaryDto> findTrendingLiquorSummaries(List<Long> ids, int limit);
 
-    // 인기 순위 계산
-    List<LiquorScoreDto> findScoresByIds(List<Long> id);
+    // 인기 순위 계산 - scheduler
+    List<LiquorScoreDto> findScoresByIds(Set<Long> activeIds);
 }
