@@ -2,6 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.liquor.LiquorScoreDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
+import com.liquordb.enums.TrendingLiquorPeriod;
 import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,9 +17,21 @@ public class LiquorRankingService {
 
     private final LiquorRepository liquorRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private static final String ACTIVE_KEY_PREFIX = "active:liquors:";
+    private static final String RANKING_KEY_PREFIX = "ranking:";
+    private static final int LIMIT = 10;
 
-    public List<LiquorSummaryDto> getTopRankings(int limit){
-        return liquorRepository.findTrendingLiquorSummaries();
+    public List<LiquorSummaryDto> getTrending(TrendingLiquorPeriod period){
+
+        String rankingKey = RANKING_KEY_PREFIX + period;
+        Set<String> topIds = redisTemplate.opsForZSet().reverseRange(rankingKey, 0, LIMIT - 1);
+
+        if (topIds != null && !topIds.isEmpty()) {
+            List<Long> ids = topIds.stream().map(Long::valueOf).toList();
+            return liquorRepository.findTrendingLiquorSummaries(ids, LIMIT);
+        }
+
+        return null; // TODO 레디스에 데이터가 없을때 처리
     }
 
     public void calculateAndSaveRanking(Set<Long> activeIds, String rankingKey) {

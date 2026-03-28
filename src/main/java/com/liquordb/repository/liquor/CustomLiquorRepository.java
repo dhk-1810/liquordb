@@ -14,7 +14,7 @@ public interface CustomLiquorRepository {
     Slice<Liquor> findAll(LiquorSearchCondition condition);
 
     // 인기 주류 조회
-    List<LiquorSummaryDto> findTrendingLiquors(int limit);
+    List<LiquorSummaryDto> findTrendingLiquorSummaries(List<Long> ids, int limit);
 
     // 인기 순위 계산
     List<LiquorScoreDto> findScoresByIds(List<Long> id);

@@ -5,6 +5,7 @@ import com.liquordb.dto.liquor.LiquorListGetRequest;
 import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.enums.Role;
+import com.liquordb.enums.TrendingLiquorPeriod;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorRankingService;
@@ -29,9 +30,11 @@ public class LiquorController {
 
     // 인기 주류 조회
     @GetMapping("/trending")
-    public ResponseEntity<List<LiquorSummaryDto>> getTrending(){
-        List<LiquorSummaryDto> trending = rankingService.getTopRankings(10);
-        return ResponseEntity.ok(trending);
+    public ResponseEntity<List<LiquorSummaryDto>> getTrending(
+            @RequestParam(defaultValue = "THREE_HOURS") TrendingLiquorPeriod period
+    ) {
+        List<LiquorSummaryDto> response = rankingService.getTrending(period);
+        return ResponseEntity.ok(response);
     }
 
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
