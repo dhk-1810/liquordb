@@ -3,6 +3,7 @@ package com.liquordb.service;
 import com.liquordb.dto.liquor.LiquorScoreDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.enums.PeriodType;
+import com.liquordb.repository.liquor.LiquorRankingRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class LiquorRankingService {
 
     private final LiquorRepository liquorRepository;
+    private final LiquorRankingRepository rankingRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private static final String ACTIVE_KEY_PREFIX = "active:liquors:";
     private static final String RANKING_KEY_PREFIX = "ranking:";
@@ -29,10 +31,10 @@ public class LiquorRankingService {
 
         if (topIds != null && !topIds.isEmpty()) {
             List<Long> ids = topIds.stream().map(Long::valueOf).toList();
-            return // TODO Redis에서 가져오도록 변경
+            return // TODO Redis에서 가져옴.
         }
 
-        List<Long> dbRankingIds = rankingRepository.findLiquorIdsByPeriod(period);
+        List<Long> dbRankingIds = rankingRepository.findTrendingLiquorIdsByPeriod(period);
         if (!dbRankingIds.isEmpty()) {
             // DB에 있던 랭킹 정보를 Redis에 다시 채워주는 작업(Cache Warm-up)을 여기서 해줘도 좋습니다.
             return liquorRepository.findTrendingLiquorSummaries(dbRankingIds, LIMIT);
