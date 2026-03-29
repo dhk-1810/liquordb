@@ -77,7 +77,7 @@ public class LiquorService {
         Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
             String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
-            return LiquorMapper.toSummaryDto(liquor, imageUrl, isLiked, liquor.getReviewCount(), liquor.getLikeCount());
+            return LiquorMapper.toSummaryDto(liquor, imageUrl, isLiked);
         });
 
         Object nextCursor = null;

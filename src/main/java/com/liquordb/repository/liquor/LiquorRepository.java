@@ -1,11 +1,14 @@
 package com.liquordb.repository.liquor;
 
+import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.entity.Liquor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiquorRepository {
@@ -29,4 +32,5 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiq
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
 
+    List<Liquor> findByIdIn(List<Long> ids);
 }

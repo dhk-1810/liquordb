@@ -32,14 +32,15 @@ public class LiquorMapper {
                 .build();
     }
 
-    public static LiquorSummaryDto toSummaryDto(Liquor liquor, String imageUrl, boolean likedByMe, long reviewCount, long likeCount) {
+    public static LiquorSummaryDto toSummaryDto(Liquor liquor, String imageUrl, boolean likedByMe) {
+
         return LiquorSummaryDto.builder()
                 .id(liquor.getId())
                 .name(liquor.getName())
-                .imageUrl(imageUrl)
+                .imageUrl(imageUrl) // TODO
                 .averageRating(liquor.getAverageRating())
-                .reviewCount(reviewCount)
-                .likeCount(likeCount)
+                .reviewCount(liquor.getReviewCount())
+                .likeCount(liquor.getLikeCount())
                 .likedByMe(likedByMe)
                 .build();
     }

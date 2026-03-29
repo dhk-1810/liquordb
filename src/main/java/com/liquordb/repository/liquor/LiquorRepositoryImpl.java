@@ -63,7 +63,7 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
     }
 
     @Override
-    public List<LiquorSummaryDto> findTrendingLiquorSummaries(List<Long> ids, int limit) {
+    public List<LiquorSummaryDto> findTrendingLiquorSummaries(List<Long> activeIds) {
 
     }
 

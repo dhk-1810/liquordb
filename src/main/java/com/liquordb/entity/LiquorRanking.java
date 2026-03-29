@@ -29,7 +29,7 @@ public class LiquorRanking {
     private Long liquorId;
 
     @Column(nullable = false, updatable = false)
-    private double score;
+    private long score;
 
     @Column(nullable = false, updatable = false)
     private int ranking;
@@ -37,14 +37,14 @@ public class LiquorRanking {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    private LiquorRanking(PeriodType periodType, Long liquorId,  double score, int ranking) {
+    private LiquorRanking(PeriodType periodType, Long liquorId, long score, int ranking) {
         this.periodType = periodType;
         this.liquorId = liquorId;
         this.score = score;
         this.ranking = ranking;
     }
 
-    public static LiquorRanking create(PeriodType periodType, Long liquorId,  double score, int ranking){
+    public static LiquorRanking create(PeriodType periodType, Long liquorId,  long score, int ranking){
         return new LiquorRanking(periodType, liquorId, score, ranking);
     }
 }
