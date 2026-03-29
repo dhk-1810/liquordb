@@ -31,9 +31,11 @@ public class LiquorController {
     // 인기 주류 조회
     @GetMapping("/trending")
     public ResponseEntity<List<LiquorSummaryDto>> getTrending(
-            @RequestParam(defaultValue = "THREE_HOURS") PeriodType period
+            @RequestParam(defaultValue = "THREE_HOURS") PeriodType period,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        List<LiquorSummaryDto> response = rankingService.getTrending(period);
+        UUID viewerId = (user != null) ? user.id() : null;
+        List<LiquorSummaryDto> response = rankingService.getTrending(period, viewerId);
         return ResponseEntity.ok(response);
     }
 

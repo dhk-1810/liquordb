@@ -1,5 +1,6 @@
 package com.liquordb.repository.liquor;
 
+import com.liquordb.entity.QLiquorRanking;
 import com.liquordb.enums.PeriodType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class LiquorRankingRepositoryImpl implements CustomLiquorRankingRepositor
                 .select(liquorRanking.liquorId)
                 .from(liquorRanking)
                 .where(liquorRanking.periodType.eq(period))
-                .orderBy(liquorRanking.rankNumber.asc())
+                .orderBy(liquorRanking.ranking.asc())
                 .fetch();
     }
 }

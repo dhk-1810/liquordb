@@ -9,15 +9,15 @@ import com.liquordb.entity.User;
 public class NoticeMapper {
 
     public static Notice toEntity(NoticeRequest request, User author) {
-        return Notice.create(author, request.title(), request.content());
+        return Notice.create(author.getId(), request.title(), request.content());
     }
 
-    public static NoticeResponseDto toDto(Notice notice) {
+    public static NoticeResponseDto toDto(Notice notice, String authorName) {
         return NoticeResponseDto.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .authorUsername(notice.getAuthor().getUsername())
+                .authorUsername(authorName)
                 .createdAt(notice.getCreatedAt())
                 .updatedAt(notice.getUpdatedAt())
                 .isPinned(notice.isPinned())

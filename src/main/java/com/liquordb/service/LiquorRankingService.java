@@ -34,7 +34,7 @@ public class LiquorRankingService {
 
         if (topIds != null && !topIds.isEmpty()) {
             List<Long> ids = topIds.stream().map(Long::valueOf).toList();
-            return // TODO Redis에서 가져옴.
+//            return // TODO Redis에서 가져옴.
         }
 
         // TODO Fallback - DB에서 조회
@@ -87,8 +87,8 @@ public class LiquorRankingService {
             // 상세 정보 캐싱 (TOP 10에 포함된 경우만 JSON으로 저장)
             summaries.stream()
                     .filter(dto -> dto.id().equals(score.liquorId()))
-                    .findFirst()
-                    .ifPresent(this::cacheLiquorSummary);
+                    .findFirst();
+//                    .ifPresent(this::cacheLiquorSummary);
         }
     }
 }

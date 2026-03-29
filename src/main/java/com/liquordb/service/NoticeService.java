@@ -41,7 +41,7 @@ public class NoticeService {
 
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
-    `private final RedisTemplate<String, Object> redisTemplate;`
+    private final RedisTemplate<String, Object> redisTemplate;
     private final RedisLockProvider redisLockProvider;
 
     // 단건 조회
@@ -54,7 +54,9 @@ public class NoticeService {
 
         Notice notice = noticeRepository.findByIdAndIsDeleted(id, false)
                 .orElseThrow(() -> new NoticeNotFoundException(id));
-        return NoticeMapper.toDto(notice);
+        User author = userRepository.findById(notice.getAuthorId())
+                .orElseThrow(() -> new UserNotFoundException(notice.getAuthorId()));
+        return NoticeMapper.toDto(notice, author.getUsername());
     }
 
     // 목록 조회
@@ -112,7 +114,7 @@ public class NoticeService {
                 .orElseThrow(() -> new UserNotFoundException(authorId));
         Notice notice = toEntity(request, user);
         noticeRepository.save(notice);
-        NoticeResponseDto response = NoticeMapper.toDto(notice);
+        NoticeResponseDto response = NoticeMapper.toDto(notice, user.getUsername());
 
         redisTemplate.opsForValue().set(DETAIL_KEY_PREFIX + notice.getId(), response); // 단건 캐싱
         syncNoticeIndex(notice);
@@ -122,10 +124,13 @@ public class NoticeService {
     // 공지사항 수정
     @Transactional
     public NoticeResponseDto update(Long id, NoticeRequest request) {
+
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new NoticeNotFoundException(id));
+        User user = userRepository.findById(notice.getAuthorId())
+                .orElseThrow(() -> new UserNotFoundException(notice.getAuthorId()));
         notice.update(request);
-        NoticeResponseDto response = NoticeMapper.toDto(notice);
+        NoticeResponseDto response = NoticeMapper.toDto(notice, user.getUsername());
 
         // 단건 삭제 - 조회 시 다시 캐싱
         redisTemplate.delete(DETAIL_KEY_PREFIX + notice.getId());
@@ -137,8 +142,11 @@ public class NoticeService {
     public NoticeResponseDto togglePin(Long id) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new NoticeNotFoundException(id));
+        User user = userRepository.findById(notice.getAuthorId())
+                .orElseThrow(() -> new UserNotFoundException(notice.getAuthorId()));
         notice.togglePin();
-        NoticeResponseDto response = NoticeMapper.toDto(noticeRepository.save(notice));
+        noticeRepository.save(notice);
+        NoticeResponseDto response = NoticeMapper.toDto(notice, user.getUsername());
 
         // ID 목록 업데이트
         syncNoticeIndex(notice);
@@ -168,8 +176,10 @@ public class NoticeService {
             return;
         }
 
+        User user = userRepository.findById(notice.getAuthorId())
+                .orElseThrow(() -> new UserNotFoundException(notice.getAuthorId()));
         redisTemplate.opsForValue().set(SUMMARY_KEY_PREFIX + notice.getId(), NoticeMapper.toSummaryDto(notice));
-        redisTemplate.opsForValue().set(DETAIL_KEY_PREFIX + notice.getId(), NoticeMapper.toDto(notice));
+        redisTemplate.opsForValue().set(DETAIL_KEY_PREFIX + notice.getId(), NoticeMapper.toDto(notice, user.getUsername()));
 
         double score = notice.getId().doubleValue();
         if (notice.isPinned()) score += 1_000_000_000_000.0;
