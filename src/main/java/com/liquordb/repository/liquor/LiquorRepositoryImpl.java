@@ -63,11 +63,6 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
     }
 
     @Override
-    public List<LiquorSummaryDto> findTrendingLiquorSummaries(List<Long> activeIds) {
-        return null; // TODO
-    }
-
-    @Override
     public List<LiquorScoreDto> findScoresByIds(Set<Long> activeIds) {
         return queryFactory
                 .select(Projections.constructor(LiquorScoreDto.class,

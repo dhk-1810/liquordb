@@ -17,7 +17,7 @@ public record LiquorResponseDto (
         LiquorCategory category,
         Long subcategoryId,
         Long subcategoryName,
-        Country country, // TODO 국가별 필터링 추가?
+        Country country,
         String manufacturer,
         double abv,
         boolean isDiscontinued, // 단종 여부

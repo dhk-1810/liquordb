@@ -64,31 +64,12 @@ public class LiquorRankingService {
 
         List<LiquorScoreDto> scores = liquorRepository.findScoresByIds(activeIds);
 
-        redisTemplate.delete(rankingKey);
-
-        // 상세 정보를 한 번에 긁어오기 위한 ID 리스트
-        List<Long> topIds = scores.stream()
-                .sorted(Comparator.comparing(LiquorScoreDto::calculateTotalScore).reversed())
-                .limit(10) // TOP 10만 상세 캐싱
-                .map(LiquorScoreDto::liquorId)
-                .toList();
-
-        List<LiquorSummaryDto> summaries = liquorRepository.findTrendingLiquorSummaries(topIds);
-
-//        // ZSet에 저장
-//        for (LiquorScoreDto score : scores) {
-//            redisTemplate.opsForZSet().add(rankingKey, String.valueOf(score.liquorId()), totalScore);
-//        }
+        // Redis Sorted Set(ZSet)에 저장
+        redisTemplate.delete(rankingKey); // 기존 랭킹 삭제
 
         for (LiquorScoreDto score : scores) {
-            // 점수 저장 (ZSet)
-            redisTemplate.opsForZSet().add(rankingKey, String.valueOf(score.liquorId()), LiquorScoreDto.calculateTotalScore(score));
-
-            // 상세 정보 캐싱 (TOP 10에 포함된 경우만 JSON으로 저장)
-            summaries.stream()
-                    .filter(dto -> dto.id().equals(score.liquorId()))
-                    .findFirst();
-//                    .ifPresent(this::cacheLiquorSummary);
+            double totalScore = LiquorScoreDto.calculateTotalScore(score);
+            redisTemplate.opsForZSet().add(rankingKey, String.valueOf(score.liquorId()), totalScore);
         }
     }
 }
