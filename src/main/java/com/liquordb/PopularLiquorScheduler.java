@@ -47,12 +47,11 @@ public class PopularLiquorScheduler {
         String rankingKey = RANKING_KEY_PREFIX + period.name();
 
         // Set 조회
-        // TODO 리뷰 작성, 좋아요, 댓글 작성 시 activeKey(후보군)에 추가
         Set<String> activeIds = redisTemplate.opsForSet().members(activeKey);
         if (activeIds == null || activeIds.isEmpty()) return;
 
         Set<Long> idSet = activeIds.stream().map(Long::parseLong).collect(Collectors.toSet());
-        rankingService.calculateAndSaveRanking(idSet, rankingKey);
+        rankingService.calculateAndSaveRanking(idSet, rankingKey, period);
 
         redisTemplate.delete(activeKey);
     }

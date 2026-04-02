@@ -2,6 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.liquor.LiquorScoreDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
+import com.liquordb.entity.LiquorRanking;
 import com.liquordb.enums.PeriodType;
 import com.liquordb.mapper.LiquorMapper;
 import com.liquordb.repository.LiquorLikeRepository;
@@ -68,16 +69,33 @@ public class LiquorRankingService {
     /**
      * 스케줄러에서만 호출
      */
-    public void calculateAndSaveRanking(Set<Long> activeIds, String rankingKey) {
+    public void calculateAndSaveRanking(Set<Long> activeIds, String rankingKey, PeriodType period) {
 
         List<LiquorScoreDto> scores = liquorRepository.findScoresByIds(activeIds);
+        scores.sort((a, b) -> Double.compare(
+                LiquorScoreDto.calculateTotalScore(b),
+                LiquorScoreDto.calculateTotalScore(a)
+        ));
 
         // Redis Sorted Set(ZSet)에 저장
-        redisTemplate.delete(rankingKey); // 기존 랭킹 삭제
+        redisTemplate.delete(rankingKey);
+        liquorRankingRepository.deleteByPeriodType(period);
 
-        for (LiquorScoreDto score : scores) {
-            double totalScore = LiquorScoreDto.calculateTotalScore(score);
-            redisTemplate.opsForZSet().add(rankingKey, String.valueOf(score.liquorId()), totalScore);
+        List<LiquorRanking> rankings = new ArrayList<>();
+        int limit = Math.min(scores.size(), 10);
+        for (int i = 0; i < limit; i++) {
+            LiquorScoreDto scoreDto = scores.get(i);
+            long totalScore = LiquorScoreDto.calculateTotalScore(scoreDto);
+            int rank = i + 1;
+
+            // 캐싱
+            redisTemplate.opsForZSet().add(rankingKey, String.valueOf(scoreDto.liquorId()), totalScore);
+
+            // DB 저장
+            LiquorRanking ranking = LiquorRanking.create(period, scoreDto.liquorId(), totalScore, rank);
+            rankings.add(ranking);
         }
+        liquorRankingRepository.saveAll(rankings);
+        // TODO LiquorSummaryDto 자체를 캐싱
     }
 }

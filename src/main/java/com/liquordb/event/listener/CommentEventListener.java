@@ -40,6 +40,9 @@ public class CommentEventListener {
         NotificationResponseDto response = NotificationResponseDto.toDto(notification);
         SseMessage message = SseMessage.create(event.receiverId(), "notification", response);
         redisTemplate.convertAndSend("sse-notifications", message);
+
+        // 인기 주류 집계를 위해 id 캐싱
+        
     }
 
 }

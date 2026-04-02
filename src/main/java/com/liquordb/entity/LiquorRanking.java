@@ -44,7 +44,7 @@ public class LiquorRanking {
         this.ranking = ranking;
     }
 
-    public static LiquorRanking create(PeriodType periodType, Long liquorId,  long score, int ranking){
+    public static LiquorRanking create(PeriodType periodType, Long liquorId, long score, int ranking){
         return new LiquorRanking(periodType, liquorId, score, ranking);
     }
 }
