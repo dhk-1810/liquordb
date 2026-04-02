@@ -8,6 +8,7 @@ import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.repository.liquor.LiquorRankingRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,25 +28,23 @@ public class LiquorRankingService {
     private static final String RANKING_KEY_PREFIX = "ranking:";
     private static final int LIMIT = 10;
 
-    public List<LiquorSummaryDto> getTrending(PeriodType period, UUID userId){
+    public List<LiquorSummaryDto> getTrending(PeriodType period, UUID userId) {
 
         String rankingKey = RANKING_KEY_PREFIX + period;
         Set<String> topIds = redisTemplate.opsForZSet().reverseRange(rankingKey, 0, LIMIT - 1);
-
-        if (topIds != null && !topIds.isEmpty()) {
-            List<Long> ids = topIds.stream().map(Long::valueOf).toList();
-//            return // TODO Redis에서 가져옴.
+        List<Long> ids;
+        if (topIds != null && !topIds.isEmpty()) { // Redis에서 ID 조회
+            ids = topIds.stream().map(Long::valueOf).toList();
+        } else { // DB에서 ID 조회 (Fallback)
+            ids = liquorRankingRepository.findTrendingLiquorIdsByPeriod(period);
         }
 
-        // TODO Fallback - DB에서 조회
-        List<Long> dbRankingIds = liquorRankingRepository.findTrendingLiquorIdsByPeriod(period);
-        if (!dbRankingIds.isEmpty()) {
-
+        if (!ids.isEmpty()) {
             Set<Long> likedLiquorIds = (userId != null)
-                    ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, dbRankingIds)
+                    ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, ids)
                     : Collections.emptySet();
 
-            return liquorRepository.findByIdIn(dbRankingIds).stream()
+            return liquorRepository.findByIdIn(ids).stream()
                     .map(liquor -> {
                         boolean isLiked = likedLiquorIds.contains(liquor.getId());
                         String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
@@ -54,7 +53,16 @@ public class LiquorRankingService {
                     .toList();
         }
 
-        return null; // TODO 모두 비정상 작동 시 주류 10개 최신순 return
+        return liquorRepository.findTopLatestLiquors(PageRequest.of(0, 10)).stream()
+                .map(liquor -> {
+                    Set<Long> likedLiquorIds = (userId != null)
+                            ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, ids)
+                            : Collections.emptySet();
+                    boolean isLiked = likedLiquorIds.contains(liquor.getId());
+                    String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
+                    return LiquorMapper.toSummaryDto(liquor, imageUrl, isLiked);
+                })
+                .toList();
     }
 
     /**

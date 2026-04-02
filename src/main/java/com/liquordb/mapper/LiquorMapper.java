@@ -37,7 +37,7 @@ public class LiquorMapper {
         return LiquorSummaryDto.builder()
                 .id(liquor.getId())
                 .name(liquor.getName())
-                .imageUrl(imageUrl) // TODO
+                .imageUrl(imageUrl)
                 .averageRating(liquor.getAverageRating())
                 .reviewCount(liquor.getReviewCount())
                 .likeCount(liquor.getLikeCount())

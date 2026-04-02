@@ -48,7 +48,6 @@ public class PopularLiquorScheduler {
 
         // Set 조회
         // TODO 리뷰 작성, 좋아요, 댓글 작성 시 activeKey(후보군)에 추가
-        // TODO fallback 위해 DB에도 추가?
         Set<String> activeIds = redisTemplate.opsForSet().members(activeKey);
         if (activeIds == null || activeIds.isEmpty()) return;
 
