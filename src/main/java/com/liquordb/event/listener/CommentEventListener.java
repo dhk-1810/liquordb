@@ -1,5 +1,6 @@
 package com.liquordb.event.listener;
 
+import com.liquordb.LiquorActivityManager;
 import com.liquordb.SseMessage;
 import com.liquordb.dto.NotificationResponseDto;
 import com.liquordb.entity.Notification;
@@ -24,9 +25,11 @@ public class CommentEventListener {
     private static final String MESSAGE_SUFFIX = "님이 리뷰에 댓글을 남겼습니다.";
 
     private final NotificationRepository notificationRepository;
+    private final LiquorActivityManager liquorActivityManager;
     private final RedisTemplate<String, Object> redisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
     private static final String ACTIVE_KEY_PREFIX = "active:liquors:";
+
 
     @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -47,14 +50,7 @@ public class CommentEventListener {
         redisTemplate.convertAndSend("sse-notifications", message);
 
         // 인기 주류 집계를 위해 ID 캐싱
-        String idStr = String.valueOf(event.liquorId());
-        stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            for (PeriodType period : PeriodType.values()) {
-                String key = ACTIVE_KEY_PREFIX + period.name();
-                stringRedisTemplate.opsForSet().add(key, idStr);
-            }
-            return null;
-        });
+        liquorActivityManager.trackActivity(event.liquorId());
     }
 
 }

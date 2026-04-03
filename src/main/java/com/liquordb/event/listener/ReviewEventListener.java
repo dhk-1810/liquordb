@@ -1,5 +1,6 @@
 package com.liquordb.event.listener;
 
+import com.liquordb.LiquorActivityManager;
 import com.liquordb.enums.PeriodType;
 import com.liquordb.event.ReviewCreatedEvent;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class ReviewEventListener {
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final LiquorActivityManager liquorActivityManager;
     private static final String ACTIVE_KEY_PREFIX = "active:liquors:";
 
     @Async("eventTaskExecutor")
@@ -25,14 +27,7 @@ public class ReviewEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(ReviewCreatedEvent event) {
 
-        String idStr = String.valueOf(event.liquorId());
-        stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            for (PeriodType period : PeriodType.values()) {
-                String key = ACTIVE_KEY_PREFIX + period.name();
-                stringRedisTemplate.opsForSet().add(key, idStr);
-            }
-            return null;
-        });
+        liquorActivityManager.trackActivity(event.liquorId());
     }
 
 }

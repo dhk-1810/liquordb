@@ -1,5 +1,6 @@
 package com.liquordb.event.listener;
 
+import com.liquordb.LiquorActivityManager;
 import com.liquordb.SseMessage;
 import com.liquordb.dto.NotificationResponseDto;
 import com.liquordb.entity.Notification;
@@ -38,6 +39,7 @@ public class LikeEventListener {
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
     private final NotificationRepository notificationRepository;
+    private final LiquorActivityManager liquorActivityManager;
     private final SseService sseService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
@@ -52,14 +54,7 @@ public class LikeEventListener {
 
         // 인기 주류 집계를 위해 ID 캐싱 - 3시간, 일간, 주간 모든 후보군 Set에 ID 추가
         if (delta == 1) {
-            String idStr = String.valueOf(event.liquorId());
-            redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-                for (PeriodType period : PeriodType.values()) {
-                    String key = ACTIVE_KEY_PREFIX + period.name();
-                    redisTemplate.opsForSet().add(key, idStr);
-                }
-                return null;
-            });
+            liquorActivityManager.trackActivity(event.liquorId());
         }
     }
 
