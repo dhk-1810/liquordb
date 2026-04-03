@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 public class SseRepository {
 
     // SseEmitter 저장소
-    private final ConcurrentMap<UUID, List<SseEmitter>> emitters = new ConcurrentHashMap<>(); // List로 다중 연결 허용
+    private final ConcurrentMap<UUID, Set<SseEmitter>> emitters = new ConcurrentHashMap<>(); // List로 다중 연결 허용
 
-    // SseMessage 저장소 (이벤트 유실 복원용)
-    private final ConcurrentMap<UUID, List<SseMessage>> messages = new ConcurrentHashMap<>();
+//    // SseMessage 저장소 (이벤트 유실 복원용)
+//    private final ConcurrentMap<UUID, List<SseMessage>> messages = new ConcurrentHashMap<>();
 
     private static final int MAX_MESSAGE_HISTORY = 10;
 
@@ -29,15 +29,15 @@ public class SseRepository {
      */
 
     public void saveEmitter(SseEmitter emitter, UUID userId) {
-        emitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(emitter);
+        emitters.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(emitter);
     }
 
     public Set<UUID> findAllConnectedUserIds() {
         return emitters.keySet();
     }
 
-    public List<SseEmitter> findEmittersByUserId(UUID userId) {
-        return emitters.getOrDefault(userId, Collections.emptyList());
+    public Set<SseEmitter> findEmittersByUserId(UUID userId) {
+        return emitters.getOrDefault(userId, Collections.emptySet());
     }
 
     public Map<UUID, List<SseEmitter>> findAllEmittersByUserIdIn(Set<UUID> userIds) {
@@ -51,7 +51,7 @@ public class SseRepository {
 
     // SSE 연결 종료 시 사용
     public void deleteEmitter(SseEmitter emitter, UUID userId) {
-        List<SseEmitter> userEmitters = emitters.get(userId);
+        Set<SseEmitter> userEmitters = emitters.get(userId);
         if (userEmitters != null) {
             userEmitters.remove(emitter);
             if (userEmitters.isEmpty()) {
@@ -70,25 +70,25 @@ public class SseRepository {
      * SseMessage
      */
 
-    public void saveMessage(SseMessage message, UUID userId) {
-        messages.compute(userId, (id, history) -> {
-            List<SseMessage> list = (history == null) ? new CopyOnWriteArrayList<>() : history; // TODO 자료구조 수정?
-            list.add(message);
+//    public void saveMessage(SseMessage message, UUID userId) {
+//        messages.compute(userId, (id, history) -> {
+//            List<SseMessage> list = (history == null) ? new CopyOnWriteArrayList<>() : history;
+//            list.add(message);
+//
+//            while (list.size() > MAX_MESSAGE_HISTORY) {
+//                list.remove(0);
+//            }
+//            return list;
+//        });
+//    }
 
-            while (list.size() > MAX_MESSAGE_HISTORY) {
-                list.remove(0);
-            }
-            return list;
-        });
-    }
-
-    public void saveAllMessages(Map<UUID, SseMessage> messagesToSave) {
-        messagesToSave.forEach((userId, message) -> saveMessage(message, userId));
-    }
+//    public void saveAllMessages(Map<UUID, SseMessage> messagesToSave) {
+//        messagesToSave.forEach((userId, message) -> saveMessage(message, userId));
+//    }
 
     // 사용자의 모든 SseMessage 삭제 (로그아웃)
-    public void deleteAllMessagesByUserId(UUID userId) {
-        messages.remove(userId);
-    }
+//    public void deleteAllMessagesByUserId(UUID userId) {
+//        messages.remove(userId);
+//    }
 }
 

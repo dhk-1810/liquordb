@@ -65,9 +65,9 @@ public class SseService {
 
     public void pushToClient(Object data, String eventName, UUID receiverId) {
         SseMessage sseMessage = SseMessage.create(receiverId, eventName, data);
-        sseRepository.saveMessage(sseMessage, receiverId);
+//        sseRepository.saveMessage(sseMessage, receiverId);
 
-        List<SseEmitter> emitters = sseRepository.findEmittersByUserId(receiverId);
+        Set<SseEmitter> emitters = sseRepository.findEmittersByUserId(receiverId);
         emitters.forEach(emitter -> sendToClient(emitter, receiverId, eventName, data, sseMessage.id().toString()));
     }
 
@@ -80,7 +80,7 @@ public class SseService {
                         Map.Entry::getKey,
                         entry -> SseMessage.create(entry.getKey(), eventName, entry.getValue())
                 ));
-        sseRepository.saveAllMessages(sseMessageMap);
+//        sseRepository.saveAllMessages(sseMessageMap);
 
         Set<UUID> receiverIds = sseMessageMap.keySet();
         Map<UUID, List<SseEmitter>> emitterMap = sseRepository.findAllEmittersByUserIdIn(receiverIds);
@@ -109,7 +109,7 @@ public class SseService {
 
         int removedCount = 0;
         for (UUID userId : userIds) {
-            List<SseEmitter> emitters = sseRepository.findEmittersByUserId(userId);
+            Set<SseEmitter> emitters = sseRepository.findEmittersByUserId(userId);
 
             for (SseEmitter emitter : emitters) {
                 try {
