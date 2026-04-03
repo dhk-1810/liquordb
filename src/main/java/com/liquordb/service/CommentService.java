@@ -2,6 +2,7 @@ package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
+import com.liquordb.entity.Liquor;
 import com.liquordb.event.CommentCreatedEvent;
 import com.liquordb.repository.comment.condition.CommentListGetCondition;
 import com.liquordb.repository.comment.condition.CommentSearchCondition;
@@ -22,6 +23,7 @@ import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.mapper.CommentMapper;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.entity.Review;
+import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.entity.User;
 import com.liquordb.repository.user.UserRepository;
@@ -45,6 +47,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final LiquorRepository liquorRepository;
 
     // 댓글 생성
     @Transactional
@@ -69,7 +72,12 @@ public class CommentService {
         Comment comment = CommentMapper.toEntity(request, parent, review, user);
         commentRepository.save(comment);
 
-        eventPublisher.publishEvent(new CommentCreatedEvent(review.getUser().getId(), comment.getId(), user.getUsername()));
+        eventPublisher.publishEvent(new CommentCreatedEvent(
+                review.getUser().getId(),
+                comment.getId(),
+                review.getLiquor().getId(),
+                user.getUsername())
+        );
         return CommentMapper.toDto(comment);
     }
 

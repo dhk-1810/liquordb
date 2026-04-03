@@ -3,6 +3,7 @@ package com.liquordb.event.listener;
 import com.liquordb.SseMessage;
 import com.liquordb.dto.NotificationResponseDto;
 import com.liquordb.entity.Notification;
+import com.liquordb.enums.PeriodType;
 import com.liquordb.event.CommentLikeEvent;
 import com.liquordb.event.LiquorLikeEvent;
 import com.liquordb.event.ReviewLikeEvent;
@@ -12,7 +13,9 @@ import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.service.SseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,6 +32,7 @@ public class LikeEventListener {
     private static final String EVENT_NAME = "notifications";
     private static final String REVIEW_LIKE_MESSAGE_SUFFIX = "님이 내 리뷰를 좋아합니다.";
     private static final String COMMENT_LIKE_MESSAGE_SUFFIX = "님이 내 댓글을 좋아합니다.";
+    private static final String ACTIVE_KEY_PREFIX = "active:liquors:";
 
     private final LiquorRepository liquorRepository;
     private final ReviewRepository reviewRepository;
@@ -36,6 +40,7 @@ public class LikeEventListener {
     private final NotificationRepository notificationRepository;
     private final SseService sseService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -44,6 +49,18 @@ public class LikeEventListener {
 
         int delta = event.isLiked() ? 1 : -1;
         liquorRepository.updateLikeCount(event.liquorId(), delta);
+
+        // 인기 주류 집계를 위해 ID 캐싱 - 3시간, 일간, 주간 모든 후보군 Set에 ID 추가
+        if (delta == 1) {
+            String idStr = String.valueOf(event.liquorId());
+            redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+                for (PeriodType period : PeriodType.values()) {
+                    String key = ACTIVE_KEY_PREFIX + period.name();
+                    redisTemplate.opsForSet().add(key, idStr);
+                }
+                return null;
+            });
+        }
     }
 
     @Async("eventTaskExecutor")
