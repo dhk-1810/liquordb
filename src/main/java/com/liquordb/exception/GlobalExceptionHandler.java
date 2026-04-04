@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
                 e.getMessage(),
                 e.details
         );
-        log.error("NotFoundException: {}", e.getMessage(), e);
+        log.warn("NotFoundException: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
                 e.getMessage(),
                 e.details
         );
-        log.error("AlreadyExistsException: {}", e.getMessage(), e);
+        log.warn("AlreadyExistsException: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
@@ -72,7 +72,11 @@ public class GlobalExceptionHandler {
                 e.getMessage(),
                 e.details
         );
-        log.error(e.getMessage(), e);
+        if (e.errorCode.getStatus().is5xxServerError()) {
+            log.error(e.getMessage(), e);
+        } else {
+            log.warn("{}: {}", e.getClass().getSimpleName(), e.getMessage());
+        }
         return ResponseEntity.status(e.errorCode.getStatus()).body(response);
     }
 
@@ -153,7 +157,7 @@ public class GlobalExceptionHandler {
                 e.getMessage(),
                 Map.of()
         );
-        log.error("IllegalArgumentException: {}", e.getMessage(), e);
+        log.warn("IllegalArgumentException: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
@@ -165,7 +169,7 @@ public class GlobalExceptionHandler {
                 e.getMessage(),
                 Map.of()
         );
-        log.error("IllegalStateException: {}", e.getMessage(), e);
+        log.warn("IllegalStateException: {}", e.getMessage());
         return ResponseEntity.badRequest().body(error);
     }
 
