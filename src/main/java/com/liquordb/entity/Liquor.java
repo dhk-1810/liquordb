@@ -37,6 +37,7 @@ public class Liquor extends LikeableEntity {
     @Column(nullable = false)
     private Long subcategoryId; // 주종 소분류
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private Country country; // 제조국
 
