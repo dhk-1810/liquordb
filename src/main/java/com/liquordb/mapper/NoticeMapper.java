@@ -26,6 +26,7 @@ public class NoticeMapper {
 
     public static NoticeSummaryDto toSummaryDto(Notice notice) {
         return new NoticeSummaryDto(
+                notice.getId(),
                 notice.getTitle(),
                 notice.isPinned(),
                 notice.getCreatedAt()

@@ -45,7 +45,10 @@ public class JsonUsernamePasswordAuthenticationFilter extends UsernamePasswordAu
             // JSON 바디를 Map으로 파싱
             Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);
 
-            String username = loginData.get("username");
+            String username = loginData.get("email");
+            if (username == null) {
+                username = loginData.get("username");
+            }
             String password = loginData.get("password");
 
             // 인증 토큰 생성

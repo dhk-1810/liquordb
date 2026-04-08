@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
  * 공지사항 목록에 표시할 요약된 정보
  */
 public record NoticeSummaryDto (
+        Long id,
         String title,
         boolean isPinned,
         LocalDateTime createdAt

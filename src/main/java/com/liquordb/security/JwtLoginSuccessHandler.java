@@ -46,7 +46,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
                 userDto.role().name()
         );
         String refreshToken = jwtTokenProvider.createRefreshToken(
-                userDto.username(),
+                userDto.email(),
                 userDto.role().name()
         );
 

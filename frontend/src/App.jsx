@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import Home from './pages/Home';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
+import LiquorsExplore from './pages/LiquorsExplore';
+import NoticesList from './pages/NoticesList';
+import NoticeDetail from './pages/NoticeDetail';
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -50,6 +53,17 @@ function AppContent() {
     checkAuth();
   }, [location.pathname]); // re-check on auth pages if needed, or just on mount
 
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout failed:', e);
+    } finally {
+      localStorage.removeItem('isLoggedIn');
+      setUser(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-12 overflow-x-hidden flex flex-col">
       {/* Header */}
@@ -63,22 +77,28 @@ function AppContent() {
             <div className="flex items-center text-sm font-medium text-slate-600">
               <div className="hidden sm:flex items-center gap-6">
                 <Link to="/" className="text-amber-600 hover:text-amber-700 transition-colors">Home</Link>
-                <span className="hover:text-amber-600 cursor-pointer transition-colors">Categories</span>
+                <Link to="/liquors" className="hover:text-amber-600 transition-colors">Liquors</Link>
+                <Link to="/notices" className="hover:text-amber-600 transition-colors">Notices</Link>
                 <span className="hover:text-amber-600 cursor-pointer transition-colors">About</span>
               </div>
               <div className="flex items-center gap-4 ml-4 pl-4 sm:ml-6 sm:pl-6 border-l border-slate-200">
                 {authLoading ? (
                   <div className="w-10 h-10 rounded-full bg-slate-200 animate-pulse"></div>
                 ) : user ? (
-                  <Link to="/mypage" className="focus:outline-none flex items-center justify-center transform hover:scale-105 transition-transform" title="Go to My Page">
-                    {profileImageUrl ? (
-                      <img src={profileImageUrl} alt={user.username} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm hover:border-amber-400 transition-colors bg-white" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm hover:border-amber-400 transition-colors uppercase">
-                        {user.username ? user.username.charAt(0) : '?'}
-                      </div>
-                    )}
-                  </Link>
+                  <>
+                    <Link to="/mypage" className="focus:outline-none flex items-center justify-center transform hover:scale-105 transition-transform" title="Go to My Page">
+                      {profileImageUrl ? (
+                        <img src={profileImageUrl} alt={user.username} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm hover:border-amber-400 transition-colors bg-white" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm hover:border-amber-400 transition-colors uppercase">
+                          {user.username ? user.username.charAt(0) : '?'}
+                        </div>
+                      )}
+                    </Link>
+                    <button onClick={handleSignOut} className="hover:text-amber-600 transition-colors font-semibold ml-2">
+                      Sign Out
+                    </button>
+                  </>
                 ) : (
                   <>
                     <Link to="/signin" className="hover:text-amber-600 transition-colors font-semibold">Sign In</Link>
@@ -97,6 +117,9 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/liquors" element={<LiquorsExplore />} />
+          <Route path="/notices" element={<NoticesList />} />
+          <Route path="/notices/:id" element={<NoticeDetail />} />
           <Route path="/mypage" element={
             <div className="text-center py-32 animate-fade-in-up">
               <h1 className="text-3xl font-bold text-slate-800">My Page (Coming Soon)</h1>
