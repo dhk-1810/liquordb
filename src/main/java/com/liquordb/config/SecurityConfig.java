@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.Customizer;
+
 @RequiredArgsConstructor
 @Configuration
 @EnableMethodSecurity
@@ -30,7 +31,6 @@ public class SecurityConfig {
     private final JwtLogoutHandler jwtLogoutHandler;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-//    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,11 +73,11 @@ public class SecurityConfig {
                 // 인가
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/","/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/index.html").permitAll()
                         .requestMatchers("/api/auth/restore").authenticated()
                         .requestMatchers( "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/liquors/**").permitAll() // 주류, 리뷰 조회 허용
-                        .requestMatchers(HttpMethod.GET, "/api/reviews/*/comments/**").permitAll() // 댓글 조회 허용
+                        .requestMatchers(HttpMethod.GET, "/api/liquors", "/api/liquors/**").permitAll() // 주류, 리뷰 조회 허용
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/*/comments", "/api/reviews/*/comments/**").permitAll() // 댓글 조회 허용
+                        .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").permitAll() // 공지 조회 허용
                         .anyRequest().authenticated()
                 );
 
