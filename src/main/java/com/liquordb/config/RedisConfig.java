@@ -1,8 +1,12 @@
 package com.liquordb.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.liquordb.redis.RedisSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -48,19 +52,27 @@ public class RedisConfig {
     }
 
     @Bean("redisSerializer")
-    public GenericJackson2JsonRedisSerializer redisSerializer(ObjectMapper objectMapper) {
+    public GenericJackson2JsonRedisSerializer redisSerializer() {
 
-        // Spring의 ObjectMapper 설정을 복사, Redis 전용으로 설정
-        ObjectMapper redisObjectMapper = objectMapper.copy();
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 2. 자바 8 날짜/시간 모듈 등록 (LocalDataTime 등을 사용한다면 필수)
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         // 다형성 처리를 위한 타입 정보 포함 설정
         // 역직렬화 시 JSON을 어떤 객체(타입)로 매핑할지 정보 필요하므로 사용
-        redisObjectMapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance, // 검증기 설정 - 아무나 원래 타입을 조작하지 못하게 함
-                ObjectMapper.DefaultTyping.NON_FINAL, // 타입 정보 저장 범위 - final이 아닌 클래스들의 타입 저장
-                JsonTypeInfo.As.PROPERTY // 타입 정보를 JSON 속성(@class)으로 포함
-        );
-        return new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+        PolymorphicTypeValidator ptv = LaissezFaireSubTypeValidator.instance;
+        mapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+
+//        mapper.activateDefaultTyping(
+//                LaissezFaireSubTypeValidator.instance, // 검증기 설정 - 아무나 원래 타입을 조작하지 못하게 함
+//                ObjectMapper.DefaultTyping.NON_FINAL, // 타입 정보 저장 범위 - final이 아닌 클래스들의 타입 저장
+//                JsonTypeInfo.As.PROPERTY // 타입 정보를 JSON 속성(@class)으로 포함
+//        );
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        return new GenericJackson2JsonRedisSerializer(mapper);
     }
 
     /**

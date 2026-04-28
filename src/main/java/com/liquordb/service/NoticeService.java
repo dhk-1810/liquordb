@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,7 @@ public class NoticeService {
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final RedisLockProvider redisLockProvider;
 
     // 단건 조회
@@ -70,11 +72,11 @@ public class NoticeService {
 
         int start = page * limit;
         int end = start + limit - 1;
-        Set<Object> idSet = redisTemplate.opsForZSet().reverseRange(INDEX_KEY_PREFIX, start, end);
+        Set<String> idSet = stringRedisTemplate.opsForZSet().reverseRange(INDEX_KEY_PREFIX, start, end);
 
         // 2. Redis에 ID 목록이 있으면 MGET으로 상세 데이터 조회
         if (idSet != null && !idSet.isEmpty()) {
-            List<Long> ids = idSet.stream().map(id -> Long.valueOf(id.toString())).toList();
+            List<Long> ids = idSet.stream().map(Long::valueOf).toList();
             List<String> keys = ids.stream().map(id -> SUMMARY_KEY_PREFIX + id).toList();
             List<Object> cachedData = redisTemplate.opsForValue().multiGet(keys);
 
@@ -183,7 +185,6 @@ public class NoticeService {
 
         double score = notice.getId().doubleValue();
         if (notice.isPinned()) score += 1_000_000_000_000.0;
-
-        redisTemplate.opsForZSet().add(INDEX_KEY_PREFIX, notice.getId(), score);
+        stringRedisTemplate.opsForZSet().add(INDEX_KEY_PREFIX, String.valueOf(notice.getId()), score);
     }
 }
