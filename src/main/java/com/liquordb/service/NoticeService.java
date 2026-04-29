@@ -86,8 +86,8 @@ public class NoticeService {
                         .map(obj -> (NoticeSummaryDto) obj)
                         .toList();
                 // 전체 카운트는 Redis ZSet의 size로 대체 가능
-                long total = redisTemplate.opsForZSet().size(INDEX_KEY_PREFIX);
-                return PageResponse.from(new PageImpl<>(dtos, PageRequest.of(page, limit), total));
+                Long total = stringRedisTemplate.opsForZSet().size(INDEX_KEY_PREFIX);
+                return PageResponse.from(new PageImpl<>(dtos, PageRequest.of(page, limit), total != null ? total : 0L));
             }
         }
 
