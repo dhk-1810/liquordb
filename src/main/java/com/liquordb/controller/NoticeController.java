@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/notices")
 @RequiredArgsConstructor
@@ -25,5 +27,10 @@ public class NoticeController {
     @GetMapping
     public ResponseEntity<PageResponse<NoticeSummaryDto>> getAllNotices(@ModelAttribute NoticeListGetRequest request) {
         return ResponseEntity.ok(noticeService.getAll(request));
+    }
+
+    @GetMapping("/pinned")
+    public ResponseEntity<List<NoticeSummaryDto>> getPinnedNotices() {
+        return ResponseEntity.ok(noticeService.getPinned());
     }
 }

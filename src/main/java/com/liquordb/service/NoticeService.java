@@ -39,6 +39,7 @@ public class NoticeService {
     private static final String DETAIL_KEY_PREFIX = "notice:detail:"; // 단건 조회
     private static final String SUMMARY_KEY_PREFIX = "notice:summary:"; // 목록에서 보일 요약 정보
     private static final String INDEX_KEY_PREFIX = "notice:ids:"; // sorted set 형태의 ID 목록
+    private static final String PINNED_INDEX_KEY_PREFIX = "notice:pinned:ids:"; // 고정 공지사항 ID 목록
 
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
@@ -67,42 +68,89 @@ public class NoticeService {
 
         boolean deleted = request.deleted() != null && request.deleted();
         int page = request.page() == null ? 0 : request.page();
-        int limit = request.limit() == null ? 50 : request.limit();
+        int limit = request.limit() == null ? 10 : request.limit();
         boolean descending = request.sortDirection() == null || request.sortDirection() == SortDirection.DESC;
 
-        int start = page * limit;
-        int end = start + limit - 1;
-        Set<String> idSet = stringRedisTemplate.opsForZSet().reverseRange(INDEX_KEY_PREFIX, start, end);
+//        int start = page * limit;
+//        int end = start + limit - 1;
+//        Set<String> idSet = stringRedisTemplate.opsForZSet().reverseRange(INDEX_KEY_PREFIX, start, end);
 
         // 2. Redis에 ID 목록이 있으면 MGET으로 상세 데이터 조회
-        if (idSet != null && !idSet.isEmpty()) {
-            List<Long> ids = idSet.stream().map(Long::valueOf).toList();
-            List<String> keys = ids.stream().map(id -> SUMMARY_KEY_PREFIX + id).toList();
+//        if (idSet != null && !idSet.isEmpty()) {
+//            List<Long> ids = idSet.stream().map(Long::valueOf).toList();
+//            List<String> keys = ids.stream().map(id -> SUMMARY_KEY_PREFIX + id).toList();
+//            List<Object> cachedData = redisTemplate.opsForValue().multiGet(keys);
+//
+//            // 모든 데이터가 캐시에 있다면 바로 반환
+//            if (cachedData != null && cachedData.stream().allMatch(Objects::nonNull)) {
+//                List<NoticeSummaryDto> dtos = cachedData.stream()
+//                        .map(obj -> (NoticeSummaryDto) obj)
+//                        .toList();
+//                // 전체 카운트는 Redis ZSet의 size로 대체 가능
+//                Long total = stringRedisTemplate.opsForZSet().size(INDEX_KEY_PREFIX);
+//                return PageResponse.from(new PageImpl<>(dtos, PageRequest.of(page, limit), total != null ? total : 0L));
+//            }
+//        }
+
+        // 3. Redis에 데이터가 없거나 일부 유실되었다면 DB 조회 (Fallback)
+        // ZSet 기반 페이지네이션을 제대로 하려면 전체 데이터가 ZSet에 있어야 합니다.
+        NoticeListGetCondition condition = new NoticeListGetCondition(
+                deleted,
+                page,
+                limit,
+                descending
+        );
+        Page<Notice> notices = noticeRepository.findAll(condition);
+//
+//        stringRedisTemplate.delete(INDEX_KEY_PREFIX);
+//        allNotices.forEach(notice -> {
+//            NoticeSummaryDto dto = NoticeMapper.toSummaryDto(notice);
+////            redisTemplate.opsForValue().set(SUMMARY_KEY_PREFIX + notice.getId(), dto, Duration.ofHours(1));
+//
+//            double score = notice.getId().doubleValue();
+//            if (notice.isPinned()) score += 1_000_000_000_000.0;
+////            stringRedisTemplate.opsForZSet().add(INDEX_KEY_PREFIX, String.valueOf(notice.getId()), score);
+//        });
+//
+//        // 메모리에서 요청한 페이지 잘라서 반환
+//        int fromIndex = Math.min(start, allNotices.getContent().size());
+//        int toIndex = Math.min(start + limit, allNotices.getContent().size());
+        List<NoticeSummaryDto> dtos = notices.getContent().stream()
+                .map(NoticeMapper::toSummaryDto)
+                .toList();
+
+        return PageResponse.from(new PageImpl<>(dtos, PageRequest.of(page, limit), notices.getTotalElements()));
+    }
+
+    // 고정 공지사항 조회 (Welcome Page 용)
+    @Transactional(readOnly = true)
+    public List<NoticeSummaryDto> getPinned() {
+        Set<String> pinnedIds = stringRedisTemplate.opsForZSet().reverseRange(PINNED_INDEX_KEY_PREFIX, 0, -1);
+
+        if (pinnedIds != null && !pinnedIds.isEmpty()) {
+            List<String> keys = pinnedIds.stream().map(id -> SUMMARY_KEY_PREFIX + id).toList();
             List<Object> cachedData = redisTemplate.opsForValue().multiGet(keys);
 
-            // 모든 데이터가 캐시에 있다면 바로 반환
             if (cachedData != null && cachedData.stream().allMatch(Objects::nonNull)) {
-                List<NoticeSummaryDto> dtos = cachedData.stream()
+                return cachedData.stream()
                         .map(obj -> (NoticeSummaryDto) obj)
                         .toList();
-                // 전체 카운트는 Redis ZSet의 size로 대체 가능
-                Long total = stringRedisTemplate.opsForZSet().size(INDEX_KEY_PREFIX);
-                return PageResponse.from(new PageImpl<>(dtos, PageRequest.of(page, limit), total != null ? total : 0L));
             }
         }
 
-        // 3. Redis에 데이터가 없거나 일부 유실되었다면 DB 조회 (Fallback)
-        NoticeListGetCondition condition = new NoticeListGetCondition(deleted, page, limit, true);
-        Page<Notice> notices = noticeRepository.findAll(condition);
-
-        // DB 조회 결과를 다시 캐싱 (이 로직은 별도 비동기로 처리해도 좋음)
-        notices.forEach(notice -> {
+        // Cache Miss: DB Fallback
+        List<Notice> pinnedNotices = noticeRepository.findAllByIsPinnedTrueAndIsDeletedFalseOrderByIdDesc();
+        
+        stringRedisTemplate.delete(PINNED_INDEX_KEY_PREFIX);
+        pinnedNotices.forEach(notice -> {
             NoticeSummaryDto dto = NoticeMapper.toSummaryDto(notice);
             redisTemplate.opsForValue().set(SUMMARY_KEY_PREFIX + notice.getId(), dto, Duration.ofHours(1));
-            syncNoticeIndex(notice); // 인덱스도 혹시 모르니 동기화
+            stringRedisTemplate.opsForZSet().add(PINNED_INDEX_KEY_PREFIX, String.valueOf(notice.getId()), notice.getId().doubleValue());
         });
-        Page<NoticeSummaryDto> response = notices.map(NoticeMapper::toSummaryDto);
-        return PageResponse.from(response);
+
+        return pinnedNotices.stream()
+                .map(NoticeMapper::toSummaryDto)
+                .toList();
     }
 
     /**
@@ -174,17 +222,20 @@ public class NoticeService {
         if (notice.isDeleted()) {
             redisTemplate.delete(DETAIL_KEY_PREFIX + notice.getId());
             redisTemplate.delete(SUMMARY_KEY_PREFIX + notice.getId());
-            redisTemplate.opsForZSet().remove(INDEX_KEY_PREFIX, notice.getId());
+            redisTemplate.opsForZSet().remove(PINNED_INDEX_KEY_PREFIX, String.valueOf(notice.getId()));
             return;
         }
 
         User user = userRepository.findById(notice.getAuthorId())
                 .orElseThrow(() -> new UserNotFoundException(notice.getAuthorId()));
+        
         redisTemplate.opsForValue().set(SUMMARY_KEY_PREFIX + notice.getId(), NoticeMapper.toSummaryDto(notice));
         redisTemplate.opsForValue().set(DETAIL_KEY_PREFIX + notice.getId(), NoticeMapper.toDto(notice, user.getUsername()));
 
-        double score = notice.getId().doubleValue();
-        if (notice.isPinned()) score += 1_000_000_000_000.0;
-        stringRedisTemplate.opsForZSet().add(INDEX_KEY_PREFIX, String.valueOf(notice.getId()), score);
+        if (notice.isPinned()) {
+            stringRedisTemplate.opsForZSet().add(PINNED_INDEX_KEY_PREFIX, String.valueOf(notice.getId()), notice.getId().doubleValue());
+        } else {
+            stringRedisTemplate.opsForZSet().remove(PINNED_INDEX_KEY_PREFIX, String.valueOf(notice.getId()));
+        }
     }
 }

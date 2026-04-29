@@ -18,13 +18,13 @@ function Home() {
           fetch('/api/liquors/trending?period=THREE_HOURS'),
           fetch('/api/liquors/trending?period=DAILY'),
           fetch('/api/liquors/trending?period=WEEKLY'),
-          fetch('/api/notices')
+          fetch('/api/notices/pinned')
         ]);
         
         const threeHoursData = await threeHoursRes.json();
         const dailyData = await dailyRes.json();
         const weeklyData = await weeklyRes.json();
-        const noticesData = await noticesRes.json();
+        const pinnedNoticesData = await noticesRes.json();
         
         setTrendingLiquors({
           THREE_HOURS: Array.isArray(threeHoursData) ? threeHoursData : [],
@@ -32,8 +32,7 @@ function Home() {
           WEEKLY: Array.isArray(weeklyData) ? weeklyData : []
         });
         
-        const allNotices = noticesData.content || [];
-        setPinnedNotices(allNotices.filter((n) => n.isPinned));
+        setPinnedNotices(Array.isArray(pinnedNoticesData) ? pinnedNoticesData : []);
         
       } catch (err) {
         console.error('Failed to fetch data:', err);

@@ -4,30 +4,30 @@ import { Link } from 'react-router-dom';
 function NoticesList() {
   const [notices, setNotices] = useState([]);
   const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchNotices = async (pageNumber = 0, reset = false) => {
+  const fetchNotices = async (pageNumber = 0) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/notices?page=${pageNumber}&size=10`);
+      const response = await fetch(`/api/notices?page=${pageNumber}&limit=10`);
       if (!response.ok) {
         throw new Error('Failed to fetch notices');
       }
 
       const data = await response.json();
 
-      if (reset) {
-        setNotices(data.content || []);
-      } else {
-        setNotices(prev => [...prev, ...(data.content || [])]);
-      }
-
+      setNotices(data.content || []);
       setPage(data.page);
       setHasNext(data.hasNext);
+      
+      const totalElems = data.totalElements || 0;
+      const pageSize = data.size || 10;
+      setTotalPages(Math.ceil(totalElems / pageSize));
     } catch (err) {
       console.error(err);
       setError('An error occurred while fetching notices.');
@@ -37,11 +37,14 @@ function NoticesList() {
   };
 
   useEffect(() => {
-    fetchNotices(0, true);
+    fetchNotices(0);
   }, []);
 
-  const handleLoadMore = () => {
-    fetchNotices(page + 1, false);
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      fetchNotices(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -95,13 +98,36 @@ function NoticesList() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </div>
-        ) : hasNext && (
-          <button
-            onClick={handleLoadMore}
-            className="bg-white border-2 border-slate-200 hover:border-amber-500 hover:text-amber-600 text-slate-600 font-bold py-2.5 px-6 rounded-full transition-all text-sm"
-          >
-            Load More
-          </button>
+        ) : (
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 0}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                page === 0
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-amber-500 hover:text-amber-600'
+              }`}
+            >
+              Previous
+            </button>
+            
+            <span className="px-4 py-2 text-sm font-medium text-slate-600">
+              Page {page + 1} of {totalPages || 1}
+            </span>
+
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={!hasNext}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                !hasNext
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-amber-500 hover:text-amber-600'
+              }`}
+            >
+              Next
+            </button>
+          </div>
         )}
       </div>
     </div>
