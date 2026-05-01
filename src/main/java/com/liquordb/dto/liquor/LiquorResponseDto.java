@@ -1,10 +1,12 @@
 package com.liquordb.dto.liquor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.liquordb.dto.tag.TagResponseDto;
 import com.liquordb.enums.Country;
 import com.liquordb.enums.LiquorCategory;
 import lombok.*;
 
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -17,7 +19,10 @@ public record LiquorResponseDto (
         LiquorCategory category,
         Long subcategoryId,
         Long subcategoryName,
+
+        @JsonIgnore
         Country country,
+
         String manufacturer,
         double abv,
         boolean isDiscontinued, // 단종 여부
@@ -30,5 +35,7 @@ public record LiquorResponseDto (
         long likeCount,
         boolean likedByMe
 ) {
-
+    public String getCountryName() {
+        return country != null ? country.getKoreanName() : "알 수 없음";
+    }
 }

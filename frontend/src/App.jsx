@@ -6,6 +6,7 @@ import SignIn from './pages/SignIn';
 import LiquorsExplore from './pages/LiquorsExplore';
 import NoticesList from './pages/NoticesList';
 import NoticeDetail from './pages/NoticeDetail';
+import LiquorDetail from './pages/LiquorDetail';
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -118,6 +119,7 @@ function AppContent() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/liquors" element={<LiquorsExplore />} />
+          <Route path="/liquors/:id" element={<LiquorDetail />} />
           <Route path="/notices" element={<NoticesList />} />
           <Route path="/notices/:id" element={<NoticeDetail />} />
           <Route path="/mypage" element={
