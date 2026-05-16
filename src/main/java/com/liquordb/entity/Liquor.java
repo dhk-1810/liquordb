@@ -16,7 +16,10 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "liquors",
-        indexes = { @Index(name = "idx_averageRating_id", columnList = "averageRating, id") }
+        indexes = {
+                @Index(name = "idx_averageRating_id", columnList = "averageRating, id"),
+                @Index(name = "idx_likeCount_id", columnList = "likeCount, id")
+        }
 )
 public class Liquor extends LikeableEntity {
 

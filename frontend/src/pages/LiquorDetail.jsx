@@ -144,8 +144,8 @@ function LiquorDetail() {
               <div>
                 <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">Country</p>
                 <p className="text-lg font-medium text-slate-800 flex items-center">
-                  <span className="mr-2">{liquor.country === 'KOREA' ? '🇰🇷' : liquor.country === 'USA' ? '🇺🇸' : liquor.country === 'FRANCE' ? '🇫🇷' : liquor.country === 'JAPAN' ? '🇯🇵' : liquor.country === 'UK' ? '🇬🇧' : '🌍'}</span>
-                  {liquor.country}
+                  <span className="mr-2">{liquor.countryName === '대한민국' ? '🇰🇷' : liquor.countryName === '미국' ? '🇺🇸' : liquor.countryName === '프랑스' ? '🇫🇷' : liquor.countryName === '일본' ? '🇯🇵' : liquor.countryName === '영국' ? '🇬🇧' : '🌍'}</span>
+                  {liquor.countryName || 'Unknown'}
                 </p>
               </div>
               <div>
