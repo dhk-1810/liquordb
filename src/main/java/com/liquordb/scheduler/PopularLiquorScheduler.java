@@ -1,4 +1,4 @@
-package com.liquordb;
+package com.liquordb.scheduler;
 
 import com.liquordb.enums.PeriodType;
 import com.liquordb.service.LiquorRankingService;

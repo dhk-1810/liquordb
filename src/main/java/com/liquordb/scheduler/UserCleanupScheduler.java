@@ -1,4 +1,4 @@
-package com.liquordb;
+package com.liquordb.scheduler;
 
 import com.liquordb.entity.User;
 import com.liquordb.enums.UserStatus;
