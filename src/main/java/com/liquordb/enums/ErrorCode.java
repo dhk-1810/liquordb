@@ -62,6 +62,7 @@ public enum ErrorCode {
 
     // Notification
     NOTIFICATION_NOT_FOUND (HttpStatus.NOT_FOUND),
+    NOTIFICATION_ACCESS_DENIED (HttpStatus.FORBIDDEN),
 
     // etc
     INVALID_INPUT_VALUE (HttpStatus.BAD_REQUEST),

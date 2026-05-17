@@ -1,10 +1,14 @@
 package com.liquordb.controller;
 
+import com.liquordb.dto.JwtDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.security.JwtInformation;
+import com.liquordb.security.TokenUtil;
 import com.liquordb.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -35,16 +39,21 @@ public class UserController {
 
     // 회원정보 수정 (프로필사진, 닉네임)
     @PatchMapping(path = "/{userId}/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<JwtInformation> update(
+    public ResponseEntity<JwtDto> update(
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails user,
+            HttpServletResponse response
     ) {
         authorizeUser(userId, user);
-        JwtInformation response = userService.update(userId, request, profileImage, refreshToken);
-        return ResponseEntity.ok(response);
+        JwtInformation newInfo = userService.update(userId, request, profileImage, refreshToken);
+        if (newInfo.refreshToken() != null) {
+            Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(newInfo.refreshToken());
+            response.addCookie(refreshCookie);
+        }
+        return ResponseEntity.ok(new JwtDto(newInfo.dto(), newInfo.accessToken()));
     }
 
     // 비밀번호 수정 (로그인 상태에서)

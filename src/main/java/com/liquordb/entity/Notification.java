@@ -28,6 +28,9 @@ public class Notification {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "is_read", nullable = false)
+    private boolean isRead;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -36,9 +39,14 @@ public class Notification {
         this.receiverId = receiverId;
         this.title = title;
         this.content = content;
+        this.isRead = false;
     }
 
     public static Notification create(UUID receiverId, String title, String content){
         return new Notification(receiverId, title, content);
+    }
+
+    public void read(){
+        this.isRead = true;
     }
 }

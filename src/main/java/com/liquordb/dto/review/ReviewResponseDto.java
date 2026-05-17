@@ -12,6 +12,9 @@ import java.util.UUID;
 public record ReviewResponseDto (
         Long id,
         UUID userId,
+        String username,
+        long likeCount,
+        long commentCount,
         Long liquorId,
         int rating,
         String title,

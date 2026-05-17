@@ -13,6 +13,10 @@ import com.liquordb.entity.reviewdetail.WineReviewDetail;
 public class ReviewDetailMapper {
 
     public static ReviewDetail toEntity(ReviewDetailRequest request, Review review) {
+        if (request == null) {
+            return null;
+        }
+
         if (request instanceof BeerReviewRequest beer) {
             return new BeerReviewDetail(
                     beer.aroma(),

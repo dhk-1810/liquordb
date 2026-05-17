@@ -1,5 +1,69 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { fetchAuthToken } from '../utils/auth';
+import CommentSection from '../components/CommentSection';
+
+function ReviewCard({ review }) {
+  const [showComments, setShowComments] = useState(false);
+
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-4">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+            {review.username ? review.username.charAt(0).toUpperCase() : 'U'}
+          </div>
+          <div>
+            <p className="font-bold text-slate-800">{review.username || 'Anonymous'}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-amber-500 text-sm font-bold">★ {review.rating}/10</span>
+              <span className="text-slate-400 text-xs">{new Date(review.createdAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h3 className="font-bold text-lg text-slate-800 mb-2">{review.title}</h3>
+      <p className="text-slate-600 mb-4 whitespace-pre-wrap">{review.content}</p>
+      
+      {review.imageUrls && review.imageUrls.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
+          {review.imageUrls.map((url, idx) => (
+            <img key={idx} src={url} alt="Review attachment" className="h-32 w-32 object-cover rounded-xl border border-slate-200 flex-shrink-0" />
+          ))}
+        </div>
+      )}
+      
+      {review.tags && review.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {review.tags.map(tag => (
+            <span key={tag.id} className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+              #{tag.name}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
+        <button className="flex items-center gap-1.5 text-slate-500 hover:text-amber-600 transition-colors font-medium text-sm">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514M9 11l-4 4" /></svg>
+          {review.likeCount || 0} Likes
+        </button>
+        <button 
+          onClick={() => setShowComments(!showComments)}
+          className="flex items-center gap-1.5 text-slate-500 hover:text-amber-600 transition-colors font-medium text-sm"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+          {review.commentCount || 0} Comments
+        </button>
+      </div>
+
+      {showComments && (
+        <CommentSection reviewId={review.id} initialCommentCount={review.commentCount || 0} />
+      )}
+    </div>
+  );
+}
 
 function LiquorDetail() {
   const { id } = useParams();
@@ -7,6 +71,14 @@ function LiquorDetail() {
   const [liquor, setLiquor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Reviews State
+  const [reviews, setReviews] = useState([]);
+  const [reviewsCursor, setReviewsCursor] = useState(null);
+  const [reviewsHasNext, setReviewsHasNext] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewSortBy, setReviewSortBy] = useState('REVIEW_ID');
+  const [reviewSortDirection, setReviewSortDirection] = useState('DESC');
 
   const handleWriteReview = () => {
     if (localStorage.getItem('isLoggedIn') !== 'true') {
@@ -25,9 +97,8 @@ function LiquorDetail() {
     }
 
     try {
-      const refreshRes = await fetch('/api/auth/token-refresh', { method: 'POST' });
-      if (!refreshRes.ok) throw new Error('Failed to get auth token');
-      const jwtData = await refreshRes.json();
+      const jwtData = await fetchAuthToken();
+      if (!jwtData) throw new Error('Failed to get auth token');
       
       const method = liquor.likedByMe ? 'DELETE' : 'POST';
       const endpoint = liquor.likedByMe ? 'cancel-like' : 'like';
@@ -60,9 +131,8 @@ function LiquorDetail() {
         let headers = {};
         if (localStorage.getItem('isLoggedIn') === 'true') {
           try {
-            const refreshRes = await fetch('/api/auth/token-refresh', { method: 'POST' });
-            if (refreshRes.ok) {
-              const jwtData = await refreshRes.json();
+            const jwtData = await fetchAuthToken();
+            if (jwtData) {
               headers['Authorization'] = `Bearer ${jwtData.accessToken}`;
             }
           } catch (e) {
@@ -92,6 +162,42 @@ function LiquorDetail() {
       fetchLiquorDetail();
     }
   }, [id]);
+
+  const fetchReviews = async (reset = false) => {
+    try {
+      if (reset) {
+        setReviewsLoading(true);
+      }
+      const currentCursor = reset ? null : reviewsCursor;
+      const cursorParam = currentCursor ? `&cursor=${currentCursor}` : '';
+      
+      const response = await fetch(
+        `/api/liquors/${id}/reviews?sortBy=${reviewSortBy}&sortDirection=${reviewSortDirection}&limit=10${cursorParam}`
+      );
+      
+      if (!response.ok) throw new Error('Failed to load reviews');
+      const data = await response.json();
+      
+      if (reset) {
+        setReviews(data.content);
+      } else {
+        setReviews(prev => [...prev, ...data.content]);
+      }
+      setReviewsCursor(data.nextCursor);
+      setReviewsHasNext(data.hasNext);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchReviews(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, reviewSortBy, reviewSortDirection]);
 
   if (isLoading) {
     return (
@@ -250,6 +356,65 @@ function LiquorDetail() {
 
           </div>
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mt-16">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-extrabold text-slate-900">Reviews</h2>
+          <select 
+            value={`${reviewSortBy}-${reviewSortDirection}`}
+            onChange={(e) => {
+              const [newSortBy, newSortDir] = e.target.value.split('-');
+              setReviewSortBy(newSortBy);
+              setReviewSortDirection(newSortDir);
+            }}
+            className="border border-slate-200 bg-white text-slate-700 rounded-xl py-2 px-4 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 outline-none cursor-pointer font-medium shadow-sm transition-all"
+          >
+            <option value="REVIEW_ID-DESC">Latest</option>
+            <option value="REVIEW_ID-ASC">Oldest</option>
+            <option value="LIKE_COUNT-DESC">Most Liked</option>
+            <option value="COMMENT_COUNT-DESC">Most Discussed</option>
+          </select>
+        </div>
+
+        {reviewsLoading && reviews.length === 0 ? (
+          <div className="flex justify-center py-12">
+            <svg className="animate-spin h-8 w-8 text-amber-500" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
+            <div className="text-5xl mb-4">✍️</div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">No reviews yet</h3>
+            <p className="text-slate-500 mb-6">Be the first to share your experience!</p>
+            <button 
+              onClick={handleWriteReview}
+              className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md"
+            >
+              Write Review
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {reviews.map(review => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+            
+            {reviewsHasNext && (
+              <div className="text-center pt-4">
+                <button 
+                  onClick={() => fetchReviews(false)}
+                  className="bg-white border border-slate-200 hover:border-amber-400 text-slate-700 hover:text-amber-600 font-bold py-3 px-8 rounded-xl transition-all shadow-sm"
+                >
+                  Load More Reviews
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

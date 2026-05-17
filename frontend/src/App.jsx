@@ -7,6 +7,9 @@ import LiquorsExplore from './pages/LiquorsExplore';
 import NoticesList from './pages/NoticesList';
 import NoticeDetail from './pages/NoticeDetail';
 import LiquorDetail from './pages/LiquorDetail';
+import ReviewWrite from './pages/ReviewWrite';
+import MyPage from './pages/MyPage';
+import { fetchAuthToken } from './utils/auth';
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -23,9 +26,8 @@ function AppContent() {
       }
 
       try {
-        const refreshRes = await fetch('/api/auth/token-refresh', { method: 'POST' });
-        if (refreshRes.ok) {
-          const jwtData = await refreshRes.json();
+        const jwtData = await fetchAuthToken();
+        if (jwtData) {
           setUser(jwtData.userDto);
           
           if (jwtData.userDto && jwtData.accessToken) {
@@ -40,8 +42,6 @@ function AppContent() {
             }
           }
         } else {
-          // If token refresh fails, clear the logged in flag
-          localStorage.removeItem('isLoggedIn');
           setUser(null);
         }
       } catch (err) {
@@ -120,13 +120,10 @@ function AppContent() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/liquors" element={<LiquorsExplore />} />
           <Route path="/liquors/:id" element={<LiquorDetail />} />
+          <Route path="/liquors/:id/reviews/new" element={<ReviewWrite />} />
           <Route path="/notices" element={<NoticesList />} />
           <Route path="/notices/:id" element={<NoticeDetail />} />
-          <Route path="/mypage" element={
-            <div className="text-center py-32 animate-fade-in-up">
-              <h1 className="text-3xl font-bold text-slate-800">My Page (Coming Soon)</h1>
-            </div>
-          } />
+          <Route path="/mypage" element={<MyPage />} />
         </Routes>
       </main>
 

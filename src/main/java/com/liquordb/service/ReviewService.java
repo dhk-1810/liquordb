@@ -67,7 +67,7 @@ public class ReviewService {
 
         Review review = ReviewMapper.toEntity(request, liquor, user);
         reviewRepository.save(review);
-        liquor.updateAverageRating(request.rating());
+        liquor.updateAverageRating(request.rating()); // reviewCount 증가 포함
 
         // 태그 추가, 없으면 새로 생성
         Set<TagResponseDto> tagDtos = new HashSet<>();
@@ -205,7 +205,7 @@ public class ReviewService {
         }
 
         Liquor liquor = review.getLiquor();
-        liquor.removeReviewRating(review.getRating());
+        liquor.removeReviewRating(review.getRating()); // reviewCount 감소 포함
 
         LocalDateTime reviewDeletedAt = LocalDateTime.now().withNano(0);
         commentRepository.softDeleteCommentsByReview(review, reviewDeletedAt, Comment.CommentStatus.DELETED);

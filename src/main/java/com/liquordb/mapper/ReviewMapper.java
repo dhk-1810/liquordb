@@ -26,11 +26,17 @@ public class ReviewMapper {
         return ReviewResponseDto.builder()
                 .id(review.getId())
                 .userId(review.getUser().getId())
+                .username(review.getUser().getUsername())
+                .likeCount(review.getLikeCount())
+                .commentCount(review.getCommentCount())
                 .liquorId(review.getLiquor().getId())
                 .content(review.getContent())
                 .rating(review.getRating())
+                .title(review.getTitle())
                 .tags(tags)
                 .imageUrls(imageUrls)
+                .createdAt(review.getCreatedAt())
+                .updatedAt(review.getUpdatedAt())
                 .build();
     }
 
