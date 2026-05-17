@@ -3,24 +3,134 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
 import CommentSection from '../components/CommentSection';
 
-function ReviewCard({ review }) {
+function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
   const [showComments, setShowComments] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editRating, setEditRating] = useState(review.rating);
+  const [editTitle, setEditTitle] = useState(review.title || '');
+  const [editContent, setEditContent] = useState(review.content);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isOwner = currentUser && currentUser.id === review.userId;
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    try {
+      const jwtData = await fetchAuthToken();
+      const response = await fetch(`/api/reviews/${review.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${jwtData.accessToken}` }
+      });
+      if (response.ok) {
+        onDelete(review.id);
+      } else {
+        throw new Error("Failed to delete");
+      }
+    } catch (err) {
+      console.error(err);
+      window.alert("Error deleting review");
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const jwtData = await fetchAuthToken();
+      const response = await fetch(`/api/reviews/${review.id}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwtData.accessToken}` 
+        },
+        body: JSON.stringify({
+          rating: editRating,
+          title: editTitle,
+          content: editContent
+        })
+      });
+      if (!response.ok) throw new Error("Failed to update");
+      const updatedReview = await response.json();
+      onUpdate(updatedReview);
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+      window.alert("Error updating review");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="bg-white p-6 rounded-2xl border border-amber-300 shadow-md mb-4 animate-fade-in-up">
+        <h3 className="font-bold text-lg mb-4 text-slate-800 flex items-center gap-2">
+          <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+          Edit Review
+        </h3>
+        <form onSubmit={handleUpdate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Rating (1-10)</label>
+            <input 
+              type="number" min="1" max="10" required
+              value={editRating} onChange={e => setEditRating(Number(e.target.value))}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Title (Optional)</label>
+            <input 
+              type="text" 
+              value={editTitle} onChange={e => setEditTitle(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Content</label>
+            <textarea 
+              required rows="4"
+              value={editContent} onChange={e => setEditContent(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all"
+            ></textarea>
+          </div>
+          <div className="flex gap-2 justify-end pt-2">
+            <button type="button" onClick={() => setIsEditing(false)} className="px-5 py-2 text-slate-500 hover:bg-slate-100 rounded-xl font-semibold transition-colors">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all disabled:opacity-50">{isSubmitting ? 'Saving...' : 'Save'}</button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-4">
+    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-4 transition-all">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-            {review.username ? review.username.charAt(0).toUpperCase() : 'U'}
+          <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold uppercase">
+            {review.username ? review.username.charAt(0) : 'U'}
           </div>
           <div>
             <p className="font-bold text-slate-800">{review.username || 'Anonymous'}</p>
             <div className="flex items-center gap-2">
               <span className="text-amber-500 text-sm font-bold">★ {review.rating}/10</span>
               <span className="text-slate-400 text-xs">{new Date(review.createdAt).toLocaleDateString()}</span>
+              {review.updatedAt && review.updatedAt !== review.createdAt && (
+                <span className="text-slate-400 text-[10px] italic">(edited)</span>
+              )}
             </div>
           </div>
         </div>
+        
+        {isOwner && (
+          <div className="flex items-center gap-2">
+            <button onClick={() => setIsEditing(true)} className="text-xs font-semibold text-slate-400 hover:text-amber-600 transition-colors bg-slate-50 hover:bg-amber-50 px-2.5 py-1.5 rounded-lg">
+              Edit
+            </button>
+            <button onClick={handleDelete} className="text-xs font-semibold text-slate-400 hover:text-red-500 transition-colors bg-slate-50 hover:bg-red-50 px-2.5 py-1.5 rounded-lg">
+              Delete
+            </button>
+          </div>
+        )}
       </div>
       
       <h3 className="font-bold text-lg text-slate-800 mb-2">{review.title}</h3>
@@ -29,7 +139,7 @@ function ReviewCard({ review }) {
       {review.imageUrls && review.imageUrls.length > 0 && (
         <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
           {review.imageUrls.map((url, idx) => (
-            <img key={idx} src={url} alt="Review attachment" className="h-32 w-32 object-cover rounded-xl border border-slate-200 flex-shrink-0" />
+            <img key={idx} src={url} alt="Review attachment" className="h-32 w-32 object-cover rounded-xl border border-slate-200 flex-shrink-0 shadow-sm" />
           ))}
         </div>
       )}
@@ -59,7 +169,7 @@ function ReviewCard({ review }) {
       </div>
 
       {showComments && (
-        <CommentSection reviewId={review.id} initialCommentCount={review.commentCount || 0} />
+        <CommentSection reviewId={review.id} initialCommentCount={review.commentCount || 0} currentUser={currentUser} />
       )}
     </div>
   );
@@ -69,6 +179,7 @@ function LiquorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [liquor, setLiquor] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -133,6 +244,7 @@ function LiquorDetail() {
           try {
             const jwtData = await fetchAuthToken();
             if (jwtData) {
+              setCurrentUser(jwtData.userDto);
               headers['Authorization'] = `Bearer ${jwtData.accessToken}`;
             }
           } catch (e) {
@@ -400,7 +512,18 @@ function LiquorDetail() {
         ) : (
           <div className="space-y-6">
             {reviews.map(review => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard 
+                key={review.id} 
+                review={review} 
+                currentUser={currentUser}
+                onUpdate={(updatedReview) => {
+                  setReviews(prev => prev.map(r => r.id === updatedReview.id ? updatedReview : r));
+                }}
+                onDelete={(reviewId) => {
+                  setReviews(prev => prev.filter(r => r.id !== reviewId));
+                  setLiquor(prev => ({...prev, reviewCount: Math.max(0, prev.reviewCount - 1)}));
+                }}
+              />
             ))}
             
             {reviewsHasNext && (

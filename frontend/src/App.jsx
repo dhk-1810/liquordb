@@ -9,6 +9,7 @@ import NoticeDetail from './pages/NoticeDetail';
 import LiquorDetail from './pages/LiquorDetail';
 import ReviewWrite from './pages/ReviewWrite';
 import MyPage from './pages/MyPage';
+import NotificationDropdown from './components/NotificationDropdown';
 import { fetchAuthToken } from './utils/auth';
 
 function AppContent() {
@@ -96,6 +97,7 @@ function AppContent() {
                         </div>
                       )}
                     </Link>
+                    <NotificationDropdown />
                     <button onClick={handleSignOut} className="hover:text-amber-600 transition-colors font-semibold ml-2">
                       Sign Out
                     </button>

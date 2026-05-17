@@ -71,6 +71,8 @@ public class CommentService {
 
         Comment comment = CommentMapper.toEntity(request, parent, review, user);
         commentRepository.save(comment);
+        review.increaseCommentCount();
+        reviewRepository.save(review);
 
         eventPublisher.publishEvent(new CommentCreatedEvent(
                 review.getUser().getId(),

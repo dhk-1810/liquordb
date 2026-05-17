@@ -10,6 +10,7 @@ public record NotificationResponseDto (
         UUID receiverId,
         String title,
         String content,
+        boolean isRead,
         LocalDateTime createdAt
 ) {
     public static NotificationResponseDto toDto(Notification notification) {
@@ -18,6 +19,7 @@ public record NotificationResponseDto (
                 notification.getReceiverId(),
                 notification.getTitle(),
                 notification.getContent(),
+                notification.isRead(),
                 notification.getCreatedAt()
         );
     }

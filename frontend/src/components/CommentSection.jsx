@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchAuthToken } from '../utils/auth';
 
-function CommentSection({ reviewId, initialCommentCount }) {
+function CommentSection({ reviewId, initialCommentCount, currentUser }) {
   const [comments, setComments] = useState([]);
   const [cursor, setCursor] = useState(null);
   const [hasNext, setHasNext] = useState(false);
@@ -13,6 +13,9 @@ function CommentSection({ reviewId, initialCommentCount }) {
   
   const [newComment, setNewComment] = useState('');
   const [commentCount, setCommentCount] = useState(initialCommentCount || 0);
+
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editContent, setEditContent] = useState('');
 
   const loadComments = async (reset = false) => {
     try {
@@ -140,6 +143,53 @@ function CommentSection({ reviewId, initialCommentCount }) {
     }
   };
 
+  const handleDelete = async (commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    try {
+      const jwtData = await fetchAuthToken();
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${jwtData.accessToken}` }
+      });
+      if (response.ok) {
+        setComments(prev => prev.filter(c => c.id !== commentId));
+        setCommentCount(prev => Math.max(0, prev - 1));
+      } else {
+        throw new Error("Failed to delete comment");
+      }
+    } catch (err) {
+      console.error(err);
+      window.alert("Error deleting comment");
+    }
+  };
+
+  const handleUpdate = async (commentId) => {
+    if (!editContent.trim()) return;
+    try {
+      const jwtData = await fetchAuthToken();
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwtData.accessToken}` 
+        },
+        body: JSON.stringify({ content: editContent })
+      });
+      if (!response.ok) throw new Error("Failed to update comment");
+      const updatedComment = await response.json();
+      setComments(prev => prev.map(c => c.id === commentId ? updatedComment : c));
+      setEditingCommentId(null);
+    } catch (err) {
+      console.error(err);
+      window.alert("Error updating comment");
+    }
+  };
+
+  const startEdit = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditContent(comment.content);
+  };
+
   return (
     <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up">
       <div className="flex items-center justify-between mb-6">
@@ -209,20 +259,50 @@ function CommentSection({ reviewId, initialCommentCount }) {
                 {comment.username ? comment.username.charAt(0) : 'U'}
               </div>
               <div className="flex-grow">
-                <div className="bg-slate-50 rounded-2xl rounded-tl-none px-4 py-3 text-sm text-slate-800 relative">
-                  <span className="font-bold block mb-0.5">{comment.username}</span>
-                  <p className="whitespace-pre-wrap">{comment.content}</p>
-                </div>
-                <div className="flex items-center gap-4 mt-1.5 px-2 text-xs text-slate-500 font-medium">
-                  <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
-                  <button 
-                    onClick={() => handleLike(comment.id)} 
-                    className="hover:text-amber-600 transition-colors flex items-center gap-1"
-                  >
-                    <span>Like</span>
-                    {comment.likeCount > 0 && <span className="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[10px]">{comment.likeCount}</span>}
-                  </button>
-                </div>
+                {editingCommentId === comment.id ? (
+                  <div className="bg-slate-50 rounded-2xl px-4 py-3 border border-amber-300">
+                    <textarea
+                      value={editContent}
+                      onChange={e => setEditContent(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:border-amber-400 outline-none mb-2"
+                      rows="2"
+                    ></textarea>
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => setEditingCommentId(null)} className="text-xs px-3 py-1.5 text-slate-500 hover:bg-slate-200 rounded-lg font-medium transition-colors">Cancel</button>
+                      <button onClick={() => handleUpdate(comment.id)} className="text-xs px-4 py-1.5 bg-amber-500 text-white rounded-lg font-bold transition-colors hover:bg-amber-600">Save</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-slate-50 rounded-2xl rounded-tl-none px-4 py-3 text-sm text-slate-800 relative">
+                      <div className="flex justify-between items-start mb-0.5">
+                        <span className="font-bold block">{comment.username}</span>
+                        {currentUser && currentUser.id === comment.userId && (
+                          <div className="flex gap-2">
+                            <button onClick={() => startEdit(comment)} className="text-[10px] font-semibold text-slate-400 hover:text-amber-600">Edit</button>
+                            <button onClick={() => handleDelete(comment.id)} className="text-[10px] font-semibold text-slate-400 hover:text-red-500">Delete</button>
+                          </div>
+                        )}
+                      </div>
+                      <p className="whitespace-pre-wrap">{comment.content}</p>
+                    </div>
+                    <div className="flex items-center gap-4 mt-1.5 px-2 text-xs text-slate-500 font-medium">
+                      <span>
+                        {new Date(comment.createdAt).toLocaleDateString()}
+                        {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
+                          <span className="italic ml-1">(edited)</span>
+                        )}
+                      </span>
+                      <button 
+                        onClick={() => handleLike(comment.id)} 
+                        className="hover:text-amber-600 transition-colors flex items-center gap-1"
+                      >
+                        <span>Like</span>
+                        {comment.likeCount > 0 && <span className="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[10px]">{comment.likeCount}</span>}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ))}

@@ -115,6 +115,26 @@ public class Review extends LikeableEntity {
         }
     }
 
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void  decreaseCommentCount() {
+        if (likeCount > 0) {
+            this.commentCount--;
+        }
+    }
+
+    public void decreaseLikeCount() {
+        if (likeCount > 0) {
+            this.likeCount--;
+        }
+    }
+
     public void softDelete(LocalDateTime deletedAt) {
         if (this.status == ReviewStatus.DELETED) return;
         this.status = ReviewStatus.DELETED;
