@@ -8,20 +8,69 @@ function LiquorDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const handleWriteReview = () => {
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      window.alert('You must be logged in to write a review.');
+      navigate('/signin');
+    } else {
+      navigate(`/liquors/${id}/reviews/new`);
+    }
+  };
+
+  const handleLike = async () => {
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      window.alert('You must be logged in to like a liquor.');
+      navigate('/signin');
+      return;
+    }
+
+    try {
+      const refreshRes = await fetch('/api/auth/token-refresh', { method: 'POST' });
+      if (!refreshRes.ok) throw new Error('Failed to get auth token');
+      const jwtData = await refreshRes.json();
+      
+      const method = liquor.likedByMe ? 'DELETE' : 'POST';
+      const endpoint = liquor.likedByMe ? 'cancel-like' : 'like';
+      
+      const response = await fetch(`/api/liquors/${id}/${endpoint}`, {
+        method,
+        headers: { 'Authorization': `Bearer ${jwtData.accessToken}` }
+      });
+
+      if (response.ok) {
+        setLiquor(prev => ({
+          ...prev,
+          likedByMe: !prev.likedByMe,
+          likeCount: prev.likedByMe ? prev.likeCount - 1 : prev.likeCount + 1
+        }));
+      } else {
+        window.alert('Failed to update like status');
+      }
+    } catch (err) {
+      console.error(err);
+      window.alert('An error occurred while liking the liquor.');
+    }
+  };
+
   useEffect(() => {
     const fetchLiquorDetail = async () => {
       try {
         setIsLoading(true);
-        // Include authorization header if user is logged in
-        const token = localStorage.getItem('isLoggedIn') === 'true' ? true : false;
-        // In this app, auth is handled by cookies/session or token refresh handled centrally? 
-        // Let's just make a standard fetch, if it's cookie based it will be sent automatically.
-        // Wait, looking at App.jsx, it seems it might use cookies for refresh, but Bearer tokens for API?
-        // App.jsx line 33: headers: { 'Authorization': `Bearer ${jwtData.accessToken}` }
-        // For public endpoints, we might not need it, or we should get it.
-        // Let's just fetch without auth header for now, GET /api/liquors/{id} allows anonymous (returns likedByMe: false).
         
-        const response = await fetch(`/api/liquors/${id}`);
+        let headers = {};
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+          try {
+            const refreshRes = await fetch('/api/auth/token-refresh', { method: 'POST' });
+            if (refreshRes.ok) {
+              const jwtData = await refreshRes.json();
+              headers['Authorization'] = `Bearer ${jwtData.accessToken}`;
+            }
+          } catch (e) {
+            console.error('Failed to get auth token for fetch', e);
+          }
+        }
+        
+        const response = await fetch(`/api/liquors/${id}`, { headers });
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Liquor not found');
@@ -102,13 +151,14 @@ function LiquorDetail() {
               </div>
             )}
             
-            {liquor.likedByMe && (
-               <div className="absolute top-6 right-6 bg-white/90 backdrop-blur text-red-500 p-2.5 rounded-full shadow-md">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                     <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                  </svg>
-               </div>
-            )}
+            <button 
+              onClick={handleLike}
+              className={`absolute top-6 right-6 p-2.5 rounded-full shadow-md transition-colors ${liquor.likedByMe ? 'bg-white/90 text-red-500' : 'bg-white/70 text-slate-300 hover:text-red-400 hover:bg-white/90'} backdrop-blur`}
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+              </svg>
+            </button>
           </div>
 
           {/* Details Section */}
@@ -189,7 +239,10 @@ function LiquorDetail() {
                 <span>{liquor.likeCount} people liked this</span>
               </div>
               
-              <button className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-8 rounded-xl transition-all duration-200 shadow-sm shadow-amber-500/30 flex items-center gap-2 hover:-translate-y-1">
+              <button 
+                onClick={handleWriteReview}
+                className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-8 rounded-xl transition-all duration-200 shadow-sm shadow-amber-500/30 flex items-center gap-2 hover:-translate-y-1"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 Write Review
               </button>

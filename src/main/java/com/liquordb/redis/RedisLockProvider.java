@@ -38,6 +38,7 @@ public class RedisLockProvider {
 
         if (Boolean.TRUE.equals(acquired)) {
             log.debug("분산 락 획득 성공: {} (값: {})", lockKey, lockValue);
+            lockValueHolder.set(lockValue);
         } else {
             log.debug("분산 락 획득 실패: {}", lockKey);
             throw new RedisLockAcquisitionException("분산 락 획득 실패: " + lockKey);

@@ -1,6 +1,5 @@
 package com.liquordb.service;
 
-import com.liquordb.dto.auth.LoginRequest;
 import com.liquordb.dto.auth.PasswordFindRequest;
 import com.liquordb.dto.auth.PasswordResetRequest;
 import com.liquordb.dto.auth.SignUpRequest;
@@ -82,13 +81,13 @@ public class AuthService {
         }
 
         // 정보 조회
-        String username = jwtTokenProvider.getClaims(refreshToken).getSubject();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
+        String email = jwtTokenProvider.getClaims(refreshToken).getSubject();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         // 새 토큰 생성 - Access, Refresh 모두 새로 발급
-        String newAccess = jwtTokenProvider.createAccessToken(username, user.getRole().name());
-        String newRefresh = jwtTokenProvider.createRefreshToken(username, user.getRole().name());
+        String newAccess = jwtTokenProvider.createAccessToken(email, user.getRole().name());
+        String newRefresh = jwtTokenProvider.createRefreshToken(email, user.getRole().name());
 
         jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, user.getId());
 
