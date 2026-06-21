@@ -46,8 +46,7 @@ public class LiquorService {
     public CursorPageResponse<LiquorSummaryDto> getAll(
             LiquorListGetRequest request,
             UUID userId,
-            boolean isViewerRoleAdmin
-    ) {
+            boolean isViewerRoleAdmin) {
         int limit = request.limit() == null ? 50 : request.limit();
         boolean searchDeleted = isViewerRoleAdmin && request.searchDeleted() != null ? request.searchDeleted() : false;
         SortLiquorBy sortBy = request.sortBy() == null ? SortLiquorBy.LIQUOR_ID : request.sortBy();
@@ -78,6 +77,42 @@ public class LiquorService {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
             String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
             return LiquorMapper.toSummaryDto(liquor, imageUrl, isLiked);
+        });
+
+        Object nextCursor = null;
+        if (response.hasNext()) {
+            List<LiquorSummaryDto> content = response.getContent();
+            nextCursor = content.get(content.size() - 1).id();
+        }
+
+        return CursorPageResponse.from(response, nextCursor);
+    }
+
+    // 좋아요 누른 주류 목록 조회
+    @Transactional(readOnly = true)
+    public CursorPageResponse<LiquorSummaryDto> getLikedLiquors(UUID userId, LiquorListGetRequest request) {
+        int limit = request.limit() == null ? 50 : request.limit();
+        SortLiquorBy sortBy = request.sortBy() == null ? SortLiquorBy.LIQUOR_ID : request.sortBy();
+        SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
+
+        LiquorSearchCondition condition = LiquorSearchCondition.builder()
+                .category(request.category())
+                .subcategoryId(request.subcategoryId())
+                .keyword(request.keyword())
+                .searchDeleted(false)
+                .tagIds(request.tagIds())
+                .cursor(request.cursor())
+                .idAfter(request.idAfter())
+                .limit(limit)
+                .sortBy(sortBy)
+                .descending(sortDirection == SortDirection.DESC)
+                .build();
+
+        Slice<Liquor> liquors = liquorRepository.findLikedLiquors(userId, condition);
+
+        Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
+            String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
+            return LiquorMapper.toSummaryDto(liquor, imageUrl, true);
         });
 
         Object nextCursor = null;
@@ -159,7 +194,7 @@ public class LiquorService {
 
     // 주류 소분류 추가
     @Transactional
-    public LiquorSubcategoryResponse createSubcategory(LiquorSubcategoryRequest request){
+    public LiquorSubcategoryResponse createSubcategory(LiquorSubcategoryRequest request) {
         LiquorSubcategory subcategory = LiquorSubcategory
                 .create(request.name(), request.description(), request.category());
         liquorSubcategoryRepository.save(subcategory);
@@ -168,7 +203,7 @@ public class LiquorService {
 
     // 주류 소분류 삭제
     @Transactional
-    public void deleteSubcategory(Long id){
+    public void deleteSubcategory(Long id) {
         liquorSubcategoryRepository.deleteById(id);
     }
 }

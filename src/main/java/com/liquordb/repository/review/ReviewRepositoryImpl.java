@@ -1,6 +1,7 @@
 package com.liquordb.repository.review;
 
 import com.liquordb.entity.QReview;
+import com.liquordb.entity.QReviewLike;
 import com.liquordb.entity.QReviewTag;
 import com.liquordb.entity.QTag;
 import com.liquordb.entity.Review;
@@ -72,6 +73,36 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
                 )
                 .orderBy(
                         getOrderSpecifier(condition.descending(), condition.sortBy())
+                )
+                .limit(limit + 1)
+                .fetch();
+
+        boolean hasNext = false;
+        if (content.size() > limit) {
+            content.remove(limit);
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(content, PageRequest.ofSize(limit), hasNext);
+    }
+
+    @Override
+    public Slice<Review> findLikedReviewsWithTags(UUID userId, ReviewListGetCondition condition) {
+        int limit = condition.limit();
+        QReviewLike reviewLike = QReviewLike.reviewLike;
+
+        List<Review> content = queryFactory.selectFrom(review)
+                .join(reviewLike).on(reviewLike.review.id.eq(review.id))
+                .leftJoin(review.reviewTags, reviewTag).fetchJoin()
+                .leftJoin(reviewTag.tag, tag).fetchJoin()
+                .where(
+                        reviewLike.user.id.eq(userId),
+                        statusEq(condition.status()),
+                        cursorCondition(condition.cursor(), condition.idAfter(), condition.sortBy(), condition.descending())
+                )
+                .orderBy(
+                        getOrderSpecifier(condition.descending(), condition.sortBy()),
+                        getTieBreakerOrder(condition.descending())
                 )
                 .limit(limit + 1)
                 .fetch();

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * 공지사항 단건 조회 응답
  */
 @Builder
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class") // 직렬화시 @class 필드 포함
 public record NoticeResponseDto (
         Long id,
         String title,

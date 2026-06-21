@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.querydsl.jpa.JPAExpressions.select;
 
@@ -47,6 +48,32 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
                         keywordContains(condition.keyword()),
                         isDeletedEq(condition.searchDeleted()),
                         tagsAllMatch(condition.tagIds()),
+                        cursorCondition(condition.cursor(), condition.idAfter(), condition.sortBy(), condition.descending())
+                )
+                .orderBy(
+                        getOrderSpecifier(condition.descending(), condition.sortBy()),
+                        getTieBreakerOrder(condition.descending())
+                )
+                .limit(limit + 1)
+                .fetch();
+
+        boolean hasNext = false;
+        if (content.size() > limit) {
+            content.remove(limit);
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(content, PageRequest.ofSize(limit), hasNext);
+    }
+
+    @Override
+    public Slice<Liquor> findLikedLiquors(UUID userId, LiquorSearchCondition condition) {
+        int limit = condition.limit();
+        List<Liquor> content = queryFactory.selectFrom(liquor)
+                .join(liquorLike).on(liquorLike.liquor.id.eq(liquor.id))
+                .where(
+                        liquorLike.user.id.eq(userId),
+                        isDeletedEq(condition.searchDeleted()),
                         cursorCondition(condition.cursor(), condition.idAfter(), condition.sortBy(), condition.descending())
                 )
                 .orderBy(

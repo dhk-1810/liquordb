@@ -137,6 +137,8 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
             return c;
           }));
         }
+      } else {
+        console.error("Failed to like comment:", response.status);
       }
     } catch (err) {
       console.error(err);
@@ -214,9 +216,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
 
       {/* Comment Input */}
       <form onSubmit={handleSubmit} className="mb-8 flex gap-3">
-        <div className="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-slate-500 font-bold text-xs uppercase overflow-hidden">
-          {localStorage.getItem('isLoggedIn') === 'true' ? 'U' : '?'}
-        </div>
+        <img src="/default-avatar.svg" alt="User Profile" className="w-8 h-8 rounded-full object-cover border border-slate-200 bg-white flex-shrink-0" />
         <div className="flex-grow">
           <input 
             type="text" 
@@ -255,9 +255,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
         <div className="space-y-5">
           {comments.map((comment) => (
             <div key={comment.id} className="flex gap-3 group">
-              <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex-shrink-0 flex items-center justify-center font-bold text-xs uppercase">
-                {comment.username ? comment.username.charAt(0) : 'U'}
-              </div>
+              <img src="/default-avatar.svg" alt="User Profile" className="w-8 h-8 rounded-full object-cover border border-slate-200 bg-white flex-shrink-0" />
               <div className="flex-grow">
                 {editingCommentId === comment.id ? (
                   <div className="bg-slate-50 rounded-2xl px-4 py-3 border border-amber-300">
@@ -295,10 +293,10 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
                       </span>
                       <button 
                         onClick={() => handleLike(comment.id)} 
-                        className="hover:text-amber-600 transition-colors flex items-center gap-1"
+                        className="text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1"
                       >
-                        <span>Like</span>
-                        {comment.likeCount > 0 && <span className="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[10px]">{comment.likeCount}</span>}
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        {comment.likeCount > 0 && <span>{comment.likeCount}</span>}
                       </button>
                     </div>
                   </>

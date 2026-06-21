@@ -61,6 +61,42 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
     }
   };
 
+  const handleLike = async () => {
+    try {
+      const jwtData = await fetchAuthToken();
+      if (!jwtData) {
+        window.alert('You must be logged in to like a review.');
+        return;
+      }
+      
+      const response = await fetch(`/api/reviews/${review.id}/like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwtData.accessToken}`
+        }
+      });
+      
+      if (response.ok) {
+        onUpdate({ ...review, likeCount: review.likeCount + 1 });
+      } else if (response.status === 409) {
+        // Already liked, so cancel like
+        const cancelRes = await fetch(`/api/reviews/${review.id}/cancel-like`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${jwtData.accessToken}`
+          }
+        });
+        if (cancelRes.ok) {
+          onUpdate({ ...review, likeCount: Math.max(0, review.likeCount - 1) });
+        }
+      } else {
+        console.error("Failed to like review:", response.status);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (isEditing) {
     return (
       <div className="bg-white p-6 rounded-2xl border border-amber-300 shadow-md mb-4 animate-fade-in-up">
@@ -106,9 +142,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-4 transition-all">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold uppercase">
-            {review.username ? review.username.charAt(0) : 'U'}
-          </div>
+          <img src="/default-avatar.svg" alt="User Profile" className="w-10 h-10 rounded-full object-cover border border-slate-200 bg-white" />
           <div>
             <p className="font-bold text-slate-800">{review.username || 'Anonymous'}</p>
             <div className="flex items-center gap-2">
@@ -155,8 +189,8 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       )}
 
       <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
-        <button className="flex items-center gap-1.5 text-slate-500 hover:text-amber-600 transition-colors font-medium text-sm">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514M9 11l-4 4" /></svg>
+        <button onClick={handleLike} className="flex items-center gap-1.5 text-slate-500 hover:text-red-500 transition-colors font-medium text-sm">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
           {review.likeCount || 0} Likes
         </button>
         <button 

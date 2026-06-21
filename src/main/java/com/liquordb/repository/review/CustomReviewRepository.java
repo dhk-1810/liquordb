@@ -19,6 +19,8 @@ public interface CustomReviewRepository {
 
     Slice<Review> findByUserIdWithTags(ReviewListGetCondition condition);
 
+    Slice<Review> findLikedReviewsWithTags(UUID userId, ReviewListGetCondition condition);
+
     // [관리자용] 리뷰 전체 조회 - 유저별로 필터링(선택), 상태별로 필터링(선택)
     Page<Review> findAllWithTags(ReviewSearchCondition condition);
 }

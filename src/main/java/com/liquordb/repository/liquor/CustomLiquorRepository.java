@@ -10,6 +10,8 @@ import org.springframework.data.domain.Slice;
 import java.util.List;
 import java.util.Set;
 
+import java.util.UUID;
+
 public interface CustomLiquorRepository {
 
     // 전체 조회
@@ -17,4 +19,7 @@ public interface CustomLiquorRepository {
 
     // 인기 순위 계산 - scheduler
     List<LiquorScoreDto> findScoresByIds(Set<Long> activeIds);
+
+    // 좋아요 누른 주류 조회
+    Slice<Liquor> findLikedLiquors(UUID userId, LiquorSearchCondition condition);
 }

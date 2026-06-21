@@ -39,7 +39,8 @@ function AppContent() {
             });
             if (myPageRes.ok) {
               const myPageData = await myPageRes.json();
-              setProfileImageUrl(myPageData.imageUrl);
+              const url = myPageData.imageUrl;
+              setProfileImageUrl(url && !url.includes('default-profile-image.png') ? url : '/default-avatar.svg');
             }
           }
         } else {
@@ -89,13 +90,7 @@ function AppContent() {
                 ) : user ? (
                   <>
                     <Link to="/mypage" className="focus:outline-none flex items-center justify-center transform hover:scale-105 transition-transform" title="Go to My Page">
-                      {profileImageUrl ? (
-                        <img src={profileImageUrl} alt={user.username} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm hover:border-amber-400 transition-colors bg-white" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm hover:border-amber-400 transition-colors uppercase">
-                          {user.username ? user.username.charAt(0) : '?'}
-                        </div>
-                      )}
+                      <img src={profileImageUrl || '/default-avatar.svg'} alt={user.username} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm hover:border-amber-400 transition-colors bg-white" />
                     </Link>
                     <NotificationDropdown />
                     <button onClick={handleSignOut} className="hover:text-amber-600 transition-colors font-semibold ml-2">

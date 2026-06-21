@@ -95,11 +95,10 @@ public class ReviewService {
         List<ReviewImageKey> keys = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             images.forEach(file -> {
-                        FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW, review.getId());
-                        keys.add(new ReviewImageKey(review, dto.key()));
-                        imageUrls.add(s3Service.getReviewImageUrl(dto.key()));
-                    }
-            );
+                FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW, review.getId());
+                keys.add(new ReviewImageKey(review, dto.key()));
+                imageUrls.add(s3Service.getReviewImageUrl(dto.key()));
+            });
             reviewImageKeyRepository.saveAll(keys);
         }
         return ReviewMapper.toDto(review, tagDtos, imageUrls);
@@ -169,6 +168,29 @@ public class ReviewService {
         return getCursorPageResponse(reviews);
     }
 
+    // 좋아요 누른 리뷰 목록 조회
+    @Transactional(readOnly = true)
+    public CursorPageResponse<ReviewResponseDto> getLikedReviews(UUID userId, ReviewListGetRequest request) {
+
+        int limit = request.limit() == null ? 20 : request.limit();
+        SortReviewBy sortBy = request.sortBy() == null ? SortReviewBy.REVIEW_ID : request.sortBy();
+        SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
+
+        ReviewListGetCondition condition = ReviewListGetCondition.builder()
+                .userId(userId)
+                .status(Review.ReviewStatus.ACTIVE)
+                .rating(request.rating())
+                .cursor(request.cursor())
+                .idAfter(request.idAfter())
+                .limit(limit)
+                .sortBy(sortBy)
+                .descending(sortDirection == SortDirection.DESC)
+                .build();
+
+        Slice<Review> reviews = reviewRepository.findLikedReviewsWithTags(userId, condition);
+        return getCursorPageResponse(reviews);
+    }
+
     // 리뷰 수정
     @Transactional
     public ReviewResponseDto update(Long reviewId, ReviewUpdateRequest request, UUID userId) {
@@ -223,7 +245,7 @@ public class ReviewService {
     private List<String> getImageUrls(Review review) {
         // default_batch_fetch_size: 100 옵션으로 N+1 문제 방지
         return review.getImageKeys().stream()
-                .map(reviewImageKey-> s3Service.getReviewImageUrl(reviewImageKey.getId().toString()))
+                .map(reviewImageKey -> s3Service.getReviewImageUrl(reviewImageKey.getId().toString()))
                 .toList();
     }
 

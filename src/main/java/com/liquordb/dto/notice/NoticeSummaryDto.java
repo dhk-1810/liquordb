@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 /**
  * 공지사항 목록에 표시할 요약된 정보
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class") // 직렬화시 @class 필드 포함
 public record NoticeSummaryDto (
         Long id,
         String title,

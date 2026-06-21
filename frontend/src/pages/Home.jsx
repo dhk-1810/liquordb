@@ -61,37 +61,29 @@ function Home() {
         <div className="space-y-20">
           {/* Pinned Notices Section */}
           {pinnedNotices.length > 0 && (
-            <section className="animate-fade-in-up">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-amber-100 rounded-xl text-amber-600 shadow-sm border border-amber-200/50">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Important Notices</h2>
-                  <p className="text-slate-500 text-sm mt-0.5">Stay updated with the latest news</p>
-                </div>
-              </div>
-
-              <div className="grid gap-3">
+            <section className="animate-fade-in-up mb-6">
+              <div className="grid gap-2">
                 {pinnedNotices.map((notice, idx) => (
-                  <div key={idx} className="group flex flex-col sm:flex-row sm:items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-amber-300 transition-all duration-300 cursor-pointer relative overflow-hidden">
+                  <Link
+                    to={`/notices/${notice.id}`}
+                    key={idx}
+                    className="group flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                  >
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 transform origin-left scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ease-out z-10"></div>
-                    <div className="flex items-start sm:items-center gap-4 relative z-20">
-                      <span className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300 mt-1 sm:mt-0">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex items-start sm:items-center gap-3 relative z-20">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300 mt-0.5 sm:mt-0">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </span>
-                      <h3 className="text-lg font-semibold text-slate-800 group-hover:text-amber-700 transition-colors">
+                      <h3 className="text-base font-semibold text-slate-800 group-hover:text-amber-700 transition-colors">
                         {notice.title}
                       </h3>
                     </div>
-                    <span className="text-sm font-medium text-slate-400 mt-3 sm:mt-0 bg-slate-50 px-3 py-1 rounded-full self-start sm:self-auto border border-slate-100">
+                    <span className="text-xs font-medium text-slate-400 mt-2 sm:mt-0 bg-slate-50 px-2.5 py-0.5 rounded-full self-start sm:self-auto border border-slate-100">
                       {new Date(notice.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </section>
@@ -127,8 +119,8 @@ function Home() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === tab.id
-                          ? 'bg-white text-rose-600 shadow-sm border-slate-200/50'
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/50'
+                        ? 'bg-white text-rose-600 shadow-sm border-slate-200/50'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-300/50'
                         }`}
                     >
                       {tab.label}

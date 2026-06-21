@@ -201,11 +201,7 @@ function MyPage() {
       {/* Header Profile Summary */}
       <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 flex items-center gap-6">
         <div className="w-24 h-24 rounded-full bg-amber-100 flex items-center justify-center border-4 border-slate-50 shadow-md overflow-hidden flex-shrink-0">
-          {myPageData.imageUrl ? (
-            <img src={myPageData.imageUrl} alt={myPageData.username} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-3xl font-bold text-amber-700 uppercase">{myPageData.username.charAt(0)}</span>
-          )}
+          <img src={(myPageData.imageUrl && !myPageData.imageUrl.includes('default-profile-image.png')) ? myPageData.imageUrl : '/default-avatar.svg'} alt={myPageData.username} className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">{myPageData.username}</h1>
@@ -299,11 +295,7 @@ function MyPage() {
                   <div className="flex flex-col sm:flex-row gap-8 mb-8">
                     <div className="flex flex-col items-center gap-4">
                       <div className="w-32 h-32 rounded-full border-4 border-slate-100 bg-slate-200 flex items-center justify-center overflow-hidden">
-                        {displayImageUrl ? (
-                          <img src={displayImageUrl} alt="Preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <svg className="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                        )}
+                        <img src={(displayImageUrl && !displayImageUrl.includes('default-profile-image.png')) ? displayImageUrl : '/default-avatar.svg'} alt="Preview" className="w-full h-full object-cover" />
                       </div>
                       
                       <div className="flex flex-col items-center gap-2">

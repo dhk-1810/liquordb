@@ -1,11 +1,18 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.JwtDto;
+import com.liquordb.dto.CursorPageResponse;
+import com.liquordb.dto.liquor.LiquorListGetRequest;
+import com.liquordb.dto.liquor.LiquorSummaryDto;
+import com.liquordb.dto.review.ReviewListGetRequest;
+import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.security.JwtInformation;
 import com.liquordb.security.TokenUtil;
+import com.liquordb.service.LiquorService;
+import com.liquordb.service.ReviewService;
 import com.liquordb.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,28 +32,28 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final LiquorService liquorService;
+    private final ReviewService reviewService;
 
     // 마이페이지
     @GetMapping("/{userId}/my-page")
     public ResponseEntity<UserMyPageDto> getMyPage(
             @PathVariable UUID userId,
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
+            @AuthenticationPrincipal CustomUserDetails user) {
         authorizeUser(userId, user);
         UserMyPageDto myPage = userService.getMyPageInfo(userId);
         return ResponseEntity.ok(myPage);
     }
 
     // 회원정보 수정 (프로필사진, 닉네임)
-    @PatchMapping(path = "/{userId}/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PatchMapping(path = "/{userId}/update", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<JwtDto> update(
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
             @AuthenticationPrincipal CustomUserDetails user,
-            HttpServletResponse response
-    ) {
+            HttpServletResponse response) {
         authorizeUser(userId, user);
         JwtInformation newInfo = userService.update(userId, request, profileImage, refreshToken);
         if (newInfo.refreshToken() != null) {
@@ -61,8 +68,7 @@ public class UserController {
     public ResponseEntity<Void> updatePassword(
             @PathVariable UUID userId,
             @RequestBody @Valid PasswordUpdateRequest request,
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
+            @AuthenticationPrincipal CustomUserDetails user) {
         authorizeUser(userId, user);
         userService.updatePassword(userId, request);
         return ResponseEntity.noContent().build();
@@ -73,12 +79,35 @@ public class UserController {
     public ResponseEntity<Void> delete(
             @PathVariable UUID userId,
             @RequestHeader("Authorization") String authHeader,
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
+            @AuthenticationPrincipal CustomUserDetails user) {
         authorizeUser(userId, user);
         String accessToken = authHeader.substring(7);
         userService.withdraw(userId, accessToken);
         return ResponseEntity.noContent().build();
+    }
+
+    // 좋아요 누른 주류 목록 조회
+    @GetMapping("/{userId}/liked-liquors")
+    public ResponseEntity<CursorPageResponse<LiquorSummaryDto>> getLikedLiquors(
+            @PathVariable UUID userId,
+            @ModelAttribute LiquorListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        authorizeUser(userId, user);
+        CursorPageResponse<LiquorSummaryDto> response = liquorService.getLikedLiquors(userId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    // 좋아요 누른 리뷰 목록 조회
+    @GetMapping("/{userId}/liked-reviews")
+    public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getLikedReviews(
+            @PathVariable UUID userId,
+            @ModelAttribute @Valid ReviewListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        authorizeUser(userId, user);
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getLikedReviews(userId, request);
+        return ResponseEntity.ok(response);
     }
 
     private void authorizeUser(UUID userId, CustomUserDetails user) {
