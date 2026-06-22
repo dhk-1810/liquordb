@@ -61,6 +61,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, CustomRev
 
     // 좋아요 수 변경
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Review r SET r.likeCount = r.likeCount + :delta WHERE r.id = :id")
+    @Query("UPDATE Review r SET r.likeCount = CASE WHEN r.likeCount + :delta < 0 THEN 0 ELSE r.likeCount + :delta END WHERE r.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 }

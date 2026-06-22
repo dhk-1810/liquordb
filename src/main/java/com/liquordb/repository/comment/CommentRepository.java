@@ -75,7 +75,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, CustomC
 
     // 좋아요 수 변경
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Comment c SET c.likeCount = c.likeCount + :delta WHERE c.id = :id")
+    @Query("UPDATE Comment c SET c.likeCount = CASE WHEN c.likeCount + :delta < 0 THEN 0 ELSE c.likeCount + :delta END WHERE c.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
 }

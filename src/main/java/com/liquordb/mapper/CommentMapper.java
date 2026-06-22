@@ -13,23 +13,23 @@ public class CommentMapper {
                 request.content(),
                 review,
                 parent,
-                requestUser
-        );
+                requestUser);
     }
 
     public static CommentResponseDto toDto(Comment comment) {
-            return CommentResponseDto.builder()
-                    .id(comment.getId())
-                    .userId(comment.getUser().getId())
-                    .username(comment.getUser().getUsername())
-                    .reviewId(comment.getReview().getId())
-                    .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
-                    .content(comment.getContent())
-                    .status(comment.getStatus())
-                    .likeCount(comment.getLikeCount())
-                    .createdAt(comment.getCreatedAt())
-                    .updatedAt(comment.getUpdatedAt())
-                    .build();
+        return CommentResponseDto.builder()
+                .id(comment.getId())
+                .userId(comment.getUser().getId())
+                .username(comment.getUser().getUsername())
+                .reviewId(comment.getReview().getId())
+                .reviewTitle(comment.getReview().getTitle())
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
+                .content(comment.getContent())
+                .status(comment.getStatus())
+                .likeCount(comment.getLikeCount())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .build();
 
     }
 

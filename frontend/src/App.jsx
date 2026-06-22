@@ -9,6 +9,7 @@ import NoticeDetail from './pages/NoticeDetail';
 import LiquorDetail from './pages/LiquorDetail';
 import ReviewWrite from './pages/ReviewWrite';
 import MyPage from './pages/MyPage';
+import MyActivityList from './pages/MyActivityList';
 import NotificationDropdown from './components/NotificationDropdown';
 import { fetchAuthToken } from './utils/auth';
 
@@ -17,6 +18,11 @@ function AppContent() {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const location = useLocation();
+
+  const isHomeActive = location.pathname === '/';
+  const isLiquorsActive = location.pathname.startsWith('/liquors');
+  const isNoticesActive = location.pathname.startsWith('/notices');
+  const isMyPageActive = location.pathname.startsWith('/mypage');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -64,6 +70,7 @@ function AppContent() {
     } finally {
       localStorage.removeItem('isLoggedIn');
       setUser(null);
+      window.location.href = '/';
     }
   };
 
@@ -79,9 +86,9 @@ function AppContent() {
             
             <div className="flex items-center text-sm font-medium text-slate-600">
               <div className="hidden sm:flex items-center gap-6">
-                <Link to="/" className="text-amber-600 hover:text-amber-700 transition-colors">Home</Link>
-                <Link to="/liquors" className="hover:text-amber-600 transition-colors">Liquors</Link>
-                <Link to="/notices" className="hover:text-amber-600 transition-colors">Notices</Link>
+                <Link to="/" className={`transition-colors font-semibold ${isHomeActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>Home</Link>
+                <Link to="/liquors" className={`transition-colors font-semibold ${isLiquorsActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>Liquors</Link>
+                <Link to="/notices" className={`transition-colors font-semibold ${isNoticesActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>Notices</Link>
                 <span className="hover:text-amber-600 cursor-pointer transition-colors">About</span>
               </div>
               <div className="flex items-center gap-4 ml-4 pl-4 sm:ml-6 sm:pl-6 border-l border-slate-200">
@@ -90,7 +97,7 @@ function AppContent() {
                 ) : user ? (
                   <>
                     <Link to="/mypage" className="focus:outline-none flex items-center justify-center transform hover:scale-105 transition-transform" title="Go to My Page">
-                      <img src={profileImageUrl || '/default-avatar.svg'} alt={user.username} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm hover:border-amber-400 transition-colors bg-white" />
+                      <img src={profileImageUrl || '/default-avatar.svg'} alt={user.username} className={`w-10 h-10 rounded-full object-cover border-2 shadow-sm transition-colors bg-white ${isMyPageActive ? 'border-amber-500' : 'border-white hover:border-amber-400'}`} />
                     </Link>
                     <NotificationDropdown />
                     <button onClick={handleSignOut} className="hover:text-amber-600 transition-colors font-semibold ml-2">
@@ -121,6 +128,7 @@ function AppContent() {
           <Route path="/notices" element={<NoticesList />} />
           <Route path="/notices/:id" element={<NoticeDetail />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/mypage/:category" element={<MyActivityList />} />
         </Routes>
       </main>
 

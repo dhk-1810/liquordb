@@ -7,9 +7,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
-public record CommentResponseDto (
+public record CommentResponseDto(
         Long id,
         Long reviewId,
+        String reviewTitle,
         Long parentId,
         UUID userId,
         String username,
@@ -18,6 +19,5 @@ public record CommentResponseDto (
         long likeCount,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-){
-
+) {
 }

@@ -402,15 +402,6 @@ function LiquorDetail() {
                 <span className="text-slate-400 font-medium">No image available</span>
               </div>
             )}
-            
-            <button 
-              onClick={handleLike}
-              className={`absolute top-6 right-6 p-2.5 rounded-full shadow-md transition-colors ${liquor.likedByMe ? 'bg-white/90 text-red-500' : 'bg-white/70 text-slate-300 hover:text-red-400 hover:bg-white/90'} backdrop-blur`}
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-              </svg>
-            </button>
           </div>
 
           {/* Details Section */}
@@ -481,14 +472,21 @@ function LiquorDetail() {
             )}
 
             <div className="mt-auto pt-6 flex items-center justify-between">
-              <div className="flex items-center text-slate-500 font-medium">
-                <div className="flex -space-x-2 mr-3">
-                  {/* Fake avatars for people who liked this */}
-                  <div className="w-8 h-8 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-blue-500 text-xs font-bold">A</div>
-                  <div className="w-8 h-8 rounded-full border-2 border-white bg-green-100 flex items-center justify-center text-green-500 text-xs font-bold">B</div>
-                  <div className="w-8 h-8 rounded-full border-2 border-white bg-amber-100 flex items-center justify-center text-amber-500 text-xs font-bold">C</div>
-                </div>
-                <span>{liquor.likeCount} people liked this</span>
+              <div className="flex items-center text-slate-500 font-medium gap-2">
+                <button 
+                  onClick={handleLike}
+                  className={`p-2 rounded-xl transition-all border ${
+                    liquor.likedByMe 
+                      ? 'bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100' 
+                      : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-slate-50'
+                  }`}
+                  title={liquor.likedByMe ? "Unlike" : "Like"}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                     <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                <span className="text-base font-bold text-slate-700">{liquor.likeCount}</span>
               </div>
               
               <button 

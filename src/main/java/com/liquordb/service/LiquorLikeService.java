@@ -13,7 +13,6 @@ import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +26,6 @@ public class LiquorLikeService {
     private final LiquorLikeRepository liquorLikeRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
-
-    private final StringRedisTemplate redisTemplate;
-    private static final String LIKE_BATCH_KEY = "liquor:batch:likes";
-    private static final String RATING_BATCH_KEY = "liquor:batch:ratings";
 
     @Transactional
     public void like(Long liquorId, UUID userId) {
@@ -52,7 +47,6 @@ public class LiquorLikeService {
 
         // 비동기로 엔터티의 likeCount 1 증가
         eventPublisher.publishEvent(new LiquorLikeEvent(liquorId, true));
-        redisTemplate.opsForHash().increment(LIKE_BATCH_KEY, String.valueOf(liquorId), 1);
     }
 
     @Transactional
@@ -63,7 +57,6 @@ public class LiquorLikeService {
 
         liquorLikeRepository.delete(liquorlike);
         eventPublisher.publishEvent(new LiquorLikeEvent(liquorId, false)); // 엔터티의 likeCount 1 감소
-        redisTemplate.opsForHash().increment(LIKE_BATCH_KEY, String.valueOf(liquorId), -1);
     }
 
 }

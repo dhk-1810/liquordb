@@ -150,8 +150,9 @@ function Home() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {currentTrending.slice(0, 10).map((liquor, index) => (
-                  <div
+                  <Link
                     key={liquor.id}
+                    to={`/liquors/${liquor.id}`}
                     className="group bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col cursor-pointer relative transition-all duration-300 hover:shadow-xl hover:shadow-amber-900/5 hover:-translate-y-1 hover:border-amber-200"
                   >
                     {/* Ranking Badge */}
@@ -214,7 +215,7 @@ function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

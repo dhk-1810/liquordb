@@ -28,7 +28,7 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiq
 
     // 좋아요 수 변경
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Liquor l SET l.likeCount = l.likeCount + :delta WHERE l.id = :id")
+    @Query("UPDATE Liquor l SET l.likeCount = CASE WHEN l.likeCount + :delta < 0 THEN 0 ELSE l.likeCount + :delta END WHERE l.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
     // 인기 주류 조회 시 사용
