@@ -20,6 +20,9 @@ public interface CustomLiquorRepository {
     // 인기 순위 계산 - scheduler
     List<LiquorScoreDto> findScoresByIds(Set<Long> activeIds);
 
+    // 전체 기간 랭킹 계산 - scheduler
+    List<LiquorScoreDto> findScoresForTotalRanking(Pageable pageable);
+
     // 좋아요 누른 주류 조회
     Slice<Liquor> findLikedLiquors(UUID userId, LiquorSearchCondition condition);
 }

@@ -109,6 +109,34 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
                 .fetch();
     }
 
+    @Override
+    public List<LiquorScoreDto> findScoresForTotalRanking(Pageable pageable) {
+        com.querydsl.core.types.Expression<Long> reviewCountSub = JPAExpressions.select(review.count()).from(review).where(review.liquor.id.eq(liquor.id));
+        com.querydsl.core.types.Expression<Long> likeCountSub = JPAExpressions.select(liquorLike.count()).from(liquorLike).where(liquorLike.liquor.id.eq(liquor.id));
+        com.querydsl.core.types.Expression<Long> commentCountSub = JPAExpressions.select(comment.count()).from(comment).where(comment.review.liquor.id.eq(liquor.id));
+
+        com.querydsl.core.types.dsl.NumberExpression<Long> scoreExpr = Expressions.numberTemplate(Long.class,
+                "({0} * 10) + ({1} * 5) + ({2} * 2)",
+                reviewCountSub, likeCountSub, commentCountSub);
+
+        return queryFactory
+                .select(Projections.constructor(LiquorScoreDto.class,
+                        liquor.id,
+                        ExpressionUtils.as(reviewCountSub, "reviewCount"),
+                        ExpressionUtils.as(likeCountSub, "likeCount"),
+                        ExpressionUtils.as(commentCountSub, "commentCount")
+                ))
+                .from(liquor)
+                .where(liquor.isDeleted.eq(false))
+                .orderBy(
+                        scoreExpr.desc(),
+                        liquor.id.desc()
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
+
     /**
      * Predicates
      */

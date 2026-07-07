@@ -52,6 +52,9 @@ public class Comment extends LikeableEntity {
 
     private LocalDateTime deletedAt;
 
+    @Version
+    private Long version;
+
     public enum CommentStatus {
         ACTIVE,
         HIDDEN, // 신고 누적시 자동 숨김처리. 관리자 복구 전까지 유효.

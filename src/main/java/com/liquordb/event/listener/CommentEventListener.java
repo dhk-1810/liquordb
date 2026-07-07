@@ -50,7 +50,7 @@ public class CommentEventListener {
         redisTemplate.convertAndSend("sse-notifications", message);
 
         // 인기 주류 집계를 위해 ID 캐싱
-        liquorActivityManager.trackActivity(event.liquorId());
+        liquorActivityManager.trackActivity(event.liquorId(), 2);
     }
 
 }

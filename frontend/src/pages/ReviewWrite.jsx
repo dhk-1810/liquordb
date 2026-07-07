@@ -228,13 +228,18 @@ function ReviewWrite() {
         {/* Header with Liquor Info */}
         <div className="bg-slate-50 border-b border-slate-200 p-6 flex items-center gap-6">
           {liquor.imageUrl ? (
-            <img src={liquor.imageUrl} alt={liquor.name} className="w-20 h-20 object-contain drop-shadow-md bg-white rounded-xl p-2 border border-slate-200" />
+            <img 
+              src={liquor.imageUrl} 
+              alt={liquor.name} 
+              className="w-20 h-20 object-contain drop-shadow-md bg-white rounded-xl p-2 border border-slate-200" 
+              onError={(e) => { e.target.src = '/default-liquor.svg' }}
+            />
           ) : (
-            <div className="w-20 h-20 flex items-center justify-center bg-white rounded-xl border border-slate-200 text-amber-300">
-              <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44a.991.991 0 01-.53-.88V7.5c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9z" />
-              </svg>
-            </div>
+            <img 
+              src="/default-liquor.svg" 
+              alt={liquor.name} 
+              className="w-20 h-20 object-contain drop-shadow-md bg-white rounded-xl p-2 border border-slate-200" 
+            />
           )}
           <div>
             <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider rounded">

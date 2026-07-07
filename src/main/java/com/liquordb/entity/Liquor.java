@@ -73,6 +73,9 @@ public class Liquor extends LikeableEntity {
 
     private LocalDateTime deletedAt;
 
+    @Version
+    private Long version;
+
     @Builder
     private Liquor(String name, LiquorCategory category, Long subcategoryId,
                    Country country, String manufacturer, Double abv, String imageKey) {

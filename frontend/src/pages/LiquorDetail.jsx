@@ -4,6 +4,7 @@ import { fetchAuthToken } from '../utils/auth';
 import CommentSection from '../components/CommentSection';
 
 function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
+  const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editRating, setEditRating] = useState(review.rating);
@@ -65,7 +66,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
-        window.alert('You must be logged in to like a review.');
+        navigate('/signin');
         return;
       }
       
@@ -386,21 +387,20 @@ function LiquorDetail() {
       <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="flex flex-col md:flex-row">
           
-          {/* Image Section */}
           <div className="w-full md:w-2/5 bg-slate-50 relative flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-slate-200">
             {liquor.imageUrl ? (
               <img 
                 src={liquor.imageUrl} 
                 alt={liquor.name} 
                 className="max-w-full max-h-[500px] object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500"
+                onError={(e) => { e.target.src = '/default-liquor.svg' }}
               />
             ) : (
-              <div className="w-64 h-64 flex flex-col items-center justify-center text-amber-300">
-                <svg className="w-32 h-32 mb-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44a.991.991 0 01-.53-.88V7.5c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9z" />
-                </svg>
-                <span className="text-slate-400 font-medium">No image available</span>
-              </div>
+              <img 
+                src="/default-liquor.svg" 
+                alt="Default Liquor" 
+                className="max-w-full max-h-[500px] object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500"
+              />
             )}
           </div>
 

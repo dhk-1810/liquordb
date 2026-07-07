@@ -149,21 +149,22 @@ function LiquorsExplore() {
                     src={liquor.imageUrl}
                     alt={liquor.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => { e.target.src = '/default-liquor.svg' }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 text-amber-300 group-hover:scale-105 transition-transform duration-500">
-                    <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44a.991.991 0 01-.53-.88V7.5c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9z" />
-                    </svg>
-                  </div>
+                  <img
+                    src="/default-liquor.svg"
+                    alt={liquor.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 )}
                 {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 
                 {/* Heart / likedByMe indicator */}
                 {liquor.likedByMe && (
-                   <div className="absolute top-3 right-3 bg-white/90 backdrop-blur text-red-500 p-1.5 rounded-full shadow-sm">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                   <div className="absolute top-3 right-3 bg-white/90 backdrop-blur text-red-500 p-2 rounded-full shadow-sm">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                          <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
                       </svg>
                    </div>
@@ -181,8 +182,15 @@ function LiquorsExplore() {
                 </div>
                 
                 <div className="mt-auto flex items-center justify-between text-sm text-slate-500 font-medium">
-                  <span className="flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                  <span className={`flex items-center gap-1 ${liquor.likedByMe ? 'text-red-500 font-semibold' : 'text-slate-500'}`}>
+                    <svg 
+                      className={`${liquor.likedByMe ? 'w-5 h-5' : 'w-4 h-4'}`} 
+                      fill={liquor.likedByMe ? 'currentColor' : 'none'} 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
                     {liquor.likeCount} likes
                   </span>
                 </div>

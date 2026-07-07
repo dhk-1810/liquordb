@@ -27,7 +27,7 @@ public class ReviewEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(ReviewCreatedEvent event) {
 
-        liquorActivityManager.trackActivity(event.liquorId());
+        liquorActivityManager.trackActivity(event.liquorId(), 10);
     }
 
 }

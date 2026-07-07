@@ -163,10 +163,10 @@ function Home() {
                     {/* Image Container */}
                     <div className="relative aspect-[4/3] w-full bg-slate-100 overflow-hidden">
                       <img
-                        src={liquor.imageUrl || 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80'}
+                        src={liquor.imageUrl || '/default-liquor.svg'}
                         alt={liquor.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80' }}
+                        onError={(e) => { e.target.src = '/default-liquor.svg' }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 

@@ -50,9 +50,9 @@ public class LikeEventListener {
         int delta = event.isLiked() ? 1 : -1;
         liquorRepository.updateLikeCount(event.liquorId(), delta);
 
-        // 인기 주류 집계를 위해 ID 캐싱 - 3시간, 일간, 주간 모든 후보군 Set에 ID 추가
+        // 인기 주류 집계를 위해 ID 캐싱 - ZSet에 활동 점수(좋아요: 5점) 가산
         if (delta == 1) {
-            liquorActivityManager.trackActivity(event.liquorId());
+            liquorActivityManager.trackActivity(event.liquorId(), 5);
         }
     }
 

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
 
 function CommentSection({ reviewId, initialCommentCount, currentUser }) {
+  const navigate = useNavigate();
   const [comments, setComments] = useState([]);
   const [cursor, setCursor] = useState(null);
   const [hasNext, setHasNext] = useState(false);
@@ -101,7 +103,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
-        window.alert('You must be logged in to like a comment.');
+        navigate('/signin');
         return;
       }
       
@@ -223,6 +225,16 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
             placeholder="Write a comment..." 
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
+            onClick={() => {
+              if (!currentUser) {
+                navigate('/signin');
+              }
+            }}
+            onFocus={() => {
+              if (!currentUser) {
+                navigate('/signin');
+              }
+            }}
             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all"
           />
           {newComment.trim() && (

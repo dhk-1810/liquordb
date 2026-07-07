@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <!-- Definitions for gradients and shadows -->
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDFBF7" />
+      <stop offset="100%" stop-color="#F3EFE6" />
+    </linearGradient>
+    
+    <!-- Liquid Gradient (Golden/Amber) -->
+    <linearGradient id="liquidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <!-- Glass Highlight Gradient -->
+    <linearGradient id="glassHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+      <stop offset="30%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Drop Shadow for the bottle -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#78350F" flood-opacity="0.12" />
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.06" />
+    </filter>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="100%" height="100%" fill="url(#bgGrad)" rx="24" />
+
+  <!-- Decorative circles for depth -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#F59E0B" stroke-opacity="0.06" stroke-width="2" />
+  <circle cx="200" cy="200" r="180" fill="none" stroke="#F59E0B" stroke-opacity="0.03" stroke-width="1" />
+
+  <!-- Shadow Group -->
+  <g filter="url(#dropShadow)">
+    <!-- THE BOTTLE -->
+    <!-- Liquid inside the bottle -->
+    <path d="M 175 140 L 225 140 L 235 170 L 235 295 C 235 300 231 305 225 305 L 175 305 C 169 305 165 300 165 295 L 165 170 Z" fill="url(#liquidGrad)" />
+    
+    <!-- Bottle Body Glass Outline -->
+    <path d="M 185 85 L 215 85 C 217 85 218 86 218 88 L 218 105 C 218 107 217 108 215 108 L 185 108 C 183 108 182 107 182 105 L 182 88 C 182 86 183 85 185 85 Z" fill="#FFFFFF" fill-opacity="0.3" stroke="#D1D5DB" stroke-width="1.5" />
+    <path d="M 188 108 L 212 108 L 212 135 L 232 165 L 237 175 L 237 298 C 237 304 232 309 226 309 L 174 309 C 168 309 163 304 163 298 L 163 175 L 168 165 L 188 135 Z" fill="none" stroke="#9CA3AF" stroke-width="2.5" stroke-linejoin="round" />
+    <path d="M 188 108 L 212 108 L 212 135 L 232 165 L 237 175 L 237 298 C 237 304 232 309 226 309 L 174 309 C 168 309 163 304 163 298 L 163 175 L 168 165 L 188 135 Z" fill="url(#glassHighlight)" />
+
+    <!-- Wooden Cork -->
+    <path d="M 190 70 L 210 70 L 213 85 L 187 85 Z" fill="#B45309" />
+    
+    <!-- Cork top -->
+    <ellipse cx="200" cy="70" rx="10" ry="3" fill="#D97706" />
+
+    <!-- Label on Bottle -->
+    <rect x="175" y="190" width="50" height="60" rx="4" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1" />
+    <!-- Label Details -->
+    <line x1="182" y1="205" x2="218" y2="205" stroke="#78350F" stroke-width="2" />
+    <line x1="185" y1="215" x2="215" y2="215" stroke="#9CA3AF" stroke-width="1" />
+    <line x1="185" y1="222" x2="215" y2="222" stroke="#9CA3AF" stroke-width="1" />
+    <line x1="185" y1="229" x2="215" y2="229" stroke="#9CA3AF" stroke-width="1" />
+    <polygon points="200,238 204,244 196,244" fill="#D97706" />
+    
+    <!-- Glass Highlights / Reflections -->
+    <path d="M 168 180 L 168 290" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.6" />
+    <path d="M 232 180 L 232 290" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+    <path d="M 174 165 L 188 142" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+
+    <!-- THE GLASS -->
+    <!-- Liquid in glass -->
+    <path d="M 252 265 L 278 265 L 282 295 A 3 3 0 0 1 279 298 L 251 298 A 3 3 0 0 1 248 295 Z" fill="url(#liquidGrad)" />
+    
+    <!-- Glass Outline -->
+    <path d="M 248 250 L 282 250 L 286 295 C 286 301 281 306 275 306 L 255 306 C 249 306 244 301 244 295 Z" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linejoin="round" />
+    <path d="M 248 250 L 282 250 L 286 295 C 286 301 281 306 275 306 L 255 306 C 249 306 244 301 244 295 Z" fill="url(#glassHighlight)" />
+    
+    <!-- Ice Cube inside the glass -->
+    <rect x="256" y="270" width="12" height="12" rx="2" transform="rotate(15 256 270)" fill="#FFFFFF" fill-opacity="0.4" stroke="#FFFFFF" stroke-width="1" />
+
+    <!-- Glass reflection highlight -->
+    <path d="M 247 258 L 247 292" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.6" />
+  </g>
+</svg>

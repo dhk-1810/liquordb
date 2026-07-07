@@ -153,13 +153,18 @@ function MyActivityList() {
                 <Link to={`/liquors/${liquor.id}`} key={liquor.id} className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 transform hover:-translate-y-1">
                   <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
                     {liquor.imageUrl ? (
-                      <img src={liquor.imageUrl} alt={liquor.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img 
+                        src={liquor.imageUrl} 
+                        alt={liquor.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => { e.target.src = '/default-liquor.svg' }}
+                      />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 text-amber-300">
-                        <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44a.991.991 0 01-.53-.88V7.5c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9z" />
-                        </svg>
-                      </div>
+                      <img 
+                        src="/default-liquor.svg" 
+                        alt={liquor.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     )}
                     <div className="absolute top-3 right-3 bg-white/90 backdrop-blur text-red-500 p-1.5 rounded-full shadow-sm">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

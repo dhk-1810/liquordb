@@ -53,6 +53,9 @@ public class User {
 
     private LocalDateTime withdrawnAt;
 
+    @Version
+    private Long version;
+
     private User(String email, String username, String password, String socialProvider, UserStatus status, Role role) {
         this.email = email;
         this.username = username;

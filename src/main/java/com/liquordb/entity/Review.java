@@ -70,6 +70,9 @@ public class Review extends LikeableEntity {
     @Column(nullable = true)
     private LocalDateTime deletedAt;
 
+    @Version
+    private Long version;
+
     public enum ReviewStatus {
         ACTIVE, HIDDEN, DELETED
     }

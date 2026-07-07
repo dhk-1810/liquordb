@@ -14,15 +14,18 @@ public class LiquorActivityManager {
     private static final String ACTIVE_KEY_PREFIX = "active:liquors:";
 
     /**
-     * 주류 ID를 모든 기간의 활성 후보군(Active Set)에 추가
+     * 주류 ID의 활동 점수를 단위 기간의 활성 후보군 ZSet에 가산
      */
-    public void trackActivity(Long liquorId) {
+    public void trackActivity(Long liquorId, int deltaScore) {
         String idStr = String.valueOf(liquorId);
 
         stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             for (PeriodType period : PeriodType.values()) {
+                if (period == PeriodType.TOTAL) {
+                    continue; // TOTAL은 DB에서 직접 전체 집계하므로 제외
+                }
                 String key = ACTIVE_KEY_PREFIX + period.name();
-                stringRedisTemplate.opsForSet().add(key, idStr);
+                stringRedisTemplate.opsForZSet().incrementScore(key, idStr, deltaScore);
             }
             return null;
         });

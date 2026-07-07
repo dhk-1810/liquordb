@@ -37,4 +37,8 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiq
     // 최신 주류 조회 (Fallback)
     @Query("SELECT l FROM Liquor l ORDER BY l.id DESC")
     List<Liquor> findTopLatestLiquors(Pageable pageable);
+
+    // 좋아요 많은 순 조회 (Fallback용)
+    @Query("SELECT l FROM Liquor l WHERE l.isDeleted = false ORDER BY l.likeCount DESC, l.id DESC")
+    List<Liquor> findTopLikedLiquors(Pageable pageable);
 }
