@@ -14,6 +14,7 @@ public record CommentResponseDto(
         Long parentId,
         UUID userId,
         String username,
+        String userProfileImageUrl,
         String content,
         Comment.CommentStatus status,
         long likeCount,

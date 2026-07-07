@@ -39,7 +39,8 @@ public class UserController {
     @GetMapping("/{userId}/my-page")
     public ResponseEntity<UserMyPageDto> getMyPage(
             @PathVariable UUID userId,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
         authorizeUser(userId, user);
         UserMyPageDto myPage = userService.getMyPageInfo(userId);
         return ResponseEntity.ok(myPage);

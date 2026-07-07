@@ -17,11 +17,12 @@ public class CommentMapper {
         );
     }
 
-    public static CommentResponseDto toDto(Comment comment) {
+    public static CommentResponseDto toDto(Comment comment, String userProfileImageUrl) {
             return CommentResponseDto.builder()
                     .id(comment.getId())
                     .userId(comment.getUser().getId())
                     .username(comment.getUser().getUsername())
+                    .userProfileImageUrl(userProfileImageUrl)
                     .reviewId(comment.getReview().getId())
                     .reviewTitle(comment.getReview().getTitle())
                     .parentId(comment.getParent() != null ? comment.getParent().getId() : null)

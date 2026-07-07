@@ -203,7 +203,7 @@ function MyPage() {
       {/* Header Profile Summary */}
       <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 flex items-center gap-6">
         <div className="w-24 h-24 rounded-full bg-amber-100 flex items-center justify-center border-4 border-slate-50 shadow-md overflow-hidden flex-shrink-0">
-          <img src={(myPageData.imageUrl && !myPageData.imageUrl.includes('default-profile-image.png')) ? myPageData.imageUrl : '/default-avatar.svg'} alt={myPageData.username} className="w-full h-full object-cover" />
+          <img src={(myPageData.imageUrl && !myPageData.imageUrl.includes('default-profile')) ? myPageData.imageUrl : '/default-avatar.svg'} alt={myPageData.username} className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">{myPageData.username}</h1>
@@ -297,7 +297,7 @@ function MyPage() {
                   <div className="flex flex-col sm:flex-row gap-8 mb-8">
                     <div className="flex flex-col items-center gap-4">
                       <div className="w-32 h-32 rounded-full border-4 border-slate-100 bg-slate-200 flex items-center justify-center overflow-hidden">
-                        <img src={(displayImageUrl && !displayImageUrl.includes('default-profile-image.png')) ? displayImageUrl : '/default-avatar.svg'} alt="Preview" className="w-full h-full object-cover" />
+                        <img src={(displayImageUrl && !displayImageUrl.includes('default-profile')) ? displayImageUrl : '/default-avatar.svg'} alt="Preview" className="w-full h-full object-cover" />
                       </div>
                       
                       <div className="flex flex-col items-center gap-2">
@@ -305,7 +305,7 @@ function MyPage() {
                           {t('mypage.changePhoto')}
                           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                         </label>
-                        {displayImageUrl && !displayImageUrl.includes('default-profile-image.png') && (
+                        {displayImageUrl && !displayImageUrl.includes('default-profile') && (
                           <button 
                             type="button" 
                             onClick={() => {

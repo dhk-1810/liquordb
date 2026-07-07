@@ -101,7 +101,7 @@ public class ReviewService {
             });
             reviewImageKeyRepository.saveAll(keys);
         }
-        return ReviewMapper.toDto(review, tagDtos, imageUrls);
+        return ReviewMapper.toDto(review, tagDtos, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()));
     }
 
     // 리뷰 단건 조회
@@ -117,7 +117,7 @@ public class ReviewService {
 
         // default_batch_fetch_size로 N+1 방지
         List<String> imageUrls = getImageUrls(review);
-        return ReviewMapper.toDto(review, tags, imageUrls);
+        return ReviewMapper.toDto(review, tags, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()));
     }
 
     // 주류별 리뷰 목록 조회
@@ -211,7 +211,7 @@ public class ReviewService {
 
         List<String> imageUrls = getImageUrls(review);
         Set<TagResponseDto> tags = getTags(reviewId);
-        return ReviewMapper.toDto(review, tags, imageUrls);
+        return ReviewMapper.toDto(review, tags, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()));
     }
 
     // 리뷰 삭제 (Soft Delete)
@@ -252,7 +252,7 @@ public class ReviewService {
     // 페이지네이션 헬퍼 메서드
     private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews) {
         Slice<ReviewResponseDto> response = reviews
-                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r)));
+                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey())));
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -272,7 +272,7 @@ public class ReviewService {
     public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
         ReviewSearchCondition condition = getSearchCondition(request);
         Page<ReviewResponseDto> page = reviewRepository.findAllWithTags(condition)
-                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r)));
+                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey())));
         return PageResponse.from(page);
     }
 

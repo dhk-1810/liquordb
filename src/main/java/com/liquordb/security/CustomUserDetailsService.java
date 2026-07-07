@@ -7,6 +7,7 @@ import com.liquordb.exception.user.UserNotFoundException;
 import com.liquordb.exception.auth.WithdrawnUserException;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.user.UserRepository;
+import com.liquordb.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
     @Override
     public CustomUserDetails loadUserByUsername(String email) throws UserNotFoundException {
@@ -32,7 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new WithdrawnUserException(); // DisabledException을 상속
         }
 
-        UserResponseDto dto = UserMapper.toDto(user);
+        UserResponseDto dto = UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey()));
         return new CustomUserDetails(user.getId(), dto, user.getPassword());
     }
 }

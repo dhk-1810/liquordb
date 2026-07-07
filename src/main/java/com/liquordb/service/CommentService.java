@@ -48,6 +48,7 @@ public class CommentService {
     private final ReviewRepository reviewRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final LiquorRepository liquorRepository;
+    private final S3Service s3Service;
 
     // 댓글 생성
     @Transactional
@@ -80,7 +81,7 @@ public class CommentService {
                 review.getLiquor().getId(),
                 user.getUsername())
         );
-        return CommentMapper.toDto(comment);
+        return CommentMapper.toDto(comment, s3Service.getProfileImageUrl(comment.getUser().getProfileImageKey()));
     }
 
     // 댓글 수정
@@ -94,7 +95,8 @@ public class CommentService {
         }
 
         comment.update(request);
-        return CommentMapper.toDto(commentRepository.save(comment));
+        Comment savedComment = commentRepository.save(comment);
+        return CommentMapper.toDto(savedComment, s3Service.getProfileImageUrl(savedComment.getUser().getProfileImageKey()));
     }
 
     // 특정 리뷰에 달린 댓글 조회
@@ -124,7 +126,7 @@ public class CommentService {
                 .build();
 
         Slice<Comment> comments = commentRepository.findByReviewId(condition);
-        Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
+        Slice<CommentResponseDto> response = comments.map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey())));
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -150,7 +152,7 @@ public class CommentService {
                 .build();
 
         Slice<Comment> comments = commentRepository.findByUserId(condition);
-        Slice<CommentResponseDto> response = comments.map(CommentMapper::toDto);
+        Slice<CommentResponseDto> response = comments.map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey())));
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -182,7 +184,7 @@ public class CommentService {
     public PageResponse<CommentResponseDto> getAll(CommentSearchRequest request) {
         CommentSearchCondition condition = getSearchCondition(request);
         Page<CommentResponseDto> page = commentRepository.findAll(condition)
-                .map(CommentMapper::toDto);
+                .map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey())));
         return PageResponse.from(page);
     }
 

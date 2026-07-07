@@ -120,7 +120,7 @@ public class UserService {
             jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
         }
 
-        return new JwtInformation(UserMapper.toDto(user), newAccess, newRefresh);
+        return new JwtInformation(UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey())), newAccess, newRefresh);
     }
 
     // 비밀번호 수정 (로그인 상태에서)
@@ -171,7 +171,12 @@ public class UserService {
             newRefresh = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
             jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
         }
-        return new JwtInformation(UserMapper.toDto(user), newAccess, newRefresh);
+
+        String profileImageUrl = null;
+        if (user.getProfileImageKey() != null){
+            profileImageUrl = s3Service.getProfileImageUrl(user.getProfileImageKey());
+        }
+        return new JwtInformation(UserMapper.toDto(user, profileImageUrl), newAccess, newRefresh);
     }
 
     // 유저 조회 - 전체 또는 검색
@@ -191,7 +196,13 @@ public class UserService {
         UserSearchCondition condition = new UserSearchCondition(request.username(), request.email(), status, page, limit, descending);
 
         Page<UserResponseDto> data = userRepository.findAll(condition)
-                .map(UserMapper::toDto);
+                .map(user -> {
+                    String profileImageUrl = null;
+                    if (user.getProfileImageKey() != null){
+                        profileImageUrl = s3Service.getProfileImageUrl(user.getProfileImageKey());
+                    }
+                    return UserMapper.toDto(user, profileImageUrl);
+                });
 
         return PageResponse.from(data);
     }

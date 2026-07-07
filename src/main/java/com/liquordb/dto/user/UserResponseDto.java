@@ -12,7 +12,8 @@ public record UserResponseDto (
         String email,
         String username,
         UserStatus status,
-        Role role
+        Role role,
+        String profileImageUrl
 ){
 
 }

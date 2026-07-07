@@ -257,7 +257,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
 
       {/* Comment Input */}
       <form onSubmit={handleSubmit} className="mb-8 flex gap-3">
-        <img src="/default-avatar.svg" alt="User Profile" className="w-8 h-8 rounded-full object-cover border border-slate-200 bg-white flex-shrink-0" />
+        <img src={(currentUser && currentUser.profileImageUrl && !currentUser.profileImageUrl.includes('default-profile')) ? currentUser.profileImageUrl : '/default-avatar.svg'} alt="User Profile" className="w-8 h-8 rounded-full object-cover border border-slate-200 bg-white flex-shrink-0" />
         <div className="flex-grow">
           <input 
             type="text" 
@@ -303,7 +303,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
         <div className="space-y-5">
           {comments.map((comment) => (
             <div key={comment.id} className="flex gap-3 group">
-              <img src="/default-avatar.svg" alt="User Profile" className="w-8 h-8 rounded-full object-cover border border-slate-200 bg-white flex-shrink-0" />
+              <img src={(comment.userProfileImageUrl && !comment.userProfileImageUrl.includes('default-profile')) ? comment.userProfileImageUrl : '/default-avatar.svg'} alt="User Profile" className="w-8 h-8 rounded-full object-cover border border-slate-200 bg-white flex-shrink-0" />
               <div className="flex-grow">
                 {editingCommentId === comment.id ? (
                   <div className="bg-slate-50 rounded-2xl px-4 py-3 border border-amber-300">

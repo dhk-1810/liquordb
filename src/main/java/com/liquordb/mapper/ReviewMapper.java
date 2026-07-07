@@ -21,12 +21,13 @@ public class ReviewMapper {
         return review;
     }
 
-    public static ReviewResponseDto toDto(Review review, Set<TagResponseDto> tags, List<String> imageUrls) {
+    public static ReviewResponseDto toDto(Review review, Set<TagResponseDto> tags, List<String> imageUrls, String userProfileImageUrl) {
 
         return ReviewResponseDto.builder()
                 .id(review.getId())
                 .userId(review.getUser().getId())
                 .username(review.getUser().getUsername())
+                .userProfileImageUrl(userProfileImageUrl)
                 .likeCount(review.getLikeCount())
                 .commentCount(review.getCommentCount())
                 .liquorId(review.getLiquor().getId())

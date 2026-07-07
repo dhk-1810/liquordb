@@ -16,13 +16,14 @@ public class UserMapper {
         );
     }
 
-    public static UserResponseDto toDto(User user){
+    public static UserResponseDto toDto(User user, String profileImageUrl){
         return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
                 user.getUsername(),
                 user.getStatus(),
-                user.getRole()
+                user.getRole(),
+                profileImageUrl
         );
     }
 

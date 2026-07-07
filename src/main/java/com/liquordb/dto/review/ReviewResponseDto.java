@@ -13,6 +13,7 @@ public record ReviewResponseDto (
         Long id,
         UUID userId,
         String username,
+        String userProfileImageUrl,
         long likeCount,
         long commentCount,
         Long liquorId,

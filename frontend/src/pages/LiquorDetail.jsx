@@ -178,7 +178,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-4 transition-all">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <img src="/default-avatar.svg" alt="User Profile" className="w-10 h-10 rounded-full object-cover border border-slate-200 bg-white" />
+          <img src={(review.userProfileImageUrl && !review.userProfileImageUrl.includes('default-profile')) ? review.userProfileImageUrl : '/default-avatar.svg'} alt="User Profile" className="w-10 h-10 rounded-full object-cover border border-slate-200 bg-white" />
           <div>
             <p className="font-bold text-slate-800">{review.username || t('reviews.anonymous')}</p>
             <div className="flex items-center gap-2">

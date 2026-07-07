@@ -32,8 +32,6 @@ public class User {
     @Column(nullable = false, length = 100)
     private String password;
 
-//    private String socialProvider; // 소셜로그인 제공자 (google, kakao 등)
-
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -56,17 +54,16 @@ public class User {
     @Version
     private Long version;
 
-    private User(String email, String username, String password, String socialProvider, UserStatus status, Role role) {
+    private User(String email, String username, String password, UserStatus status, Role role) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.status = status;
         this.role = role;
-//        this.socialProvider = socialProvider;
     }
 
-    public static User create(String email, String username, String password, String socialProvider){
-        return new User(email, username, password, socialProvider, UserStatus.ACTIVE, Role.USER);
+    public static User create(String email, String username, String password){
+        return new User(email, username, password, UserStatus.ACTIVE, Role.USER);
     }
 
     public void updateEmail(String email){

@@ -69,17 +69,9 @@ function AppContent() {
         if (jwtData) {
           setUser(jwtData.userDto);
           
-          if (jwtData.userDto && jwtData.accessToken) {
-            const myPageRes = await fetch(`/api/users/${jwtData.userDto.id}/my-page`, {
-              headers: {
-                'Authorization': `Bearer ${jwtData.accessToken}`
-              }
-            });
-            if (myPageRes.ok) {
-              const myPageData = await myPageRes.json();
-              const url = myPageData.imageUrl;
-              setProfileImageUrl(url && !url.includes('default-profile-image.png') ? url : '/default-avatar.svg');
-            }
+          if (jwtData.userDto) {
+            const url = jwtData.userDto.profileImageUrl;
+            setProfileImageUrl(url && !url.includes('default-profile') ? url : '/default-avatar.svg');
           }
         } else {
           setUser(null);

@@ -37,6 +37,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
     private final StringRedisTemplate stringRedisTemplate;
+    private final S3Service s3Service; // 단방향 참조
 
     private static final String RESET_LINK_PREFIX = "https://liquordb.com/password/reset?token=";  // 실제로 작동하지는 않는 링크임.
     private static final String RESET_MAIL_SUBJECT = "[LiquorDB] 비밀번호 재설정 안내드립니다.";
@@ -66,7 +67,7 @@ public class AuthService {
         User user = UserMapper.toEntity(request, encodedPassword);
         userRepository.save(user);
 
-        return UserMapper.toDto(user);
+        return UserMapper.toDto(user, null);
     }
 
     // 로그인 - 필터에서 처리
@@ -94,7 +95,7 @@ public class AuthService {
         jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, user.getId());
 
         return new JwtInformation(
-                UserMapper.toDto(user),
+                UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey())),
                 newAccess,
                 newRefresh
         );
@@ -127,7 +128,7 @@ public class AuthService {
         String resetLink = RESET_LINK_PREFIX + resetToken;
         final String resetMailText
                 = "안녕하세요. LiquorDB입니다.\n\n" +
-                "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" +
+                "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" + // TODO
                 resetLink + "\n\n" +
                 "이 링크는 5분 동안만 유효합니다.";
 
@@ -160,6 +161,6 @@ public class AuthService {
                 .orElseThrow(LoginFailedException::new);
         user.restore();
         userRepository.save(user);
-        return UserMapper.toDto(user);
+        return UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey()));
     }
 }
