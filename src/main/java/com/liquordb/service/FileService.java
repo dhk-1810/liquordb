@@ -6,18 +6,11 @@ import com.liquordb.exception.file.FileNotFoundException;
 import com.liquordb.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -31,7 +24,7 @@ public class FileService {
     private static final long MAX_FILE_SIZE = 30 * 1024 * 1024;
 
     @Transactional
-    public FileResponseDto upload(MultipartFile file, File.FileType type, Object id) {
+    public FileResponseDto uploadAndSave(MultipartFile file, File.FileType type, Object id) {
 
         if (file == null || file.isEmpty()) {
             throw new FileNotFoundException();
@@ -47,7 +40,7 @@ public class FileService {
         String key = generateS3Key(type, extension, id);
 
         try {
-            s3Service.uploadFile(key, file);
+            s3Service.upload(key, file);
         } catch (IOException e) {
             log.error("파일 업로드 실패", e);
             throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.");
@@ -59,7 +52,17 @@ public class FileService {
         return FileResponseDto.toDto(metadata);
     }
 
+    @Transactional
+    public void delete(String key) {
+        if (key == null || key.isBlank()) {
+            return;
+        }
+        s3Service.deleteFile(key);
+        fileRepository.findByS3key(key)
+                .ifPresent(fileRepository::delete);
+    }
     // Key 예시: reviews/id/abc-123-def.jpg
+
     private String generateS3Key(File.FileType type, String extension, Object id) {
         String idPath = String.valueOf(id);
         return String.format("%s/%s/%s%s",

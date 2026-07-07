@@ -95,7 +95,7 @@ public class ReviewService {
         List<ReviewImageKey> keys = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             images.forEach(file -> {
-                FileResponseDto dto = fileService.upload(file, File.FileType.REVIEW, review.getId());
+                FileResponseDto dto = fileService.uploadAndSave(file, File.FileType.REVIEW, review.getId());
                 keys.add(new ReviewImageKey(review, dto.key()));
                 imageUrls.add(s3Service.getReviewImageUrl(dto.key()));
             });

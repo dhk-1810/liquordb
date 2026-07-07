@@ -99,12 +99,14 @@ public class UserService {
 
         Boolean deleteImage = request.deleteProfileImage();
         if (deleteImage != null && deleteImage) {
-            // TODO fileService.delete(user.getProfileImageKey());
+            if (user.getProfileImageKey() != null) {
+                fileService.delete(user.getProfileImageKey());
+            }
             user.setProfileImage(null);
         }
 
         if (profileImage != null && !profileImage.isEmpty()) {
-            FileResponseDto file = fileService.upload(profileImage, File.FileType.PROFILE, userId);
+            FileResponseDto file = fileService.uploadAndSave(profileImage, File.FileType.PROFILE, userId);
             user.setProfileImage(file.key());
         }
 

@@ -305,7 +305,7 @@ function MyPage() {
                           {t('mypage.changePhoto')}
                           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                         </label>
-                        {displayImageUrl && (
+                        {displayImageUrl && !displayImageUrl.includes('default-profile-image.png') && (
                           <button 
                             type="button" 
                             onClick={() => {
