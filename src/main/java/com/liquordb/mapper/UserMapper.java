@@ -11,8 +11,7 @@ public class UserMapper {
         return User.create(
                 request.email(),
                 request.username(),
-                encodedPassword,
-                null // TODO 소셜로그인
+                encodedPassword
         );
     }
 

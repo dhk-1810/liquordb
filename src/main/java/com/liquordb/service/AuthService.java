@@ -18,6 +18,7 @@ import com.liquordb.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,17 +32,19 @@ import java.util.UUID;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
-
-    private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
-    private final StringRedisTemplate stringRedisTemplate;
-    private final S3Service s3Service; // 단방향 참조
 
-    private static final String RESET_LINK_PREFIX = "https://liquordb.com/password/reset?token=";  // 실제로 작동하지는 않는 링크임.
+    private final MailService mailService;
+    private final S3Service s3Service; // 단방향 참조
+    private final JwtTokenProvider jwtTokenProvider;
+    private final StringRedisTemplate stringRedisTemplate;
+
     private static final String RESET_MAIL_SUBJECT = "[LiquorDB] 비밀번호 재설정 안내드립니다.";
     private static final long RESET_TOKEN_EXPIRATION_MINUTES = 5;
+
+    @Value("${liquordb.frontend-url}")
+    private String frontendUrl;
 
     // 회원가입
     @Transactional
@@ -125,10 +128,10 @@ public class AuthService {
         stringRedisTemplate.opsForValue().set(resetToken, email, expiration);
         stringRedisTemplate.opsForValue().set(oldTokenKey, resetToken, expiration);
 
-        String resetLink = RESET_LINK_PREFIX + resetToken;
+        String resetLink = frontendUrl + "/reset-password/" + resetToken;
         final String resetMailText
                 = "안녕하세요. LiquorDB입니다.\n\n" +
-                "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" + // TODO
+                "비밀번호 재설정을 위해 아래 링크를 클릭해 주세요.\n" +
                 resetLink + "\n\n" +
                 "이 링크는 5분 동안만 유효합니다.";
 
