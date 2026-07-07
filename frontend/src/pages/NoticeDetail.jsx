@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function NoticeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [notice, setNotice] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,13 +54,13 @@ function NoticeDetail() {
           <svg className="w-12 h-12 mx-auto mb-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <h2 className="text-xl font-bold mb-2">Error Loading Notice</h2>
+          <h2 className="text-xl font-bold mb-2">{t('notices.errorLoading')}</h2>
           <p className="text-red-500 mb-6">{error}</p>
           <button 
              onClick={() => navigate('/notices')}
              className="bg-white text-slate-700 hover:text-amber-600 font-semibold py-2 px-6 rounded-full border border-slate-200 hover:border-amber-400 transition-colors"
           >
-            ← Back to Notices
+            ← {t('notices.backToNotices')}
           </button>
         </div>
       </div>
@@ -69,14 +71,14 @@ function NoticeDetail() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
       <Link to="/notices" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-amber-600 transition-colors mb-8">
         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        Back to Notices
+        {t('notices.backToNotices')}
       </Link>
 
       <article className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <header className="bg-slate-50 border-b border-slate-100 px-8 py-8">
           <div className="flex items-center gap-3 mb-4">
             {notice.isPinned && (
-              <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-md">PINNED</span>
+              <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-md">{t('notices.pinned')}</span>
             )}
             <span className="text-sm font-medium text-slate-500">
               {new Date(notice.createdAt).toLocaleString()}

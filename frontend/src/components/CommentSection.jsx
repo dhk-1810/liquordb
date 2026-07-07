@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
+import { useTranslation } from 'react-i18next';
 
 function CommentSection({ reviewId, initialCommentCount, currentUser }) {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [comments, setComments] = useState([]);
   const [cursor, setCursor] = useState(null);
@@ -18,6 +20,37 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
 
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editContent, setEditContent] = useState('');
+
+  const isKoreanText = (text) => /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(text || '');
+
+  const handleTranslate = async (commentId) => {
+    const comment = comments.find(c => c.id === commentId);
+    if (!comment) return;
+
+    if (comment.translatedContent) {
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, showTranslation: !c.showTranslation } : c));
+      return;
+    }
+
+    setComments(prev => prev.map(c => c.id === commentId ? { ...c, isTranslating: true } : c));
+
+    try {
+      const response = await fetch(`/api/comments/${commentId}/translate`);
+      if (!response.ok) throw new Error('Translation failed');
+      const data = await response.json();
+      
+      setComments(prev => prev.map(c => c.id === commentId ? { 
+        ...c, 
+        translatedContent: data.translatedContent || '', 
+        showTranslation: true,
+        isTranslating: false 
+      } : c));
+    } catch (err) {
+      console.error(err);
+      window.alert('Translation failed.');
+      setComments(prev => prev.map(c => c.id === commentId ? { ...c, isTranslating: false } : c));
+    }
+  };
 
   const loadComments = async (reset = false) => {
     try {
@@ -62,7 +95,8 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
-        window.alert('You must be logged in to comment.');
+        window.alert(t('comments.loginToComment'));
+        navigate('/signin');
         return;
       }
 
@@ -93,16 +127,22 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
       
     } catch (err) {
       console.error(err);
-      window.alert('Error posting comment.');
+      window.alert(t('comments.errorPosting'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleLike = async (commentId, isCurrentlyLiked) => {
+    if (!currentUser) {
+      window.alert(t('comments.loginToLike'));
+      navigate('/signin');
+      return;
+    }
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
+        window.alert(t('comments.loginToLike'));
         navigate('/signin');
         return;
       }
@@ -148,7 +188,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
   };
 
   const handleDelete = async (commentId) => {
-    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    if (!window.confirm(t('comments.deleteConfirm'))) return;
     try {
       const jwtData = await fetchAuthToken();
       const response = await fetch(`/api/comments/${commentId}`, {
@@ -163,7 +203,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
       }
     } catch (err) {
       console.error(err);
-      window.alert("Error deleting comment");
+      window.alert(t('comments.errorDeleting'));
     }
   };
 
@@ -185,7 +225,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
       setEditingCommentId(null);
     } catch (err) {
       console.error(err);
-      window.alert("Error updating comment");
+      window.alert(t('comments.errorUpdating'));
     }
   };
 
@@ -193,12 +233,11 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
     setEditingCommentId(comment.id);
     setEditContent(comment.content);
   };
-
   return (
     <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up">
       <div className="flex items-center justify-between mb-6">
         <h4 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-          Comments 
+          {t('comments.title')}
           <span className="bg-slate-100 text-slate-500 text-sm py-0.5 px-2 rounded-full">{commentCount}</span>
         </h4>
         <select 
@@ -210,9 +249,9 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
           }}
           className="text-sm border-none bg-slate-50 text-slate-600 rounded-lg py-1.5 px-3 focus:ring-0 cursor-pointer font-medium"
         >
-          <option value="COMMENT_ID-DESC">Latest</option>
-          <option value="COMMENT_ID-ASC">Oldest</option>
-          <option value="LIKE_COUNT-DESC">Most Liked</option>
+          <option value="COMMENT_ID-DESC">{t('comments.latest')}</option>
+          <option value="COMMENT_ID-ASC">{t('comments.oldest')}</option>
+          <option value="LIKE_COUNT-DESC">{t('comments.mostLiked')}</option>
         </select>
       </div>
 
@@ -222,16 +261,13 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
         <div className="flex-grow">
           <input 
             type="text" 
-            placeholder="Write a comment..." 
+            placeholder={t('comments.placeholder')} 
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            onClick={() => {
+            onFocus={(e) => {
               if (!currentUser) {
-                navigate('/signin');
-              }
-            }}
-            onFocus={() => {
-              if (!currentUser) {
+                e.preventDefault();
+                window.alert(t('comments.loginToComment'));
                 navigate('/signin');
               }
             }}
@@ -244,7 +280,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
                 disabled={isSubmitting}
                 className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-1.5 px-4 rounded-lg transition-colors"
               >
-                {isSubmitting ? 'Posting...' : 'Post'}
+                {isSubmitting ? t('comments.posting') : t('comments.post')}
               </button>
             </div>
           )}
@@ -259,9 +295,9 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
         </div>
-      ) : comments.length === 0 ? (
+            ) : comments.length === 0 ? (
         <div className="text-center py-8 text-slate-400 text-sm">
-          No comments yet. Be the first to share your thoughts!
+          {t('comments.noComments')}
         </div>
       ) : (
         <div className="space-y-5">
@@ -278,8 +314,8 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
                       rows="2"
                     ></textarea>
                     <div className="flex gap-2 justify-end">
-                      <button onClick={() => setEditingCommentId(null)} className="text-xs px-3 py-1.5 text-slate-500 hover:bg-slate-200 rounded-lg font-medium transition-colors">Cancel</button>
-                      <button onClick={() => handleUpdate(comment.id)} className="text-xs px-4 py-1.5 bg-amber-500 text-white rounded-lg font-bold transition-colors hover:bg-amber-600">Save</button>
+                      <button onClick={() => setEditingCommentId(null)} className="text-xs px-3 py-1.5 text-slate-500 hover:bg-slate-200 rounded-lg font-medium transition-colors">{t('comments.cancel')}</button>
+                      <button onClick={() => handleUpdate(comment.id)} className="text-xs px-4 py-1.5 bg-amber-500 text-white rounded-lg font-bold transition-colors hover:bg-amber-600">{t('comments.save')}</button>
                     </div>
                   </div>
                 ) : (
@@ -289,18 +325,20 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
                         <span className="font-bold block">{comment.username}</span>
                         {currentUser && currentUser.id === comment.userId && (
                           <div className="flex gap-2">
-                            <button onClick={() => startEdit(comment)} className="text-[10px] font-semibold text-slate-400 hover:text-amber-600">Edit</button>
-                            <button onClick={() => handleDelete(comment.id)} className="text-[10px] font-semibold text-slate-400 hover:text-red-500">Delete</button>
+                            <button onClick={() => startEdit(comment)} className="text-[10px] font-semibold text-slate-400 hover:text-amber-600">{t('comments.edit')}</button>
+                            <button onClick={() => handleDelete(comment.id)} className="text-[10px] font-semibold text-slate-400 hover:text-red-500">{t('comments.delete')}</button>
                           </div>
                         )}
                       </div>
-                      <p className="whitespace-pre-wrap">{comment.content}</p>
+                      <p className="whitespace-pre-wrap">
+                        {comment.showTranslation ? comment.translatedContent : comment.content}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-4 mt-1.5 px-2 text-xs text-slate-500 font-medium">
+                    <div className="flex items-center gap-4 mt-1.5 px-2 text-xs text-slate-500 font-medium flex-wrap">
                       <span>
                         {new Date(comment.createdAt).toLocaleDateString()}
                         {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
-                          <span className="italic ml-1">(edited)</span>
+                          <span className="italic ml-1">{t('comments.edited')}</span>
                         )}
                       </span>
                       <button 
@@ -310,6 +348,26 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                         {comment.likeCount > 0 && <span>{comment.likeCount}</span>}
                       </button>
+                      {(() => {
+                        const hasKorean = isKoreanText(comment.content);
+                        const currentLang = i18n.language;
+                        const isDifferentLanguage = (hasKorean && currentLang !== 'ko') || (!hasKorean && currentLang === 'ko');
+
+                        if (!isDifferentLanguage) return null;
+
+                        return (
+                          <button 
+                            onClick={() => handleTranslate(comment.id)}
+                            disabled={comment.isTranslating}
+                            className="text-[10px] font-bold text-amber-600 hover:text-amber-700 bg-amber-50 px-2 py-0.5 rounded transition-colors disabled:opacity-50 inline-flex items-center gap-0.5"
+                          >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                            </svg>
+                            {comment.isTranslating ? t('common.loading') : comment.showTranslation ? t('comments.showOriginal') : t('comments.translate')}
+                          </button>
+                        );
+                      })()}
                     </div>
                   </>
                 )}
@@ -322,7 +380,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
               onClick={() => loadComments(false)}
               className="w-full py-2 text-sm font-semibold text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors mt-4"
             >
-              Load more comments
+              {t('comments.loadMore')}
             </button>
           )}
         </div>

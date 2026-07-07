@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
+import { useTranslation } from 'react-i18next';
 
 function ReviewWrite() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [liquor, setLiquor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +77,7 @@ function ReviewWrite() {
     e.preventDefault();
     
     if (!title.trim() || !content.trim()) {
-      window.alert('Please fill out both the title and content.');
+      window.alert(t('reviewWrite.fillRequired'));
       return;
     }
     
@@ -84,7 +86,7 @@ function ReviewWrite() {
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
-        window.alert('You must be logged in to submit a review.');
+        window.alert(t('reviewWrite.loginRequired'));
         navigate('/signin');
         return;
       }
@@ -131,7 +133,7 @@ function ReviewWrite() {
         throw new Error(errorData.message || 'Failed to submit review');
       }
 
-      window.alert('Review submitted successfully!');
+      window.alert(t('reviewWrite.submitSuccess'));
       navigate(`/liquors/${id}`);
       
     } catch (err) {
@@ -157,24 +159,24 @@ function ReviewWrite() {
     let fields = [];
     if (liquor.category === 'BEER') {
       fields = [
-        { key: 'aroma', label: 'Aroma' },
-        { key: 'taste', label: 'Taste' },
-        { key: 'headRetention', label: 'Head Retention' },
-        { key: 'look', label: 'Look' }
+        { key: 'aroma', label: t('reviewWrite.beerFields.aroma') },
+        { key: 'taste', label: t('reviewWrite.beerFields.taste') },
+        { key: 'headRetention', label: t('reviewWrite.beerFields.headRetention') },
+        { key: 'look', label: t('reviewWrite.beerFields.look') }
       ];
     } else if (liquor.category === 'WINE') {
       fields = [
-        { key: 'sweetness', label: 'Sweetness' },
-        { key: 'acidity', label: 'Acidity' },
-        { key: 'body', label: 'Body' },
-        { key: 'tannin', label: 'Tannin' }
+        { key: 'sweetness', label: t('reviewWrite.wineFields.sweetness') },
+        { key: 'acidity', label: t('reviewWrite.wineFields.acidity') },
+        { key: 'body', label: t('reviewWrite.wineFields.body') },
+        { key: 'tannin', label: t('reviewWrite.wineFields.tannin') }
       ];
     } else if (liquor.category === 'WHISKY') {
       fields = [
-        { key: 'aroma', label: 'Aroma' },
-        { key: 'taste', label: 'Taste' },
-        { key: 'finish', label: 'Finish' },
-        { key: 'body', label: 'Body' }
+        { key: 'aroma', label: t('reviewWrite.whiskyFields.aroma') },
+        { key: 'taste', label: t('reviewWrite.whiskyFields.taste') },
+        { key: 'finish', label: t('reviewWrite.whiskyFields.finish') },
+        { key: 'body', label: t('reviewWrite.whiskyFields.body') }
       ];
     }
 
@@ -182,7 +184,7 @@ function ReviewWrite() {
 
     return (
       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-8 shadow-sm">
-        <h3 className="text-lg font-bold text-slate-800 mb-4">{liquor.category} Tasting Notes</h3>
+        <h3 className="text-lg font-bold text-slate-800 mb-4">{liquor.category} {t('reviewWrite.tastingNotes')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {fields.map(field => (
             <div key={field.key}>
@@ -202,8 +204,8 @@ function ReviewWrite() {
                 className="w-full accent-amber-500 bg-slate-200 rounded-lg appearance-none h-2"
               />
               <div className="flex justify-between text-xs text-slate-400 mt-1 font-medium">
-                <span>Low</span>
-                <span>High</span>
+                <span>{t('reviewWrite.low')}</span>
+                <span>{t('reviewWrite.high')}</span>
               </div>
             </div>
           ))}
@@ -221,7 +223,7 @@ function ReviewWrite() {
         <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Cancel Review
+        {t('reviewWrite.cancelReview')}
       </button>
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
@@ -245,7 +247,7 @@ function ReviewWrite() {
             <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider rounded">
               {liquor.category}
             </span>
-            <h1 className="text-2xl font-extrabold text-slate-900 mt-1">Review {liquor.name}</h1>
+            <h1 className="text-2xl font-extrabold text-slate-900 mt-1">{t('reviewWrite.reviewLabel')} {liquor.name}</h1>
           </div>
         </div>
 
@@ -254,7 +256,7 @@ function ReviewWrite() {
           
           {/* Overall Rating */}
           <div className="mb-8 flex flex-col items-center">
-            <label className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Overall Rating</label>
+            <label className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">{t('reviewWrite.overallRating')}</label>
             <div className="flex items-center gap-6 w-full max-w-md">
               <span className="text-2xl font-bold text-slate-400">1</span>
               <div className="flex-1 flex flex-col relative">
@@ -280,11 +282,11 @@ function ReviewWrite() {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Review Title <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t('reviewWrite.reviewTitle')} <span className="text-red-500">*</span></label>
               <input 
                 type="text" 
                 required
-                placeholder="Summarize your experience..."
+                placeholder={t('reviewWrite.reviewTitlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all font-medium text-slate-800"
@@ -292,11 +294,11 @@ function ReviewWrite() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Review Content <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t('reviewWrite.reviewContent')} <span className="text-red-500">*</span></label>
               <textarea 
                 required
                 rows="6"
-                placeholder="What did you like? What could be better? Describe the taste and aroma."
+                placeholder={t('reviewWrite.reviewContentPlaceholder')}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all resize-y text-slate-800"
@@ -304,20 +306,20 @@ function ReviewWrite() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Tags</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t('reviewWrite.tags')}</label>
               <input 
                 type="text" 
-                placeholder="e.g., sweet, smooth, woody (comma separated)"
+                placeholder={t('reviewWrite.tagsPlaceholder')}
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all text-slate-800"
               />
-              <p className="text-xs text-slate-400 mt-2">Add up to 10 tags separated by commas.</p>
+              <p className="text-xs text-slate-400 mt-2">{t('reviewWrite.tagsHint')}</p>
             </div>
 
             {/* Images */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">Add Photos</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-3">{t('reviewWrite.addPhotos')}</label>
               
               <div className="flex flex-wrap gap-4">
                 {previewUrls.map((url, idx) => (
@@ -335,7 +337,7 @@ function ReviewWrite() {
                 
                 <label className="w-24 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-amber-400 flex flex-col items-center justify-center text-slate-400 hover:text-amber-500 transition-colors cursor-pointer">
                   <svg className="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                  <span className="text-xs font-semibold">Upload</span>
+                  <span className="text-xs font-semibold">{t('reviewWrite.upload')}</span>
                   <input 
                     type="file" 
                     multiple 
@@ -365,7 +367,7 @@ function ReviewWrite() {
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                  Submit Review
+                  {t('reviewWrite.submitReview')}
                 </>
               )}
             </button>

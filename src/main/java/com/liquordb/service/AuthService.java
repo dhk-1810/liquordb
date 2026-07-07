@@ -16,6 +16,7 @@ import com.liquordb.security.JwtInformation;
 import com.liquordb.security.JwtRegistry;
 import com.liquordb.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -101,6 +103,8 @@ public class AuthService {
     // 비밀번호 재설정 링크 전송
     @Transactional
     public void sendPasswordResetLink(PasswordFindRequest request) {
+
+        log.info("Password reset attempt: " + request.email());
 
         String email = request.email();
         User user = userRepository.findByEmail(email)

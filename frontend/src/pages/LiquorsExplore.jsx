@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function LiquorsExplore() {
+  const { t } = useTranslation();
   const [liquors, setLiquors] = useState([]);
   const [keyword, setKeyword] = useState('');
   const [sortBy, setSortBy] = useState('LIQUOR_ID');
@@ -19,7 +21,6 @@ function LiquorsExplore() {
       const params = new URLSearchParams({
         limit: '12',
         sortBy: sortBy,
-        // Using sortDirection as DESC by default for all unless we add a UI toggle.
         sortDirection: 'DESC'
       });
       
@@ -46,7 +47,7 @@ function LiquorsExplore() {
       setHasNext(data.hasNext);
     } catch (err) {
       console.error(err);
-      setError('An error occurred while fetching liquors.');
+      setError(t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +55,7 @@ function LiquorsExplore() {
 
   useEffect(() => {
     fetchLiquors(true);
-  }, [category, sortBy]); // Fetch automatically when category or sort changes
+  }, [category, sortBy]);
 
   const handleSearchClick = (e) => {
     e.preventDefault();
@@ -68,8 +69,8 @@ function LiquorsExplore() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-up">
       <div className="mb-8">
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">Explore Liquors</h1>
-        <p className="text-lg text-slate-600">Discover and search for your favorite drinks.</p>
+        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">{t('liquors.title')}</h1>
+        <p className="text-lg text-slate-600">{t('liquors.subtitle')}</p>
       </div>
 
       {/* Filters and Search Bar */}
@@ -84,7 +85,7 @@ function LiquorsExplore() {
             </div>
             <input
               type="text"
-              placeholder="Search by name..."
+              placeholder={t('liquors.searchPlaceholder')}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200"
@@ -97,11 +98,11 @@ function LiquorsExplore() {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200 appearance-none font-medium"
             >
-              <option value="">All Categories</option>
-              <option value="BEER">Beer</option>
-              <option value="WINE">Wine</option>
-              <option value="WHISKY">Whisky</option>
-              <option value="OTHER">Other</option>
+              <option value="">{t('liquors.categories.all')}</option>
+              <option value="BEER">{t('liquors.categories.beer')}</option>
+              <option value="WINE">{t('liquors.categories.wine')}</option>
+              <option value="WHISKY">{t('liquors.categories.whisky')}</option>
+              <option value="OTHER">{t('liquors.categories.other')}</option>
             </select>
           </div>
 
@@ -111,9 +112,9 @@ function LiquorsExplore() {
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200 appearance-none font-medium"
             >
-              <option value="LIQUOR_ID">Newest Responses</option>
-              <option value="LIKE_COUNT">Most Liked</option>
-              <option value="AVERAGE_RATING">Highest Rating</option>
+              <option value="LIQUOR_ID">{t('liquors.sort.newest')}</option>
+              <option value="LIKE_COUNT">{t('liquors.sort.mostLiked')}</option>
+              <option value="AVERAGE_RATING">{t('liquors.sort.highestRating')}</option>
             </select>
           </div>
 
@@ -121,7 +122,7 @@ function LiquorsExplore() {
             type="submit"
             className="w-full md:w-auto bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 shadow-sm shadow-amber-500/30 whitespace-nowrap"
           >
-            Search
+            {t('liquors.search')}
           </button>
         </form>
       </div>
@@ -136,8 +137,8 @@ function LiquorsExplore() {
       {liquors.length === 0 && !isLoading ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
           <div className="text-5xl mb-4">🍷</div>
-          <h3 className="text-xl font-bold text-slate-700 mb-2">No liquors found</h3>
-          <p className="text-slate-500">Try adjusting your search criteria or categories.</p>
+          <h3 className="text-xl font-bold text-slate-700 mb-2">{t('liquors.noResults')}</h3>
+          <p className="text-slate-500">{t('liquors.noResultsDesc')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -177,8 +178,8 @@ function LiquorsExplore() {
                   <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
-                  <span className="font-semibold text-slate-700">{liquor.averageRating ? liquor.averageRating.toFixed(1) : 'No rating'}</span>
-                  <span className="text-xs text-slate-400">({liquor.reviewCount} reviews)</span>
+                  <span className="font-semibold text-slate-700">{liquor.averageRating ? liquor.averageRating.toFixed(1) : t('common.noRating')}</span>
+                  <span className="text-xs text-slate-400">({liquor.reviewCount} {t('common.reviews')})</span>
                 </div>
                 
                 <div className="mt-auto flex items-center justify-between text-sm text-slate-500 font-medium">
@@ -191,7 +192,7 @@ function LiquorsExplore() {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
-                    {liquor.likeCount} likes
+                    {liquor.likeCount} {t('common.likes')}
                   </span>
                 </div>
               </div>
@@ -214,7 +215,7 @@ function LiquorsExplore() {
             onClick={handleLoadMore}
             className="bg-white border-2 border-slate-200 hover:border-amber-500 hover:text-amber-600 text-slate-600 font-bold py-3.5 px-8 rounded-full transition-all tracking-wide"
           >
-            Load More Liquors
+            {t('liquors.loadMore')}
           </button>
         )}
       </div>

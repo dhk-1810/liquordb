@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
+import { useTranslation } from 'react-i18next';
 
 function MyActivityList() {
-  const { category } = useParams(); // 'liked-liquors', 'liked-reviews', 'reviews', 'comments'
+  const { category } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
   const [hasNext, setHasNext] = useState(false);
@@ -13,11 +15,11 @@ function MyActivityList() {
 
   const getTitle = () => {
     switch (category) {
-      case 'liked-liquors': return 'Liked Liquors';
-      case 'liked-reviews': return 'Liked Reviews';
-      case 'reviews': return 'Reviews Written';
-      case 'comments': return 'Comments Written';
-      default: return 'My Activity';
+      case 'liked-liquors': return t('mypage.likedLiquors');
+      case 'liked-reviews': return t('mypage.likedReviews');
+      case 'reviews': return t('mypage.reviewsWritten');
+      case 'comments': return t('mypage.commentsWritten');
+      default: return t('activity.browseActivity');
     }
   };
 
@@ -33,11 +35,11 @@ function MyActivityList() {
 
   const getEmptyMessage = () => {
     switch (category) {
-      case 'liked-liquors': return "You haven't liked any liquors yet.";
-      case 'liked-reviews': return "You haven't liked any reviews yet.";
-      case 'reviews': return "You haven't written any reviews yet.";
-      case 'comments': return "You haven't written any comments yet.";
-      default: return "No records found.";
+      case 'liked-liquors': return t('activity.emptyLikedLiquors');
+      case 'liked-reviews': return t('activity.emptyLikedReviews');
+      case 'reviews': return t('activity.emptyReviews');
+      case 'comments': return t('activity.emptyComments');
+      default: return t('activity.emptyDefault');
     }
   };
 
@@ -124,12 +126,12 @@ function MyActivityList() {
         <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to My Page
+        {t('activity.backToMyPage')}
       </button>
 
       <div className="mb-10">
         <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">{getTitle()}</h1>
-        <p className="text-slate-500 font-medium">Browse and manage your activity history.</p>
+        <p className="text-slate-500 font-medium">{t('activity.browseActivity')}</p>
       </div>
 
       {error && (
@@ -142,7 +144,7 @@ function MyActivityList() {
       {items.length === 0 && !isLoading ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
           <div className="text-6xl mb-6">📂</div>
-          <h3 className="text-xl font-bold text-slate-800 mb-2">No records found</h3>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">{t('activity.noRecords')}</h3>
           <p className="text-slate-400">{getEmptyMessage()}</p>
         </div>
       ) : (
@@ -181,7 +183,7 @@ function MyActivityList() {
                       <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
-                      <span className="font-semibold text-slate-700 text-sm">{liquor.averageRating ? liquor.averageRating.toFixed(1) : 'No rating'}</span>
+                      <span className="font-semibold text-slate-700 text-sm">{liquor.averageRating ? liquor.averageRating.toFixed(1) : t('common.noRating')}</span>
                     </div>
                   </div>
                 </Link>
@@ -205,7 +207,7 @@ function MyActivityList() {
                       </div>
                     </div>
                     <Link to={`/liquors/${review.liquorId}`} className="text-xs font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 transition-colors">
-                      View Liquor →
+                      {t('activity.viewLiquor')}
                     </Link>
                   </div>
                   <h3 className="font-bold text-lg text-slate-800 mb-2">{review.title}</h3>
@@ -231,11 +233,11 @@ function MyActivityList() {
                   <div className="flex items-center gap-4 pt-4 border-t border-slate-100 text-slate-500 text-sm font-medium">
                     <span className="flex items-center gap-1.5">
                       <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                      {review.likeCount || 0} Likes
+                      {review.likeCount || 0} {t('common.likes')}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-                      {review.commentCount || 0} Comments
+                      {review.commentCount || 0} {t('common.comments')}
                     </span>
                   </div>
                 </div>
@@ -251,7 +253,7 @@ function MyActivityList() {
                   <div className="flex-grow">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
                       <p className="text-xs text-slate-500 font-medium">
-                        Commented on review: <span className="font-bold text-slate-700">"{comment.reviewTitle || 'Untitled Review'}"</span>
+                        {t('activity.commentedOn')} <span className="font-bold text-slate-700">"{comment.reviewTitle || 'Untitled Review'}"</span>
                       </p>
                       <span className="text-[10px] text-slate-400 font-semibold">{new Date(comment.createdAt).toLocaleString()}</span>
                     </div>
@@ -275,7 +277,7 @@ function MyActivityList() {
                   onClick={handleLoadMore}
                   className="bg-white border-2 border-slate-200 hover:border-amber-500 hover:text-amber-600 text-slate-600 font-bold py-3 px-8 rounded-full transition-all text-sm tracking-wide shadow-sm"
                 >
-                  Load More Activity
+                  {t('activity.loadMore')}
                 </button>
               )}
             </div>

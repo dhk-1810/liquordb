@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import './i18n';
 import Home from './pages/Home';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
@@ -10,14 +12,44 @@ import LiquorDetail from './pages/LiquorDetail';
 import ReviewWrite from './pages/ReviewWrite';
 import MyPage from './pages/MyPage';
 import MyActivityList from './pages/MyActivityList';
+import FindPassword from './pages/FindPassword';
+import ResetPassword from './pages/ResetPassword';
 import NotificationDropdown from './components/NotificationDropdown';
 import { fetchAuthToken } from './utils/auth';
+
+function LanguageToggle() {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language;
+
+  const toggle = () => {
+    const next = currentLang === 'ko' ? 'en' : 'ko';
+    i18n.changeLanguage(next);
+    localStorage.setItem('i18n_lang', next);
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      title="언어 변경 / Change Language"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-slate-600 hover:text-amber-700 transition-all duration-200 text-sm font-bold select-none"
+    >
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+      </svg>
+      <span>{currentLang === 'ko' ? 'KO' : 'EN'}</span>
+      <span className="text-slate-300">|</span>
+      <span className="text-slate-400">{currentLang === 'ko' ? 'EN' : 'KO'}</span>
+    </button>
+  );
+}
 
 function AppContent() {
   const [user, setUser] = useState(null);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const location = useLocation();
+  const { t } = useTranslation();
 
   const isHomeActive = location.pathname === '/';
   const isLiquorsActive = location.pathname.startsWith('/liquors');
@@ -60,7 +92,7 @@ function AppContent() {
     };
 
     checkAuth();
-  }, [location.pathname]); // re-check on auth pages if needed, or just on mount
+  }, [location.pathname]);
 
   const handleSignOut = async () => {
     try {
@@ -86,12 +118,12 @@ function AppContent() {
             
             <div className="flex items-center text-sm font-medium text-slate-600">
               <div className="hidden sm:flex items-center gap-6">
-                <Link to="/" className={`transition-colors font-semibold ${isHomeActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>Home</Link>
-                <Link to="/liquors" className={`transition-colors font-semibold ${isLiquorsActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>Liquors</Link>
-                <Link to="/notices" className={`transition-colors font-semibold ${isNoticesActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>Notices</Link>
-                <span className="hover:text-amber-600 cursor-pointer transition-colors">About</span>
+                <Link to="/" className={`transition-colors font-semibold ${isHomeActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>{t('nav.home')}</Link>
+                <Link to="/liquors" className={`transition-colors font-semibold ${isLiquorsActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>{t('nav.liquors')}</Link>
+                <Link to="/notices" className={`transition-colors font-semibold ${isNoticesActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>{t('nav.notices')}</Link>
               </div>
-              <div className="flex items-center gap-4 ml-4 pl-4 sm:ml-6 sm:pl-6 border-l border-slate-200">
+              <div className="flex items-center gap-3 ml-4 pl-4 sm:ml-6 sm:pl-6 border-l border-slate-200">
+                <LanguageToggle />
                 {authLoading ? (
                   <div className="w-10 h-10 rounded-full bg-slate-200 animate-pulse"></div>
                 ) : user ? (
@@ -101,13 +133,13 @@ function AppContent() {
                     </Link>
                     <NotificationDropdown />
                     <button onClick={handleSignOut} className="hover:text-amber-600 transition-colors font-semibold ml-2">
-                      Sign Out
+                      {t('nav.signOut')}
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link to="/signin" className="hover:text-amber-600 transition-colors font-semibold">Sign In</Link>
-                    <Link to="/signup" className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-sm shadow-amber-500/20 ml-1 hover:-translate-y-0.5">Sign Up</Link>
+                    <Link to="/signin" className="hover:text-amber-600 transition-colors font-semibold">{t('nav.signIn')}</Link>
+                    <Link to="/signup" className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-sm shadow-amber-500/20 ml-1 hover:-translate-y-0.5">{t('nav.signUp')}</Link>
                   </>
                 )}
               </div>
@@ -129,6 +161,8 @@ function AppContent() {
           <Route path="/notices/:id" element={<NoticeDetail />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/mypage/:category" element={<MyActivityList />} />
+          <Route path="/find-password" element={<FindPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </main>
 

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function Home() {
+  const { t } = useTranslation();
   const [trendingLiquors, setTrendingLiquors] = useState({
     THREE_HOURS: [],
     DAILY: [],
@@ -55,7 +57,7 @@ function Home() {
             <div className="absolute inset-0 rounded-full border-4 border-slate-100"></div>
             <div className="absolute inset-0 rounded-full border-4 border-amber-500 border-t-transparent animate-spin"></div>
           </div>
-          <p className="text-slate-500 font-medium">Loading amazing drinks...</p>
+          <p className="text-slate-500 font-medium">{t('home.loading')}</p>
         </div>
       ) : (
         <div className="space-y-20">
@@ -100,10 +102,10 @@ function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Trending Now</h2>
+                    <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{t('home.trendingTitle')}</h2>
                     <p className="text-slate-500 text-sm mt-1 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                      Most loved drinks according to your community
+                      {t('home.trendingSubtitle')}
                     </p>
                   </div>
                 </div>
@@ -111,9 +113,9 @@ function Home() {
                 {/* Scope Tabs */}
                 <div className="flex items-center gap-1 bg-slate-200/50 p-1 rounded-xl self-start">
                   {[
-                    { id: 'THREE_HOURS', label: 'Real-time' },
-                    { id: 'DAILY', label: 'Daily Top 10' },
-                    { id: 'WEEKLY', label: 'Weekly Top 10' }
+                    { id: 'THREE_HOURS', label: t('home.tabs.threeHours') },
+                    { id: 'DAILY', label: t('home.tabs.daily') },
+                    { id: 'WEEKLY', label: t('home.tabs.weekly') }
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -130,7 +132,7 @@ function Home() {
               </div>
 
               <button className="text-sm font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-5 py-2 rounded-full transition-colors flex items-center gap-1.5 shadow-sm border border-amber-200/50 hidden sm:flex">
-                View all
+                {t('home.viewAll')}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -144,11 +146,11 @@ function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-slate-600">No trending records found</h3>
-                <p className="text-slate-400 mt-2">Check back later for popular picks.</p>
+                <h3 className="text-xl font-bold text-slate-600">{t('home.noTrending')}</h3>
+                <p className="text-slate-400 mt-2">{t('home.noTrendingDesc')}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 {currentTrending.slice(0, 10).map((liquor, index) => (
                   <Link
                     key={liquor.id}
@@ -179,7 +181,7 @@ function Home() {
 
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
                         <span className="bg-white/20 backdrop-blur-md text-white font-semibold px-6 py-2.5 rounded-full border border-white/30 shadow-2xl backdrop-saturate-150">
-                          View Details
+                          {t('home.viewDetails')}
                         </span>
                       </div>
                     </div>

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function SignIn() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -33,20 +35,18 @@ function SignIn() {
       if (!res.ok) {
         if (data.details && Object.keys(data.details).length > 0) {
           const firstError = Object.values(data.details)[0]?.message || Object.values(data.details)[0];
-          setError(firstError || data.message || 'Invalid email or password.');
+          setError(firstError || data.message || t('auth.signIn.invalidCredentials'));
         } else {
-          setError(data.message || 'Invalid email or password.');
+          setError(data.message || t('auth.signIn.invalidCredentials'));
         }
         return;
       }
 
-      // Success
       localStorage.setItem('isLoggedIn', 'true');
-      // Navigating home will trigger the checkAuth fetch in App.jsx layout
       navigate('/');
     } catch (err) {
       console.error(err);
-      setError('A network error occurred. Please try again.');
+      setError(t('auth.signIn.networkError'));
     } finally {
       setLoading(false);
     }
@@ -61,8 +61,8 @@ function SignIn() {
 
         <div className="p-8 relative z-10">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
-            <p className="text-sm text-slate-500 mt-2">Sign in to your LiquorDB account.</p>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">{t('auth.signIn.title')}</h2>
+            <p className="text-sm text-slate-500 mt-2">{t('auth.signIn.subtitle')}</p>
           </div>
 
           {error && (
@@ -77,7 +77,7 @@ function SignIn() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="email">
-                Email Address
+                {t('auth.signIn.email')}
               </label>
               <input
                 id="email"
@@ -94,11 +94,11 @@ function SignIn() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-semibold text-slate-700" htmlFor="password">
-                  Password
+                  {t('auth.signIn.password')}
                 </label>
-                <a href="#" className="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors">
-                  Forgot password?
-                </a>
+                <Link to="/find-password" className="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors">
+                  {t('auth.signIn.forgotPassword')}
+                </Link>
               </div>
               <input
                 id="password"
@@ -124,7 +124,7 @@ function SignIn() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : (
-                  'Sign In'
+                  t('auth.signIn.submit')
                 )}
               </button>
             </div>
@@ -132,9 +132,9 @@ function SignIn() {
 
           <div className="mt-8 text-center">
             <p className="text-sm font-medium text-slate-600">
-              Don't have an account yet?{' '}
+              {t('auth.signIn.noAccount')}{' '}
               <Link to="/signup" className="text-amber-600 hover:text-amber-700 hover:underline transition-all">
-                Create one now
+                {t('auth.signIn.createAccount')}
               </Link>
             </p>
           </div>

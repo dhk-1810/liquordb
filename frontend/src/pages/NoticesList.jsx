@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function NoticesList() {
+  const { t } = useTranslation();
   const [notices, setNotices] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -16,7 +18,7 @@ function NoticesList() {
 
       const response = await fetch(`/api/notices?page=${pageNumber}&limit=10`);
       if (!response.ok) {
-        throw new Error('Failed to fetch notices');
+        throw new Error(t('notices.fetchError'));
       }
 
       const data = await response.json();
@@ -30,7 +32,7 @@ function NoticesList() {
       setTotalPages(Math.ceil(totalElems / pageSize));
     } catch (err) {
       console.error(err);
-      setError('An error occurred while fetching notices.');
+      setError(t('notices.fetchError'));
     } finally {
       setIsLoading(false);
     }
@@ -50,8 +52,8 @@ function NoticesList() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
       <div className="mb-8">
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">Notices</h1>
-        <p className="text-lg text-slate-600">Stay updated with the latest news and announcements.</p>
+        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">{t('notices.title')}</h1>
+        <p className="text-lg text-slate-600">{t('notices.subtitle')}</p>
       </div>
 
       {error && (
@@ -64,7 +66,7 @@ function NoticesList() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {notices.length === 0 && !isLoading ? (
           <div className="text-center py-20">
-            <h3 className="text-lg font-semibold text-slate-600">No notices found.</h3>
+            <h3 className="text-lg font-semibold text-slate-600">{t('notices.noNotices')}</h3>
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">
@@ -74,7 +76,7 @@ function NoticesList() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {notice.isPinned && (
-                        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-md">PINNED</span>
+                        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-md">{t('notices.pinned')}</span>
                       )}
                       <h3 className="text-lg font-semibold text-slate-800 line-clamp-1">{notice.title}</h3>
                     </div>
@@ -109,11 +111,11 @@ function NoticesList() {
                   : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-amber-500 hover:text-amber-600'
               }`}
             >
-              Previous
+              {t('notices.previous')}
             </button>
             
             <span className="px-4 py-2 text-sm font-medium text-slate-600">
-              Page {page + 1} of {totalPages || 1}
+              {t('notices.page', { current: page + 1, total: totalPages || 1 })}
             </span>
 
             <button
@@ -125,7 +127,7 @@ function NoticesList() {
                   : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-amber-500 hover:text-amber-600'
               }`}
             >
-              Next
+              {t('notices.next')}
             </button>
           </div>
         )}

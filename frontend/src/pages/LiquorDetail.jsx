@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
 import CommentSection from '../components/CommentSection';
+import { useTranslation } from 'react-i18next';
 
 function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [showComments, setShowComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editRating, setEditRating] = useState(review.rating);
@@ -12,10 +14,38 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
   const [editContent, setEditContent] = useState(review.content);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [translatedTitle, setTranslatedTitle] = useState('');
+  const [translatedContent, setTranslatedContent] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const isKoreanText = (text) => /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(text || '');
+
+  const handleTranslate = async () => {
+    if (translatedContent) {
+      setShowTranslation(prev => !prev);
+      return;
+    }
+    setIsTranslating(true);
+    try {
+      const response = await fetch(`/api/reviews/${review.id}/translate`);
+      if (!response.ok) throw new Error('Translation failed');
+      const data = await response.json();
+      setTranslatedTitle(data.translatedTitle || '');
+      setTranslatedContent(data.translatedContent || '');
+      setShowTranslation(true);
+    } catch (err) {
+      console.error(err);
+      window.alert('Translation failed.');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   const isOwner = currentUser && currentUser.id === review.userId;
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    if (!window.confirm(t('reviews.confirmDelete'))) return;
     try {
       const jwtData = await fetchAuthToken();
       const response = await fetch(`/api/reviews/${review.id}`, {
@@ -29,7 +59,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       }
     } catch (err) {
       console.error(err);
-      window.alert("Error deleting review");
+      window.alert(t('reviews.deleteError'));
     }
   };
 
@@ -56,16 +86,22 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       setIsEditing(false);
     } catch (err) {
       console.error(err);
-      window.alert("Error updating review");
+      window.alert(t('reviews.updateError'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleLike = async () => {
+    if (!currentUser) {
+      window.alert(t('reviews.loginToLike'));
+      navigate('/signin');
+      return;
+    }
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
+        window.alert(t('reviews.loginToLike'));
         navigate('/signin');
         return;
       }
@@ -80,7 +116,6 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       if (response.ok) {
         onUpdate({ ...review, likeCount: review.likeCount + 1 });
       } else if (response.status === 409) {
-        // Already liked, so cancel like
         const cancelRes = await fetch(`/api/reviews/${review.id}/cancel-like`, {
           method: 'DELETE',
           headers: {
@@ -103,11 +138,11 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       <div className="bg-white p-6 rounded-2xl border border-amber-300 shadow-md mb-4 animate-fade-in-up">
         <h3 className="font-bold text-lg mb-4 text-slate-800 flex items-center gap-2">
           <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-          Edit Review
+          {t('reviews.editTitle')}
         </h3>
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Rating (1-10)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">{t('reviews.rating')}</label>
             <input 
               type="number" min="1" max="10" required
               value={editRating} onChange={e => setEditRating(Number(e.target.value))}
@@ -115,7 +150,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Title (Optional)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">{t('reviews.titleOptional')}</label>
             <input 
               type="text" 
               value={editTitle} onChange={e => setEditTitle(e.target.value)}
@@ -123,7 +158,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Content</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">{t('reviews.content')}</label>
             <textarea 
               required rows="4"
               value={editContent} onChange={e => setEditContent(e.target.value)}
@@ -131,8 +166,8 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
             ></textarea>
           </div>
           <div className="flex gap-2 justify-end pt-2">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-5 py-2 text-slate-500 hover:bg-slate-100 rounded-xl font-semibold transition-colors">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all disabled:opacity-50">{isSubmitting ? 'Saving...' : 'Save'}</button>
+            <button type="button" onClick={() => setIsEditing(false)} className="px-5 py-2 text-slate-500 hover:bg-slate-100 rounded-xl font-semibold transition-colors">{t('common.cancel')}</button>
+            <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all disabled:opacity-50">{isSubmitting ? t('common.saving') : t('common.save')}</button>
           </div>
         </form>
       </div>
@@ -145,12 +180,12 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
         <div className="flex items-center gap-3">
           <img src="/default-avatar.svg" alt="User Profile" className="w-10 h-10 rounded-full object-cover border border-slate-200 bg-white" />
           <div>
-            <p className="font-bold text-slate-800">{review.username || 'Anonymous'}</p>
+            <p className="font-bold text-slate-800">{review.username || t('reviews.anonymous')}</p>
             <div className="flex items-center gap-2">
               <span className="text-amber-500 text-sm font-bold">★ {review.rating}/10</span>
               <span className="text-slate-400 text-xs">{new Date(review.createdAt).toLocaleDateString()}</span>
               {review.updatedAt && review.updatedAt !== review.createdAt && (
-                <span className="text-slate-400 text-[10px] italic">(edited)</span>
+                <span className="text-slate-400 text-[10px] italic">{t('reviews.edited')}</span>
               )}
             </div>
           </div>
@@ -159,17 +194,42 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
         {isOwner && (
           <div className="flex items-center gap-2">
             <button onClick={() => setIsEditing(true)} className="text-xs font-semibold text-slate-400 hover:text-amber-600 transition-colors bg-slate-50 hover:bg-amber-50 px-2.5 py-1.5 rounded-lg">
-              Edit
+              {t('common.edit')}
             </button>
             <button onClick={handleDelete} className="text-xs font-semibold text-slate-400 hover:text-red-500 transition-colors bg-slate-50 hover:bg-red-50 px-2.5 py-1.5 rounded-lg">
-              Delete
+              {t('common.delete')}
             </button>
           </div>
         )}
       </div>
       
-      <h3 className="font-bold text-lg text-slate-800 mb-2">{review.title}</h3>
-      <p className="text-slate-600 mb-4 whitespace-pre-wrap">{review.content}</p>
+      <h3 className="font-bold text-lg text-slate-800 mb-2">
+        {showTranslation ? translatedTitle : review.title}
+      </h3>
+      <p className="text-slate-600 mb-2 whitespace-pre-wrap">
+        {showTranslation ? translatedContent : review.content}
+      </p>
+
+      {(() => {
+        const hasKorean = isKoreanText(review.content) || isKoreanText(review.title);
+        const currentLang = i18n.language;
+        const isDifferentLanguage = (hasKorean && currentLang !== 'ko') || (!hasKorean && currentLang === 'ko');
+
+        if (!isDifferentLanguage) return null;
+
+        return (
+          <button 
+            onClick={handleTranslate}
+            disabled={isTranslating}
+            className="text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-lg mb-4 transition-colors disabled:opacity-50 inline-flex items-center gap-1"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+            {isTranslating ? t('common.loading') : showTranslation ? t('reviews.showOriginal') : t('reviews.translate')}
+          </button>
+        );
+      })()}
       
       {review.imageUrls && review.imageUrls.length > 0 && (
         <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
@@ -192,14 +252,14 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
         <button onClick={handleLike} className="flex items-center gap-1.5 text-slate-500 hover:text-red-500 transition-colors font-medium text-sm">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-          {review.likeCount || 0} Likes
+          {review.likeCount || 0} {t('reviews.likes')}
         </button>
         <button 
           onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-1.5 text-slate-500 hover:text-amber-600 transition-colors font-medium text-sm"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-          {review.commentCount || 0} Comments
+          {review.commentCount || 0} {t('reviews.comments')}
         </button>
       </div>
 
@@ -213,12 +273,12 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
 function LiquorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [liquor, setLiquor] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Reviews State
   const [reviews, setReviews] = useState([]);
   const [reviewsCursor, setReviewsCursor] = useState(null);
   const [reviewsHasNext, setReviewsHasNext] = useState(false);
@@ -228,7 +288,7 @@ function LiquorDetail() {
 
   const handleWriteReview = () => {
     if (localStorage.getItem('isLoggedIn') !== 'true') {
-      window.alert('You must be logged in to write a review.');
+      window.alert(t('liquors.loginToReview'));
       navigate('/signin');
     } else {
       navigate(`/liquors/${id}/reviews/new`);
@@ -237,7 +297,7 @@ function LiquorDetail() {
 
   const handleLike = async () => {
     if (localStorage.getItem('isLoggedIn') !== 'true') {
-      window.alert('You must be logged in to like a liquor.');
+      window.alert(t('liquors.loginToLike'));
       navigate('/signin');
       return;
     }
@@ -261,11 +321,11 @@ function LiquorDetail() {
           likeCount: prev.likedByMe ? prev.likeCount - 1 : prev.likeCount + 1
         }));
       } else {
-        window.alert('Failed to update like status');
+        window.alert(t('common.error'));
       }
     } catch (err) {
       console.error(err);
-      window.alert('An error occurred while liking the liquor.');
+      window.alert(t('common.error'));
     }
   };
 
@@ -290,16 +350,16 @@ function LiquorDetail() {
         const response = await fetch(`/api/liquors/${id}`, { headers });
         if (!response.ok) {
           if (response.status === 404) {
-            throw new Error('Liquor not found');
+            throw new Error(t('liquors.notFound'));
           }
-          throw new Error('Failed to fetch liquor details');
+          throw new Error(t('common.error'));
         }
         
         const data = await response.json();
         setLiquor(data);
       } catch (err) {
         console.error(err);
-        setError(err.message || 'An error occurred while fetching details.');
+        setError(err.message || t('common.error'));
       } finally {
         setIsLoading(false);
       }
@@ -361,12 +421,12 @@ function LiquorDetail() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center animate-fade-in-up">
         <div className="text-6xl mb-6">😕</div>
-        <h2 className="text-3xl font-bold text-slate-800 mb-4">{error || 'Liquor not found'}</h2>
+        <h2 className="text-3xl font-bold text-slate-800 mb-4">{error || t('liquors.notFound')}</h2>
         <button 
           onClick={() => navigate(-1)}
           className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-medium transition-colors"
         >
-          Go Back
+          {t('liquors.goBack')}
         </button>
       </div>
     );
@@ -381,7 +441,7 @@ function LiquorDetail() {
         <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to Liquors
+        {t('liquors.backToLiquors')}
       </button>
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
@@ -414,7 +474,7 @@ function LiquorDetail() {
                   </span>
                   {liquor.isDiscontinued && (
                     <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wider rounded-full">
-                      Discontinued
+                      {t('liquors.discontinued')}
                     </span>
                   )}
                 </div>
@@ -429,29 +489,29 @@ function LiquorDetail() {
                   </svg>
                   <span className="text-xl font-bold text-slate-800">{liquor.averageRating ? liquor.averageRating.toFixed(1) : 'N/A'}</span>
                 </div>
-                <span className="text-sm text-slate-500 mt-1 font-medium">{liquor.reviewCount} reviews</span>
+                <span className="text-sm text-slate-500 mt-1 font-medium">{liquor.reviewCount} {t('common.reviews')}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6 my-8 py-8 border-y border-slate-100">
               <div>
-                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">Country</p>
+                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.country')}</p>
                 <p className="text-lg font-medium text-slate-800 flex items-center">
                   <span className="mr-2">{liquor.countryName === '대한민국' ? '🇰🇷' : liquor.countryName === '미국' ? '🇺🇸' : liquor.countryName === '프랑스' ? '🇫🇷' : liquor.countryName === '일본' ? '🇯🇵' : liquor.countryName === '영국' ? '🇬🇧' : '🌍'}</span>
-                  {liquor.countryName || 'Unknown'}
+                  {liquor.countryName || t('common.unknown')}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">ABV</p>
+                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.abv')}</p>
                 <p className="text-lg font-medium text-slate-800">{liquor.abv}%</p>
               </div>
               <div>
-                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">Manufacturer</p>
-                <p className="text-lg font-medium text-slate-800">{liquor.manufacturer || 'Unknown'}</p>
+                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.manufacturer')}</p>
+                <p className="text-lg font-medium text-slate-800">{liquor.manufacturer || t('common.unknown')}</p>
               </div>
               {liquor.subcategoryName && (
                 <div>
-                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">Style</p>
+                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.style')}</p>
                   <p className="text-lg font-medium text-slate-800">{liquor.subcategoryName}</p>
                 </div>
               )}
@@ -460,7 +520,7 @@ function LiquorDetail() {
             {/* Tags */}
             {liquor.tags && liquor.tags.length > 0 && (
               <div className="mb-8">
-                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-3">Tasting Notes & Tags</p>
+                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-3">{t('liquors.tastingNotes')}</p>
                 <div className="flex flex-wrap gap-2">
                   {liquor.tags.map((tag, idx) => (
                     <span key={idx} className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors cursor-default">
@@ -494,7 +554,7 @@ function LiquorDetail() {
                 className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-8 rounded-xl transition-all duration-200 shadow-sm shadow-amber-500/30 flex items-center gap-2 hover:-translate-y-1"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                Write Review
+                {t('liquors.writeReview')}
               </button>
             </div>
 
@@ -505,7 +565,7 @@ function LiquorDetail() {
       {/* Reviews Section */}
       <div className="mt-16">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-extrabold text-slate-900">Reviews</h2>
+          <h2 className="text-3xl font-extrabold text-slate-900">{t('reviews.title')}</h2>
           <select 
             value={`${reviewSortBy}-${reviewSortDirection}`}
             onChange={(e) => {
@@ -515,10 +575,10 @@ function LiquorDetail() {
             }}
             className="border border-slate-200 bg-white text-slate-700 rounded-xl py-2 px-4 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 outline-none cursor-pointer font-medium shadow-sm transition-all"
           >
-            <option value="REVIEW_ID-DESC">Latest</option>
-            <option value="REVIEW_ID-ASC">Oldest</option>
-            <option value="LIKE_COUNT-DESC">Most Liked</option>
-            <option value="COMMENT_COUNT-DESC">Most Discussed</option>
+            <option value="REVIEW_ID-DESC">{t('reviews.sort.latest')}</option>
+            <option value="REVIEW_ID-ASC">{t('reviews.sort.oldest')}</option>
+            <option value="LIKE_COUNT-DESC">{t('reviews.sort.mostLiked')}</option>
+            <option value="COMMENT_COUNT-DESC">{t('reviews.sort.mostDiscussed')}</option>
           </select>
         </div>
 
@@ -532,13 +592,13 @@ function LiquorDetail() {
         ) : reviews.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
             <div className="text-5xl mb-4">✍️</div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">No reviews yet</h3>
-            <p className="text-slate-500 mb-6">Be the first to share your experience!</p>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">{t('reviews.noReviews')}</h3>
+            <p className="text-slate-500 mb-6">{t('reviews.noReviewsDesc')}</p>
             <button 
               onClick={handleWriteReview}
               className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md"
             >
-              Write Review
+              {t('liquors.writeReview')}
             </button>
           </div>
         ) : (
@@ -564,7 +624,7 @@ function LiquorDetail() {
                   onClick={() => fetchReviews(false)}
                   className="bg-white border border-slate-200 hover:border-amber-400 text-slate-700 hover:text-amber-600 font-bold py-3 px-8 rounded-xl transition-all shadow-sm"
                 >
-                  Load More Reviews
+                  {t('reviews.loadMore')}
                 </button>
               </div>
             )}

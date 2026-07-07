@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
+import { useTranslation } from 'react-i18next';
 
 function MyPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('overview');
@@ -29,7 +31,7 @@ function MyPage() {
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
-        window.alert('Please log in first.');
+        window.alert(t('mypage.loginRequired'));
         navigate('/signin');
         return;
       }
@@ -48,7 +50,7 @@ function MyPage() {
       setEmail(data.email);
     } catch (err) {
       console.error(err);
-      window.alert('Error loading profile information.');
+      window.alert(t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +102,7 @@ function MyPage() {
         throw new Error(err.message || 'Failed to update profile');
       }
 
-      window.alert('Profile updated successfully!');
+      window.alert(t('mypage.profileUpdated'));
       
       // If the username changed, the backend set a new refresh cookie and returned a new access token.
       // But since fetchAuthToken caches the old promise, we can force a page reload to cleanly restart auth state, 
@@ -120,7 +122,7 @@ function MyPage() {
     e.preventDefault();
     
     if (newPassword !== confirmPassword) {
-      window.alert("New passwords don't match.");
+      window.alert(t('mypage.passwordMismatch'));
       return;
     }
 
@@ -145,7 +147,7 @@ function MyPage() {
         throw new Error(err.message || 'Failed to update password');
       }
 
-      window.alert('Password updated successfully!');
+      window.alert(t('mypage.passwordUpdated'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -158,7 +160,7 @@ function MyPage() {
   };
 
   const handleWithdraw = async () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (window.confirm(t('mypage.confirmDeleteAccount'))) {
       try {
         const jwtData = await fetchAuthToken();
         const response = await fetch(`/api/users/${user.id}`, {
@@ -169,7 +171,7 @@ function MyPage() {
         });
         if (!response.ok) throw new Error("Failed to delete account");
         
-        window.alert("Account deleted successfully.");
+        window.alert(t('mypage.profileUpdated'));
         await fetch('/api/auth/logout', { method: 'POST' });
         localStorage.removeItem('isLoggedIn');
         window.location.href = '/';
@@ -218,19 +220,19 @@ function MyPage() {
               onClick={() => setActiveTab('overview')}
               className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors ${activeTab === 'overview' ? 'bg-amber-50 text-amber-700' : 'text-slate-600 hover:bg-slate-50'}`}
             >
-              Overview
+              {t('mypage.overview')}
             </button>
             <button 
               onClick={() => setActiveTab('edit_profile')}
               className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors ${activeTab === 'edit_profile' ? 'bg-amber-50 text-amber-700' : 'text-slate-600 hover:bg-slate-50'}`}
             >
-              Edit Profile
+              {t('mypage.editProfile')}
             </button>
             <button 
               onClick={() => setActiveTab('change_password')}
               className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors ${activeTab === 'change_password' ? 'bg-amber-50 text-amber-700' : 'text-slate-600 hover:bg-slate-50'}`}
             >
-              Change Password
+              {t('mypage.changePassword')}
             </button>
           </div>
         </div>
@@ -245,7 +247,7 @@ function MyPage() {
                   <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-4">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                   </div>
-                  <p className="text-slate-500 font-semibold mb-1">Liked Liquors</p>
+                   <p className="text-slate-500 font-semibold mb-1">{t('mypage.likedLiquors')}</p>
                 </div>
                 <p className="text-3xl font-extrabold text-slate-800 mt-2">{myPageData.likedLiquorCount}</p>
               </Link>
@@ -255,7 +257,7 @@ function MyPage() {
                   <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-4">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" /></svg>
                   </div>
-                  <p className="text-slate-500 font-semibold mb-1">Liked Reviews</p>
+                   <p className="text-slate-500 font-semibold mb-1">{t('mypage.likedReviews')}</p>
                 </div>
                 <p className="text-3xl font-extrabold text-slate-800 mt-2">{myPageData.likedReviewCount}</p>
               </Link>
@@ -265,7 +267,7 @@ function MyPage() {
                   <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-4">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                   </div>
-                  <p className="text-slate-500 font-semibold mb-1">Reviews Written</p>
+                   <p className="text-slate-500 font-semibold mb-1">{t('mypage.reviewsWritten')}</p>
                 </div>
                 <p className="text-3xl font-extrabold text-slate-800 mt-2">{myPageData.reviewCount}</p>
               </Link>
@@ -275,7 +277,7 @@ function MyPage() {
                   <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-4">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                   </div>
-                  <p className="text-slate-500 font-semibold mb-1">Comments Written</p>
+                   <p className="text-slate-500 font-semibold mb-1">{t('mypage.commentsWritten')}</p>
                 </div>
                 <p className="text-3xl font-extrabold text-slate-800 mt-2">{myPageData.commentCount}</p>
               </Link>
@@ -288,7 +290,7 @@ function MyPage() {
               {/* Edit Profile */}
               <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="px-8 py-6 border-b border-slate-200 bg-slate-50">
-                  <h2 className="text-xl font-bold text-slate-800">Edit Profile</h2>
+                  <h2 className="text-xl font-bold text-slate-800">{t('mypage.editProfile')}</h2>
                 </div>
                 <form onSubmit={handleProfileUpdate} className="p-8">
                   
@@ -300,7 +302,7 @@ function MyPage() {
                       
                       <div className="flex flex-col items-center gap-2">
                         <label className="bg-amber-100 hover:bg-amber-200 text-amber-700 text-sm font-bold py-2 px-4 rounded-lg cursor-pointer transition-colors text-center w-full">
-                          Change Photo
+                          {t('mypage.changePhoto')}
                           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                         </label>
                         {displayImageUrl && (
@@ -313,7 +315,7 @@ function MyPage() {
                             }}
                             className="text-red-500 text-sm font-semibold hover:underline"
                           >
-                            Remove
+                            {t('mypage.remove')}
                           </button>
                         )}
                       </div>
@@ -321,7 +323,7 @@ function MyPage() {
 
                     <div className="flex-grow space-y-5">
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Username</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">{t('mypage.username')}</label>
                         <input 
                           type="text" 
                           value={username}
@@ -330,7 +332,7 @@ function MyPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address (Read Only)</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">{t('mypage.emailReadOnly')}</label>
                         <input 
                           type="email" 
                           value={email}
@@ -347,14 +349,14 @@ function MyPage() {
                       onClick={handleWithdraw}
                       className="text-sm font-semibold text-slate-400 hover:text-red-500 transition-colors"
                     >
-                      Delete Account
+                      {t('mypage.deleteAccount')}
                     </button>
                     <button 
                       type="submit" 
                       disabled={isUpdatingProfile}
                       className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md disabled:opacity-50"
                     >
-                      {isUpdatingProfile ? 'Saving...' : 'Save Profile'}
+                      {isUpdatingProfile ? t('common.saving') : t('mypage.saveProfile')}
                     </button>
                   </div>
                 </form>
@@ -367,11 +369,11 @@ function MyPage() {
               {/* Change Password */}
               <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="px-8 py-6 border-b border-slate-200 bg-slate-50">
-                  <h2 className="text-xl font-bold text-slate-800">Change Password</h2>
+                  <h2 className="text-xl font-bold text-slate-800">{t('mypage.changePassword')}</h2>
                 </div>
                 <form onSubmit={handlePasswordUpdate} className="p-8 space-y-5">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Current Password</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">{t('mypage.currentPassword')}</label>
                     <input 
                       type="password" 
                       required
@@ -381,7 +383,7 @@ function MyPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">New Password</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">{t('mypage.newPassword')}</label>
                     <input 
                       type="password" 
                       required
@@ -391,7 +393,7 @@ function MyPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Confirm New Password</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">{t('mypage.confirmNewPassword')}</label>
                     <input 
                       type="password" 
                       required
@@ -407,7 +409,7 @@ function MyPage() {
                       disabled={isUpdatingPassword}
                       className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md disabled:opacity-50"
                     >
-                      {isUpdatingPassword ? 'Updating...' : 'Update Password'}
+                      {isUpdatingPassword ? t('mypage.updating') : t('mypage.updatePassword')}
                     </button>
                   </div>
                 </form>

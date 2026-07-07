@@ -5,6 +5,8 @@ import com.liquordb.dto.review.*;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
 import com.liquordb.service.ReviewService;
+import com.liquordb.service.TranslationService;
+import com.liquordb.dto.translation.ReviewTranslationResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final ReviewLikeService reviewLikeService;
+    private final TranslationService translationService;
 
     // 리뷰 등록
     @PostMapping(value = "/liquors/{liquorId}/reviews", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -96,6 +99,15 @@ public class ReviewController {
     ) {
         reviewLikeService.cancelLike(reviewId, user.id());
         return ResponseEntity.noContent().build();
+    }
+
+    // 리뷰 번역
+    @GetMapping("/reviews/{reviewId}/translate")
+    public ResponseEntity<ReviewTranslationResponseDto> translate(
+            @PathVariable Long reviewId
+    ) {
+        ReviewTranslationResponseDto response = translationService.translateReview(reviewId);
+        return ResponseEntity.ok(response);
     }
 
 }

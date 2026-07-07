@@ -8,6 +8,8 @@ import com.liquordb.dto.comment.request.CommentUpdateRequest;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.CommentLikeService;
 import com.liquordb.service.CommentService;
+import com.liquordb.service.TranslationService;
+import com.liquordb.dto.translation.CommentTranslationResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ public class CommentController {
 
     private final CommentService commentService;
     private final CommentLikeService commentLikeService;
+    private final TranslationService translationService;
 
     // 댓글 작성
     @PostMapping("/reviews/{reviewId}/comments")
@@ -95,6 +98,15 @@ public class CommentController {
     ) {
         commentLikeService.cancelLike(commentId, user.id());
         return ResponseEntity.noContent().build();
+    }
+
+    // 댓글 번역
+    @GetMapping("/comments/{commentId}/translate")
+    public ResponseEntity<CommentTranslationResponseDto> translate(
+            @PathVariable Long commentId
+    ) {
+        CommentTranslationResponseDto response = translationService.translateComment(commentId);
+        return ResponseEntity.ok(response);
     }
 
 }

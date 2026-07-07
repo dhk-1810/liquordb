@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function SignUp() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,20 +34,18 @@ function SignUp() {
       const data = await res.json();
       
       if (!res.ok) {
-        // Handle validation errors or message
         if (data.details) {
           const firstError = Object.values(data.details)[0]?.message;
-          setError(firstError || data.message || 'Signup failed');
+          setError(firstError || data.message || t('auth.signUp.failed'));
         } else {
-          setError(data.message || 'Signup failed');
+          setError(data.message || t('auth.signUp.failed'));
         }
         return;
       }
 
-      // Success, route to sign in or home side
       navigate('/signin');
     } catch (err) {
-      setError('A network error occurred. Please try again.');
+      setError(t('auth.signUp.networkError'));
     } finally {
       setLoading(false);
     }
@@ -60,8 +60,8 @@ function SignUp() {
 
         <div className="p-8 relative z-10">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Create an account</h2>
-            <p className="text-sm text-slate-500 mt-2">Join the LiquorDB community today.</p>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">{t('auth.signUp.title')}</h2>
+            <p className="text-sm text-slate-500 mt-2">{t('auth.signUp.subtitle')}</p>
           </div>
 
           {error && (
@@ -76,7 +76,7 @@ function SignUp() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="email">
-                Email Address
+                {t('auth.signUp.email')}
               </label>
               <input
                 id="email"
@@ -92,7 +92,7 @@ function SignUp() {
             
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="username">
-                Username
+                {t('auth.signUp.username')}
               </label>
               <input
                 id="username"
@@ -102,13 +102,13 @@ function SignUp() {
                 value={formData.username}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200"
-                placeholder="Pick a unique display name"
+                placeholder={t('auth.signUp.usernamePlaceholder')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5" htmlFor="password">
-                Password
+                {t('auth.signUp.password')}
               </label>
               <input
                 id="password"
@@ -118,10 +118,10 @@ function SignUp() {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200"
-                placeholder="8+ chars (A-Z, a-z, 0-9, symbol)"
+                placeholder={t('auth.signUp.passwordPlaceholder')}
               />
               <p className="text-xs text-slate-400 mt-2 font-medium">
-                Must be 8-20 characters long and contain uppercase, lowercase, number, and special character.
+                {t('auth.signUp.passwordHint')}
               </p>
             </div>
 
@@ -137,7 +137,7 @@ function SignUp() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : (
-                  'Create Account'
+                  t('auth.signUp.submit')
                 )}
               </button>
             </div>
@@ -145,9 +145,9 @@ function SignUp() {
 
           <div className="mt-8 text-center">
             <p className="text-sm font-medium text-slate-600">
-              Already have an account?{' '}
+              {t('auth.signUp.hasAccount')}{' '}
               <Link to="/signin" className="text-amber-600 hover:text-amber-700 hover:underline transition-all">
-                Sign in here
+                {t('auth.signUp.signIn')}
               </Link>
             </p>
           </div>
