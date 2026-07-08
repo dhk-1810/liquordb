@@ -18,6 +18,7 @@ import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.LiquorTagRepository;
 import com.liquordb.repository.ReviewTagRepository;
+import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.repository.review.ReviewImageKeyRepository;
@@ -54,6 +55,7 @@ public class ReviewService {
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
     private final ReviewTagRepository reviewTagRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 
     // 리뷰 등록
     @Transactional
@@ -101,7 +103,7 @@ public class ReviewService {
             });
             reviewImageKeyRepository.saveAll(keys);
         }
-        return ReviewMapper.toDto(review, tagDtos, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()));
+        return ReviewMapper.toDto(review, tagDtos, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()), false);
     }
 
     // 리뷰 단건 조회
@@ -117,12 +119,12 @@ public class ReviewService {
 
         // default_batch_fetch_size로 N+1 방지
         List<String> imageUrls = getImageUrls(review);
-        return ReviewMapper.toDto(review, tags, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()));
+        return ReviewMapper.toDto(review, tags, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()), false);
     }
 
     // 주류별 리뷰 목록 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<ReviewResponseDto> getAllByLiquorId(Long liquorId, ReviewListGetRequest request) {
+    public CursorPageResponse<ReviewResponseDto> getAllByLiquorId(Long liquorId, ReviewListGetRequest request, UUID userId) {
 
         liquorRepository.findByIdAndIsDeleted(liquorId, false)
                 .orElseThrow(() -> new LiquorNotFoundException(liquorId));
@@ -142,12 +144,12 @@ public class ReviewService {
                 .build();
 
         Slice<Review> reviews = reviewRepository.findByLiquorIdWithTags(condition);
-        return getCursorPageResponse(reviews);
+        return getCursorPageResponse(reviews, userId);
     }
 
     // 유저별 리뷰 목록 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<ReviewResponseDto> getAllByUserId(UUID authorId, ReviewListGetRequest request) {
+    public CursorPageResponse<ReviewResponseDto> getAllByUserId(UUID authorId, ReviewListGetRequest request, UUID userId) {
 
         int limit = request.limit() == null ? 20 : request.limit();
         SortReviewBy sortBy = request.sortBy() == null ? SortReviewBy.REVIEW_ID : request.sortBy();
@@ -165,7 +167,7 @@ public class ReviewService {
                 .build();
 
         Slice<Review> reviews = reviewRepository.findByUserIdWithTags(condition);
-        return getCursorPageResponse(reviews);
+        return getCursorPageResponse(reviews, userId);
     }
 
     // 좋아요 누른 리뷰 목록 조회
@@ -188,7 +190,7 @@ public class ReviewService {
                 .build();
 
         Slice<Review> reviews = reviewRepository.findLikedReviewsWithTags(userId, condition);
-        return getCursorPageResponse(reviews);
+        return getCursorPageResponse(reviews, userId);
     }
 
     // 리뷰 수정
@@ -211,7 +213,8 @@ public class ReviewService {
 
         List<String> imageUrls = getImageUrls(review);
         Set<TagResponseDto> tags = getTags(reviewId);
-        return ReviewMapper.toDto(review, tags, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()));
+        boolean likedByMe = reviewLikeRepository.existsByReview_IdAndUser_Id(reviewId, userId);
+        return ReviewMapper.toDto(review, tags, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()), likedByMe);
     }
 
     // 리뷰 삭제 (Soft Delete)
@@ -245,14 +248,17 @@ public class ReviewService {
     private List<String> getImageUrls(Review review) {
         // default_batch_fetch_size: 100 옵션으로 N+1 문제 방지
         return review.getImageKeys().stream()
-                .map(reviewImageKey -> s3Service.getReviewImageUrl(reviewImageKey.getId().toString()))
+                .map(reviewImageKey -> s3Service.getReviewImageUrl(reviewImageKey.getId().getImageKey()))
                 .toList();
     }
 
     // 페이지네이션 헬퍼 메서드
-    private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews) {
+    private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews, UUID userId) {
         Slice<ReviewResponseDto> response = reviews
-                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey())));
+                .map(r -> {
+                    boolean likedByMe = userId != null && reviewLikeRepository.existsByReview_IdAndUser_Id(r.getId(), userId);
+                    return ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey()), likedByMe);
+                });
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -272,7 +278,7 @@ public class ReviewService {
     public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
         ReviewSearchCondition condition = getSearchCondition(request);
         Page<ReviewResponseDto> page = reviewRepository.findAllWithTags(condition)
-                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey())));
+                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey()), false));
         return PageResponse.from(page);
     }
 

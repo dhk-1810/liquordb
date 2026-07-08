@@ -10,6 +10,7 @@ import java.util.UUID;
 public record CommentResponseDto(
         Long id,
         Long reviewId,
+        Long liquorId,
         String reviewTitle,
         Long parentId,
         UUID userId,
@@ -18,6 +19,7 @@ public record CommentResponseDto(
         String content,
         Comment.CommentStatus status,
         long likeCount,
+        boolean likedByMe,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

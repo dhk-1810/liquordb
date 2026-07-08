@@ -131,12 +131,12 @@ function Home() {
                 </div>
               </div>
 
-              <button className="text-sm font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-5 py-2 rounded-full transition-colors flex items-center gap-1.5 shadow-sm border border-amber-200/50 hidden sm:flex">
+              <Link to="/liquors" className="text-sm font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-5 py-2 rounded-full transition-colors flex items-center gap-1.5 shadow-sm border border-amber-200/50 hidden sm:flex">
                 {t('home.viewAll')}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
+              </Link>
             </div>
 
             {currentTrending.length === 0 ? (

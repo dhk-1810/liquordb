@@ -158,6 +158,7 @@
     "changePhoto": "Change Photo",
     "remove": "Remove",
     "username": "Username",
+    "email": "Email Address",
     "emailReadOnly": "Email Address (Read Only)",
     "deleteAccount": "Delete Account",
     "saveProfile": "Save Profile",

@@ -43,9 +43,11 @@ public class CommentController {
     @GetMapping("/reviews/{reviewId}/comments")
     public ResponseEntity<CursorPageResponse<CommentResponseDto>> getByReviewId(
             @PathVariable Long reviewId,
-            @ModelAttribute @Valid CommentListGetRequest request
+            @ModelAttribute @Valid CommentListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CursorPageResponse<CommentResponseDto> comments = commentService.getByReviewId(reviewId, request);
+        UUID currentUserId = user != null ? user.id() : null;
+        CursorPageResponse<CommentResponseDto> comments = commentService.getByReviewId(reviewId, request, currentUserId);
         return ResponseEntity.ok(comments);
     }
 
@@ -53,9 +55,11 @@ public class CommentController {
     @GetMapping("/users/{userId}/comments")
     public ResponseEntity<CursorPageResponse<CommentResponseDto>> getByUserId(
             @PathVariable UUID userId,
-            @ModelAttribute @Valid CommentListGetRequest request
+            @ModelAttribute @Valid CommentListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CursorPageResponse<CommentResponseDto> comments = commentService.getByUserId(userId, request);
+        UUID currentUserId = user != null ? user.id() : null;
+        CursorPageResponse<CommentResponseDto> comments = commentService.getByUserId(userId, request, currentUserId);
         return ResponseEntity.ok(comments);
     }
 

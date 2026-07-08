@@ -44,9 +44,11 @@ public class ReviewController {
     @GetMapping("/liquors/{liquorId}/reviews")
     public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByLiquor(
             @PathVariable Long liquorId,
-            @ModelAttribute @Valid ReviewListGetRequest request
+            @ModelAttribute @Valid ReviewListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByLiquorId(liquorId, request);
+        UUID currentUserId = user != null ? user.id() : null;
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByLiquorId(liquorId, request, currentUserId);
         return ResponseEntity.ok(response);
     }
 
@@ -54,9 +56,11 @@ public class ReviewController {
     @GetMapping("/users/{authorId}/reviews")
     public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getReviewsByUser(
             @PathVariable UUID authorId,
-            @ModelAttribute @Valid ReviewListGetRequest request
+            @ModelAttribute @Valid ReviewListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByUserId(authorId, request);
+        UUID currentUserId = user != null ? user.id() : null;
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getAllByUserId(authorId, request, currentUserId);
         return ResponseEntity.ok(response);
     }
 

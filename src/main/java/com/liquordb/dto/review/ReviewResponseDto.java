@@ -22,6 +22,7 @@ public record ReviewResponseDto (
         String content,
         Set<TagResponseDto> tags,
         List<String> imageUrls,
+        boolean likedByMe,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ){

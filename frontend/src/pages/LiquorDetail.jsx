@@ -4,7 +4,7 @@ import { fetchAuthToken } from '../utils/auth';
 import CommentSection from '../components/CommentSection';
 import { useTranslation } from 'react-i18next';
 
-function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
+function ReviewCard({ review, currentUser, onUpdate, onDelete, onImageClick }) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [showComments, setShowComments] = useState(false);
@@ -114,7 +114,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       });
       
       if (response.ok) {
-        onUpdate({ ...review, likeCount: review.likeCount + 1 });
+        onUpdate({ ...review, likedByMe: true, likeCount: review.likeCount + 1 });
       } else if (response.status === 409) {
         const cancelRes = await fetch(`/api/reviews/${review.id}/cancel-like`, {
           method: 'DELETE',
@@ -123,7 +123,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
           }
         });
         if (cancelRes.ok) {
-          onUpdate({ ...review, likeCount: Math.max(0, review.likeCount - 1) });
+          onUpdate({ ...review, likedByMe: false, likeCount: Math.max(0, review.likeCount - 1) });
         }
       } else {
         console.error("Failed to like review:", response.status);
@@ -183,7 +183,7 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
             <p className="font-bold text-slate-800">{review.username || t('reviews.anonymous')}</p>
             <div className="flex items-center gap-2">
               <span className="text-amber-500 text-sm font-bold">★ {review.rating}/10</span>
-              <span className="text-slate-400 text-xs">{new Date(review.createdAt).toLocaleDateString()}</span>
+              <span className="text-slate-400 text-xs">{new Date(review.createdAt).toLocaleString(undefined, { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
               {review.updatedAt && review.updatedAt !== review.createdAt && (
                 <span className="text-slate-400 text-[10px] italic">{t('reviews.edited')}</span>
               )}
@@ -234,7 +234,13 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       {review.imageUrls && review.imageUrls.length > 0 && (
         <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
           {review.imageUrls.map((url, idx) => (
-            <img key={idx} src={url} alt="Review attachment" className="h-32 w-32 object-cover rounded-xl border border-slate-200 flex-shrink-0 shadow-sm" />
+            <img 
+              key={idx} 
+              src={url} 
+              alt="Review attachment" 
+              onClick={() => onImageClick && onImageClick(review.imageUrls, idx)}
+              className="h-32 w-32 object-cover rounded-xl border border-slate-200 flex-shrink-0 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" 
+            />
           ))}
         </div>
       )}
@@ -250,8 +256,8 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       )}
 
       <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
-        <button onClick={handleLike} className="flex items-center gap-1.5 text-slate-500 hover:text-red-500 transition-colors font-medium text-sm">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+        <button onClick={handleLike} className={`flex items-center gap-1.5 transition-colors font-medium text-sm ${review.likedByMe ? 'text-red-500 hover:text-red-600' : 'text-slate-500 hover:text-red-500'}`}>
+          <svg className="w-5 h-5" fill={review.likedByMe ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
           {review.likeCount || 0} {t('reviews.likes')}
         </button>
         <button 
@@ -264,7 +270,12 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete }) {
       </div>
 
       {showComments && (
-        <CommentSection reviewId={review.id} initialCommentCount={review.commentCount || 0} currentUser={currentUser} />
+        <CommentSection 
+          reviewId={review.id} 
+          initialCommentCount={review.commentCount || 0} 
+          currentUser={currentUser} 
+          onCommentCountChange={(newCount) => onUpdate({ ...review, commentCount: newCount })}
+        />
       )}
     </div>
   );
@@ -293,6 +304,42 @@ function LiquorDetail() {
     } else {
       navigate(`/liquors/${id}/reviews/new`);
     }
+  };
+
+  const [activeImageModal, setActiveImageModal] = useState({
+    isOpen: false,
+    images: [],
+    currentIndex: 0
+  });
+
+  const openImageModal = (images, index) => {
+    setActiveImageModal({
+      isOpen: true,
+      images,
+      currentIndex: index
+    });
+  };
+
+  const closeImageModal = () => {
+    setActiveImageModal({
+      isOpen: false,
+      images: [],
+      currentIndex: 0
+    });
+  };
+
+  const prevImage = () => {
+    setActiveImageModal(prev => ({
+      ...prev,
+      currentIndex: prev.currentIndex === 0 ? prev.images.length - 1 : prev.currentIndex - 1
+    }));
+  };
+
+  const nextImage = () => {
+    setActiveImageModal(prev => ({
+      ...prev,
+      currentIndex: prev.currentIndex === prev.images.length - 1 ? 0 : prev.currentIndex + 1
+    }));
   };
 
   const handleLike = async () => {
@@ -608,6 +655,7 @@ function LiquorDetail() {
                 key={review.id} 
                 review={review} 
                 currentUser={currentUser}
+                onImageClick={(images, index) => setActiveImageModal({ isOpen: true, images, currentIndex: index })}
                 onUpdate={(updatedReview) => {
                   setReviews(prev => prev.map(r => r.id === updatedReview.id ? updatedReview : r));
                 }}
@@ -627,6 +675,57 @@ function LiquorDetail() {
                   {t('reviews.loadMore')}
                 </button>
               </div>
+            )}
+          </div>
+        )}
+        {/* Image Modal Lightbox */}
+        {activeImageModal.isOpen && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center animate-fade-in">
+            <button 
+              type="button"
+              onClick={() => setActiveImageModal({ isOpen: false, images: [], currentIndex: 0 })}
+              className="absolute top-6 right-6 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {activeImageModal.images.length > 1 && (
+              <button 
+                type="button"
+                onClick={() => setActiveImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length }))}
+                className="absolute left-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            <div className="max-w-[85vw] max-h-[85vh] flex flex-col items-center gap-4 animate-scale-up">
+              <img 
+                src={activeImageModal.images[activeImageModal.currentIndex]} 
+                alt="Expanded view" 
+                className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+              />
+              {activeImageModal.images.length > 1 && (
+                <span className="text-white/60 text-sm font-semibold">
+                  {activeImageModal.currentIndex + 1} / {activeImageModal.images.length}
+                </span>
+              )}
+            </div>
+
+            {activeImageModal.images.length > 1 && (
+              <button 
+                type="button"
+                onClick={() => setActiveImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex + 1) % prev.images.length }))}
+                className="absolute right-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+              >
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             )}
           </div>
         )}

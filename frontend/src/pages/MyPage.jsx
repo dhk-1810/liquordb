@@ -26,6 +26,8 @@ function MyPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
+
+
   const fetchMyPageData = async () => {
     setIsLoading(true);
     try {
@@ -74,12 +76,14 @@ function MyPage() {
     e.preventDefault();
     setIsUpdatingProfile(true);
 
+    const isEmailChanged = email !== user.email;
+
     try {
       const jwtData = await fetchAuthToken();
       
       const formData = new FormData();
       formData.append('username', username);
-      // formData.append('email', email); // Assuming we don't update email easily, or maybe we do? Let's leave it up to username and image for now since email changes are sensitive.
+      formData.append('email', email);
       
       if (deleteProfileImage) {
         formData.append('deleteProfileImage', 'true');
@@ -104,11 +108,18 @@ function MyPage() {
 
       window.alert(t('mypage.profileUpdated'));
       
-      // If the username changed, the backend set a new refresh cookie and returned a new access token.
-      // But since fetchAuthToken caches the old promise, we can force a page reload to cleanly restart auth state, 
-      // or we can just fetch my page data again.
-      // Easiest robust way is to just reload the page so App.jsx picks up the new token/username.
-      window.location.reload();
+      if (isEmailChanged) {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (e) {
+          console.error('Logout failed:', e);
+        } finally {
+          localStorage.removeItem('isLoggedIn');
+          window.location.href = '/signin';
+        }
+      } else {
+        window.location.reload();
+      }
       
     } catch (err) {
       console.error(err);
@@ -148,9 +159,14 @@ function MyPage() {
       }
 
       window.alert(t('mypage.passwordUpdated'));
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (e) {
+        console.error('Logout failed:', e);
+      } finally {
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = '/signin';
+      }
     } catch (err) {
       console.error(err);
       window.alert(`Error: ${err.message}`);
@@ -159,28 +175,7 @@ function MyPage() {
     }
   };
 
-  const handleWithdraw = async () => {
-    if (window.confirm(t('mypage.confirmDeleteAccount'))) {
-      try {
-        const jwtData = await fetchAuthToken();
-        const response = await fetch(`/api/users/${user.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${jwtData.accessToken}`
-          }
-        });
-        if (!response.ok) throw new Error("Failed to delete account");
-        
-        window.alert(t('mypage.profileUpdated'));
-        await fetch('/api/auth/logout', { method: 'POST' });
-        localStorage.removeItem('isLoggedIn');
-        window.location.href = '/';
-      } catch (err) {
-        console.error(err);
-        window.alert("Error deleting account.");
-      }
-    }
-  };
+
 
   if (isLoading) {
     return (
@@ -195,7 +190,7 @@ function MyPage() {
 
   if (!myPageData) return null;
 
-  const displayImageUrl = profileImagePreview || (!deleteProfileImage ? myPageData.imageUrl : null);
+  const displayImageUrl = profileImagePreview || (!deleteProfileImage ? myPageData.profileImageUrl : null);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
@@ -203,7 +198,7 @@ function MyPage() {
       {/* Header Profile Summary */}
       <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 flex items-center gap-6">
         <div className="w-24 h-24 rounded-full bg-amber-100 flex items-center justify-center border-4 border-slate-50 shadow-md overflow-hidden flex-shrink-0">
-          <img src={(myPageData.imageUrl && !myPageData.imageUrl.includes('default-profile')) ? myPageData.imageUrl : '/default-avatar.svg'} alt={myPageData.username} className="w-full h-full object-cover" />
+          <img src={(myPageData.profileImageUrl && !myPageData.profileImageUrl.includes('default-profile')) ? myPageData.profileImageUrl : '/default-avatar.svg'} alt={myPageData.username} className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">{myPageData.username}</h1>
@@ -234,6 +229,7 @@ function MyPage() {
             >
               {t('mypage.changePassword')}
             </button>
+
           </div>
         </div>
 
@@ -332,12 +328,12 @@ function MyPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">{t('mypage.emailReadOnly')}</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">{t('mypage.email')}</label>
                         <input 
                           type="email" 
                           value={email}
-                          readOnly
-                          className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-slate-500 cursor-not-allowed"
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -346,7 +342,7 @@ function MyPage() {
                   <div className="flex items-center justify-between pt-6 border-t border-slate-100">
                     <button 
                       type="button"
-                      onClick={handleWithdraw}
+                      onClick={() => navigate('/withdraw')}
                       className="text-sm font-semibold text-slate-400 hover:text-red-500 transition-colors"
                     >
                       {t('mypage.deleteAccount')}
@@ -416,6 +412,8 @@ function MyPage() {
               </div>
             </div>
           )}
+
+
         </div>
       </div>
 

@@ -63,4 +63,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, CustomRev
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Review r SET r.likeCount = CASE WHEN r.likeCount + :delta < 0 THEN 0 ELSE r.likeCount + :delta END WHERE r.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Review r SET r.user = null WHERE r.user.id IN :userIds")
+    void setNullUserByUserIds(@Param("userIds") java.util.List<UUID> userIds);
 }

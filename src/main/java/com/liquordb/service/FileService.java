@@ -61,8 +61,8 @@ public class FileService {
         fileRepository.findByS3key(key)
                 .ifPresent(fileRepository::delete);
     }
-    // Key 예시: reviews/id/abc-123-def.jpg
 
+    // Key 예시: reviews/id/abc-123-def.jpg
     private String generateS3Key(File.FileType type, String extension, Object id) {
         String idPath = String.valueOf(id);
         return String.format("%s/%s/%s%s",

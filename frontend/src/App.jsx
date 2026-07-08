@@ -14,6 +14,7 @@ import MyPage from './pages/MyPage';
 import MyActivityList from './pages/MyActivityList';
 import FindPassword from './pages/FindPassword';
 import ResetPassword from './pages/ResetPassword';
+import Withdraw from './pages/Withdraw';
 import NotificationDropdown from './components/NotificationDropdown';
 import { fetchAuthToken } from './utils/auth';
 
@@ -155,6 +156,7 @@ function AppContent() {
           <Route path="/mypage/:category" element={<MyActivityList />} />
           <Route path="/find-password" element={<FindPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/withdraw" element={<Withdraw />} />
         </Routes>
       </main>
 

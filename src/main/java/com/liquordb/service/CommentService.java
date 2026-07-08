@@ -27,6 +27,7 @@ import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.entity.User;
 import com.liquordb.repository.user.UserRepository;
+import com.liquordb.repository.CommentLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -49,6 +50,7 @@ public class CommentService {
     private final ApplicationEventPublisher eventPublisher;
     private final LiquorRepository liquorRepository;
     private final S3Service s3Service;
+    private final CommentLikeRepository commentLikeRepository;
 
     // 댓글 생성
     @Transactional
@@ -81,7 +83,7 @@ public class CommentService {
                 review.getLiquor().getId(),
                 user.getUsername())
         );
-        return CommentMapper.toDto(comment, s3Service.getProfileImageUrl(comment.getUser().getProfileImageKey()));
+        return CommentMapper.toDto(comment, s3Service.getProfileImageUrl(comment.getUser().getProfileImageKey()), false);
     }
 
     // 댓글 수정
@@ -96,12 +98,13 @@ public class CommentService {
 
         comment.update(request);
         Comment savedComment = commentRepository.save(comment);
-        return CommentMapper.toDto(savedComment, s3Service.getProfileImageUrl(savedComment.getUser().getProfileImageKey()));
+        boolean likedByMe = commentLikeRepository.existsByComment_IdAndUser_Id(commentId, userId);
+        return CommentMapper.toDto(savedComment, s3Service.getProfileImageUrl(savedComment.getUser().getProfileImageKey()), likedByMe);
     }
 
     // 특정 리뷰에 달린 댓글 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<CommentResponseDto> getByReviewId(Long reviewId, CommentListGetRequest request) {
+    public CursorPageResponse<CommentResponseDto> getByReviewId(Long reviewId, CommentListGetRequest request, UUID userId) {
 
         reviewRepository.findByIdAndStatus(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
@@ -126,7 +129,10 @@ public class CommentService {
                 .build();
 
         Slice<Comment> comments = commentRepository.findByReviewId(condition);
-        Slice<CommentResponseDto> response = comments.map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey())));
+        Slice<CommentResponseDto> response = comments.map(c -> {
+            boolean likedByMe = userId != null && commentLikeRepository.existsByComment_IdAndUser_Id(c.getId(), userId);
+            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe);
+        });
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -139,7 +145,7 @@ public class CommentService {
 
     // 특정 유저가 작성한 댓글 조회
     @Transactional(readOnly = true)
-    public CursorPageResponse<CommentResponseDto> getByUserId(UUID userId, CommentListGetRequest request) {
+    public CursorPageResponse<CommentResponseDto> getByUserId(UUID userId, CommentListGetRequest request, UUID currentUserId) {
 
         SortDirection sortDirection = request.sortDirection() == null ? SortDirection.DESC : request.sortDirection();
 
@@ -152,7 +158,10 @@ public class CommentService {
                 .build();
 
         Slice<Comment> comments = commentRepository.findByUserId(condition);
-        Slice<CommentResponseDto> response = comments.map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey())));
+        Slice<CommentResponseDto> response = comments.map(c -> {
+            boolean likedByMe = currentUserId != null && commentLikeRepository.existsByComment_IdAndUser_Id(c.getId(), currentUserId);
+            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe);
+        });
 
         Long nextCursor = null;
         if (response.hasNext()) {
@@ -184,7 +193,7 @@ public class CommentService {
     public PageResponse<CommentResponseDto> getAll(CommentSearchRequest request) {
         CommentSearchCondition condition = getSearchCondition(request);
         Page<CommentResponseDto> page = commentRepository.findAll(condition)
-                .map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey())));
+                .map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), false));
         return PageResponse.from(page);
     }
 

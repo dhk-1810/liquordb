@@ -10,6 +10,7 @@ import com.liquordb.entity.reviewdetail.ReviewDetail;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class ReviewMapper {
 
@@ -21,13 +22,18 @@ public class ReviewMapper {
         return review;
     }
 
-    public static ReviewResponseDto toDto(Review review, Set<TagResponseDto> tags, List<String> imageUrls, String userProfileImageUrl) {
+    public static ReviewResponseDto toDto(Review review, Set<TagResponseDto> tags, List<String> imageUrls, String userProfileImageUrl, boolean likedByMe) {
+
+        User user = review.getUser();
+        UUID userId = user != null ? user.getId() : null;
+        String username = user != null ? user.getUsername() : "탈퇴한 사용자";
+        String profileUrl = user != null ? userProfileImageUrl : null;
 
         return ReviewResponseDto.builder()
                 .id(review.getId())
-                .userId(review.getUser().getId())
-                .username(review.getUser().getUsername())
-                .userProfileImageUrl(userProfileImageUrl)
+                .userId(userId)
+                .username(username)
+                .userProfileImageUrl(profileUrl)
                 .likeCount(review.getLikeCount())
                 .commentCount(review.getCommentCount())
                 .liquorId(review.getLiquor().getId())
@@ -36,6 +42,7 @@ public class ReviewMapper {
                 .title(review.getTitle())
                 .tags(tags)
                 .imageUrls(imageUrls)
+                .likedByMe(likedByMe)
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
                 .build();

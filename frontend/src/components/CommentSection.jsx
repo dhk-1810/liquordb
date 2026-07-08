@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchAuthToken } from '../utils/auth';
 import { useTranslation } from 'react-i18next';
 
-function CommentSection({ reviewId, initialCommentCount, currentUser }) {
+function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentCountChange }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [comments, setComments] = useState([]);
@@ -113,7 +113,11 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
       
       // Reload from top
       setNewComment('');
-      setCommentCount(prev => prev + 1);
+      setCommentCount(prev => {
+        const next = prev + 1;
+        if (onCommentCountChange) onCommentCountChange(next);
+        return next;
+      });
       
       // If we are sorting by latest, it will appear at the top. 
       // Force reload of first page:
@@ -159,7 +163,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
       if (response.ok) {
         setComments(prev => prev.map(c => {
           if (c.id === commentId) {
-            return { ...c, likeCount: c.likeCount + 1 };
+            return { ...c, likedByMe: true, likeCount: c.likeCount + 1 };
           }
           return c;
         }));
@@ -174,7 +178,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
         if (cancelRes.ok) {
           setComments(prev => prev.map(c => {
             if (c.id === commentId) {
-              return { ...c, likeCount: Math.max(0, c.likeCount - 1) };
+              return { ...c, likedByMe: false, likeCount: Math.max(0, c.likeCount - 1) };
             }
             return c;
           }));
@@ -197,7 +201,11 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
       });
       if (response.ok) {
         setComments(prev => prev.filter(c => c.id !== commentId));
-        setCommentCount(prev => Math.max(0, prev - 1));
+        setCommentCount(prev => {
+          const next = Math.max(0, prev - 1);
+          if (onCommentCountChange) onCommentCountChange(next);
+          return next;
+        });
       } else {
         throw new Error("Failed to delete comment");
       }
@@ -249,9 +257,9 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
           }}
           className="text-sm border-none bg-slate-50 text-slate-600 rounded-lg py-1.5 px-3 focus:ring-0 cursor-pointer font-medium"
         >
-          <option value="COMMENT_ID-DESC">{t('comments.latest')}</option>
-          <option value="COMMENT_ID-ASC">{t('comments.oldest')}</option>
-          <option value="LIKE_COUNT-DESC">{t('comments.mostLiked')}</option>
+          <option value="COMMENT_ID-DESC">{t('reviews.sort.latest')}</option>
+          <option value="COMMENT_ID-ASC">{t('reviews.sort.oldest')}</option>
+          <option value="LIKE_COUNT-DESC">{t('reviews.sort.mostLiked')}</option>
         </select>
       </div>
 
@@ -336,16 +344,16 @@ function CommentSection({ reviewId, initialCommentCount, currentUser }) {
                     </div>
                     <div className="flex items-center gap-4 mt-1.5 px-2 text-xs text-slate-500 font-medium flex-wrap">
                       <span>
-                        {new Date(comment.createdAt).toLocaleDateString()}
+                        {new Date(comment.createdAt).toLocaleString(undefined, { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
                           <span className="italic ml-1">{t('comments.edited')}</span>
                         )}
                       </span>
                       <button 
                         onClick={() => handleLike(comment.id)} 
-                        className="text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                        className={`transition-colors flex items-center gap-1 ${comment.likedByMe ? 'text-red-500 hover:text-red-600' : 'text-slate-400 hover:text-red-500'}`}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        <svg className="w-4 h-4" fill={comment.likedByMe ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                         {comment.likeCount > 0 && <span>{comment.likeCount}</span>}
                       </button>
                       {(() => {

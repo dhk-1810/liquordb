@@ -24,7 +24,7 @@ function FindPassword() {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (data.details && Object.keys(data.details).length > 0) {
-          const firstError = Object.values(data.details)[0]?.message || Object.values(data.details)[0];
+          const firstError = Object.values(data.details)[0]?.message;
           setError(firstError || data.message || t('auth.findPassword.requestError'));
         } else {
           setError(data.message || t('auth.findPassword.requestError'));

@@ -31,7 +31,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new WithdrawnUserException(); // DisabledException을 상속
+            if (user.getWithdrawnAt() == null || user.getWithdrawnAt().isBefore(java.time.LocalDateTime.now().minusWeeks(1))) {
+                throw new WithdrawnUserException(); // DisabledException을 상속
+            }
         }
 
         UserResponseDto dto = UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey()));

@@ -40,11 +40,11 @@ public class UserMapper {
                 user.getEmail(),
                 user.getUsername(),
                 imageUrl,
-                reviewCount,
-                commentCount,
                 likedLiquorCount,
                 likedReviewCount,
-                likedCommentCount
+                likedCommentCount,
+                reviewCount,
+                commentCount
         );
     }
 }

@@ -158,6 +158,7 @@
     "changePhoto": "사진 변경",
     "remove": "제거",
     "username": "닉네임",
+    "email": "이메일 주소",
     "emailReadOnly": "이메일 주소 (읽기 전용)",
     "deleteAccount": "계정 삭제",
     "saveProfile": "프로필 저장",

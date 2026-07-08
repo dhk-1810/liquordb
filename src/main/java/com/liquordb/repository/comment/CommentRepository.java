@@ -78,4 +78,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, CustomC
     @Query("UPDATE Comment c SET c.likeCount = CASE WHEN c.likeCount + :delta < 0 THEN 0 ELSE c.likeCount + :delta END WHERE c.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Comment c SET c.user = null WHERE c.user.id IN :userIds")
+    void setNullUserByUserIds(@Param("userIds") java.util.List<UUID> userIds);
 }

@@ -34,7 +34,7 @@ function SignIn() {
       
       if (!res.ok) {
         if (data.details && Object.keys(data.details).length > 0) {
-          const firstError = Object.values(data.details)[0]?.message || Object.values(data.details)[0];
+          const firstError = Object.values(data.details)[0]?.message;
           setError(firstError || data.message || t('auth.signIn.invalidCredentials'));
         } else {
           setError(data.message || t('auth.signIn.invalidCredentials'));
@@ -42,8 +42,36 @@ function SignIn() {
         return;
       }
 
-      localStorage.setItem('isLoggedIn', 'true');
-      navigate('/');
+      if (data.userDto && data.userDto.status === 'WITHDRAWN') {
+        const confirmRestore = window.confirm(
+          '탈퇴 신청된 계정입니다. 1주일 이내이므로 계정을 복구하고 다시 이용하실 수 있습니다. 계정을 복구하고 로그인하시겠습니까?'
+        );
+        if (confirmRestore) {
+          try {
+            const restoreRes = await fetch(`/api/auth/restore?email=${encodeURIComponent(data.userDto.email)}`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${data.accessToken}`
+              }
+            });
+            if (restoreRes.ok) {
+              window.alert('계정이 성공적으로 복구되었습니다!');
+              localStorage.setItem('isLoggedIn', 'true');
+              navigate('/');
+            } else {
+              const err = await restoreRes.json().catch(() => ({}));
+              throw new Error(err.message || 'Failed to restore account');
+            }
+          } catch (err) {
+            window.alert(`복구 실패: ${err.message}`);
+          }
+        } else {
+          return;
+        }
+      } else {
+        localStorage.setItem('isLoggedIn', 'true');
+        navigate('/');
+      }
     } catch (err) {
       console.error(err);
       setError(t('auth.signIn.networkError'));

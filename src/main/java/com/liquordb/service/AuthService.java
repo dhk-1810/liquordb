@@ -151,6 +151,7 @@ public class AuthService {
                 .orElseThrow(() -> new UserNotFoundException(email));
         user.updatePassword(passwordEncoder.encode(request.password()));
         userRepository.save(user);
+        jwtRegistry.invalidateAllRefreshTokensByUserId(user.getId());
 
         stringRedisTemplate.delete(token);
         stringRedisTemplate.delete("reset_token_email:" + email);

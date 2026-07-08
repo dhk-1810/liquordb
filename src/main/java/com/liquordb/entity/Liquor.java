@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.Set;
                 @Index(name = "idx_likeCount_id", columnList = "likeCount, id")
         }
 )
+@EntityListeners(AuditingEntityListener.class)
 public class Liquor extends LikeableEntity {
 
     @Id

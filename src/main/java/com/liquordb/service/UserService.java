@@ -83,18 +83,19 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        boolean isIdentifierChanged = false;
+        boolean isEmailChanged = false;
+        boolean isUsernameChanged = false;
 
         if (request.email() != null && !request.email().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.email())) throw new DuplicateEmailException(request.email());
             user.updateEmail(request.email());
-            isIdentifierChanged = true;
+            isEmailChanged = true;
         }
 
         if (request.username() != null && !request.username().equals(user.getUsername())) {
             if (userRepository.existsByUsername(request.username())) throw new DuplicateUsernameException(request.username());
             user.updateUsername(request.username());
-            isIdentifierChanged = true;
+            isUsernameChanged = true;
         }
 
         Boolean deleteImage = request.deleteProfileImage();
@@ -114,7 +115,9 @@ public class UserService {
 
         String newAccess = null;
         String newRefresh = null;
-        if (isIdentifierChanged) {
+        if (isEmailChanged) {
+            jwtRegistry.invalidateAllRefreshTokensByUserId(userId);
+        } else if (isUsernameChanged) {
             newAccess = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
             newRefresh = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
             jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
@@ -136,14 +139,20 @@ public class UserService {
 
         user.updatePassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+        jwtRegistry.invalidateAllRefreshTokensByUserId(userId);
     }
 
     // 회원 탈퇴 (soft delete)
     @Transactional
-    public void withdraw(UUID userId, String accessToken) {
+    public void withdraw(UUID userId, String password, String accessToken) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new InvalidPasswordException();
+        }
+
         user.withdraw();
         userRepository.save(user);
         jwtRegistry.invalidateAllRefreshTokensByUserId(user.getId());

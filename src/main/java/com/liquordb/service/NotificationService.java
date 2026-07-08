@@ -31,7 +31,7 @@ public class NotificationService {
 
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new NotificationNotFoundException(id));
-        if (userId != notification.getReceiverId()){
+        if (!userId.equals(notification.getReceiverId())){
             throw new NotificationAccessDeniedException(id, userId);
         }
         notification.read();
@@ -42,7 +42,7 @@ public class NotificationService {
 
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new NotificationNotFoundException(id));
-        if (userId != notification.getReceiverId()){
+        if (!userId.equals(notification.getReceiverId())){
             throw new NotificationAccessDeniedException(id, userId);
         }
         notificationRepository.deleteById(id);

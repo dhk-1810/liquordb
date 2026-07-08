@@ -13,6 +13,26 @@ function MyActivityList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [activeImageModal, setActiveImageModal] = useState({
+    isOpen: false,
+    images: [],
+    currentIndex: 0
+  });
+
+  const prevImage = () => {
+    setActiveImageModal(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+    }));
+  };
+
+  const nextImage = () => {
+    setActiveImageModal(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex + 1) % prev.images.length
+    }));
+  };
+
   const getTitle = () => {
     switch (category) {
       case 'liked-liquors': return t('mypage.likedLiquors');
@@ -64,6 +84,13 @@ function MyActivityList() {
       const params = new URLSearchParams({
         limit: category === 'liked-liquors' ? '12' : '10'
       });
+      if (category === 'reviews' || category === 'liked-reviews') {
+        params.append('sortBy', 'REVIEW_ID');
+        params.append('sortDirection', 'DESC');
+      } else if (category === 'comments') {
+        params.append('sortBy', 'COMMENT_ID');
+        params.append('sortDirection', 'DESC');
+      }
       if (!reset && nextCursor) {
         params.append('cursor', nextCursor);
       }
@@ -202,7 +229,7 @@ function MyActivityList() {
                         <p className="font-bold text-slate-800">{review.username || 'Anonymous'}</p>
                         <div className="flex items-center gap-2">
                           <span className="text-amber-500 text-sm font-bold">★ {review.rating}/10</span>
-                          <span className="text-slate-400 text-xs">{new Date(review.createdAt).toLocaleDateString()}</span>
+                          <span className="text-slate-400 text-xs">{new Date(review.createdAt).toLocaleString(undefined, { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                       </div>
                     </div>
@@ -216,7 +243,13 @@ function MyActivityList() {
                   {review.imageUrls && review.imageUrls.length > 0 && (
                     <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
                       {review.imageUrls.map((url, idx) => (
-                        <img key={idx} src={url} alt="Review attachment" className="h-24 w-24 object-cover rounded-xl border border-slate-200 flex-shrink-0 shadow-sm" />
+                        <img 
+                          key={idx} 
+                          src={url} 
+                          alt="Review attachment" 
+                          onClick={() => setActiveImageModal({ isOpen: true, images: review.imageUrls, currentIndex: idx })}
+                          className="h-24 w-24 object-cover rounded-xl border border-slate-200 flex-shrink-0 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" 
+                        />
                       ))}
                     </div>
                   )}
@@ -231,9 +264,9 @@ function MyActivityList() {
                     </div>
                   )}
                   <div className="flex items-center gap-4 pt-4 border-t border-slate-100 text-slate-500 text-sm font-medium">
-                    <span className="flex items-center gap-1.5">
-                      <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                      {review.likeCount || 0} {t('common.likes')}
+                    <span className={`flex items-center gap-1.5 ${review.likedByMe ? 'text-red-500 font-bold' : 'text-slate-500 font-medium'}`}>
+                      <svg className="w-4.5 h-4.5" fill={review.likedByMe ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                      {review.likeCount || 0} {t('reviews.likes')}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
@@ -252,10 +285,13 @@ function MyActivityList() {
                   <img src={(comment.userProfileImageUrl && !comment.userProfileImageUrl.includes('default-profile')) ? comment.userProfileImageUrl : '/default-avatar.svg'} alt="User Profile" className="w-8 h-8 rounded-full object-cover border border-slate-200 bg-white mt-1" />
                   <div className="flex-grow">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                      <p className="text-xs text-slate-500 font-medium">
-                        {t('activity.commentedOn')} <span className="font-bold text-slate-700">"{comment.reviewTitle || 'Untitled Review'}"</span>
+                      <p className="text-xs text-slate-500 font-medium flex items-center gap-1.5 flex-wrap">
+                        {t('activity.commentedOn')} 
+                        <Link to={`/liquors/${comment.liquorId}#review-${comment.reviewId}`} className="font-bold text-amber-600 hover:text-amber-700 hover:underline">
+                          "{comment.reviewTitle || 'Untitled Review'}"
+                        </Link>
                       </p>
-                      <span className="text-[10px] text-slate-400 font-semibold">{new Date(comment.createdAt).toLocaleString()}</span>
+                      <span className="text-[10px] text-slate-400 font-semibold">{new Date(comment.createdAt).toLocaleString(undefined, { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <p className="text-slate-800 text-sm whitespace-pre-wrap leading-relaxed">{comment.content}</p>
                   </div>
@@ -283,6 +319,57 @@ function MyActivityList() {
             </div>
           )}
         </>
+      )}
+      {/* Image Modal Lightbox */}
+      {activeImageModal.isOpen && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center animate-fade-in">
+          <button 
+            type="button"
+            onClick={() => setActiveImageModal({ isOpen: false, images: [], currentIndex: 0 })}
+            className="absolute top-6 right-6 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+          >
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {activeImageModal.images.length > 1 && (
+            <button 
+              type="button"
+              onClick={prevImage}
+              className="absolute left-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          <div className="max-w-[85vw] max-h-[85vh] flex flex-col items-center gap-4 animate-scale-up">
+            <img 
+              src={activeImageModal.images[activeImageModal.currentIndex]} 
+              alt="Expanded view" 
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+            />
+            {activeImageModal.images.length > 1 && (
+              <span className="text-white/60 text-sm font-semibold">
+                {activeImageModal.currentIndex + 1} / {activeImageModal.images.length}
+              </span>
+            )}
+          </div>
+
+          {activeImageModal.images.length > 1 && (
+            <button 
+              type="button"
+              onClick={nextImage}
+              className="absolute right-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
