@@ -1,7 +1,6 @@
 package com.liquordb.dto.review;
 
 import com.liquordb.dto.review.reviewdetaildto.ReviewDetailRequest;
-import com.liquordb.entity.Liquor;
 import jakarta.validation.constraints.*;
 
 import java.util.List;

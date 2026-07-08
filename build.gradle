@@ -59,3 +59,8 @@ tasks.named('test') {
 jar {
     enabled = false
 }
+
+bootRun {
+    systemProperties = System.properties
+    systemProperty 'spring.output.ansi.enabled', 'ALWAYS'
+}

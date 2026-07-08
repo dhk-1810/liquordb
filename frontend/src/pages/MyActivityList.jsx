@@ -145,7 +145,8 @@ function MyActivityList() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
+    <>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
       <button
         onClick={() => navigate('/mypage')}
         className="mb-8 flex items-center text-slate-500 hover:text-amber-600 font-medium transition-colors group"
@@ -240,6 +241,71 @@ function MyActivityList() {
                   <h3 className="font-bold text-lg text-slate-800 mb-2">{review.title}</h3>
                   <p className="text-slate-600 mb-4 whitespace-pre-wrap">{review.content}</p>
 
+                  {review.reviewDetail && (review.reviewDetail.type === 'BEER' || review.reviewDetail.type === 'WINE' || review.reviewDetail.type === 'WHISKY') && (
+                    <div className="mt-2 mb-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-100/80 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                      {review.reviewDetail.type === 'BEER' && (
+                        <>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.aroma')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.aroma?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.taste')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.taste?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.headRetention')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.headRetention?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.look')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.look?.toFixed(1) || '0.0'}</span>
+                          </div>
+                        </>
+                      )}
+                      {review.reviewDetail.type === 'WINE' && (
+                        <>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.sweetness')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.sweetness?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.acidity')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.acidity?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.body')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.body?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.tannin')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.tannin?.toFixed(1) || '0.0'}</span>
+                          </div>
+                        </>
+                      )}
+                      {review.reviewDetail.type === 'WHISKY' && (
+                        <>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.aroma')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.aroma?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.taste')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.taste?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.finish')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.finish?.toFixed(1) || '0.0'}</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.body')}</span>
+                            <span className="text-amber-500 font-bold">★ {review.reviewDetail.body?.toFixed(1) || '0.0'}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
                   {review.imageUrls && review.imageUrls.length > 0 && (
                     <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
                       {review.imageUrls.map((url, idx) => (
@@ -320,6 +386,8 @@ function MyActivityList() {
           )}
         </>
       )}
+      </div>
+
       {/* Image Modal Lightbox */}
       {activeImageModal.isOpen && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center animate-fade-in">
@@ -371,7 +439,7 @@ function MyActivityList() {
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 

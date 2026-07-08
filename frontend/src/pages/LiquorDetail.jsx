@@ -231,6 +231,71 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete, onImageClick }) {
         );
       })()}
       
+      {review.reviewDetail && (review.reviewDetail.type === 'BEER' || review.reviewDetail.type === 'WINE' || review.reviewDetail.type === 'WHISKY') && (
+        <div className="mt-2 mb-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-100/80 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs animate-fade-in">
+          {review.reviewDetail.type === 'BEER' && (
+            <>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.aroma')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.aroma?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.taste')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.taste?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.headRetention')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.headRetention?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.beerFields.look')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.look?.toFixed(1) || '0.0'}</span>
+              </div>
+            </>
+          )}
+          {review.reviewDetail.type === 'WINE' && (
+            <>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.sweetness')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.sweetness?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.acidity')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.acidity?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.body')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.body?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.wineFields.tannin')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.tannin?.toFixed(1) || '0.0'}</span>
+              </div>
+            </>
+          )}
+          {review.reviewDetail.type === 'WHISKY' && (
+            <>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.aroma')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.aroma?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.taste')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.taste?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.finish')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.finish?.toFixed(1) || '0.0'}</span>
+              </div>
+              <div className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <span className="text-slate-500 font-semibold">{t('reviewWrite.whiskyFields.body')}</span>
+                <span className="text-amber-500 font-bold">★ {review.reviewDetail.body?.toFixed(1) || '0.0'}</span>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+      
       {review.imageUrls && review.imageUrls.length > 0 && (
         <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
           {review.imageUrls.map((url, idx) => (
@@ -480,7 +545,8 @@ function LiquorDetail() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
+    <>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
       <button 
         onClick={() => navigate(-1)}
         className="mb-8 flex items-center text-slate-500 hover:text-amber-600 font-medium transition-colors group"
@@ -678,59 +744,61 @@ function LiquorDetail() {
             )}
           </div>
         )}
-        {/* Image Modal Lightbox */}
-        {activeImageModal.isOpen && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center animate-fade-in">
-            <button 
-              type="button"
-              onClick={() => setActiveImageModal({ isOpen: false, images: [], currentIndex: 0 })}
-              className="absolute top-6 right-6 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all focus:outline-none"
-            >
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            {activeImageModal.images.length > 1 && (
-              <button 
-                type="button"
-                onClick={() => setActiveImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length }))}
-                className="absolute left-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
-              >
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-            )}
-
-            <div className="max-w-[85vw] max-h-[85vh] flex flex-col items-center gap-4 animate-scale-up">
-              <img 
-                src={activeImageModal.images[activeImageModal.currentIndex]} 
-                alt="Expanded view" 
-                className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
-              />
-              {activeImageModal.images.length > 1 && (
-                <span className="text-white/60 text-sm font-semibold">
-                  {activeImageModal.currentIndex + 1} / {activeImageModal.images.length}
-                </span>
-              )}
-            </div>
-
-            {activeImageModal.images.length > 1 && (
-              <button 
-                type="button"
-                onClick={() => setActiveImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex + 1) % prev.images.length }))}
-                className="absolute right-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
-              >
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </div>
+
+    {/* Image Modal Lightbox */}
+      {activeImageModal.isOpen && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center animate-fade-in">
+          <button 
+            type="button"
+            onClick={() => setActiveImageModal({ isOpen: false, images: [], currentIndex: 0 })}
+            className="absolute top-6 right-6 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+          >
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {activeImageModal.images.length > 1 && (
+            <button 
+              type="button"
+              onClick={() => setActiveImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length }))}
+              className="absolute left-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          <div className="max-w-[85vw] max-h-[85vh] flex flex-col items-center gap-4 animate-scale-up">
+            <img 
+              src={activeImageModal.images[activeImageModal.currentIndex]} 
+              alt="Expanded view" 
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+            />
+            {activeImageModal.images.length > 1 && (
+              <span className="text-white/60 text-sm font-semibold">
+                {activeImageModal.currentIndex + 1} / {activeImageModal.images.length}
+              </span>
+            )}
+          </div>
+
+          {activeImageModal.images.length > 1 && (
+            <button 
+              type="button"
+              onClick={() => setActiveImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex + 1) % prev.images.length }))}
+              className="absolute right-6 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all focus:outline-none"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 

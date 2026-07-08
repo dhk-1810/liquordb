@@ -24,7 +24,8 @@ public record ReviewResponseDto (
         List<String> imageUrls,
         boolean likedByMe,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        ReviewDetailResponseDto reviewDetail
 ){
 
 }

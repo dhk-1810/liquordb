@@ -1,6 +1,7 @@
 package com.liquordb.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,7 +44,7 @@ public class JsonUsernamePasswordAuthenticationFilter extends UsernamePasswordAu
 
         try {
             // JSON 바디를 Map으로 파싱
-            Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);
+            Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), new TypeReference<Map<String, String>>() {});
 
             String username = loginData.get("email");
             if (username == null) {

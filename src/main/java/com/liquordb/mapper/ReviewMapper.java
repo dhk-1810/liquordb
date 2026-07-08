@@ -6,7 +6,9 @@ import com.liquordb.dto.review.ReviewRequest;
 import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.User;
-import com.liquordb.entity.reviewdetail.ReviewDetail;
+import com.liquordb.entity.reviewdetail.*;
+
+import com.liquordb.dto.review.ReviewDetailResponseDto;
 
 import java.util.List;
 import java.util.Set;
@@ -45,7 +47,35 @@ public class ReviewMapper {
                 .likedByMe(likedByMe)
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
+                .reviewDetail(getReviewDetailResponse(review.getDetail()))
                 .build();
+    }
+
+    private static ReviewDetailResponseDto getReviewDetailResponse(ReviewDetail detail) {
+        if (detail == null) {
+            return null;
+        }
+        ReviewDetailResponseDto.ReviewDetailResponseDtoBuilder builder = ReviewDetailResponseDto.builder();
+        if (detail instanceof BeerReviewDetail beer) {
+            builder.type("BEER")
+                    .aroma(beer.getAroma())
+                    .taste(beer.getTaste())
+                    .headRetention(beer.getHeadRetention())
+                    .look(beer.getLook());
+        } else if (detail instanceof WineReviewDetail wine) {
+            builder.type("WINE")
+                    .sweetness(wine.getSweetness())
+                    .acidity(wine.getAcidity())
+                    .body(wine.getBody())
+                    .tannin(wine.getTannin());
+        } else if (detail instanceof WhiskyReviewDetail whisky) {
+            builder.type("WHISKY")
+                    .aroma(whisky.getAroma())
+                    .taste(whisky.getTaste())
+                    .finish(whisky.getFinish())
+                    .body(whisky.getBody());
+        }
+        return builder.build();
     }
 
 }
