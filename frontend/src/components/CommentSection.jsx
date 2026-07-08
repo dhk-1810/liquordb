@@ -137,12 +137,18 @@ function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentC
     }
   };
 
-  const handleLike = async (commentId, isCurrentlyLiked) => {
+  const handleLike = async (comment) => {
     if (!currentUser) {
       window.alert(t('comments.loginToLike'));
       navigate('/signin');
       return;
     }
+
+    if (currentUser.id === comment.userId) {
+      window.alert(t('comments.selfLikeNotAllowed', '본인이 작성한 댓글에는 좋아요를 누를 수 없습니다.'));
+      return;
+    }
+
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
@@ -151,40 +157,33 @@ function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentC
         return;
       }
       
-      // We don't have isCurrentlyLiked from the backend API directly unless it was added, 
-      // but assuming the user just toggles or clicks "like"
-      const response = await fetch(`/api/comments/${commentId}/like`, {
-        method: 'POST',
+      const method = comment.likedByMe ? 'DELETE' : 'POST';
+      const endpoint = comment.likedByMe ? 'cancel-like' : 'like';
+
+      const response = await fetch(`/api/comments/${comment.id}/${endpoint}`, {
+        method,
         headers: {
           'Authorization': `Bearer ${jwtData.accessToken}`
         }
       });
       
       if (response.ok) {
+        const nextLikedByMe = !comment.likedByMe;
+        const nextLikeCount = nextLikedByMe ? comment.likeCount + 1 : Math.max(0, comment.likeCount - 1);
         setComments(prev => prev.map(c => {
-          if (c.id === commentId) {
-            return { ...c, likedByMe: true, likeCount: c.likeCount + 1 };
+          if (c.id === comment.id) {
+            return { ...c, likedByMe: nextLikedByMe, likeCount: nextLikeCount };
           }
           return c;
         }));
       } else if (response.status === 409) {
-        // Already liked, so cancel like
-        const cancelRes = await fetch(`/api/comments/${commentId}/cancel-like`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${jwtData.accessToken}`
-          }
-        });
-        if (cancelRes.ok) {
-          setComments(prev => prev.map(c => {
-            if (c.id === commentId) {
-              return { ...c, likedByMe: false, likeCount: Math.max(0, c.likeCount - 1) };
-            }
-            return c;
-          }));
-        }
+        const errData = await response.json().catch(() => ({}));
+        window.alert(errData.message || t('comments.alreadyLiked', '이미 좋아요 한 댓글이거나 처리 중 오류가 발생했습니다.'));
+      } else if (response.status === 400) {
+        const errData = await response.json().catch(() => ({}));
+        window.alert(errData.message || t('comments.selfLikeNotAllowed', '본인이 작성한 댓글에는 좋아요를 누를 수 없습니다.'));
       } else {
-        console.error("Failed to like comment:", response.status);
+        console.error("Failed to like/unlike comment:", response.status);
       }
     } catch (err) {
       console.error(err);
@@ -350,7 +349,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentC
                         )}
                       </span>
                       <button 
-                        onClick={() => handleLike(comment.id)} 
+                        onClick={() => handleLike(comment)} 
                         className={`transition-colors flex items-center gap-1 ${comment.likedByMe ? 'text-red-500 hover:text-red-600' : 'text-slate-400 hover:text-red-500'}`}
                       >
                         <svg className="w-4 h-4" fill={comment.likedByMe ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>

@@ -39,8 +39,49 @@ function NotificationDropdown() {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
+
+    // SSE 구독 설정
+    let eventSource = null;
+    const setupSse = async () => {
+      try {
+        const jwtData = await fetchAuthToken();
+        if (!jwtData) return;
+
+        // Native EventSource 생성 (인증 토큰을 쿼리 스트링으로 전달)
+        eventSource = new EventSource(`/api/sse?token=${jwtData.accessToken}`);
+
+        // 알림 수신 시 핸들러 등록
+        eventSource.addEventListener('notification', (event) => {
+          try {
+            const newNotification = JSON.parse(event.data);
+            
+            // 중복 알림 등록 방지 및 상태 갱신
+            setNotifications(prev => {
+              if (prev.some(n => n.id === newNotification.id)) return prev;
+              return [newNotification, ...prev];
+            });
+            setUnreadCount(prev => prev + 1);
+          } catch (e) {
+            console.error('Error parsing SSE notification:', e);
+          }
+        });
+
+        eventSource.onerror = (err) => {
+          console.error('SSE connection error, closing...', err);
+          eventSource.close();
+        };
+      } catch (err) {
+        console.error('Failed to setup SSE:', err);
+      }
+    };
+
+    setupSse();
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      if (eventSource) {
+        eventSource.close();
+      }
     };
   }, []);
 

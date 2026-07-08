@@ -7,6 +7,7 @@ import com.liquordb.event.ReviewLikeEvent;
 import com.liquordb.exception.review.ReviewLikeAlreadyExistsException;
 import com.liquordb.exception.review.ReviewLikeNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
+import com.liquordb.exception.review.SelfReviewLikeException;
 import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.user.UserRepository;
@@ -37,6 +38,11 @@ public class ReviewLikeService {
         User user = userRepository.getReferenceById(userId);
         Review review = reviewRepository.findByIdAndStatusWithUser(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        if (review.getUser().getId().equals(userId)) {
+            throw new SelfReviewLikeException(reviewId, userId);
+        }
+
         ReviewLike reviewLike = ReviewLike.create(user, review);
 
         try {
@@ -45,7 +51,8 @@ public class ReviewLikeService {
             throw new ReviewNotFoundException(reviewId);
         }
 
-        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, true, review.getUser().getUsername(), review.getUser().getId()));
+        reviewRepository.updateLikeCount(reviewId, 1);
+        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, true, user.getUsername(), review.getUser().getId(), userId));
     }
 
     @Transactional
@@ -55,7 +62,8 @@ public class ReviewLikeService {
                 .orElseThrow(() -> new ReviewLikeNotFoundException(reviewId, userId));
 
         reviewLikeRepository.delete(reviewLike);
-        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, false, null, null));
+        reviewRepository.updateLikeCount(reviewId, -1);
+        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, false, null, null, null));
     }
 
 }

@@ -7,6 +7,7 @@ import com.liquordb.event.CommentLikeEvent;
 import com.liquordb.exception.comment.CommentLikeAlreadyExistsException;
 import com.liquordb.exception.comment.CommentLikeNotFoundException;
 import com.liquordb.exception.comment.CommentNotFoundException;
+import com.liquordb.exception.comment.SelfCommentLikeException;
 import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.user.UserRepository;
@@ -39,6 +40,11 @@ public class CommentLikeService {
 
         Comment comment = commentRepository.findByIdWAndStatusWithUser(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
+
+        if (comment.getUser().getId().equals(userId)) {
+            throw new SelfCommentLikeException(commentId, userId);
+        }
+
         CommentLike commentLike = CommentLike.create(user, comment);
 
         try {
@@ -47,7 +53,8 @@ public class CommentLikeService {
             throw new CommentNotFoundException(commentId);
         }
 
-        eventPublisher.publishEvent(new CommentLikeEvent(commentId, true, comment.getUser().getUsername(), comment.getUser().getId()));
+        commentRepository.updateLikeCount(commentId, 1);
+        eventPublisher.publishEvent(new CommentLikeEvent(commentId, true, user.getUsername(), comment.getUser().getId(), userId));
     }
 
     @Transactional
@@ -57,7 +64,8 @@ public class CommentLikeService {
                 .orElseThrow(() -> new CommentLikeNotFoundException(commentId, userId));
 
         commentLikeRepository.delete(commentLike);
-        eventPublisher.publishEvent(new CommentLikeEvent(commentId, false, null, null));
+        commentRepository.updateLikeCount(commentId, -1);
+        eventPublisher.publishEvent(new CommentLikeEvent(commentId, false, null, null, null));
     }
 
 }

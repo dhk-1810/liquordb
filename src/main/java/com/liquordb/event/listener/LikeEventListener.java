@@ -56,38 +56,42 @@ public class LikeEventListener {
         }
     }
 
-    @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(ReviewLikeEvent event) {
+        if (!event.isLiked()) return;
 
-        int delta = event.isLiked() ? 1 : -1;
-        reviewRepository.updateLikeCount(event.reviewId(), delta);
-        saveAndSendNotification(event.isLiked(), event.receiverId(), event.username(), REVIEW_LIKE_MESSAGE_SUFFIX, event);
+        // 본인의 좋아요에 대해서는 알림을 생성하지 않음
+        if (event.senderId().equals(event.receiverId())) {
+            return;
+        }
+
+        saveAndSendNotification(event.receiverId(), event.senderUsername(), REVIEW_LIKE_MESSAGE_SUFFIX);
     }
 
-    @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(CommentLikeEvent event) {
+        if (!event.isLiked()) return;
 
-        int delta = event.isLiked() ? 1 : -1;
-        commentRepository.updateLikeCount(event.commentId(), delta);
-        saveAndSendNotification(event.isLiked(), event.receiverId(), event.username(), COMMENT_LIKE_MESSAGE_SUFFIX, event);
+        // 본인의 좋아요에 대해서는 알림을 생성하지 않음
+        if (event.senderId().equals(event.receiverId())) {
+            return;
+        }
+
+        saveAndSendNotification(event.receiverId(), event.senderUsername(), COMMENT_LIKE_MESSAGE_SUFFIX);
     }
 
-    private void saveAndSendNotification(boolean liked, UUID uuid, String username, String reviewLikeMessageSuffix, Object event) {
-        if (liked) {
-            Notification notification = Notification.create(
-                    uuid,
-                    username + reviewLikeMessageSuffix,
-                    null
-            );
-            notificationRepository.save(notification);
+    private void saveAndSendNotification(UUID receiverId, String senderUsername, String messageSuffix) {
+        Notification notification = Notification.create(
+                receiverId,
+                senderUsername + messageSuffix,
+                null
+        );
+        notificationRepository.save(notification);
 
-            NotificationResponseDto response = NotificationResponseDto.toDto(notification);
-            SseMessage message = SseMessage.create(uuid, "notification", response);
-            redisTemplate.convertAndSend("sse-notifications", message);
-        }
+        NotificationResponseDto response = NotificationResponseDto.toDto(notification);
+        SseMessage message = SseMessage.create(receiverId, "notification", response);
+        redisTemplate.convertAndSend("sse-notifications", message);
     }
 }

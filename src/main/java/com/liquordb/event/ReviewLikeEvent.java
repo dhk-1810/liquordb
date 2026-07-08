@@ -5,7 +5,8 @@ import java.util.UUID;
 public record ReviewLikeEvent (
         Long reviewId,
         boolean isLiked,
-        String username,
-        UUID receiverId
+        String senderUsername,
+        UUID receiverId,
+        UUID senderId
 ) {
 }

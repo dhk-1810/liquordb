@@ -98,6 +98,12 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete, onImageClick }) {
       navigate('/signin');
       return;
     }
+
+    if (currentUser.id === review.userId) {
+      window.alert(t('reviews.selfLikeNotAllowed', '본인이 작성한 리뷰에는 좋아요를 누를 수 없습니다.'));
+      return;
+    }
+
     try {
       const jwtData = await fetchAuthToken();
       if (!jwtData) {
@@ -106,27 +112,28 @@ function ReviewCard({ review, currentUser, onUpdate, onDelete, onImageClick }) {
         return;
       }
       
-      const response = await fetch(`/api/reviews/${review.id}/like`, {
-        method: 'POST',
+      const method = review.likedByMe ? 'DELETE' : 'POST';
+      const endpoint = review.likedByMe ? 'cancel-like' : 'like';
+
+      const response = await fetch(`/api/reviews/${review.id}/${endpoint}`, {
+        method,
         headers: {
           'Authorization': `Bearer ${jwtData.accessToken}`
         }
       });
       
       if (response.ok) {
-        onUpdate({ ...review, likedByMe: true, likeCount: review.likeCount + 1 });
+        const nextLikedByMe = !review.likedByMe;
+        const nextLikeCount = nextLikedByMe ? review.likeCount + 1 : Math.max(0, review.likeCount - 1);
+        onUpdate({ ...review, likedByMe: nextLikedByMe, likeCount: nextLikeCount });
       } else if (response.status === 409) {
-        const cancelRes = await fetch(`/api/reviews/${review.id}/cancel-like`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${jwtData.accessToken}`
-          }
-        });
-        if (cancelRes.ok) {
-          onUpdate({ ...review, likedByMe: false, likeCount: Math.max(0, review.likeCount - 1) });
-        }
+        const errData = await response.json().catch(() => ({}));
+        window.alert(errData.message || t('reviews.alreadyLiked', '이미 좋아요 한 리뷰이거나 처리 중 오류가 발생했습니다.'));
+      } else if (response.status === 400) {
+        const errData = await response.json().catch(() => ({}));
+        window.alert(errData.message || t('reviews.selfLikeNotAllowed', '본인이 작성한 리뷰에는 좋아요를 누를 수 없습니다.'));
       } else {
-        console.error("Failed to like review:", response.status);
+        console.error("Failed to like/unlike review:", response.status);
       }
     } catch (err) {
       console.error(err);
