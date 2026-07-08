@@ -212,7 +212,7 @@ public class ReviewService {
         reviewRepository.save(review);
 
         List<String> imageUrls = getImageUrls(review);
-        Set<TagResponseDto> tags = getTags(reviewId);
+        Set<TagResponseDto> tags = getTags(review);
         boolean likedByMe = reviewLikeRepository.existsByReview_IdAndUser_Id(reviewId, userId);
         return ReviewMapper.toDto(review, tags, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()), likedByMe);
     }
@@ -239,9 +239,9 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    private Set<TagResponseDto> getTags(Long id) {
-        return reviewTagRepository.findByReview_Id(id)
-                .stream().map(TagMapper::toDto)
+    private Set<TagResponseDto> getTags(Review review) {
+        return review.getReviewTags().stream()
+                .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
     }
 
@@ -254,10 +254,22 @@ public class ReviewService {
 
     // 페이지네이션 헬퍼 메서드
     private CursorPageResponse<ReviewResponseDto> getCursorPageResponse(Slice<Review> reviews, UUID userId) {
+        List<Long> reviewIds = reviews.getContent().stream().map(Review::getId).toList();
+
+        Set<Long> likedReviewIds = (userId != null && !reviewIds.isEmpty())
+                ? reviewLikeRepository.findLikedReviewIdsByUserIdAndReviewIds(userId, reviewIds)
+                : Collections.emptySet();
+
         Slice<ReviewResponseDto> response = reviews
                 .map(r -> {
-                    boolean likedByMe = userId != null && reviewLikeRepository.existsByReview_IdAndUser_Id(r.getId(), userId);
-                    return ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey()), likedByMe);
+                    boolean likedByMe = likedReviewIds.contains(r.getId());
+                    return ReviewMapper.toDto(
+                            r,
+                            getTags(r),
+                            getImageUrls(r),
+                            s3Service.getProfileImageUrl(r.getUser().getProfileImageKey()), // F
+                            likedByMe
+                    );
                 });
 
         Long nextCursor = null;
@@ -278,7 +290,7 @@ public class ReviewService {
     public PageResponse<ReviewResponseDto> getAll(ReviewSearchRequest request) {
         ReviewSearchCondition condition = getSearchCondition(request);
         Page<ReviewResponseDto> page = reviewRepository.findAllWithTags(condition)
-                .map(r -> ReviewMapper.toDto(r, getTags(r.getId()), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey()), false));
+                .map(r -> ReviewMapper.toDto(r, getTags(r), getImageUrls(r), s3Service.getProfileImageUrl(r.getUser().getProfileImageKey()), false));
         return PageResponse.from(page);
     }
 

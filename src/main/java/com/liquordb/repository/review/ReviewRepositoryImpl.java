@@ -37,6 +37,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
 
         int limit = condition.limit();
         List<Review> content = queryFactory.selectFrom(review)
+                .leftJoin(review.user).fetchJoin()
                 .leftJoin(review.reviewTags, reviewTag).fetchJoin()
                 .leftJoin(reviewTag.tag, tag).fetchJoin()
                 .where(
@@ -66,6 +67,9 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
 
         int limit = condition.limit();
         List<Review> content = queryFactory.selectFrom(review)
+                .leftJoin(review.user).fetchJoin()
+                .leftJoin(review.reviewTags, reviewTag).fetchJoin()
+                .leftJoin(reviewTag.tag, tag).fetchJoin()
                 .where(
                         userIdEq(condition.userId()),
                         statusEq(condition.status()),
@@ -93,6 +97,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
 
         List<Review> content = queryFactory.selectFrom(review)
                 .join(reviewLike).on(reviewLike.review.id.eq(review.id))
+                .leftJoin(review.user).fetchJoin()
                 .leftJoin(review.reviewTags, reviewTag).fetchJoin()
                 .leftJoin(reviewTag.tag, tag).fetchJoin()
                 .where(
@@ -122,6 +127,9 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
         int limit = condition.limit();
         int page = condition.page();
         List<Review> content = queryFactory.selectFrom(review)
+                .leftJoin(review.user).fetchJoin()
+                .leftJoin(review.reviewTags, reviewTag).fetchJoin()
+                .leftJoin(reviewTag.tag, tag).fetchJoin()
                 .where(
                         usernameContains(condition.username()),
                         statusEq(condition.reviewStatus())
