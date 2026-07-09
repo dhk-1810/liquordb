@@ -39,3 +39,4 @@ out/
 .env.template
 .env
 .env.local
+.dockerignore

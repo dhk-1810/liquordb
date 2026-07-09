@@ -4,3 +4,6 @@ spring:
     url: jdbc:mysql://${DB_ENDPOINT}:3306/${DB_NAME}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+
+cors:
+  allowed-origins: ${AWS_CLOUDFRONT_DOMAIN}
