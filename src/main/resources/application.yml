@@ -34,7 +34,7 @@ spring:
       enable-statistics: true
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
 
   mail:

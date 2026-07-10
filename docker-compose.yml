@@ -4,18 +4,19 @@ services:
     build: .
     image: liquordb-backend:latest
     networks:
-      liquordb-network:
-    ports:
-      - "8080:8080"
+      - liquordb-network
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
     env_file:
       - .env
     depends_on:
-      - postgres-db
+      - mysql-db
+      - redis
     working_dir: /backend
     volumes:
       - backend_uploads:/backend/uploads # 업로드 파일 영속성 확보
@@ -42,11 +43,24 @@ services:
   redis:
     image: redis:7.2-alpine
     container_name: redis
+    networks:
+      - liquordb-network
     ports:
       - "6379:6379"
     volumes: # 데이터 영구 저장 설정
       - redis-data:/data
     command: redis-server --appendonly yes # 실행 명령 - 데이터 변경시 디스크에 로그 낭김
+
+  # --- Nginx Load Balancer ---
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - liquordb-network
+    depends_on:
+      - backend
 
 networks:
   liquordb-network:
