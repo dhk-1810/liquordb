@@ -1,5 +1,4 @@
 services:
-  # --- Backend (Spring Boot) ---
   backend:
     build: .
     image: liquordb-backend:latest
@@ -14,54 +13,10 @@ services:
       REDIS_PORT: ${REDIS_PORT}
     env_file:
       - .env
-    depends_on:
-      - mysql-db
-      - redis
     working_dir: /backend
     volumes:
       - backend_uploads:/backend/uploads # 업로드 파일 영속성 확보
-
-  # --- Infrastructure ---
-  mysql-db:
-    image: mysql:8.0
-    networks:
-      liquordb-network:
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      TZ: Asia/Seoul
-    env_file:
-      - .env
-    volumes:
-      - mysql_data:/mysql_data:/var/lib/mysql # 데이터 영속성 보장
-      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql # 초기 스키마 설정
-
-  redis:
-    image: redis:7.2-alpine
-    container_name: redis
-    networks:
-      - liquordb-network
-    ports:
-      - "6379:6379"
-    volumes: # 데이터 영구 저장 설정
-      - redis-data:/data
-    command: redis-server --appendonly yes # 실행 명령 - 데이터 변경시 디스크에 로그 낭김
-
-  # --- Nginx Load Balancer ---
-  nginx:
-    build: ./nginx
-    container_name: nginx
-    ports:
-      - "80:80"
-    networks:
-      - liquordb-network
-    depends_on:
-      - backend
-
+      -
 networks:
   liquordb-network:
     driver: bridge
