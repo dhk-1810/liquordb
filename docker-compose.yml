@@ -1,27 +1,105 @@
+# 로컬 테스트용 docker-compose임. 배포할 땐(ECS) 사용되지 않음.
+
 services:
-  backend:
+  # --- Backend 1 (Spring Boot) ---
+  backend_1:
     build: .
     image: liquordb-backend:latest
+    ports:
+      - "8081:8080"
     networks:
       - liquordb-network
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
+      SPRING_PROFILES_ACTIVE: local
+      DB_ENDPOINT: mysql
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
     env_file:
-      - .env
-    working_dir: /backend
+      - .env.local
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # --- Backend 2 (Spring Boot) ---
+  backend_2:
+    build: .
+    image: liquordb-backend:latest
+    ports:
+      - "8082:8080"
+    networks:
+      - liquordb-network
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DB_ENDPOINT: mysql
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+    env_file:
+      - .env.local
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # --- Infrastructure ---
+  mysql:
+    image: mysql:8.0
+    networks:
+      liquordb-network:
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: Asia/Seoul
+    env_file:
+      - .env.local
     volumes:
-      - backend_uploads:/backend/uploads # 업로드 파일 영속성 확보
-      -
+      - mysql_data:/mysql_data:/var/lib/mysql # 데이터 영속성 보장
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql # 초기 스키마 설정
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    networks:
+      - liquordb-network
+    ports:
+      - "6379:6379"
+    volumes: # 데이터 영구 저장 설정
+      - redis-data:/data
+    command: redis-server --appendonly yes # 실행 명령 - 데이터 변경시 디스크에 로그 낭김
+
+  # --- Nginx Load Balancer ---
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - liquordb-network
+    depends_on:
+      - backend_1
+      - backend_2
+
 networks:
   liquordb-network:
     driver: bridge
 
 volumes:
-  backend_uploads:
   mysql_data:
   redis-data:

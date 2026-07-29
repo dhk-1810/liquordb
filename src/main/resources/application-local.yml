@@ -1,7 +1,10 @@
 spring:
+  config:
+    activate:
+      on-profile: local
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/${DB_NAME}?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://${DB_ENDPOINT:localhost}:3306/${DB_NAME}?serverTimezone=Asia/Seoul
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 

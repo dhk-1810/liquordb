@@ -4,7 +4,7 @@ FROM nginx:alpine
 # 기본 설정파일 삭제
 RUN rm /etc/nginx/conf.d/default.conf
 # 직접 만든 설정파일 주입
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.local.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
