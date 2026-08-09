@@ -65,8 +65,7 @@ services:
     env_file:
       - .env.local
     volumes:
-      - mysql_data:/mysql_data:/var/lib/mysql # 데이터 영속성 보장
-      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql # 초기 스키마 설정
+      - mysql_data:/var/lib/mysql # 데이터 영속성 보장
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s

@@ -39,6 +39,8 @@ out/
 .env.template
 .env
 .env.local
+.env.prod
+.env.*
 .dockerignore
 
 nginx/liquordb-nginx-key-pair.pem
