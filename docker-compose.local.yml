@@ -1,22 +1,13 @@
 # 로컬 테스트용 docker-compose임. 배포할 땐(ECS) 사용되지 않음.
-
+# up: docker-compose -f docker-compose.local.yml up -d
+# down: docker-compose -f docker-compose.local.yml down
+# Caused by: java.sql.SQLException: Access denied for user 'root'@'172.18.0.5' (using password: YES)
 services:
-  # --- Backend 1 (Spring Boot) ---
-  backend_1:
+  app-1:
     build: .
-    image: liquordb-backend:latest
-    ports:
-      - "8081:8080"
+    image: liquordb-app:latest
     networks:
       - liquordb-network
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      DB_ENDPOINT: mysql
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      REDIS_HOST: redis
-      REDIS_PORT: ${REDIS_PORT:-6379}
     env_file:
       - .env.local
     depends_on:
@@ -26,21 +17,11 @@ services:
         condition: service_started
 
   # --- Backend 2 (Spring Boot) ---
-  backend_2:
+  app-2:
     build: .
-    image: liquordb-backend:latest
-    ports:
-      - "8082:8080"
+    image: liquordb-app:latest
     networks:
       - liquordb-network
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      DB_ENDPOINT: mysql
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      REDIS_HOST: redis
-      REDIS_PORT: ${REDIS_PORT:-6379}
     env_file:
       - .env.local
     depends_on:
@@ -54,8 +35,6 @@ services:
     image: mysql:8.0
     networks:
       liquordb-network:
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -74,26 +53,28 @@ services:
 
   redis:
     image: redis:7.2-alpine
-    container_name: redis
     networks:
       - liquordb-network
-    ports:
-      - "6379:6379"
-    volumes: # 데이터 영구 저장 설정
-      - redis-data:/data
     command: redis-server --appendonly yes # 실행 명령 - 데이터 변경시 디스크에 로그 낭김
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # --- Nginx Load Balancer ---
   nginx:
-    build: ./nginx
-    container_name: nginx
+    image: nginx:alpine
+    #    build: ./nginx
     ports:
       - "80:80"
     networks:
       - liquordb-network
     depends_on:
-      - backend_1
-      - backend_2
+      - app-1
+      - app-2
+    volumes:
+      - ./nginx/nginx.local.conf:/etc/nginx/conf.d/default.conf
 
 networks:
   liquordb-network:
@@ -101,4 +82,3 @@ networks:
 
 volumes:
   mysql_data:
-  redis-data:

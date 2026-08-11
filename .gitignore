@@ -39,7 +39,7 @@ out/
 .env.template
 .env
 .env.local
-.env.prod
+.env.light
 .env.*
 .dockerignore
 
