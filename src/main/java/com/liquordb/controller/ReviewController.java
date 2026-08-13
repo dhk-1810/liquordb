@@ -2,6 +2,7 @@ package com.liquordb.controller;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.review.*;
+import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.ReviewLikeService;
 import com.liquordb.service.ReviewService;
@@ -114,4 +115,23 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
+    // 좋아요 누른 리뷰 목록 조회
+    @GetMapping("/users/{userId}/liked-reviews")
+    public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getLikedReviews(
+            @PathVariable UUID userId,
+            @ModelAttribute @Valid ReviewListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        authorizeUser(userId, user);
+        CursorPageResponse<ReviewResponseDto> response = reviewService.getLikedReviews(userId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    private void authorizeUser(UUID userId, CustomUserDetails user) {
+        if (user == null || !user.id().equals(userId)) {
+            throw new UserAccessDeniedException(user != null ? user.id() : null);
+        }
+    }
+
 }
+

@@ -40,24 +40,34 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         UserResponseDto userDto = userDetails.dto();
 
-        // 토큰 발행, 레지스트리 등록
-        String accessToken = jwtTokenProvider.createAccessToken(
-                userDto.email(),
-                userDto.role().name()
-        );
-        String refreshToken = jwtTokenProvider.createRefreshToken(
-                userDto.email(),
-                userDto.role().name()
-        );
+        String accessToken;
+        if (userDto.status() == com.liquordb.enums.UserStatus.WITHDRAWN) {
+            // 탈퇴 계정은 복구를 위해 5분 유효기간의 임시 AccessToken만 발급 (RefreshToken 생성 및 저장 안 함)
+            long fiveMinutesInMs = 5 * 60 * 1000L;
+            accessToken = jwtTokenProvider.createCustomAccessToken(
+                    userDto.email(),
+                    userDto.role().name(),
+                    fiveMinutesInMs
+            );
+        } else {
+            // 정상 계정인 경우 정상 토큰 및 RefreshToken 쿠키 발행
+            accessToken = jwtTokenProvider.createAccessToken(
+                    userDto.email(),
+                    userDto.role().name()
+            );
+            String refreshToken = jwtTokenProvider.createRefreshToken(
+                    userDto.email(),
+                    userDto.role().name()
+            );
 
-        jwtRegistry.registerRefreshToken(userDto.id(), refreshToken); // 동시 로그인 제한 처리도 수행됨.
+            jwtRegistry.registerRefreshToken(userDto.id(), refreshToken);
 
-        // 토큰 전달 - 엑세스 토큰은 JSON 바디로, 리프레시 토큰은 쿠키로.
-        Cookie refreshCookie = new Cookie("REFRESH_TOKEN", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(REFRESH_TOKEN_MAX_AGE);
-        response.addCookie(refreshCookie);
+            Cookie refreshCookie = new Cookie("REFRESH_TOKEN", refreshToken);
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(REFRESH_TOKEN_MAX_AGE);
+            response.addCookie(refreshCookie);
+        }
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

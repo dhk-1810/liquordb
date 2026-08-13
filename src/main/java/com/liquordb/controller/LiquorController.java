@@ -6,6 +6,7 @@ import com.liquordb.dto.liquor.LiquorResponseDto;
 import com.liquordb.dto.liquor.LiquorSummaryDto;
 import com.liquordb.enums.Role;
 import com.liquordb.enums.PeriodType;
+import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.service.LiquorLikeService;
 import com.liquordb.service.LiquorRankingService;
@@ -82,4 +83,23 @@ public class LiquorController {
         return ResponseEntity.noContent().build();
     }
 
+    // 좋아요 누른 주류 목록 조회
+    @GetMapping("/users/{userId}/liked-liquors")
+    public ResponseEntity<CursorPageResponse<LiquorSummaryDto>> getLikedLiquors(
+            @PathVariable UUID userId,
+            @ModelAttribute LiquorListGetRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        authorizeUser(userId, user);
+        CursorPageResponse<LiquorSummaryDto> response = liquorService.getLikedLiquors(userId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    private void authorizeUser(UUID userId, CustomUserDetails user) {
+        if (user == null || !user.id().equals(userId)) {
+            throw new UserAccessDeniedException(user != null ? user.id() : null);
+        }
+    }
+
 }
+

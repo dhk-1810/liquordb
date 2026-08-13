@@ -40,7 +40,6 @@ services:
       retries: 10
     restart: always
 
-  # --- In-Memory DB (Redis) ---
   redis:
     image: redis:7.2-alpine
     networks:

@@ -1,18 +1,11 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.JwtDto;
-import com.liquordb.dto.CursorPageResponse;
-import com.liquordb.dto.liquor.LiquorListGetRequest;
-import com.liquordb.dto.liquor.LiquorSummaryDto;
-import com.liquordb.dto.review.ReviewListGetRequest;
-import com.liquordb.dto.review.ReviewResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.security.JwtInformation;
 import com.liquordb.security.TokenUtil;
-import com.liquordb.service.LiquorService;
-import com.liquordb.service.ReviewService;
 import com.liquordb.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,8 +25,6 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-    private final LiquorService liquorService;
-    private final ReviewService reviewService;
 
     // 마이페이지
     @GetMapping("/{userId}/my-page")
@@ -88,33 +79,10 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // 좋아요 누른 주류 목록 조회
-    @GetMapping("/{userId}/liked-liquors")
-    public ResponseEntity<CursorPageResponse<LiquorSummaryDto>> getLikedLiquors(
-            @PathVariable UUID userId,
-            @ModelAttribute LiquorListGetRequest request,
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
-        authorizeUser(userId, user);
-        CursorPageResponse<LiquorSummaryDto> response = liquorService.getLikedLiquors(userId, request);
-        return ResponseEntity.ok(response);
-    }
-
-    // 좋아요 누른 리뷰 목록 조회
-    @GetMapping("/{userId}/liked-reviews")
-    public ResponseEntity<CursorPageResponse<ReviewResponseDto>> getLikedReviews(
-            @PathVariable UUID userId,
-            @ModelAttribute @Valid ReviewListGetRequest request,
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
-        authorizeUser(userId, user);
-        CursorPageResponse<ReviewResponseDto> response = reviewService.getLikedReviews(userId, request);
-        return ResponseEntity.ok(response);
-    }
-
     private void authorizeUser(UUID userId, CustomUserDetails user) {
         if (!user.id().equals(userId)) {
             throw new UserAccessDeniedException(user.id());
         }
     }
 }
+

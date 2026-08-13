@@ -44,6 +44,10 @@ public class JwtTokenProvider {
         return generateToken(email, role, jwtProperties.getAccessTokenValidityInMs(), TOKEN_TYPE_ACCESS);
     }
 
+    public String createCustomAccessToken(String email, String role, long validityInMilliseconds) {
+        return generateToken(email, role, validityInMilliseconds, TOKEN_TYPE_ACCESS);
+    }
+
     public String createRefreshToken(String email, String role) {
         return generateToken(email, role, jwtProperties.getRefreshTokenValidityInMs(), TOKEN_TYPE_REFRESH);
     }

@@ -32,8 +32,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         if (user.getStatus() == UserStatus.WITHDRAWN) {
             if (user.getWithdrawnAt() == null || user.getWithdrawnAt().isBefore(java.time.LocalDateTime.now().minusWeeks(1))) {
-                throw new WithdrawnUserException(); // DisabledException을 상속
+                throw new WithdrawnUserException(); // 1주일 초과 시 로그인 불가
             }
+            // 1주일 이내 탈퇴 유저는 복구를 위해 UserDetails 생성을 진행함
         }
 
         UserResponseDto dto = UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey()));

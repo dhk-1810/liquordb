@@ -1,7 +1,7 @@
 # 로컬 테스트용 docker-compose임. 배포할 땐(ECS) 사용되지 않음.
 # up: docker-compose -f docker-compose.local.yml up -d
 # down: docker-compose -f docker-compose.local.yml down
-# Caused by: java.sql.SQLException: Access denied for user 'root'@'172.18.0.5' (using password: YES)
+
 services:
   app-1:
     build: .
@@ -36,7 +36,7 @@ services:
     networks:
       liquordb-network:
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}

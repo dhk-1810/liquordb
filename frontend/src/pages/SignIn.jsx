@@ -55,6 +55,7 @@ function SignIn() {
               }
             });
             if (restoreRes.ok) {
+              const restoreData = await restoreRes.json().catch(() => ({}));
               window.alert('계정이 성공적으로 복구되었습니다!');
               localStorage.setItem('isLoggedIn', 'true');
               navigate('/');

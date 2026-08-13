@@ -1,7 +1,6 @@
 package com.liquordb.controller;
 
 import com.liquordb.dto.JwtDto;
-import com.liquordb.dto.auth.LoginRequest;
 import com.liquordb.dto.auth.PasswordFindRequest;
 import com.liquordb.dto.auth.PasswordResetRequest;
 import com.liquordb.dto.auth.SignUpRequest;
@@ -64,7 +63,12 @@ public class AuthController {
 
     // 계정 복구
     @PostMapping("/restore")
-    public ResponseEntity<UserResponseDto> restore(@RequestParam String email) {
-        return ResponseEntity.ok(authService.restore(email));
+    public ResponseEntity<JwtDto> restore(@RequestParam String email, HttpServletResponse response) {
+        JwtInformation info = authService.restore(email);
+        if (info.refreshToken() != null) {
+            Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(info.refreshToken());
+            response.addCookie(refreshCookie);
+        }
+        return ResponseEntity.ok(new JwtDto(info.dto(), info.accessToken()));
     }
 }

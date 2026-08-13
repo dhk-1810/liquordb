@@ -159,12 +159,23 @@ public class AuthService {
 
     // 계정 복구
     @Transactional
-    public UserResponseDto restore(String email) {
+    public JwtInformation restore(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(LoginFailedException::new);
+
         user.restore();
         userRepository.save(user);
-        return UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey()));
+
+        UserResponseDto dto = UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey()));
+
+        // 정식 토큰 및 레지스트리 생성
+        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
+
+        jwtRegistry.registerRefreshToken(user.getId(), refreshToken);
+
+        return new JwtInformation(dto, accessToken, refreshToken);
     }
 }
+
