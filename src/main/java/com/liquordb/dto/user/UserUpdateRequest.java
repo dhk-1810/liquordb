@@ -15,7 +15,9 @@ public record UserUpdateRequest(
 
         String username,
 
-        Boolean deleteProfileImage
+        Boolean deleteProfileImage,
+
+        org.springframework.web.multipart.MultipartFile profileImage
 ){
 
 }

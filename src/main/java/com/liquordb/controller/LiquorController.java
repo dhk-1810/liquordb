@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/liquors")
+@RequestMapping("/api")
 public class LiquorController {
 
     private final LiquorService liquorService;
@@ -30,7 +30,7 @@ public class LiquorController {
     private final LiquorLikeService liquorLikeService;
 
     // 인기 주류 조회
-    @GetMapping("/trending")
+    @GetMapping("/liquors/trending")
     public ResponseEntity<List<LiquorSummaryDto>> getTrending(
             @RequestParam(defaultValue = "THREE_HOURS") PeriodType period,
             @AuthenticationPrincipal CustomUserDetails user
@@ -41,7 +41,7 @@ public class LiquorController {
     }
 
     // 주류 목록 조회 (전체 조회 또는 대분류, 소분류별로 필터링)
-    @GetMapping
+    @GetMapping("/liquors")
     public ResponseEntity<CursorPageResponse<LiquorSummaryDto>> getAll(
             @ModelAttribute LiquorListGetRequest request,
             @AuthenticationPrincipal CustomUserDetails user
@@ -53,7 +53,7 @@ public class LiquorController {
     }
 
     // 주류 단건 조회
-    @GetMapping("/{liquorId}")
+    @GetMapping("/liquors/{liquorId}")
     public ResponseEntity<LiquorResponseDto> getLiquorDetail(
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
@@ -64,7 +64,7 @@ public class LiquorController {
     }
 
     // 좋아요
-    @PostMapping("/{liquorId}/like")
+    @PostMapping("/liquors/{liquorId}/like")
     public ResponseEntity<Void> like(
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user
@@ -74,7 +74,7 @@ public class LiquorController {
     }
 
     // 좋아요 취소
-    @DeleteMapping("/{liquorId}/cancel-like")
+    @DeleteMapping("/liquors/{liquorId}/cancel-like")
     public ResponseEntity<Void> cancelLike(
             @PathVariable Long liquorId,
             @AuthenticationPrincipal CustomUserDetails user

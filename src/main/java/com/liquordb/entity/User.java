@@ -105,6 +105,7 @@ public class User {
     public void restore() {
         if (this.status.isAvailable()) return;
         this.status = UserStatus.ACTIVE;
+        this.withdrawnAt = null;
     }
 
 }

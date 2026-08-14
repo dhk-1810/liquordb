@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liquordb.dto.JwtDto;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.user.UserRepository;
 import com.liquordb.service.AuthService;
@@ -30,24 +31,27 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
     private final ObjectMapper objectMapper; // JSON 변환
+    private static final long TEMP_ACCESS_TOKEN_LIFETIME = 5 * 60 * 1000L;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) throws IOException {
 
         // 사용자 정보 추출
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         UserResponseDto userDto = userDetails.dto();
 
         String accessToken;
-        if (userDto.status() == com.liquordb.enums.UserStatus.WITHDRAWN) {
+        if (userDto.status() == UserStatus.WITHDRAWN) {
             // 탈퇴 계정은 복구를 위해 5분 유효기간의 임시 AccessToken만 발급 (RefreshToken 생성 및 저장 안 함)
-            long fiveMinutesInMs = 5 * 60 * 1000L;
+
             accessToken = jwtTokenProvider.createCustomAccessToken(
                     userDto.email(),
                     userDto.role().name(),
-                    fiveMinutesInMs
+                    TEMP_ACCESS_TOKEN_LIFETIME
             );
         } else {
             // 정상 계정인 경우 정상 토큰 및 RefreshToken 쿠키 발행

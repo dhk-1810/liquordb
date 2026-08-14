@@ -33,7 +33,6 @@ public record CustomUserDetails (
 
     @Override
     public boolean isEnabled() {
-        return dto.status().isAvailable();
+        return true;
     }
-
 }

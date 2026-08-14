@@ -115,7 +115,8 @@ function NotificationDropdown() {
     }
   };
 
-  const handleClearAll = async () => {
+  const handleClearAll = async (e) => {
+    if (e) e.stopPropagation();
     try {
       const jwtData = await fetchAuthToken();
       await fetch('/api/notifications', {
@@ -127,6 +128,28 @@ function NotificationDropdown() {
       setNotifications([]);
       setUnreadCount(0);
       setIsOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteSingle = async (id, e) => {
+    if (e) e.stopPropagation();
+    try {
+      const jwtData = await fetchAuthToken();
+      await fetch(`/api/notifications/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${jwtData.accessToken}`
+        }
+      });
+      setNotifications(prev => {
+        const target = prev.find(n => n.id === id);
+        if (target && !target.isRead) {
+          setUnreadCount(count => Math.max(0, count - 1));
+        }
+        return prev.filter(n => n.id !== id);
+      });
     } catch (err) {
       console.error(err);
     }
@@ -163,7 +186,7 @@ function NotificationDropdown() {
             <h3 className="font-bold text-slate-800">Notifications</h3>
             {notifications.length > 0 && (
               <button 
-                onClick={handleClearAll}
+                onClick={(e) => handleClearAll(e)}
                 className="text-xs font-semibold text-slate-400 hover:text-red-500 transition-colors"
               >
                 Clear All
@@ -182,10 +205,10 @@ function NotificationDropdown() {
                   <li 
                     key={notification.id} 
                     onClick={() => handleNotificationClick(notification)}
-                    className={`p-4 hover:bg-slate-50 cursor-pointer transition-colors ${!notification.isRead ? 'bg-amber-50/30' : ''}`}
+                    className={`p-4 hover:bg-slate-50 cursor-pointer transition-colors group ${!notification.isRead ? 'bg-amber-50/30' : ''}`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-grow">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-grow min-w-0">
                         <p className={`text-sm ${!notification.isRead ? 'font-bold text-slate-800' : 'font-medium text-slate-600'}`}>
                           {notification.title}
                         </p>
@@ -194,9 +217,20 @@ function NotificationDropdown() {
                           {new Date(notification.createdAt).toLocaleString()}
                         </p>
                       </div>
-                      {!notification.isRead && (
-                        <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 mt-1"></div>
-                      )}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {!notification.isRead && (
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                        )}
+                        <button
+                          onClick={(e) => handleDeleteSingle(notification.id, e)}
+                          className="text-slate-300 hover:text-red-500 p-1 rounded-md transition-colors opacity-70 hover:opacity-100"
+                          title="Delete notification"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
+    @Transactional(readOnly = true)
     public List<NotificationResponseDto> get(NotificationListGetRequest request, UUID userId) {
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -27,6 +29,7 @@ public class NotificationService {
         return notifications.stream().map(NotificationResponseDto::toDto).toList();
     }
 
+    @Transactional
     public void read(Long id, UUID userId) {
 
         Notification notification = notificationRepository.findById(id)
@@ -38,6 +41,7 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional
     public void delete(Long id, UUID userId) {
 
         Notification notification = notificationRepository.findById(id)
@@ -48,6 +52,7 @@ public class NotificationService {
         notificationRepository.deleteById(id);
     }
 
+    @Transactional
     public void clear(UUID userId){
         notificationRepository.deleteAllByReceiverId(userId);
     }

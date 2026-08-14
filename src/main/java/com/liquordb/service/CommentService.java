@@ -77,12 +77,14 @@ public class CommentService {
         review.increaseCommentCount();
         reviewRepository.save(review);
 
-        eventPublisher.publishEvent(new CommentCreatedEvent(
-                review.getUser().getId(),
-                comment.getId(),
-                review.getLiquor().getId(),
-                user.getUsername())
-        );
+        if (!review.getUser().getId().equals(userId)) {
+            eventPublisher.publishEvent(new CommentCreatedEvent(
+                    review.getUser().getId(),
+                    comment.getId(),
+                    review.getLiquor().getId(),
+                    user.getUsername())
+            );
+        }
         return CommentMapper.toDto(comment, s3Service.getProfileImageUrl(comment.getUser().getProfileImageKey()), false);
     }
 

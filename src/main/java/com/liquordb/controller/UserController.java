@@ -42,12 +42,13 @@ public class UserController {
     public ResponseEntity<JwtDto> update(
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
             @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
             @AuthenticationPrincipal CustomUserDetails user,
             HttpServletResponse response) {
         authorizeUser(userId, user);
-        JwtInformation newInfo = userService.update(userId, request, profileImage, refreshToken);
+        MultipartFile fileToUpload = (profileImage != null && !profileImage.isEmpty()) ? profileImage : request.profileImage();
+        JwtInformation newInfo = userService.update(userId, request, fileToUpload, refreshToken);
         if (newInfo.refreshToken() != null) {
             Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(newInfo.refreshToken());
             response.addCookie(refreshCookie);

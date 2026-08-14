@@ -58,7 +58,7 @@ function SignIn() {
               const restoreData = await restoreRes.json().catch(() => ({}));
               window.alert('계정이 성공적으로 복구되었습니다!');
               localStorage.setItem('isLoggedIn', 'true');
-              navigate('/');
+              window.location.href = '/';
             } else {
               const err = await restoreRes.json().catch(() => ({}));
               throw new Error(err.message || 'Failed to restore account');

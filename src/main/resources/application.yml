@@ -66,3 +66,6 @@ jwt:
   issuer: ${JWT_ISSUER}
   access-token-validity-in-ms: ${JWT_ACCESS_TOKEN_VALIDITY}
   refresh-token-validity-in-ms: ${JWT_REFRESH_TOKEN_VALIDITY}
+
+cors:
+  allowed-origins: ${AWS_CLOUDFRONT_DOMAIN}

@@ -4,6 +4,7 @@ import com.liquordb.entity.id.LiquorTagId;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "liquors_tags")
+@EntityListeners(AuditingEntityListener.class)
 public class LiquorTag {
 
     @EmbeddedId

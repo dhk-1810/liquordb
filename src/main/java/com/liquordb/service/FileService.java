@@ -46,7 +46,7 @@ public class FileService {
             throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.");
         }
 
-        File metadata = File.create(key, file.getName(), type);
+        File metadata = File.create(key, type);
         fileRepository.save(metadata);
 
         return FileResponseDto.toDto(metadata);
