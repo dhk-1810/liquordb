@@ -205,7 +205,12 @@
     "errorUpdating": "Error updating comment",
     "errorPosting": "Error posting comment.",
     "translate": "Translate",
-    "showOriginal": "Show original"
+    "showOriginal": "Show original",
+    "reply": "Reply",
+    "replyCount": "View {{count}} replies",
+    "hideReplies": "Hide replies",
+    "replyTo": "Replying to @{{username}}",
+    "cancelReply": "Cancel Reply"
   },
   "auth": {
     "signIn": {

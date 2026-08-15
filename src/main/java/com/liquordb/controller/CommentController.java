@@ -51,6 +51,17 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
+    // 특정 댓글의 답글 목록 조회 (작성일/ID 오래된 순)
+    @GetMapping("/comments/{commentId}/replies")
+    public ResponseEntity<java.util.List<CommentResponseDto>> getReplies(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        UUID currentUserId = user != null ? user.id() : null;
+        java.util.List<CommentResponseDto> replies = commentService.getRepliesByParentId(commentId, currentUserId);
+        return ResponseEntity.ok(replies);
+    }
+
     // 특정 사용자의 댓글 조회
     @GetMapping("/users/{userId}/comments")
     public ResponseEntity<CursorPageResponse<CommentResponseDto>> getByUserId(

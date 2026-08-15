@@ -35,7 +35,8 @@ public class ReviewLikeService {
             throw new ReviewLikeAlreadyExistsException(reviewId, userId);
         }
 
-        User user = userRepository.getReferenceById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         Review review = reviewRepository.findByIdAndStatusWithUser(reviewId, Review.ReviewStatus.ACTIVE)
                 .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
@@ -46,7 +47,7 @@ public class ReviewLikeService {
         ReviewLike reviewLike = ReviewLike.create(user, review);
 
         try {
-            reviewLikeRepository.save(reviewLike);
+            reviewLikeRepository.saveAndFlush(reviewLike);
         } catch (DataIntegrityViolationException e) {
             throw new ReviewNotFoundException(reviewId);
         }
@@ -62,6 +63,7 @@ public class ReviewLikeService {
                 .orElseThrow(() -> new ReviewLikeNotFoundException(reviewId, userId));
 
         reviewLikeRepository.delete(reviewLike);
+        reviewLikeRepository.flush();
         reviewRepository.updateLikeCount(reviewId, -1);
         eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, false, null, null, null));
     }

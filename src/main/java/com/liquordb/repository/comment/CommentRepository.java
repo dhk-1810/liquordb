@@ -20,6 +20,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, CustomC
     @Query("SELECT c FROM Comment c JOIN FETCH c.user WHERE c.id = :commentId AND c.status = :status")
     Optional<Comment> findByIdWAndStatusWithUser(@Param("commentId") Long commentId, @Param("status") Comment.CommentStatus status);
 
+    // 특정 부모 댓글의 답글 목록 조회 (작성일/ID 오래된 순)
+    java.util.List<Comment> findByParentIdAndStatusOrderByCreatedAtAscIdAsc(Long parentId, Comment.CommentStatus status);
+
     // 특정 유저가 작성한 댓글 수
     long countByUser_IdAndStatus(UUID userId, Comment.CommentStatus status);
 

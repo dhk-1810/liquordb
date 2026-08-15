@@ -36,7 +36,8 @@ public class CommentLikeService {
         }
 
         // 작성자
-        User user = userRepository.getReferenceById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         Comment comment = commentRepository.findByIdWAndStatusWithUser(commentId, Comment.CommentStatus.ACTIVE)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
@@ -48,7 +49,7 @@ public class CommentLikeService {
         CommentLike commentLike = CommentLike.create(user, comment);
 
         try {
-            commentLikeRepository.save(commentLike);
+            commentLikeRepository.saveAndFlush(commentLike);
         } catch (DataIntegrityViolationException e) {
             throw new CommentNotFoundException(commentId);
         }
@@ -64,6 +65,7 @@ public class CommentLikeService {
                 .orElseThrow(() -> new CommentLikeNotFoundException(commentId, userId));
 
         commentLikeRepository.delete(commentLike);
+        commentLikeRepository.flush();
         commentRepository.updateLikeCount(commentId, -1);
         eventPublisher.publishEvent(new CommentLikeEvent(commentId, false, null, null, null));
     }

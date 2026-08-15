@@ -2,14 +2,14 @@ package com.liquordb.repository;
 
 import com.liquordb.entity.Review;
 import com.liquordb.entity.ReviewLike;
-import com.liquordb.entity.User;
+import com.liquordb.entity.id.ReviewLikeId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
+public interface ReviewLikeRepository extends JpaRepository<ReviewLike, ReviewLikeId> {
 
     long countByReview_Id(Long reviewId);
 

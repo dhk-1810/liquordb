@@ -32,6 +32,7 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
         List<Comment> content = queryFactory.selectFrom(comment)
                 .where(
                         reviewIdEq(condition.reviewId()),
+                        comment.parent.id.isNull(),
                         statusEq(condition.status()),
                         cursorCondition(condition.cursor(), condition.idAfter(), condition.useId(), condition.descending())
                 )

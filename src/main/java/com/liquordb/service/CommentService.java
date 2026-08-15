@@ -145,6 +145,16 @@ public class CommentService {
         return CursorPageResponse.from(response, nextCursor);
     }
 
+    // 특정 부모 댓글의 답글 목록 조회 (작성일/ID 오래된 순)
+    @Transactional(readOnly = true)
+    public List<CommentResponseDto> getRepliesByParentId(Long parentId, UUID userId) {
+        List<Comment> replies = commentRepository.findByParentIdAndStatusOrderByCreatedAtAscIdAsc(parentId, Comment.CommentStatus.ACTIVE);
+        return replies.stream().map(c -> {
+            boolean likedByMe = userId != null && commentLikeRepository.existsByComment_IdAndUser_Id(c.getId(), userId);
+            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe);
+        }).toList();
+    }
+
     // 특정 유저가 작성한 댓글 조회
     @Transactional(readOnly = true)
     public CursorPageResponse<CommentResponseDto> getByUserId(UUID userId, CommentListGetRequest request, UUID currentUserId) {

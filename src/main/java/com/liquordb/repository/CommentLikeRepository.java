@@ -2,12 +2,13 @@ package com.liquordb.repository;
 
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.CommentLike;
+import com.liquordb.entity.id.CommentLikeId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> {
+public interface CommentLikeRepository extends JpaRepository<CommentLike, CommentLikeId> {
 
     // 유저가 좋아요 댓글 개수 - 마이페이지에서 사용
     long countByUser_IdAndCommentStatus(UUID userId, Comment.CommentStatus commentStatus);

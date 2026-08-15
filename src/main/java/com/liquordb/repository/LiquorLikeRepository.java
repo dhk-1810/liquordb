@@ -1,9 +1,8 @@
 package com.liquordb.repository;
 
 import com.liquordb.entity.LiquorLike;
-import com.liquordb.entity.User;
+import com.liquordb.entity.id.LiquorLikeId;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public interface LiquorLikeRepository extends JpaRepository<LiquorLike, Long> {
+public interface LiquorLikeRepository extends JpaRepository<LiquorLike, LiquorLikeId> {
 
     long countByLiquor_Id(Long liquorId);
 

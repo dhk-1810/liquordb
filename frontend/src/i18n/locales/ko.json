@@ -205,7 +205,12 @@
     "errorUpdating": "댓글 수정 중 오류가 발생했습니다.",
     "errorPosting": "댓글 등록 중 오류가 발생했습니다.",
     "translate": "번역하기",
-    "showOriginal": "원본 보기"
+    "showOriginal": "원본 보기",
+    "reply": "답글",
+    "replyCount": "답글 {{count}}개 보기",
+    "hideReplies": "답글 숨기기",
+    "replyTo": "{{username}}님에게 답글 작성 중",
+    "cancelReply": "답글 취소"
   },
   "auth": {
     "signIn": {
