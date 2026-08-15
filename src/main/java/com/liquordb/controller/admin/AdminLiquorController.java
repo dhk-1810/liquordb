@@ -18,6 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminLiquorController {
 
     private final LiquorService liquorService;
+    private final com.liquordb.service.CocktailSeederService cocktailSeederService;
+
+    // 수동 칵테일 데이터 시딩 (TheCocktailDB 1회 수집)
+    @PostMapping("/seed/cocktails")
+    public ResponseEntity<String> seedCocktails() {
+        cocktailSeederService.seedCocktailsAsync();
+        return ResponseEntity.ok("Cocktail seeding started asynchronously. Check application logs for progress.");
+    }
 
     // 주류 추가
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})

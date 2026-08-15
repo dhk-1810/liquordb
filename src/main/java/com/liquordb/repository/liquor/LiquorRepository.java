@@ -41,4 +41,7 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiq
     // 좋아요 많은 순 조회 (Fallback용)
     @Query("SELECT l FROM Liquor l WHERE l.isDeleted = false ORDER BY l.likeCount DESC, l.id DESC")
     List<Liquor> findTopLikedLiquors(Pageable pageable);
+
+    // 이름 중복 확인 (시더용)
+    boolean existsByName(String name);
 }

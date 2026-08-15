@@ -1,0 +1,403 @@
+openapi: 3.1.0
+info:
+  title: TheCocktailDB API
+  version: "1.0"
+  description: >-
+    Search and browse TheCocktailDB's crowd-sourced cocktail, drink, and
+    ingredient data. Access level and result limits depend on the supplied API
+    key. Obtain access and review current terms on the official documentation
+    page. API keys are deliberately not included in this specification.
+  termsOfService: https://www.thecocktaildb.com/terms_of_use.php
+  contact:
+    name: TheCocktailDB
+    url: https://www.thecocktaildb.com/contact.php
+    email: thedatadb@gmail.com
+  license:
+    name: TheCocktailDB Terms of Use
+    url: https://www.thecocktaildb.com/terms_of_use.php
+externalDocs:
+  description: Official API documentation
+  url: https://www.thecocktaildb.com/documentation
+servers:
+  - url: https://www.thecocktaildb.com/api/json/v1
+    description: Production API
+tags:
+  - name: Search
+  - name: Lookup
+  - name: Filter
+  - name: Lists
+  - name: Discovery
+paths:
+  /{apiKey}/search.php:
+    get:
+      tags: [Search]
+      summary: Search for cocktails or ingredients
+      description: >-
+        Supply exactly one search parameter. Use `s` for a cocktail-name
+        search, `f` for cocktails beginning with one letter, or `i` for an
+        ingredient-name search.
+      operationId: searchV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+        - $ref: "#/components/parameters/DrinkName"
+        - $ref: "#/components/parameters/FirstLetter"
+        - $ref: "#/components/parameters/IngredientName"
+      responses:
+        "200":
+          description: Matching cocktails or ingredients
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/DrinksResponse"
+                  - $ref: "#/components/schemas/IngredientsResponse"
+  /{apiKey}/lookup.php:
+    get:
+      tags: [Lookup]
+      summary: Look up a cocktail or ingredient by ID
+      description: Supply exactly one of `i` or `iid`.
+      operationId: lookupV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+        - $ref: "#/components/parameters/DrinkId"
+        - $ref: "#/components/parameters/IngredientId"
+      responses:
+        "200":
+          description: Full cocktail or ingredient record
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/DrinksResponse"
+                  - $ref: "#/components/schemas/IngredientsResponse"
+  /{apiKey}/filter.php:
+    get:
+      tags: [Filter]
+      summary: Filter cocktails
+      description: >-
+        Supply exactly one filter: ingredient (`i`), glass (`g`), category
+        (`c`), or alcoholic classification (`a`). Availability of multiple
+        comma-separated ingredients depends on the API access level.
+      operationId: filterV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+        - $ref: "#/components/parameters/FilterIngredient"
+        - $ref: "#/components/parameters/Glass"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/Alcoholic"
+      responses:
+        "200":
+          description: Matching cocktail summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DrinkSummariesResponse"
+  /{apiKey}/list.php:
+    get:
+      tags: [Lists]
+      summary: List filter values
+      description: >-
+        Supply exactly one parameter with the literal value `list`: `c` for
+        categories, `g` for glasses, `i` for ingredients, or `a` for alcoholic
+        classifications.
+      operationId: listFiltersV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+        - $ref: "#/components/parameters/ListCategories"
+        - $ref: "#/components/parameters/ListGlasses"
+        - $ref: "#/components/parameters/ListIngredients"
+        - $ref: "#/components/parameters/ListAlcoholic"
+      responses:
+        "200":
+          description: Available filter values
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListResponse"
+  /{apiKey}/random.php:
+    get:
+      tags: [Discovery]
+      summary: Get one random cocktail
+      operationId: randomCocktailV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+      responses:
+        "200":
+          $ref: "#/components/responses/Drinks"
+  /{apiKey}/randomselection.php:
+    get:
+      tags: [Discovery]
+      summary: Get a random cocktail selection
+      description: Selection size depends on the API access level.
+      operationId: randomSelectionV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+      responses:
+        "200":
+          $ref: "#/components/responses/Drinks"
+  /{apiKey}/popular.php:
+    get:
+      tags: [Discovery]
+      summary: Get popular cocktails
+      description: Availability and result count depend on the API access level.
+      operationId: popularCocktailsV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+      responses:
+        "200":
+          $ref: "#/components/responses/Drinks"
+  /{apiKey}/latest.php:
+    get:
+      tags: [Discovery]
+      summary: Get the latest cocktails
+      description: Availability and result count depend on the API access level.
+      operationId: latestCocktailsV1
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+      responses:
+        "200":
+          $ref: "#/components/responses/Drinks"
+components:
+  parameters:
+    ApiKey:
+      name: apiKey
+      in: path
+      required: true
+      description: Your TheCocktailDB API key. No key value is stored in this specification.
+      schema:
+        type: string
+        minLength: 1
+    DrinkName:
+      name: s
+      in: query
+      required: false
+      description: Full or partial cocktail name.
+      schema:
+        type: string
+        minLength: 1
+    FirstLetter:
+      name: f
+      in: query
+      required: false
+      description: First letter of a cocktail name.
+      schema:
+        type: string
+        pattern: "^[A-Za-z]$"
+    IngredientName:
+      name: i
+      in: query
+      required: false
+      description: Full or partial ingredient name.
+      schema:
+        type: string
+        minLength: 1
+    DrinkId:
+      name: i
+      in: query
+      required: false
+      description: Numeric cocktail ID.
+      schema:
+        type: integer
+        minimum: 1
+    IngredientId:
+      name: iid
+      in: query
+      required: false
+      description: Numeric ingredient ID.
+      schema:
+        type: integer
+        minimum: 1
+    FilterIngredient:
+      name: i
+      in: query
+      required: false
+      description: Ingredient name, or comma-separated ingredient names when supported.
+      schema:
+        type: string
+        minLength: 1
+    Glass:
+      name: g
+      in: query
+      required: false
+      description: Glass name. Spaces may be represented by underscores.
+      schema:
+        type: string
+        minLength: 1
+    Category:
+      name: c
+      in: query
+      required: false
+      description: Category name. Spaces may be represented by underscores.
+      schema:
+        type: string
+        minLength: 1
+    Alcoholic:
+      name: a
+      in: query
+      required: false
+      description: Alcoholic classification. Spaces may be represented by underscores.
+      schema:
+        type: string
+        minLength: 1
+    ListCategories:
+      name: c
+      in: query
+      required: false
+      schema:
+        type: string
+        const: list
+    ListGlasses:
+      name: g
+      in: query
+      required: false
+      schema:
+        type: string
+        const: list
+    ListIngredients:
+      name: i
+      in: query
+      required: false
+      schema:
+        type: string
+        const: list
+    ListAlcoholic:
+      name: a
+      in: query
+      required: false
+      schema:
+        type: string
+        const: list
+  responses:
+    Drinks:
+      description: Cocktail records
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DrinksResponse"
+  schemas:
+    DrinksResponse:
+      type: object
+      required: [drinks]
+      properties:
+        drinks:
+          oneOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/Drink"
+            - type: string
+              description: Legacy no-data message.
+    DrinkSummariesResponse:
+      type: object
+      required: [drinks]
+      properties:
+        drinks:
+          oneOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/DrinkSummary"
+            - type: string
+              description: Legacy no-data message.
+    IngredientsResponse:
+      type: object
+      required: [ingredients]
+      properties:
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Ingredient"
+    ListResponse:
+      type: object
+      required: [drinks]
+      properties:
+        drinks:
+          oneOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/ListValue"
+            - type: "null"
+    DrinkSummary:
+      type: object
+      required: [idDrink, strDrink]
+      properties:
+        idDrink:
+          type: string
+          description: Numeric identifier serialized as a string.
+        strDrink:
+          type: string
+        strDrinkThumb:
+          type: [string, "null"]
+          format: uri
+    Drink:
+      allOf:
+        - $ref: "#/components/schemas/DrinkSummary"
+        - type: object
+          properties:
+            strDrinkAlternate:
+              type: [string, "null"]
+            strTags:
+              type: [string, "null"]
+            strVideo:
+              type: [string, "null"]
+              format: uri
+            strCategory:
+              type: [string, "null"]
+            strIBA:
+              type: [string, "null"]
+            strAlcoholic:
+              type: [string, "null"]
+            strGlass:
+              type: [string, "null"]
+            strInstructions:
+              type: [string, "null"]
+            strInstructionsES:
+              type: [string, "null"]
+            strInstructionsDE:
+              type: [string, "null"]
+            strInstructionsFR:
+              type: [string, "null"]
+            strInstructionsIT:
+              type: [string, "null"]
+            strInstructionsZH-HANS:
+              type: [string, "null"]
+            strInstructionsZH-HANT:
+              type: [string, "null"]
+            strImageSource:
+              type: [string, "null"]
+            strImageAttribution:
+              type: [string, "null"]
+            strCreativeCommonsConfirmed:
+              type: string
+            dateModified:
+              type: [string, "null"]
+              description: Database timestamp in `YYYY-MM-DD HH:MM:SS` format.
+          patternProperties:
+            "^strIngredient([1-9]|1[0-5])$":
+              type: [string, "null"]
+            "^strMeasure([1-9]|1[0-5])$":
+              type: [string, "null"]
+    Ingredient:
+      type: object
+      properties:
+        idIngredient:
+          type: string
+          description: Numeric identifier serialized as a string.
+        strIngredient:
+          type: [string, "null"]
+        strDescription:
+          type: [string, "null"]
+        strType:
+          type: [string, "null"]
+        strAlcohol:
+          type: [string, "null"]
+        strABV:
+          oneOf:
+            - type: integer
+            - type: string
+            - type: "null"
+    ListValue:
+      type: object
+      description: >-
+        Contains one of `strCategory`, `strGlass`, `strIngredient1`, or
+        `strAlcoholic`, according to the requested list.
+      additionalProperties:
+        type: [string, "null"]

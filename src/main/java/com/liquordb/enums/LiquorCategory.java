@@ -1,5 +1,5 @@
 package com.liquordb.enums;
 
 public enum LiquorCategory {
-    BEER, WINE, WHISKY, OTHER
+    BEER, WINE, WHISKY, COCKTAIL, OTHER
 }
