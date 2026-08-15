@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/admin/comments")
 @RequiredArgsConstructor
+@RequestMapping("/api/admin/comments")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminCommentController {
 
     private final CommentService commentService;

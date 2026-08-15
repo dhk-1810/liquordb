@@ -1,5 +1,6 @@
 {
   "nav": {
+    "admin": "Admin",
     "home": "Home",
     "liquors": "Liquors",
     "notices": "Notices",

@@ -1,5 +1,6 @@
 {
   "nav": {
+    "admin": "관리자",
     "home": "홈",
     "liquors": "주류",
     "notices": "공지사항",

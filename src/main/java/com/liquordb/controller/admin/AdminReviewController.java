@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/admin/reviews")
 @RequiredArgsConstructor
+@RequestMapping("/api/admin/reviews")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminReviewController {
 
     private final ReviewService reviewService;

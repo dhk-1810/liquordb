@@ -48,16 +48,28 @@ public class S3Service {
         if (key == null || key.isBlank()) {
             return "/" + DEFAULT_LIQUOR_IMAGE_SUFFIX;
         }
+        if (key.startsWith("http://") || key.startsWith("https://")) {
+            return key;
+        }
         return s3Properties.cloudfrontDomain() + key;
     }
 
     public String getReviewImageUrl(String key) {
+        if (key == null || key.isBlank()) {
+            return null;
+        }
+        if (key.startsWith("http://") || key.startsWith("https://")) {
+            return key;
+        }
         return s3Properties.cloudfrontDomain() + key;
     }
 
     public String getProfileImageUrl(String key) {
         if (key == null || key.isBlank()) {
             return "/" + DEFAULT_PROFILE_IMAGE_SUFFIX;
+        }
+        if (key.startsWith("http://") || key.startsWith("https://")) {
+            return key;
         }
         return s3Properties.cloudfrontDomain() + key;
     }

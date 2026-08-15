@@ -15,6 +15,7 @@ import MyActivityList from './pages/MyActivityList';
 import FindPassword from './pages/FindPassword';
 import ResetPassword from './pages/ResetPassword';
 import Withdraw from './pages/Withdraw';
+import Admin from './pages/Admin';
 import NotificationDropdown from './components/NotificationDropdown';
 import { fetchAuthToken } from './utils/auth';
 
@@ -52,6 +53,8 @@ function AppContent() {
   const location = useLocation();
   const { t } = useTranslation();
 
+  const isAdmin = user?.role === 'ADMIN';
+  const isAdminActive = location.pathname.startsWith('/admin');
   const isHomeActive = location.pathname === '/';
   const isLiquorsActive = location.pathname.startsWith('/liquors');
   const isNoticesActive = location.pathname.startsWith('/notices');
@@ -111,6 +114,9 @@ function AppContent() {
             
             <div className="flex items-center text-sm font-medium text-slate-600">
               <div className="hidden sm:flex items-center gap-6">
+                {isAdmin && (
+                  <Link to="/admin" className={`transition-colors font-semibold ${isAdminActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>{t('nav.admin')}</Link>
+                )}
                 <Link to="/" className={`transition-colors font-semibold ${isHomeActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>{t('nav.home')}</Link>
                 <Link to="/liquors" className={`transition-colors font-semibold ${isLiquorsActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>{t('nav.liquors')}</Link>
                 <Link to="/notices" className={`transition-colors font-semibold ${isNoticesActive ? 'text-amber-600 font-bold' : 'text-slate-600 hover:text-amber-600'}`}>{t('nav.notices')}</Link>
@@ -145,6 +151,7 @@ function AppContent() {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
+          {isAdmin && <Route path="/admin" element={<Admin />} />}
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/liquors" element={<LiquorsExplore />} />

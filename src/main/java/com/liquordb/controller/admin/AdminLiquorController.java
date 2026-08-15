@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/admin/liquors")
+@RequestMapping("/api/admin/liquors")
 public class AdminLiquorController {
 
     private final LiquorService liquorService;
