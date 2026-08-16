@@ -20,7 +20,9 @@ public class ReviewMapper {
 
         Review review = Review.create(request, liquor, user);
         ReviewDetail detail = ReviewDetailMapper.toEntity(request.reviewDetailRequest(), review);
-        review.addDetail(detail);
+        if (detail != null) {
+            review.addDetail(detail);
+        }
         return review;
     }
 

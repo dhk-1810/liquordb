@@ -154,20 +154,29 @@ public class LiquorRepositoryImpl implements CustomLiquorRepository{
                 }
                 case LIKE_COUNT -> {
                     Long likeCountCursor = Long.parseLong(cursor);
-                    yield descending
+                    com.querydsl.core.types.dsl.BooleanExpression mainCond = descending
                             ? liquor.likeCount.lt(likeCountCursor)
-                            .or(liquor.likeCount.eq(likeCountCursor).and(liquor.id.lt(idAfter)))
-                            : liquor.likeCount.gt(likeCountCursor)
-                            .or(liquor.likeCount.eq(likeCountCursor).and(liquor.id.gt(idAfter)));
+                            : liquor.likeCount.gt(likeCountCursor);
+                    if (idAfter != null) {
+                        com.querydsl.core.types.dsl.BooleanExpression tieBreaker = descending
+                                ? liquor.likeCount.eq(likeCountCursor).and(liquor.id.lt(idAfter))
+                                : liquor.likeCount.eq(likeCountCursor).and(liquor.id.gt(idAfter));
+                        yield mainCond.or(tieBreaker);
+                    }
+                    yield mainCond;
                 }
                 case AVERAGE_RATING -> {
                     Double avgRatingCursor = Double.parseDouble(cursor);
-                    yield descending
+                    com.querydsl.core.types.dsl.BooleanExpression mainCond = descending
                             ? liquor.averageRating.lt(avgRatingCursor)
-                            .or(liquor.averageRating.eq(avgRatingCursor).and(liquor.id.lt(idAfter)))
-                            : liquor.averageRating.gt(avgRatingCursor)
-                            .or(liquor.averageRating.eq(avgRatingCursor).and(liquor.id.gt(idAfter)));
-
+                            : liquor.averageRating.gt(avgRatingCursor);
+                    if (idAfter != null) {
+                        com.querydsl.core.types.dsl.BooleanExpression tieBreaker = descending
+                                ? liquor.averageRating.eq(avgRatingCursor).and(liquor.id.lt(idAfter))
+                                : liquor.averageRating.eq(avgRatingCursor).and(liquor.id.gt(idAfter));
+                        yield mainCond.or(tieBreaker);
+                    }
+                    yield mainCond;
                 }
                 default -> null;
             };

@@ -122,17 +122,16 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
                 return comment.id.gt(cursor);
             }
         } else { // likeCount로 정렬
-            if (descending) {
-                return comment.likeCount.lt(cursor)
-                        .or(
-                                comment.likeCount.eq(cursor).and(comment.id.lt(idAfter))
-                        );
-            } else {
-                return comment.likeCount.gt(cursor)
-                        .or(
-                                comment.likeCount.eq(cursor).and(comment.id.gt(idAfter))
-                        );
+            com.querydsl.core.types.dsl.BooleanExpression mainCond = descending
+                    ? comment.likeCount.lt(cursor)
+                    : comment.likeCount.gt(cursor);
+            if (idAfter != null) {
+                com.querydsl.core.types.dsl.BooleanExpression tieBreaker = descending
+                        ? comment.likeCount.eq(cursor).and(comment.id.lt(idAfter))
+                        : comment.likeCount.eq(cursor).and(comment.id.gt(idAfter));
+                return mainCond.or(tieBreaker);
             }
+            return mainCond;
         }
     }
 

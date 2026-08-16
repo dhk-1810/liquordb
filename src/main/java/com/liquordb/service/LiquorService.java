@@ -80,12 +80,21 @@ public class LiquorService {
         });
 
         Object nextCursor = null;
+        Long idAfter = null;
         if (response.hasNext()) {
             List<LiquorSummaryDto> content = response.getContent();
-            nextCursor = content.get(content.size() - 1).id();
+            LiquorSummaryDto lastItem = content.get(content.size() - 1);
+            if (sortBy == SortLiquorBy.LIKE_COUNT) {
+                nextCursor = lastItem.likeCount();
+            } else if (sortBy == SortLiquorBy.AVERAGE_RATING) {
+                nextCursor = lastItem.averageRating();
+            } else {
+                nextCursor = lastItem.id();
+            }
+            idAfter = lastItem.id();
         }
 
-        return CursorPageResponse.from(response, nextCursor);
+        return CursorPageResponse.from(response, nextCursor, idAfter);
     }
 
     // 좋아요 누른 주류 목록 조회
@@ -116,12 +125,21 @@ public class LiquorService {
         });
 
         Object nextCursor = null;
+        Long idAfter = null;
         if (response.hasNext()) {
             List<LiquorSummaryDto> content = response.getContent();
-            nextCursor = content.get(content.size() - 1).id();
+            LiquorSummaryDto lastItem = content.get(content.size() - 1);
+            if (sortBy == SortLiquorBy.LIKE_COUNT) {
+                nextCursor = lastItem.likeCount();
+            } else if (sortBy == SortLiquorBy.AVERAGE_RATING) {
+                nextCursor = lastItem.averageRating();
+            } else {
+                nextCursor = lastItem.id();
+            }
+            idAfter = lastItem.id();
         }
 
-        return CursorPageResponse.from(response, nextCursor);
+        return CursorPageResponse.from(response, nextCursor, idAfter);
     }
 
     // 주류 단건 조회

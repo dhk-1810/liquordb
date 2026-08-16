@@ -47,6 +47,7 @@
       "beer": "Beer",
       "wine": "Wine",
       "whisky": "Whisky",
+      "cocktail": "Cocktail",
       "other": "Other"
     },
     "sort": {

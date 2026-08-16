@@ -104,8 +104,10 @@ public class Review extends LikeableEntity {
     }
 
     public void addDetail(ReviewDetail detail) {
-        this.detail = detail;
-        detail.setReview(this);
+        if (detail != null) {
+            this.detail = detail;
+            detail.setReview(this);
+        }
     }
 
     public void update(ReviewUpdateRequest request) {

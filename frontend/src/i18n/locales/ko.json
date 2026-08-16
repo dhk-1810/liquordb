@@ -47,6 +47,7 @@
       "beer": "맥주",
       "wine": "와인",
       "whisky": "위스키",
+      "cocktail": "칵테일",
       "other": "기타"
     },
     "sort": {

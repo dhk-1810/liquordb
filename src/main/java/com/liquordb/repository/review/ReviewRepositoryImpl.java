@@ -170,22 +170,28 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
                 }
             }
             case LIKE_COUNT -> {
-                if (descending) {
-                    return review.likeCount.lt(cursor)
-                            .or(review.likeCount.eq(cursor).and(review.id.lt(idAfter)));
-                } else {
-                    return review.likeCount.gt(cursor)
-                            .or(review.likeCount.eq(cursor).and(review.id.gt(idAfter)));
+                com.querydsl.core.types.dsl.BooleanExpression mainCond = descending
+                        ? review.likeCount.lt(cursor)
+                        : review.likeCount.gt(cursor);
+                if (idAfter != null) {
+                    com.querydsl.core.types.dsl.BooleanExpression tieBreaker = descending
+                            ? review.likeCount.eq(cursor).and(review.id.lt(idAfter))
+                            : review.likeCount.eq(cursor).and(review.id.gt(idAfter));
+                    return mainCond.or(tieBreaker);
                 }
+                return mainCond;
             }
             case COMMENT_COUNT -> {
-                if (descending) {
-                    return review.commentCount.lt(cursor)
-                            .or(review.commentCount.eq(cursor).and(review.id.lt(idAfter)));
-                } else {
-                    return review.commentCount.gt(cursor)
-                            .or(review.commentCount.eq(cursor).and(review.id.gt(idAfter)));
+                com.querydsl.core.types.dsl.BooleanExpression mainCond = descending
+                        ? review.commentCount.lt(cursor)
+                        : review.commentCount.gt(cursor);
+                if (idAfter != null) {
+                    com.querydsl.core.types.dsl.BooleanExpression tieBreaker = descending
+                            ? review.commentCount.eq(cursor).and(review.id.lt(idAfter))
+                            : review.commentCount.eq(cursor).and(review.id.gt(idAfter));
+                    return mainCond.or(tieBreaker);
                 }
+                return mainCond;
             }
             default ->  {
                 return null;
