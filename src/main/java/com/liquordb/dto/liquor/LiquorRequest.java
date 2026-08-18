@@ -12,6 +12,8 @@ public record LiquorRequest(
         @NotBlank(message = "주류 이름은 필수입니다.")
         String name,
 
+        String nameKo,
+
         @NotNull(message = "주류 분류는 필수입니다.")
         LiquorCategory category,
 

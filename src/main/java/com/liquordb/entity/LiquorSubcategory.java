@@ -12,32 +12,38 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "liquor_subcategories")
+@Table(
+        name = "liquor_subcategories",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_category_name", columnNames = {"category", "name"})
+        }
+)
 public class LiquorSubcategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 30)
-    private String name; // 예: 페일에일, 바이젠, 스카치
+    @Column(nullable = false, length = 50)
+    private String name; // 영문 이름 (기본 식별용, 예: Vodka based, Single Malt)
 
-    private String description;
+    @Column(length = 50)
+    private String nameKo; // 한국어 이름 (예: 보드카 베이스, 싱글 몰트)
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private LiquorCategory category; // 대분류: BEER, WHISKY 등
 
-    public LiquorSubcategory(String name, String description, LiquorCategory category) {
+    public LiquorSubcategory(String name, String nameKo, LiquorCategory category) {
         this.name = name;
-        this.description = description;
+        this.nameKo = nameKo;
         this.category = category;
     }
 
-    public static LiquorSubcategory create(String name, String description, LiquorCategory category){
+    public static LiquorSubcategory create(String name, String nameKo, LiquorCategory category){
         return new LiquorSubcategory(
                 name,
-                description,
+                nameKo,
                 category
         );
     }

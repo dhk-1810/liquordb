@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
     void deleteAllByReceiverId(UUID receiverId);
 
     @Query("""

@@ -609,33 +609,134 @@ function LiquorDetail() {
                   </svg>
                   <span className="text-xl font-bold text-slate-800">{(liquor.averageRating ?? 0).toFixed(1)}</span>
                 </div>
-                <span className="text-sm text-slate-500 mt-1 font-medium">{liquor.reviewCount} {t('common.reviews')}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6 my-8 py-8 border-y border-slate-100">
-              <div>
-                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.country')}</p>
-                <p className="text-lg font-medium text-slate-800 flex items-center">
-                  <span className="mr-2">{liquor.countryName === '대한민국' ? '🇰🇷' : liquor.countryName === '미국' ? '🇺🇸' : liquor.countryName === '프랑스' ? '🇫🇷' : liquor.countryName === '일본' ? '🇯🇵' : liquor.countryName === '영국' ? '🇬🇧' : '🌍'}</span>
-                  {liquor.countryName || t('common.unknown')}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.abv')}</p>
-                <p className="text-lg font-medium text-slate-800">{liquor.abv}%</p>
-              </div>
-              <div>
-                <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.manufacturer')}</p>
-                <p className="text-lg font-medium text-slate-800">{liquor.manufacturer || t('common.unknown')}</p>
-              </div>
+              {liquor.category !== 'COCKTAIL' && (
+                <div>
+                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.country')}</p>
+                  <p className="text-lg font-medium text-slate-800 flex items-center">
+                    <span className="mr-2">{liquor.countryName === '대한민국' ? '🇰🇷' : liquor.countryName === '미국' ? '🇺🇸' : liquor.countryName === '프랑스' ? '🇫🇷' : liquor.countryName === '일본' ? '🇯🇵' : liquor.countryName === '영국' ? '🇬🇧' : '🌍'}</span>
+                    {liquor.countryName || t('common.unknown')}
+                  </p>
+                </div>
+              )}
+              {liquor.category === 'COCKTAIL' ? (
+                <div>
+                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.glass', 'Glass')}</p>
+                  <p className="text-lg font-medium text-slate-800">{liquor.liquorDetail?.glass || t('common.unknown')}</p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.abv')}</p>
+                  <p className="text-lg font-medium text-slate-800">{liquor.abv}%</p>
+                </div>
+              )}
+              {liquor.category !== 'COCKTAIL' && (
+                <div>
+                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.manufacturer')}</p>
+                  <p className="text-lg font-medium text-slate-800">{liquor.manufacturer || t('common.unknown')}</p>
+                </div>
+              )}
               {liquor.subcategoryName && (
                 <div>
-                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{t('liquors.style')}</p>
+                  <p className="text-sm text-slate-400 uppercase font-semibold tracking-wider mb-1">{liquor.category === 'COCKTAIL' ? t('liquors.type', 'Type') : t('liquors.style')}</p>
                   <p className="text-lg font-medium text-slate-800">{liquor.subcategoryName}</p>
                 </div>
               )}
             </div>
+
+            {/* Sub-category Specific Details (liquorDetail) */}
+            {liquor.liquorDetail && (
+              <div className="mb-8 p-5 bg-amber-50/50 rounded-2xl border border-amber-100/80 space-y-3 text-sm">
+                {liquor.liquorDetail.type === 'COCKTAIL' && (
+                  <>
+                    {liquor.liquorDetail.glass && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🍸 Glass:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.glass}</span>
+                      </div>
+                    )}
+                    {liquor.liquorDetail.ingredients && (
+                      <div>
+                        <span className="font-bold text-amber-900 block mb-1">🍋 Ingredients:</span>
+                        <p className="text-slate-700 whitespace-pre-line bg-white/70 p-2.5 rounded-xl border border-amber-100">{liquor.liquorDetail.ingredients}</p>
+                      </div>
+                    )}
+                    {liquor.liquorDetail.instructions && (
+                      <div>
+                        <span className="font-bold text-amber-900 block mb-1">📝 Recipe / Instructions:</span>
+                        <p className="text-slate-700 whitespace-pre-line bg-white/70 p-2.5 rounded-xl border border-amber-100">{liquor.liquorDetail.instructions}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {liquor.liquorDetail.type === 'BEER' && (
+                  <>
+                    {liquor.liquorDetail.malts && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🌾 Malts:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.malts}</span>
+                      </div>
+                    )}
+                    {liquor.liquorDetail.hops && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🌿 Hops:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.hops}</span>
+                      </div>
+                    )}
+                    {liquor.liquorDetail.ibu !== null && liquor.liquorDetail.ibu !== undefined && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🍺 IBU:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.ibu}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {liquor.liquorDetail.type === 'WINE' && (
+                  <>
+                    {liquor.liquorDetail.grapeVariety && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🍇 Variety:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.grapeVariety}</span>
+                      </div>
+                    )}
+                    {liquor.liquorDetail.vintage && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🍷 Vintage:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.vintage}</span>
+                      </div>
+                    )}
+                    {liquor.liquorDetail.region && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🗺️ Region:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.region}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {liquor.liquorDetail.type === 'WHISKY' && (
+                  <>
+                    {liquor.liquorDetail.caskType && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">🪵 Cask Type:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.caskType}</span>
+                      </div>
+                    )}
+                    {liquor.liquorDetail.age && (
+                      <div>
+                        <span className="font-bold text-amber-900 mr-2">⏳ Age:</span>
+                        <span className="text-slate-700">{liquor.liquorDetail.age} Years</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Tags */}
             {liquor.tags && liquor.tags.length > 0 && (
@@ -685,7 +786,9 @@ function LiquorDetail() {
       {/* Reviews Section */}
       <div className="mt-16">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-extrabold text-slate-900">{t('reviews.title')}</h2>
+          <h2 className="text-3xl font-extrabold text-slate-900">
+            {t('reviews.title')} <span className="text-slate-500 font-bold">({liquor.reviewCount || 0})</span>
+          </h2>
           <select 
             value={`${reviewSortBy}-${reviewSortDirection}`}
             onChange={(e) => {

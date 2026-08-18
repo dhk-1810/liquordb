@@ -154,7 +154,15 @@ public class LiquorService {
                 .collect(Collectors.toSet());
         boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
         String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
-        return LiquorMapper.toDto(liquor, imageUrl, tags, likedByMe);
+
+        String subcategoryName = null;
+        if (liquor.getSubcategoryId() != null) {
+            subcategoryName = liquorSubcategoryRepository.findById(liquor.getSubcategoryId())
+                    .map(sub -> sub.getNameKo() != null ? sub.getNameKo() : sub.getName())
+                    .orElse(null);
+        }
+
+        return LiquorMapper.toDto(liquor, imageUrl, tags, likedByMe, subcategoryName);
     }
 
     /**
@@ -170,7 +178,13 @@ public class LiquorService {
         liquorRepository.save(liquor);
 
         String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
-        return LiquorMapper.toDto(liquor, imageUrl, null, false);
+        String subcategoryName = null;
+        if (liquor.getSubcategoryId() != null) {
+            subcategoryName = liquorSubcategoryRepository.findById(liquor.getSubcategoryId())
+                    .map(sub -> sub.getNameKo() != null ? sub.getNameKo() : sub.getName())
+                    .orElse(null);
+        }
+        return LiquorMapper.toDto(liquor, imageUrl, null, false, subcategoryName);
     }
 
     // 주류 수정
@@ -193,7 +207,15 @@ public class LiquorService {
         Set<TagResponseDto> tags = liquor.getLiquorTags().stream()
                 .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
-        return LiquorMapper.toDto(liquor, imageUrl, tags, false);
+
+        String subcategoryName = null;
+        if (liquor.getSubcategoryId() != null) {
+            subcategoryName = liquorSubcategoryRepository.findById(liquor.getSubcategoryId())
+                    .map(sub -> sub.getNameKo() != null ? sub.getNameKo() : sub.getName())
+                    .orElse(null);
+        }
+
+        return LiquorMapper.toDto(liquor, imageUrl, tags, false, subcategoryName);
     }
 
     // 주류 삭제 (Soft Delete)
@@ -214,7 +236,7 @@ public class LiquorService {
     @Transactional
     public LiquorSubcategoryResponse createSubcategory(LiquorSubcategoryRequest request) {
         LiquorSubcategory subcategory = LiquorSubcategory
-                .create(request.name(), request.description(), request.category());
+                .create(request.name(), request.nameKo(),request.category());
         liquorSubcategoryRepository.save(subcategory);
         return LiquorSubcategoryResponse.toDto(subcategory);
     }

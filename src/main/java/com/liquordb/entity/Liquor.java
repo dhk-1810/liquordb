@@ -1,5 +1,6 @@
 package com.liquordb.entity;
 
+import com.liquordb.entity.liquordetail.LiquorDetail;
 import com.liquordb.enums.Country;
 import com.liquordb.enums.LiquorCategory;
 import jakarta.persistence.*;
@@ -32,8 +33,11 @@ public class Liquor extends LikeableEntity {
     @Column(nullable = false)
     private boolean isDeleted;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 100)
     private String name;
+
+    @Column(length = 100)
+    private String nameKo;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -64,6 +68,9 @@ public class Liquor extends LikeableEntity {
     @OneToMany(mappedBy = "liquor")
     private Set<LiquorTag> liquorTags = new HashSet<>();
 
+    @OneToOne(mappedBy = "liquor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private LiquorDetail detail;
+
     private String imageKey; // 대표 이미지 사진 저장경로
 
     @CreatedDate
@@ -79,10 +86,11 @@ public class Liquor extends LikeableEntity {
     private Long version;
 
     @Builder
-    private Liquor(String name, LiquorCategory category, Long subcategoryId,
+    private Liquor(String name, String nameKo, LiquorCategory category, Long subcategoryId,
                    Country country, String manufacturer, Double abv, String imageKey) {
         this.isDeleted = false;
         this.name = name;
+        this.nameKo = nameKo;
         this.category = category;
         this.subcategoryId = subcategoryId;
         this.country = country;
@@ -93,10 +101,11 @@ public class Liquor extends LikeableEntity {
         this.imageKey = imageKey;
     }
 
-    public static Liquor create(String name, LiquorCategory category, Long subcategoryId,
+    public static Liquor create(String name, String nameKo, LiquorCategory category, Long subcategoryId,
                                 Country country, String manufacturer, Double abv, String imageKey) {
         return Liquor.builder()
                 .name(name)
+                .nameKo(nameKo)
                 .category(category)
                 .subcategoryId(subcategoryId)
                 .country(country)
@@ -104,6 +113,10 @@ public class Liquor extends LikeableEntity {
                 .abv(abv)
                 .imageKey(imageKey)
                 .build();
+    }
+
+    public void setDetail(LiquorDetail detail) {
+        this.detail = detail;
     }
 
     public void update(Boolean discontinued, Boolean deleteImage) {

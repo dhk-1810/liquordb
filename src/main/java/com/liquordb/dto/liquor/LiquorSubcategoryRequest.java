@@ -8,6 +8,8 @@ public record LiquorSubcategoryRequest(
         @NotBlank(message = "이름으로 공백은 사용할 수 없습니다.")
         String name,
 
+        String nameKo,
+
         String description,
 
         LiquorCategory category

@@ -9,6 +9,7 @@ import lombok.*;
 public record LiquorSummaryDto (
         Long id,
         String name,
+        String nameKo,
         String imageUrl,
         Double averageRating,
         long reviewCount,

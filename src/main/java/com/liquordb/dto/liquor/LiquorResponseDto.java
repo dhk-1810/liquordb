@@ -16,9 +16,10 @@ import java.util.Set;
 public record LiquorResponseDto (
         Long id,
         String name,
+        String nameKo,
         LiquorCategory category,
         Long subcategoryId,
-        Long subcategoryName,
+        String subcategoryName,
 
         @JsonIgnore
         Country country,
@@ -33,7 +34,8 @@ public record LiquorResponseDto (
 
         Set<TagResponseDto> tags,
         long likeCount,
-        boolean likedByMe
+        boolean likedByMe,
+        LiquorDetailResponseDto liquorDetail
 ) {
     public String getCountryName() {
         return country != null ? country.getKoreanName() : "알 수 없음";

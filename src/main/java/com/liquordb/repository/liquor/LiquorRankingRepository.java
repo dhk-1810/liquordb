@@ -6,5 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LiquorRankingRepository extends JpaRepository<LiquorRanking, Long>, CustomLiquorRankingRepository {
 
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
     void deleteByPeriodType(PeriodType periodType);
 }

@@ -8,4 +8,8 @@ import java.util.Optional;
 public interface LiquorSubcategoryRepository extends JpaRepository<LiquorSubcategory, Long> {
 
     Optional<LiquorSubcategory> findByName(String name);
+
+    Optional<LiquorSubcategory> findByNameKo(String nameKo);
+
+    Optional<LiquorSubcategory> findByCategoryAndName(com.liquordb.enums.LiquorCategory category, String name);
 }

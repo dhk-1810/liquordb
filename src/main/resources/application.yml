@@ -7,6 +7,7 @@ spring:
       enabled: always
 
   jpa:
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
     properties:
@@ -16,6 +17,10 @@ spring:
         format_sql: false
         show_sql: false
     open-in-view: false
+
+  sql:
+    init:
+      mode: always
 
   servlet:
     multipart:

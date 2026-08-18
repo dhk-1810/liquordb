@@ -6,14 +6,14 @@ import com.liquordb.enums.LiquorCategory;
 public record LiquorSubcategoryResponse (
         Long id,
         String name,
-        String description,
+        String nameKo,
         LiquorCategory category
 ) {
     public static LiquorSubcategoryResponse toDto(LiquorSubcategory subcategory) {
         return new LiquorSubcategoryResponse(
                 subcategory.getId(),
                 subcategory.getName(),
-                subcategory.getDescription(),
+                subcategory.getNameKo(),
                 subcategory.getCategory()
         );
     }

@@ -86,6 +86,7 @@ public class LiquorRankingService {
     /**
      * 스케줄러에서만 호출
      */
+    @Transactional
     public void calculateAndSaveRanking(PeriodType period) {
 
         String activeKey = ACTIVE_KEY_PREFIX + period.name(); // 활동 발생 주류
