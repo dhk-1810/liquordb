@@ -43,4 +43,5 @@ out/
 .env.*
 .dockerignore
 
-nginx/liquordb-nginx-key-pair.pem
+liquordb-key-pair.pem
+liquordb-app.tar

@@ -8,6 +8,17 @@
     "signUp": "회원가입",
     "signOut": "로그아웃"
   },
+  "admin": {
+    "title": "관리자 대시보드",
+    "subtitle": "시스템 관리 및 데이터 동기화 기능을 수행할 수 있습니다.",
+    "cocktails": "칵테일 정보 관리",
+    "fetchCocktails": "칵테일 정보 조회",
+    "seedCocktails": "외부 칵테일 데이터 수집 (시딩)",
+    "notices": "공지사항 관리",
+    "noticesDesc": "서비스 공지사항을 등록, 수정 및 삭제합니다.",
+    "viewNotices": "공지사항 목록 이동",
+    "writeNotice": "공지사항 작성"
+  },
   "common": {
     "loading": "로딩 중...",
     "error": "오류가 발생했습니다.",
@@ -65,7 +76,7 @@
     "manufacturer": "제조사",
     "style": "스타일",
     "type": "타입",
-    "tastingNotes": "테이스팅 노트 & 태그",
+    "tastingNotes": "태그",
     "writeReview": "리뷰 작성",
     "backToLiquors": "주류 목록으로",
     "notFound": "주류를 찾을 수 없습니다",
@@ -149,7 +160,21 @@
     "noNotices": "공지사항이 없습니다.",
     "backToNotices": "공지사항 목록으로",
     "errorLoading": "공지사항 로딩 오류",
-    "fetchError": "공지사항을 불러오는 중 오류가 발생했습니다."
+    "fetchError": "공지사항을 불러오는 중 오류가 발생했습니다.",
+    "writeNotice": "공지 작성",
+    "editNotice": "공지 수정",
+    "deleteNotice": "공지 삭제",
+    "pinNotice": "상단 고정",
+    "unpinNotice": "고정 해제",
+    "titleLabel": "제목",
+    "contentLabel": "내용",
+    "titlePlaceholder": "제목을 입력하세요",
+    "contentPlaceholder": "공지 내용을 입력하세요...",
+    "confirmDelete": "정말로 이 공지사항을 삭제하시겠습니까?",
+    "createSuccess": "공지사항이 등록되었습니다.",
+    "updateSuccess": "공지사항이 수정되었습니다.",
+    "deleteSuccess": "공지사항이 삭제되었습니다.",
+    "pinSuccess": "상단 고정 상태가 변경되었습니다."
   },
   "mypage": {
     "overview": "개요",

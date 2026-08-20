@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { fetchAuthToken } from '../utils/auth';
 
@@ -126,6 +127,33 @@ function Admin() {
               </svg>
               <span>{t('admin.seedCocktails', '외부 칵테일 데이터 수집 (시딩)')}</span>
             </button>
+          </div>
+        </div>
+
+        {/* Notice Management Card */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+          <div>
+            <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl font-bold mb-4">
+              📢
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">
+              {t('admin.notices', '공지사항 관리')}
+            </h2>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+              {t('admin.noticesDesc', '서비스 공지사항을 등록, 수정 및 삭제합니다.')}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/notices"
+              className="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white py-2.5 px-4 rounded-xl font-semibold transition-all shadow-sm shadow-amber-500/20 flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <span>{t('admin.viewNotices', '공지사항 목록 이동')}</span>
+            </Link>
           </div>
         </div>
       </div>
