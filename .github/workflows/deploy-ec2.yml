@@ -57,7 +57,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT || 22 }}
           source: "liquordb-app.tar.gz,docker-compose.light.yml"
-          target: "/app"
+          target: "/home/ec2-user/app"
 
       - name: Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -67,7 +67,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT || 22 }}
           script: |
-            cd /app
+            cd /home/ec2-user/app
             gunzip -c liquordb-app.tar.gz | docker load
             rm -f liquordb-app.tar.gz
             docker compose -f docker-compose.light.yml up -d
