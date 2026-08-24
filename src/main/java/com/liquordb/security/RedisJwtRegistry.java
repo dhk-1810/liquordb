@@ -25,8 +25,7 @@ public class RedisJwtRegistry implements JwtRegistry {
     private static final int MAX_ACTIVE_JWT_COUNT = 3; // 동시 접속 제한
 
     private final Duration refreshTokenValidity;
-//    private final JwtTokenProvider jwtTokenProvider;
-//    private final ApplicationEventPublisher eventPublisher;
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisLockProvider redisLockProvider;
 
@@ -95,7 +94,11 @@ public class RedisJwtRegistry implements JwtRegistry {
         String lockKey = getRefreshLockKey(userId);
 
         redisLockProvider.acquireLock(lockKey);
-        redisTemplate.delete(userKey);
+        try {
+            redisTemplate.delete(userKey);
+        } finally {
+            redisLockProvider.releaseLock(lockKey);
+        }
     }
 
     @Override
@@ -142,96 +145,4 @@ public class RedisJwtRegistry implements JwtRegistry {
         return BLACKLIST_TOKEN_PREFIX + token;
     }
 
-    private String getBlacklistLockKey(String accessToken) {
-        return BLACKLIST_LOCK_KEY_PREFIX + accessToken;
-    }
-
-    //    @Override
-//    @CacheEvict(value = "users", key = "'all'")
-//    @Retryable(retryFor = RedisLockAcquisitionException.class, maxAttempts = 3,
-//            backoff = @Backoff(delay = 100, multiplier = 2))
-//    public void registerJwtInformation(JwtInformation jwtInformation) {
-//        String userKey = getUserKey(jwtInformation.userId());ㄹ
-//        String lockKey = jwtInformation.userId().toString();
-//
-//        redisLockProvider.acquireLock(lockKey);
-//        try {
-//            Long currentSize = redisTemplate.opsForList().size(userKey);
-//
-//            while (currentSize != null && currentSize >= MAX_ACTIVE_JWT_COUNT) {
-//                Object oldestTokenObj = redisTemplate.opsForList().leftPop(userKey);
-//                if (oldestTokenObj instanceof JwtInformation oldestToken) {
-//                    removeTokenIndex(oldestToken.accessToken(), oldestToken.refreshToken());
-//                }
-//                currentSize = redisTemplate.opsForList().size(userKey);
-//            }
-//
-//            redisTemplate.opsForList().rightPush(userKey, jwtInformation);
-//            redisTemplate.expire(userKey, DEFAULT_TTL);
-//            addTokenIndex(jwtInformation.accessToken(), jwtInformation.refreshToken());
-//
-//        } finally {
-//            redisLockProvider.releaseLock(lockKey);
-//        }
-//
-////        eventPublisher.publishEvent(new UserLogInOutEvent(jwtInformation.userId(), true));
-//    }
-//
-//    @Override
-//    @CacheEvict(value = "users", key = "'all'")
-//    public void invalidateJwtInformationByUserId(UUID userId) {
-//        String userKey = getUserKey(userId);
-//
-//        List<Object> tokens = redisTemplate.opsForList().range(userKey, 0, -1);
-//        if (tokens != null) {
-//            tokens.forEach(tokenObj -> {
-//                if (tokenObj instanceof JwtInformation jwtInfo) {
-//                    removeTokenIndex(jwtInfo.accessToken(), jwtInfo.refreshToken());
-//                }
-//            });
-//        }
-//
-//        redisTemplate.delete(userKey);
-////        eventPublisher.publishEvent(new UserLogInOutEvent(userId, false));
-//    }
-//
-//    @Override
-//    @Retryable(retryFor = RedisLockAcquisitionException.class, maxAttempts = 10,
-//            backoff = @Backoff(delay = 100, multiplier = 2))
-//    public void rotateJwtInformation(String refreshToken, JwtInformation newJwtInfo) {
-//        String userKey = getUserKey(newJwtInfo.userId());
-//        String lockKey = newJwtInfo.userId().toString();
-//
-//        redisLockProvider.acquireLock(lockKey);
-//
-//        try {
-//            // 사용자의 모든 토큰 조회
-//            List<Object> tokens = redisTemplate.opsForList().range(userKey, 0, -1);
-//
-//            if (tokens != null) {
-//                for (int i = 0; i < tokens.size(); i++) {
-//                    if (tokens.get(i) instanceof JwtInformation oldJwtInfo &&
-//                            oldJwtInfo.refreshToken().equals(refreshToken)) {
-//
-//                        removeTokenIndex(oldJwtInfo.accessToken(), oldJwtInfo.refreshToken());
-//
-//                        JwtInformation rotatedJwtInfo = new JwtInformation(
-//                                oldJwtInfo.dto(),
-//                                newJwtInfo.accessToken(),
-//                                newJwtInfo.refreshToken()
-//                        );
-//
-//                        redisTemplate.opsForList().set(userKey, i, rotatedJwtInfo);
-//                        addTokenIndex(newJwtInfo.accessToken(), newJwtInfo.refreshToken());
-//                        redisTemplate.expire(userKey, DEFAULT_TTL);
-//                        log.debug("JWT 로테이션 완료: User={}, NewAccessToken={}", oldJwtInfo.userId(), rotatedJwtInfo.accessToken());
-//                        break;
-//                    }
-//                }
-//            }
-//
-//        } finally {
-//            redisLockProvider.releaseLock(lockKey);
-//        }
-//    }
 }
