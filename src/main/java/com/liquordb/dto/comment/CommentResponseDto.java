@@ -20,6 +20,7 @@ public record CommentResponseDto(
         Comment.CommentStatus status,
         long likeCount,
         boolean likedByMe,
+        long replyCount,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

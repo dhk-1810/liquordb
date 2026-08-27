@@ -119,24 +119,41 @@ function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentC
       });
 
       if (!response.ok) throw new Error('Failed to post comment');
+      const createdComment = await response.json();
       
       if (parentId) {
         setReplyContent('');
         setReplyingToComment(null);
+        // 부모 댓글의 replyCount 증가 및 답글 목록에 새 답글 추가
+        setComments(prev => prev.map(c => 
+          c.id === parentId 
+            ? { ...c, replyCount: (c.replyCount || 0) + 1 } 
+            : c
+        ));
+        setOpenReplies(prev => ({
+          ...prev,
+          [parentId]: {
+            loading: false,
+            list: [...(prev[parentId]?.list || []), createdComment]
+          }
+        }));
       } else {
         setNewComment('');
       }
+
       setCommentCount(prev => {
         const next = prev + 1;
         if (onCommentCountChange) onCommentCountChange(next);
         return next;
       });
       
-      if (sortBy === 'COMMENT_ID' && sortDirection === 'DESC') {
-        loadComments(true);
-      } else {
-        setSortBy('COMMENT_ID');
-        setSortDirection('DESC');
+      if (!parentId) {
+        if (sortBy === 'COMMENT_ID' && sortDirection === 'DESC') {
+          loadComments(true);
+        } else {
+          setSortBy('COMMENT_ID');
+          setSortDirection('DESC');
+        }
       }
       
     } catch (err) {
@@ -366,25 +383,27 @@ function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentC
                     {comment.likeCount > 0 && <span>{comment.likeCount}</span>}
                   </button>
                   
-                  <button
-                    onClick={() => {
-                      if (!currentUser) {
-                        window.alert(t('comments.loginToComment'));
-                        navigate('/signin');
-                        return;
-                      }
-                      if (replyingToComment?.id === comment.id) {
-                        setReplyingToComment(null);
-                        setReplyContent('');
-                      } else {
-                        setReplyingToComment(comment);
-                        setReplyContent('');
-                      }
-                    }}
-                    className="text-slate-400 hover:text-amber-600 transition-colors text-xs font-semibold"
-                  >
-                    {t('comments.reply')}
-                  </button>
+                  {level === 0 && (
+                    <button
+                      onClick={() => {
+                        if (!currentUser) {
+                          window.alert(t('comments.loginToComment'));
+                          navigate('/signin');
+                          return;
+                        }
+                        if (replyingToComment?.id === comment.id) {
+                          setReplyingToComment(null);
+                          setReplyContent('');
+                        } else {
+                          setReplyingToComment(comment);
+                          setReplyContent('');
+                        }
+                      }}
+                      className="text-slate-400 hover:text-amber-600 transition-colors text-xs font-semibold"
+                    >
+                      {t('comments.reply')}
+                    </button>
+                  )}
 
                   {(() => {
                     const hasKorean = isKoreanText(comment.content);
@@ -452,8 +471,8 @@ function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentC
           </form>
         )}
 
-        {/* Toggle View Replies Button (Only for top-level comments) */}
-        {level === 0 && (
+        {/* Toggle View Replies Button (Only for top-level comments with replies) */}
+        {level === 0 && ((comment.replyCount > 0) || (replyState?.list && replyState.list.length > 0)) && (
           <div className="ml-11 mt-2">
             {replyState?.loading ? (
               <div className="text-xs text-amber-600 font-semibold animate-pulse flex items-center gap-1">
@@ -481,7 +500,7 @@ function CommentSection({ reviewId, initialCommentCount, currentUser, onCommentC
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
-                {t('comments.replyCount', '답글 보기')}
+                {t('comments.replyCount', { count: comment.replyCount || 0 })}
               </button>
             )}
           </div>

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,7 +22,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, CustomC
     Optional<Comment> findByIdWAndStatusWithUser(@Param("commentId") Long commentId, @Param("status") Comment.CommentStatus status);
 
     // 특정 부모 댓글의 답글 목록 조회 (작성일/ID 오래된 순)
-    java.util.List<Comment> findByParentIdAndStatusOrderByCreatedAtAscIdAsc(Long parentId, Comment.CommentStatus status);
+    List<Comment> findByParentIdAndStatusOrderByCreatedAtAscIdAsc(Long parentId, Comment.CommentStatus status);
+
+    // 특정 부모 댓글의 활성 답글 수
+    long countByParentIdAndStatus(Long parentId, Comment.CommentStatus status);
 
     // 특정 유저가 작성한 댓글 수
     long countByUser_IdAndStatus(UUID userId, Comment.CommentStatus status);

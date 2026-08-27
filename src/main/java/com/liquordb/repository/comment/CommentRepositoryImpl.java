@@ -10,11 +10,14 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.core.group.GroupBy;
 import org.springframework.data.domain.*;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -103,6 +106,22 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
                         statusEq(condition.commentStatus())
                 );
         return PageableExecutionUtils.getPage(content, PageRequest.of(page, limit), countQuery::fetchOne);
+    }
+
+    @Override
+    public Map<Long, Long> countRepliesByParentIds(List<Long> parentIds, Comment.CommentStatus status) {
+        if (parentIds == null || parentIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return queryFactory
+                .from(comment)
+                .where(
+                        comment.parent.id.in(parentIds),
+                        statusEq(status)
+                )
+                .groupBy(comment.parent.id)
+                .transform(GroupBy.groupBy(comment.parent.id).as(comment.count()));
     }
 
     /**

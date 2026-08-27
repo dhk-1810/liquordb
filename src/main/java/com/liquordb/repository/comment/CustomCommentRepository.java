@@ -6,6 +6,8 @@ import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
+import java.util.Map;
+
 public interface CustomCommentRepository {
 
     // 특정 리뷰에 달린 댓글 조회
@@ -16,4 +18,7 @@ public interface CustomCommentRepository {
 
     // [관리자용] 댓글 전체 조회 - 유저별로 필터링(선택), 상태별로 필터링(선택)
     Page<Comment> findAll(CommentSearchCondition condition);
+
+    // 부모 댓글 ID별 활성 답글 수 집계
+    Map<Long, Long> countRepliesByParentIds(java.util.List<Long> parentIds, Comment.CommentStatus status);
 }

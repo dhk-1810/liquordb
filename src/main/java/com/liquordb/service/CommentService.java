@@ -2,7 +2,6 @@ package com.liquordb.service;
 
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
-import com.liquordb.entity.Liquor;
 import com.liquordb.event.CommentCreatedEvent;
 import com.liquordb.repository.comment.condition.CommentListGetCondition;
 import com.liquordb.repository.comment.condition.CommentSearchCondition;
@@ -37,7 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -70,6 +71,9 @@ public class CommentService {
             if (!parent.getReview().getId().equals(reviewId)) {
                 throw new InvalidParentCommentException(parentId);
             }
+            if (parent.getParent() != null) { // 답글에는 답글 작성 불가
+                throw new InvalidParentCommentException(parentId);
+            }
         }
 
         Comment comment = CommentMapper.toEntity(request, parent, review, user);
@@ -85,7 +89,7 @@ public class CommentService {
                     user.getUsername())
             );
         }
-        return CommentMapper.toDto(comment, s3Service.getProfileImageUrl(comment.getUser().getProfileImageKey()), false);
+        return CommentMapper.toDto(comment, s3Service.getProfileImageUrl(comment.getUser().getProfileImageKey()), false, 0L);
     }
 
     // 댓글 수정
@@ -101,7 +105,8 @@ public class CommentService {
         comment.update(request);
         Comment savedComment = commentRepository.save(comment);
         boolean likedByMe = commentLikeRepository.existsByComment_IdAndUser_Id(commentId, userId);
-        return CommentMapper.toDto(savedComment, s3Service.getProfileImageUrl(savedComment.getUser().getProfileImageKey()), likedByMe);
+        long replyCount = commentRepository.countByParentIdAndStatus(commentId, Comment.CommentStatus.ACTIVE);
+        return CommentMapper.toDto(savedComment, s3Service.getProfileImageUrl(savedComment.getUser().getProfileImageKey()), likedByMe, replyCount);
     }
 
     // 특정 리뷰에 달린 댓글 조회
@@ -131,9 +136,12 @@ public class CommentService {
                 .build();
 
         Slice<Comment> comments = commentRepository.findByReviewId(condition);
+        Map<Long, Long> replyCountMap = getReplyCountMap(comments.getContent());
+
         Slice<CommentResponseDto> response = comments.map(c -> {
             boolean likedByMe = userId != null && commentLikeRepository.existsByComment_IdAndUser_Id(c.getId(), userId);
-            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe);
+            long replyCount = replyCountMap.getOrDefault(c.getId(), 0L);
+            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe, replyCount);
         });
 
         Long nextCursor = null;
@@ -151,7 +159,7 @@ public class CommentService {
         List<Comment> replies = commentRepository.findByParentIdAndStatusOrderByCreatedAtAscIdAsc(parentId, Comment.CommentStatus.ACTIVE);
         return replies.stream().map(c -> {
             boolean likedByMe = userId != null && commentLikeRepository.existsByComment_IdAndUser_Id(c.getId(), userId);
-            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe);
+            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe, 0L);
         }).toList();
     }
 
@@ -170,9 +178,12 @@ public class CommentService {
                 .build();
 
         Slice<Comment> comments = commentRepository.findByUserId(condition);
+        Map<Long, Long> replyCountMap = getReplyCountMap(comments.getContent());
+
         Slice<CommentResponseDto> response = comments.map(c -> {
             boolean likedByMe = currentUserId != null && commentLikeRepository.existsByComment_IdAndUser_Id(c.getId(), currentUserId);
-            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe);
+            long replyCount = replyCountMap.getOrDefault(c.getId(), 0L);
+            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), likedByMe, replyCount);
         });
 
         Long nextCursor = null;
@@ -196,6 +207,14 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
+    private Map<Long, Long> getReplyCountMap(List<Comment> comments) {
+        List<Long> commentIds = comments.stream().map(Comment::getId).toList();
+        if (commentIds.isEmpty()) {
+            return Map.of();
+        }
+        return commentRepository.countRepliesByParentIds(commentIds, Comment.CommentStatus.ACTIVE);
+    }
+
     /**
      * 관리자용
      */
@@ -204,9 +223,13 @@ public class CommentService {
     @Transactional(readOnly = true)
     public PageResponse<CommentResponseDto> getAll(CommentSearchRequest request) {
         CommentSearchCondition condition = getSearchCondition(request);
-        Page<CommentResponseDto> page = commentRepository.findAll(condition)
-                .map(c -> CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), false));
-        return PageResponse.from(page);
+        Page<Comment> page = commentRepository.findAll(condition);
+        Map<Long, Long> replyCountMap = getReplyCountMap(page.getContent());
+        Page<CommentResponseDto> responsePage = page.map(c -> {
+            long replyCount = replyCountMap.getOrDefault(c.getId(), 0L);
+            return CommentMapper.toDto(c, s3Service.getProfileImageUrl(c.getUser().getProfileImageKey()), false, replyCount);
+        });
+        return PageResponse.from(responsePage);
     }
 
     private CommentSearchCondition getSearchCondition(CommentSearchRequest request) {

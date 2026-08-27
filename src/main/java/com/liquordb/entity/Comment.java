@@ -69,7 +69,7 @@ public class Comment extends LikeableEntity {
         this.parent = parent;
         this.user = user;
         this.status = CommentStatus.ACTIVE;
-        likeCount = 0;
+        this.likeCount = 0;
     }
 
     public static Comment create(String content, Review review, Comment parent, User user) {
