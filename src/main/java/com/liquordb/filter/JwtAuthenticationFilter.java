@@ -2,7 +2,6 @@ package com.liquordb.filter;
 
 import com.liquordb.security.CustomUserDetails;
 import com.liquordb.security.CustomUserDetailsService;
-import com.liquordb.security.JwtRegistry;
 import com.liquordb.security.JwtTokenProvider;
 import com.nimbusds.jwt.JWTClaimsSet;
 import jakarta.servlet.FilterChain;
@@ -28,7 +27,6 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final JwtRegistry jwtRegistry;
     private final CustomUserDetailsService customUserDetailsService;
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
@@ -56,24 +54,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("추출된 email: {}, role: {}", email, role);
 
             if (StringUtils.hasText(email) && role != null) {
-                if (isTokenValidInRegistry(token)) {
-                    CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(email); // TODO DB조회 대신 토큰 자체에서 추출?
-                    log.info("DB 조회 성공: {}", userDetails.getUsername());
+                CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(email); // TODO DB조회 대신 토큰 자체에서 추출?
+                log.info("DB 조회 성공: {}", userDetails.getUsername());
 
-                    // 권한 확인
-                    log.info("UserDetails 권한 목록: {}", userDetails.getAuthorities());
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
-                    log.debug("사용자 권한: {}", userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("사용자 인증 완료: {}", email);
-                } else {
-                    log.warn("토큰이 유효하지 않습니다.");
-
-                }
+                // 권한 확인
+                log.info("UserDetails 권한 목록: {}", userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+                log.debug("사용자 권한: {}", userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("사용자 인증 완료: {}", email);
             } else {
                 log.warn("토큰 내에 필수 사용자 정보가 누락되었습니다. (subject: {}, role: {})", email, role);
             }
@@ -95,16 +88,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return paramToken;
         }
         return null;
-    }
-
-    // 토큰 상태 검증
-    private boolean isTokenValidInRegistry(String accessToken) {
-
-        if (jwtRegistry.isBlacklisted(accessToken)) {
-            log.warn("유효하지 않은 토큰입니다.");
-            return false;
-        }
-        return true;
-
     }
 }

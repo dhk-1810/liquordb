@@ -144,7 +144,7 @@ public class UserService {
 
     // 회원 탈퇴 (soft delete)
     @Transactional
-    public void withdraw(UUID userId, String password, String accessToken) {
+    public void withdraw(UUID userId, String password) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -156,8 +156,6 @@ public class UserService {
         user.withdraw();
         userRepository.save(user);
         jwtRegistry.invalidateAllRefreshTokensByUserId(user.getId());
-        long remainingMs = jwtTokenProvider.getRemainingExpiration(accessToken);
-        jwtRegistry.addToBlacklist(accessToken, remainingMs);
     }
 
     /**

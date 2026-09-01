@@ -17,10 +17,5 @@ public interface JwtRegistry {
 
     boolean isRefreshTokenActive(String refreshToken);
 
-
-    void addToBlacklist(String accessToken, long remainingTtlMs);
-
-    boolean isBlacklisted(String accessToken);
-
     void clearExpiredTokens();
 }

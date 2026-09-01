@@ -9,8 +9,7 @@ import java.time.Duration;
 import java.util.UUID;
 
 /**
- * 리프레시 토큰, 로그아웃된 엑세스 토큰 저장
- * 동시 로그인 기기 대수 제한, 무효화된 엑세스 토큰 거부
+ * 리프레시 토큰 관리 (동시 로그인 기기 대수 제한, 세션 무효화)
  * 토큰 유효기간 만료 시 캐시에서 삭제
  */
 @Component
@@ -20,8 +19,6 @@ public class RedisJwtRegistry implements JwtRegistry {
     private static final String REFRESH_USER_LIST_PREFIX = "jwt:refresh:user";
     private static final String REFRESH_TOKEN_PREFIX = "jwt:refresh:token";
     private static final String REFRESH_LOCK_PREFIX = "lock:jwt:refresh:";
-    private static final String BLACKLIST_TOKEN_PREFIX = "jwt:blacklist:index:";
-    private static final String BLACKLIST_LOCK_KEY_PREFIX = "lock:jwt:blacklist:";
     private static final int MAX_ACTIVE_JWT_COUNT = 3; // 동시 접속 제한
 
     private final Duration refreshTokenValidity;
@@ -108,19 +105,6 @@ public class RedisJwtRegistry implements JwtRegistry {
     }
 
     @Override
-    public void addToBlacklist(String accessToken, long remainingTtlMs) {
-        String key = getBlacklistIndexKey(accessToken);
-        // 락 없이 바로 저장 (Atomic 연산)
-        redisTemplate.opsForValue().set(key, "logout", Duration.ofMillis(remainingTtlMs));
-    }
-
-    @Override
-    public boolean isBlacklisted(String accessToken) {
-        String key = BLACKLIST_TOKEN_PREFIX + accessToken;
-        return redisTemplate.hasKey(key);
-    }
-
-    @Override
     public void clearExpiredTokens() {
         // TTL 지나면 Redis에서 자동으로 삭제됨.
     }
@@ -139,10 +123,6 @@ public class RedisJwtRegistry implements JwtRegistry {
 
     private String getRefreshTokenIndexKey(String token) {
         return REFRESH_TOKEN_PREFIX + token;
-    }
-
-    private String getBlacklistIndexKey(String token) {
-        return BLACKLIST_TOKEN_PREFIX + token;
     }
 
 }
