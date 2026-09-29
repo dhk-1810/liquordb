@@ -56,6 +56,7 @@ public class LikeEventListener {
         }
     }
 
+    @Async("eventTaskExecutor") // TODO 리뷰,댓글은 Executor 분리
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(ReviewLikeEvent event) {
@@ -69,6 +70,7 @@ public class LikeEventListener {
         saveAndSendNotification(event.receiverId(), event.senderUsername(), REVIEW_LIKE_MESSAGE_SUFFIX);
     }
 
+    @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(CommentLikeEvent event) {

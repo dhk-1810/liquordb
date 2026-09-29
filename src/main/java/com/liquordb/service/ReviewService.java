@@ -51,11 +51,11 @@ public class ReviewService {
     private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
     private final LiquorTagRepository liquorTagRepository;
+    private final ReviewTagRepository reviewTagRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
-    private final ReviewTagRepository reviewTagRepository;
-    private final ReviewLikeRepository reviewLikeRepository;
 
     // 리뷰 등록
     @Transactional

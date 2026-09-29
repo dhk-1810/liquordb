@@ -9,7 +9,7 @@ spring:
     password: ${DB_PASSWORD}
 
     hikari:
-      maximum-pool-size: 30
+      maximum-pool-size: 10
       minimum-idle: 10
       connection-timeout: 30000 # 커넥션을 기다리는 최대 시간 (ms)
       idle-timeout: 600000
