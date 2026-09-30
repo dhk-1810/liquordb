@@ -1,6 +1,7 @@
 package com.liquordb.event;
 
 public record ReviewCreatedEvent (
-    Long liquorId
+    Long liquorId,
+    double rating
 ) {
 }

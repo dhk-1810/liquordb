@@ -1,12 +1,10 @@
 package com.liquordb.event.listener;
 
 import com.liquordb.LiquorActivityManager;
-import com.liquordb.enums.PeriodType;
 import com.liquordb.event.ReviewCreatedEvent;
+import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -16,16 +14,18 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class ReviewEventListener {
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final LiquorRepository liquorRepository;
     private final LiquorActivityManager liquorActivityManager;
-    private static final String ACTIVE_KEY_PREFIX = "active:liquors:";
 
     @Async("eventTaskExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(ReviewCreatedEvent event) {
+
+        liquorRepository.updateReviewStats(event.liquorId(), event.rating());
 
         liquorActivityManager.trackActivity(event.liquorId(), 10);
     }

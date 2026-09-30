@@ -31,6 +31,13 @@ public interface LiquorRepository extends JpaRepository<Liquor, Long>, CustomLiq
     @Query("UPDATE Liquor l SET l.likeCount = CASE WHEN l.likeCount + :delta < 0 THEN 0 ELSE l.likeCount + :delta END WHERE l.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Liquor l SET " +
+            "l.averageRating = ROUND(((l.averageRating * l.reviewCount) + :newRating) / (l.reviewCount + 1), 2), " +
+            "l.reviewCount = l.reviewCount + 1 " +
+            "WHERE l.id = :liquorId")
+    void updateReviewStats(@Param("liquorId") Long liquorId, @Param("newRating") Double newRating);
+
     // 인기 주류 조회 시 사용
     List<Liquor> findByIdIn(List<Long> ids);
 
