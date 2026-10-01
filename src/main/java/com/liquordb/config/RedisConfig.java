@@ -33,7 +33,7 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
-    // 환경변수가 있으면 쓰고, 없으면 UUID를 생성
+    // 환경변수가 있으면 쓰고, 없으면 UUID 생성
     @Value("${server.instance.id:${SERVER_ID:#{T(java.util.UUID).randomUUID().toString().substring(0,8)}}}")
     private String serverId;
 

@@ -30,7 +30,7 @@ public class Comment extends LikeableEntity {
     @Column(nullable = false)
     private long likeCount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
     private Review review;
 
@@ -42,7 +42,7 @@ public class Comment extends LikeableEntity {
 //    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
 //    private List<Comment> replies = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

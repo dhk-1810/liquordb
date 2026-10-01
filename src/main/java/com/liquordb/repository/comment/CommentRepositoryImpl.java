@@ -2,6 +2,9 @@ package com.liquordb.repository.comment;
 
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.QComment;
+import com.liquordb.entity.QLiquor;
+import com.liquordb.entity.QReview;
+import com.liquordb.entity.QUser;
 import com.liquordb.repository.comment.condition.CommentListGetCondition;
 import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import com.querydsl.core.types.Order;
@@ -26,6 +29,9 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QComment comment = QComment.comment;
+    private final QUser user = QUser.user;
+    private final QReview review = QReview.review;
+    private final QLiquor liquor = QLiquor.liquor;
 
     // 특정 리뷰에 달린 댓글 조회
     @Override
@@ -33,6 +39,9 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
         int limit = condition.limit();
         List<Comment> content = queryFactory.selectFrom(comment)
+                .leftJoin(comment.user, user).fetchJoin()
+                .leftJoin(comment.review, review).fetchJoin()
+                .leftJoin(review.liquor, liquor).fetchJoin()
                 .where(
                         reviewIdEq(condition.reviewId()),
                         comment.parent.id.isNull(),
@@ -61,6 +70,9 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
 
         int limit = condition.limit();
         List<Comment> content = queryFactory.selectFrom(comment)
+                .leftJoin(comment.user, user).fetchJoin()
+                .leftJoin(comment.review, review).fetchJoin()
+                .leftJoin(review.liquor, liquor).fetchJoin()
                 .where(
                         userIdEq(condition.userId()),
                         statusEq(condition.status()),
@@ -87,6 +99,9 @@ public class CommentRepositoryImpl implements CustomCommentRepository {
         int limit = condition.limit();
         int page = condition.page();
         List<Comment> content = queryFactory.selectFrom(comment)
+                .leftJoin(comment.user, user).fetchJoin()
+                .leftJoin(comment.review, review).fetchJoin()
+                .leftJoin(review.liquor, liquor).fetchJoin()
                 .where(
                         usernameContains(condition.username()),
                         statusEq(condition.commentStatus())

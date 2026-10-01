@@ -22,7 +22,18 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, CustomC
     Optional<Comment> findByIdWAndStatusWithUser(@Param("commentId") Long commentId, @Param("status") Comment.CommentStatus status);
 
     // 특정 부모 댓글의 답글 목록 조회 (작성일/ID 오래된 순)
-    List<Comment> findByParentIdAndStatusOrderByCreatedAtAscIdAsc(Long parentId, Comment.CommentStatus status);
+    @Query("""
+        SELECT c FROM Comment c
+        LEFT JOIN FETCH c.user
+        LEFT JOIN FETCH c.review r
+        LEFT JOIN FETCH r.liquor
+        WHERE c.parent.id = :parentId AND c.status = :status
+        ORDER BY c.createdAt ASC, c.id ASC
+    """)
+    List<Comment> findByParentIdAndStatusOrderByCreatedAtAscIdAsc(
+            @Param("parentId") Long parentId,
+            @Param("status") Comment.CommentStatus status
+    );
 
     // 특정 부모 댓글의 활성 답글 수
     long countByParentIdAndStatus(Long parentId, Comment.CommentStatus status);
@@ -87,5 +98,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, CustomC
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Comment c SET c.user = null WHERE c.user.id IN :userIds")
-    void setNullUserByUserIds(@Param("userIds") java.util.List<UUID> userIds);
+    void setNullUserByUserIds(@Param("userIds") List<UUID> userIds);
 }

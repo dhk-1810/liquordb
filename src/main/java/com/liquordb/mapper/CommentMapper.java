@@ -18,8 +18,9 @@ public class CommentMapper {
         );
     }
 
+    // 서비스 단에서 FETCH JOIN으로 DB 조회하므로, Getter 메서드를 사용해도 N+1 문제 발생하지 않음.
     public static CommentResponseDto toDto(Comment comment, String userProfileImageUrl, boolean likedByMe, Long nullableReplyCount) {
-        com.liquordb.entity.User user = comment.getUser();
+        User user = comment.getUser();
         UUID userId = user != null ? user.getId() : null;
         String username = user != null ? user.getUsername() : "탈퇴한 사용자";
         String profileUrl = user != null ? userProfileImageUrl : null;
@@ -32,7 +33,7 @@ public class CommentMapper {
                 .username(username)
                 .userProfileImageUrl(profileUrl)
                 .reviewId(comment.getReview().getId())
-                .liquorId(comment.getReview().getLiquor().getId()) // TODO 쿼리 많이나감
+                .liquorId(comment.getReview().getLiquor().getId())
                 .reviewTitle(comment.getReview().getTitle())
                 .parentId(parentId)
                 .content(comment.getContent())
