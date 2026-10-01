@@ -4,12 +4,15 @@ import com.liquordb.SseMessage;
 import com.liquordb.repository.SseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,20 +25,27 @@ import java.util.stream.Collectors;
 public class SseService {
 
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 30; // 30분
+    private static final String SSE_SESSION_PREFIX = "sse:session:";
+    private static final Duration SESSION_TTL = Duration.ofMinutes(35);
 
     private final SseRepository sseRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
+    @Qualifier("serverId")
+    private final String serverId;
 
     public SseEmitter connect(UUID receiverId, UUID lastEventId) {
 
         SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
 
-        // 연결 종료/타임아웃 시 리포지토리에서 삭제
-        emitter.onCompletion(() -> sseRepository.deleteEmitter(emitter, receiverId));
-        emitter.onTimeout(() -> sseRepository.deleteEmitter(emitter, receiverId));
-        emitter.onError((e) -> sseRepository.deleteEmitter(emitter, receiverId));
+        // 연결 종료/타임아웃 시 리포지토리 및 Redis 세션에서 삭제
+        emitter.onCompletion(() -> removeEmitterAndSession(emitter, receiverId));
+        emitter.onTimeout(() -> removeEmitterAndSession(emitter, receiverId));
+        emitter.onError((e) -> removeEmitterAndSession(emitter, receiverId));
 
         sseRepository.saveEmitter(emitter, receiverId);
+        stringRedisTemplate.opsForValue().set(SSE_SESSION_PREFIX + receiverId, serverId, SESSION_TTL);
+        log.info("SSE 세션 등록: userId={}, serverId={}", receiverId, serverId);
 
         // 연결되면 더미 이벤트 전송, 연결 확인
         ping(emitter, receiverId, "connect check");
@@ -49,6 +59,9 @@ public class SseService {
         Set<UUID> connectedUsers = sseRepository.findAllConnectedUserIds();
         if (connectedUsers.isEmpty()) return;
 
+        // 세션 TTL 갱신
+        connectedUsers.forEach(userId -> stringRedisTemplate.expire(SSE_SESSION_PREFIX + userId, SESSION_TTL));
+
         Map<UUID, List<SseEmitter>> allEmitters = sseRepository.findAllEmittersByUserIdIn(connectedUsers);
 
         allEmitters.forEach((userId, emitters) ->
@@ -57,10 +70,16 @@ public class SseService {
     }
 
     public void send(Object data, String eventName, UUID receiverId){
-        SseMessage redisMessage = SseMessage.create(receiverId, eventName, data);
-        redisTemplate.convertAndSend("sse-notifications", redisMessage);
+        String targetServerId = stringRedisTemplate.opsForValue().get(SSE_SESSION_PREFIX + receiverId);
+        if (targetServerId == null) {
+            log.debug("사용자({}) 오프라인 상태. SSE 전송 생략.", receiverId);
+            return;
+        }
 
-        log.info("Redis로 알림 발행 완료: receiverId={}, event={}", receiverId, eventName);
+        SseMessage redisMessage = SseMessage.create(receiverId, eventName, data);
+        redisTemplate.convertAndSend("sse:server:" + targetServerId, redisMessage);
+
+        log.info("Redis로 타겟 서버 알림 발행 완료: receiverId={}, targetServerId={}, event={}", receiverId, targetServerId, eventName);
     }
 
     public void pushToClient(Object data, String eventName, UUID receiverId) {
@@ -115,13 +134,21 @@ public class SseService {
                 try {
                     emitter.send(SseEmitter.event().name("cleanup-ping").data("check"));
                 } catch (Exception e) {
-                    sseRepository.deleteEmitter(emitter, userId);
+                    removeEmitterAndSession(emitter, userId);
                     removedCount++;
                 }
             }
         }
 
         log.info("SSE Emitter clean up task finished. Removed {} zombie emitters.", removedCount);
+    }
+
+    private void removeEmitterAndSession(SseEmitter emitter, UUID userId) {
+        sseRepository.deleteEmitter(emitter, userId);
+        if (sseRepository.findEmittersByUserId(userId).isEmpty()) {
+            stringRedisTemplate.delete(SSE_SESSION_PREFIX + userId);
+            log.info("SSE 세션 삭제: userId={}", userId);
+        }
     }
 
     /**

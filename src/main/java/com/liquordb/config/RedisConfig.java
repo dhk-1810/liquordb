@@ -33,6 +33,15 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
+    // 환경변수가 있으면 쓰고, 없으면 UUID를 생성
+    @Value("${server.instance.id:${SERVER_ID:#{T(java.util.UUID).randomUUID().toString().substring(0,8)}}}")
+    private String serverId;
+
+    @Bean(name = "serverId")
+    public String serverId() {
+        return serverId;
+    }
+
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
@@ -93,6 +102,7 @@ public class RedisConfig {
         return new GenericJackson2JsonRedisSerializer(mapper);
     }
 
+
     /**
      * Pub-Sub 관련 설정
      */
@@ -102,15 +112,16 @@ public class RedisConfig {
         return new MessageListenerAdapter(subscriber, "onMessage");
     }
 
-    // Redis 채널을 구독하고 메시지를 대기하는 컨테이너
+    // 자기 서버 전용 Redis 채널(sse:server:{serverId})을 구독하고 메시지를 대기하는 컨테이너
     @Bean
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory factory,
-            MessageListenerAdapter adapter
+            MessageListenerAdapter adapter,
+            @Qualifier("serverId") String serverId
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(factory);
-        container.addMessageListener(adapter, new ChannelTopic("sse-notifications"));
+        container.addMessageListener(adapter, new ChannelTopic("sse:server:" + serverId));
         return container;
     }
 }

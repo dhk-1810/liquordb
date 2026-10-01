@@ -41,7 +41,6 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
-    private final RedisLockProvider redisLockProvider;
 
     // 단건 조회
     @Transactional(readOnly = true)
