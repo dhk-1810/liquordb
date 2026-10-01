@@ -56,8 +56,12 @@ public class Notice {
         }
     }
 
-    public void togglePin(){
-        this.isPinned = !this.isPinned;
+    public void pin() {
+        this.isPinned = true;
+    }
+
+    public void unpin() {
+        this.isPinned = false;
     }
 
     public void softDelete(){

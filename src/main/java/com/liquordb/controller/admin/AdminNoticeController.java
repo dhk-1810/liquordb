@@ -35,11 +35,16 @@ public class AdminNoticeController {
         return ResponseEntity.ok(noticeService.update(noticeId, dto));
     }
 
-    // 고정 토글
-    // TODO 멱등성
+    // 상단 고정
     @PatchMapping("/{noticeId}/pin")
-    public ResponseEntity<NoticeResponseDto> togglePin(@PathVariable Long noticeId){
-        return ResponseEntity.ok(noticeService.togglePin(noticeId));
+    public ResponseEntity<NoticeResponseDto> pinNotice(@PathVariable Long noticeId) {
+        return ResponseEntity.ok(noticeService.pin(noticeId));
+    }
+
+    // 상단 고정 해제
+    @PatchMapping("/{noticeId}/unpin")
+    public ResponseEntity<NoticeResponseDto> unpinNotice(@PathVariable Long noticeId) {
+        return ResponseEntity.ok(noticeService.unpin(noticeId));
     }
 
     // 공지사항 삭제

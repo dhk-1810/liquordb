@@ -113,8 +113,11 @@ function NoticeDetail() {
       if (authData?.accessToken) {
         headers['Authorization'] = `Bearer ${authData.accessToken}`;
       }
+      const endpoint = notice?.isPinned
+        ? `/api/admin/notices/${id}/unpin`
+        : `/api/admin/notices/${id}/pin`;
 
-      const res = await fetch(`/api/admin/notices/${id}/pin`, {
+      const res = await fetch(endpoint, {
         method: 'PATCH',
         headers,
       });

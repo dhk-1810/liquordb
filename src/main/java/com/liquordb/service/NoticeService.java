@@ -155,14 +155,30 @@ public class NoticeService {
         return response;
     }
 
-    // 고정 토글
+    // 상단 고정
     @Transactional
-    public NoticeResponseDto togglePin(Long id) {
+    public NoticeResponseDto pin(Long id) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new NoticeNotFoundException(id));
         User user = userRepository.findById(notice.getAuthorId())
                 .orElseThrow(() -> new UserNotFoundException(notice.getAuthorId()));
-        notice.togglePin();
+        notice.pin();
+        noticeRepository.save(notice);
+        NoticeResponseDto response = NoticeMapper.toDto(notice, user.getUsername());
+
+        // ID 목록 업데이트
+        syncNoticeIndex(notice);
+        return response;
+    }
+
+    // 상단 고정 해제
+    @Transactional
+    public NoticeResponseDto unpin(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new NoticeNotFoundException(id));
+        User user = userRepository.findById(notice.getAuthorId())
+                .orElseThrow(() -> new UserNotFoundException(notice.getAuthorId()));
+        notice.unpin();
         noticeRepository.save(notice);
         NoticeResponseDto response = NoticeMapper.toDto(notice, user.getUsername());
 
