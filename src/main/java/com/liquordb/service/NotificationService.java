@@ -1,5 +1,6 @@
 package com.liquordb.service;
 
+import com.liquordb.SseMessage;
 import com.liquordb.dto.NotificationListGetRequest;
 import com.liquordb.dto.NotificationResponseDto;
 import com.liquordb.entity.Notification;
@@ -7,8 +8,10 @@ import com.liquordb.exception.notification.NotificationAccessDeniedException;
 import com.liquordb.exception.notification.NotificationNotFoundException;
 import com.liquordb.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +20,25 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    @Transactional
+    public void sendNotification(UUID receiverId, String content) {
+        Notification notification = Notification.create(receiverId, content, null);
+        notificationRepository.save(notification);
+
+        try {
+            NotificationResponseDto response = NotificationResponseDto.toDto(notification);
+            SseMessage message = SseMessage.create(receiverId, "notification", response);
+            redisTemplate.convertAndSend("sse-notifications", message);
+        } catch (Exception e) {
+            log.warn("Redis 알림 브로드캐스트 실패: {}", e.getMessage());
+        }
+    }
 
     @Transactional(readOnly = true)
     public List<NotificationResponseDto> get(NotificationListGetRequest request, UUID userId) {

@@ -1,5 +1,6 @@
 package com.liquordb.service;
 
+import com.liquordb.LiquorActivityManager;
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.FileResponseDto;
 import com.liquordb.dto.PageResponse;
@@ -14,7 +15,6 @@ import com.liquordb.exception.liquor.LiquorNotFoundException;
 import com.liquordb.exception.review.ReviewAccessDeniedException;
 import com.liquordb.exception.review.ReviewNotFoundException;
 import com.liquordb.exception.user.UserNotFoundException;
-import com.liquordb.event.ReviewCreatedEvent;
 import com.liquordb.mapper.ReviewMapper;
 import com.liquordb.mapper.TagMapper;
 import com.liquordb.repository.LiquorTagRepository;
@@ -30,7 +30,6 @@ import com.liquordb.repository.tag.TagRepository;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -58,7 +57,7 @@ public class ReviewService {
     private final ReviewDetailUpdater reviewDetailUpdater;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
-    private final ApplicationEventPublisher eventPublisher;
+    private final LiquorActivityManager liquorActivityManager;
 
     // 리뷰 등록
     @Transactional
@@ -106,7 +105,8 @@ public class ReviewService {
             reviewImageKeyRepository.saveAll(keys);
         }
 
-        eventPublisher.publishEvent(new ReviewCreatedEvent(liquorId, request.rating()));
+        liquorRepository.updateReviewStats(liquorId, request.rating().doubleValue());
+        liquorActivityManager.trackActivity(liquorId, 10);
 
         return ReviewMapper.toDto(review, tagDtos, imageUrls, s3Service.getProfileImageUrl(review.getUser().getProfileImageKey()), false);
     }

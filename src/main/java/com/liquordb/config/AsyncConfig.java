@@ -8,6 +8,8 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 @Configuration
 @EnableAsync
 @EnableRetry
@@ -18,13 +20,14 @@ public class AsyncConfig {
         return new MdcAndSecurityContextTaskDecorator();
     }
 
-    @Bean(name = "eventTaskExecutor")
-    public TaskExecutor eventTaskExecutor() {
+    @Bean(name = "mailTaskExecutor")
+    public TaskExecutor mailTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5); // 기본적으로 유지되는 스레드 수
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("Event-");
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("Mail-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setTaskDecorator(taskDecorator());
         executor.initialize();
         return executor;

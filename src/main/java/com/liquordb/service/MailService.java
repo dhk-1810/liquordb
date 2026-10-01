@@ -19,7 +19,7 @@ public class MailService {
     @Value("${spring.mail.username}")
     private String senderAddress;
 
-    @Async
+    @Async("mailTaskExecutor")
     public void sendMail(String to, String subject, String text) {
 
         log.info("비밀번호 재설정 메일 발송 시작: {}", to);

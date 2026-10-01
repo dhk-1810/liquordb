@@ -3,7 +3,6 @@ package com.liquordb.service;
 import com.liquordb.entity.Comment;
 import com.liquordb.entity.CommentLike;
 import com.liquordb.entity.User;
-import com.liquordb.event.CommentLikeEvent;
 import com.liquordb.exception.comment.CommentLikeAlreadyExistsException;
 import com.liquordb.exception.comment.CommentLikeNotFoundException;
 import com.liquordb.exception.comment.CommentNotFoundException;
@@ -12,7 +11,6 @@ import com.liquordb.repository.CommentLikeRepository;
 import com.liquordb.repository.comment.CommentRepository;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +21,12 @@ import java.util.UUID;
 @Service
 public class CommentLikeService {
 
+    private static final String COMMENT_LIKE_MESSAGE_SUFFIX = "님이 내 댓글을 좋아합니다.";
+
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final UserRepository userRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final NotificationService notificationService; // 단방향 참조
 
     @Transactional
     public void like(Long commentId, UUID userId) {
@@ -55,7 +55,7 @@ public class CommentLikeService {
         }
 
         commentRepository.updateLikeCount(commentId, 1);
-        eventPublisher.publishEvent(new CommentLikeEvent(commentId, true, user.getUsername(), comment.getUser().getId(), userId));
+        notificationService.sendNotification(comment.getUser().getId(), user.getUsername() + COMMENT_LIKE_MESSAGE_SUFFIX);
     }
 
     @Transactional
@@ -67,7 +67,6 @@ public class CommentLikeService {
         commentLikeRepository.delete(commentLike);
         commentLikeRepository.flush();
         commentRepository.updateLikeCount(commentId, -1);
-        eventPublisher.publishEvent(new CommentLikeEvent(commentId, false, null, null, null));
     }
 
 }

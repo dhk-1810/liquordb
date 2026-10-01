@@ -1,8 +1,8 @@
 package com.liquordb.service;
 
+import com.liquordb.LiquorActivityManager;
 import com.liquordb.dto.CursorPageResponse;
 import com.liquordb.dto.PageResponse;
-import com.liquordb.event.CommentCreatedEvent;
 import com.liquordb.repository.comment.condition.CommentListGetCondition;
 import com.liquordb.repository.comment.condition.CommentSearchCondition;
 import com.liquordb.dto.comment.request.CommentListGetRequest;
@@ -28,7 +28,6 @@ import com.liquordb.entity.User;
 import com.liquordb.repository.user.UserRepository;
 import com.liquordb.repository.CommentLikeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -45,13 +44,16 @@ import java.util.UUID;
 @Service
 public class CommentService {
 
+    private static final String COMMENT_CREATED_MESSAGE_SUFFIX = "님이 리뷰에 댓글을 남겼습니다.";
+
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
-    private final ApplicationEventPublisher eventPublisher;
     private final LiquorRepository liquorRepository;
-    private final S3Service s3Service;
     private final CommentLikeRepository commentLikeRepository;
+    private final S3Service s3Service; // 단방향 참조
+    private final NotificationService notificationService; // 단방향 참조
+    private final LiquorActivityManager liquorActivityManager;
 
     // 댓글 생성
     @Transactional
@@ -82,13 +84,11 @@ public class CommentService {
         reviewRepository.save(review);
 
         if (!review.getUser().getId().equals(userId)) {
-            eventPublisher.publishEvent(new CommentCreatedEvent(
-                    review.getUser().getId(),
-                    comment.getId(),
-                    review.getLiquor().getId(),
-                    user.getUsername())
-            );
+            notificationService.sendNotification(review.getUser().getId(), user.getUsername() + COMMENT_CREATED_MESSAGE_SUFFIX);
         }
+
+        liquorActivityManager.trackActivity(review.getLiquor().getId(), 2);
+
         return CommentMapper.toDto(comment, s3Service.getProfileImageUrl(comment.getUser().getProfileImageKey()), false, 0L);
     }
 

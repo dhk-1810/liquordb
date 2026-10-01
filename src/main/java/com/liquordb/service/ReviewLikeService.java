@@ -3,7 +3,6 @@ package com.liquordb.service;
 import com.liquordb.entity.Review;
 import com.liquordb.entity.ReviewLike;
 import com.liquordb.entity.User;
-import com.liquordb.event.ReviewLikeEvent;
 import com.liquordb.exception.review.ReviewLikeAlreadyExistsException;
 import com.liquordb.exception.review.ReviewLikeNotFoundException;
 import com.liquordb.exception.review.ReviewNotFoundException;
@@ -12,7 +11,6 @@ import com.liquordb.repository.ReviewLikeRepository;
 import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +21,12 @@ import java.util.UUID;
 @Service
 public class ReviewLikeService {
 
+    private static final String REVIEW_LIKE_MESSAGE_SUFFIX = "님이 내 리뷰를 좋아합니다.";
+
     private final ReviewRepository reviewRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final NotificationService notificationService; // 단방향 참조
 
     @Transactional
     public void like(Long reviewId, UUID userId) {
@@ -53,7 +53,7 @@ public class ReviewLikeService {
         }
 
         reviewRepository.updateLikeCount(reviewId, 1);
-        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, true, user.getUsername(), review.getUser().getId(), userId));
+        notificationService.sendNotification(review.getUser().getId(), user.getUsername() + REVIEW_LIKE_MESSAGE_SUFFIX);
     }
 
     @Transactional
@@ -65,7 +65,6 @@ public class ReviewLikeService {
         reviewLikeRepository.delete(reviewLike);
         reviewLikeRepository.flush();
         reviewRepository.updateLikeCount(reviewId, -1);
-        eventPublisher.publishEvent(new ReviewLikeEvent(reviewId, false, null, null, null));
     }
 
 }

@@ -1,7 +1,7 @@
 package com.liquordb.service;
 
+import com.liquordb.LiquorActivityManager;
 import com.liquordb.entity.LiquorLike;
-import com.liquordb.event.LiquorLikeEvent;
 import com.liquordb.exception.liquor.LiquorLikeAlreadyExistsException;
 import com.liquordb.exception.liquor.LiquorLikeNotFoundException;
 import com.liquordb.exception.liquor.LiquorNotFoundException;
@@ -11,7 +11,6 @@ import com.liquordb.repository.liquor.LiquorRepository;
 import com.liquordb.entity.User;
 import com.liquordb.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +24,7 @@ public class LiquorLikeService {
     private final LiquorRepository liquorRepository;
     private final LiquorLikeRepository liquorLikeRepository;
     private final UserRepository userRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final LiquorActivityManager liquorActivityManager;
 
     @Transactional
     public void like(Long liquorId, UUID userId) {
@@ -45,8 +44,8 @@ public class LiquorLikeService {
             throw new LiquorNotFoundException(liquorId);
         }
 
-        // 비동기로 엔터티의 likeCount 1 증가
-        eventPublisher.publishEvent(new LiquorLikeEvent(liquorId, true));
+        liquorRepository.updateLikeCount(liquorId, 1);
+        liquorActivityManager.trackActivity(liquorId, 5);
     }
 
     @Transactional
@@ -56,7 +55,7 @@ public class LiquorLikeService {
                 .orElseThrow(() -> new LiquorLikeNotFoundException(liquorId, userId));
 
         liquorLikeRepository.delete(liquorlike);
-        eventPublisher.publishEvent(new LiquorLikeEvent(liquorId, false)); // 엔터티의 likeCount 1 감소
+        liquorRepository.updateLikeCount(liquorId, -1);
     }
 
 }
