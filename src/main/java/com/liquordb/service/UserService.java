@@ -163,27 +163,16 @@ public class UserService {
      */
 
     @Transactional
-    public JwtInformation updateRole(Role role, UUID userId, String refreshToken) {
+    public void updateRole(Role role, UUID userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        String newAccess = null;
-        String newRefresh = null;
-
         if (!role.equals(user.getRole())) {
             user.updateRole(role);
             userRepository.save(user);
-            newAccess = jwtTokenProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().name());
-            newRefresh = jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail(), user.getRole().name());
-            jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
+            jwtRegistry.invalidateAllRefreshTokensByUserId(userId);
         }
-
-        String profileImageUrl = null;
-        if (user.getProfileImageKey() != null){
-            profileImageUrl = s3Service.getProfileImageUrl(user.getProfileImageKey());
-        }
-        return new JwtInformation(UserMapper.toDto(user, profileImageUrl), newAccess, newRefresh);
     }
 
     // 유저 조회 - 전체 또는 검색

@@ -30,8 +30,6 @@ public class Notice {
     @Column(nullable = false, columnDefinition = "BINARY(16)")
     private UUID authorId;
 
-    // TODO 이미지
-
     @Column(nullable = false)
     private boolean isPinned;
 
