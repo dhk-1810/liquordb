@@ -1,7 +1,8 @@
 package com.liquordb.filter;
 
+import com.liquordb.enums.Role;
+import com.liquordb.enums.UserStatus;
 import com.liquordb.security.CustomUserDetails;
-import com.liquordb.security.CustomUserDetailsService;
 import com.liquordb.security.JwtTokenProvider;
 import com.nimbusds.jwt.JWTClaimsSet;
 import jakarta.servlet.FilterChain;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * 인증 수행 - 엑세스 토큰 검증
@@ -27,7 +29,6 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final CustomUserDetailsService customUserDetailsService;
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 
@@ -50,12 +51,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             String email = claims.getSubject();
             String role = (String) claims.getClaim("role");
+            String id = (String) claims.getClaim("id");
 
-            log.info("추출된 email: {}, role: {}", email, role);
+            log.info("추출된 email: {}, role: {}, id: {}", email, role, id);
 
-            if (StringUtils.hasText(email) && role != null) {
-                CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(email); // TODO DB조회 대신 토큰 자체에서 추출?
-                log.info("DB 조회 성공: {}", userDetails.getUsername());
+            if (StringUtils.hasText(email) && role != null && StringUtils.hasText(id)) {
+                Role userRole = Role.valueOf(role.startsWith("ROLE_") ? role.substring(5) : role);
+                CustomUserDetails userDetails = new CustomUserDetails(
+                        UUID.fromString(id),
+                        email,
+                        userRole,
+                        UserStatus.ACTIVE,
+                        null
+                );
 
                 // 권한 확인
                 log.info("UserDetails 권한 목록: {}", userDetails.getAuthorities());
@@ -68,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.debug("사용자 인증 완료: {}", email);
             } else {
-                log.warn("토큰 내에 필수 사용자 정보가 누락되었습니다. (subject: {}, role: {})", email, role);
+                log.warn("토큰 내에 필수 사용자 정보가 누락되었습니다. (subject: {}, role: {}, id: {})", email, role, id);
             }
         }
         filterChain.doFilter(request, response);

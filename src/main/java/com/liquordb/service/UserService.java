@@ -118,8 +118,8 @@ public class UserService {
         if (isEmailChanged) {
             jwtRegistry.invalidateAllRefreshTokensByUserId(userId);
         } else if (isUsernameChanged) {
-            newAccess = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
-            newRefresh = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
+            newAccess = jwtTokenProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().name());
+            newRefresh = jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail(), user.getRole().name());
             jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
         }
 
@@ -174,8 +174,8 @@ public class UserService {
         if (!role.equals(user.getRole())) {
             user.updateRole(role);
             userRepository.save(user);
-            newAccess = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
-            newRefresh = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
+            newAccess = jwtTokenProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().name());
+            newRefresh = jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail(), user.getRole().name());
             jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, userId);
         }
 

@@ -92,8 +92,8 @@ public class AuthService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         // 새 토큰 생성 - Access, Refresh 모두 새로 발급
-        String newAccess = jwtTokenProvider.createAccessToken(email, user.getRole().name());
-        String newRefresh = jwtTokenProvider.createRefreshToken(email, user.getRole().name());
+        String newAccess = jwtTokenProvider.createAccessToken(user.getId(), email, user.getRole().name());
+        String newRefresh = jwtTokenProvider.createRefreshToken(user.getId(), email, user.getRole().name());
 
         jwtRegistry.rotateRefreshToken(refreshToken, newRefresh, user.getId());
 
@@ -170,8 +170,8 @@ public class AuthService {
         UserResponseDto dto = UserMapper.toDto(user, s3Service.getProfileImageUrl(user.getProfileImageKey()));
 
         // 정식 토큰 및 레지스트리 생성
-        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
-        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().name());
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().name());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail(), user.getRole().name());
 
         jwtRegistry.registerRefreshToken(user.getId(), refreshToken);
 

@@ -47,7 +47,7 @@ public class LiquorController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         UUID viewerId = (user != null) ? user.id() : null;
-        boolean isViewerRoleAdmin = user != null && (user.dto().role() == Role.ADMIN);
+        boolean isViewerRoleAdmin = user != null && (user.role() == Role.ADMIN);
         CursorPageResponse<LiquorSummaryDto> liquor = liquorService.getAll(request, viewerId, isViewerRoleAdmin);
         return ResponseEntity.ok(liquor);
     }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * 토큰 생성, 검증, Claim 추출, 유효성 검사 등 수행.
@@ -40,33 +41,38 @@ public class JwtTokenProvider {
         }
     }
 
-    public String createAccessToken(String email, String role) {
-        return generateToken(email, role, jwtProperties.getAccessTokenValidityInMs(), TOKEN_TYPE_ACCESS);
+    public String createAccessToken(UUID id, String email, String role) {
+        return generateToken(id, email, role, jwtProperties.getAccessTokenValidityInMs(), TOKEN_TYPE_ACCESS);
     }
 
-    public String createCustomAccessToken(String email, String role, long validityInMilliseconds) {
-        return generateToken(email, role, validityInMilliseconds, TOKEN_TYPE_ACCESS);
+    public String createCustomAccessToken(UUID id, String email, String role, long validityInMilliseconds) {
+        return generateToken(id, email, role, validityInMilliseconds, TOKEN_TYPE_ACCESS);
     }
 
-    public String createRefreshToken(String email, String role) {
-        return generateToken(email, role, jwtProperties.getRefreshTokenValidityInMs(), TOKEN_TYPE_REFRESH);
+    public String createRefreshToken(UUID id, String email, String role) {
+        return generateToken(id, email, role, jwtProperties.getRefreshTokenValidityInMs(), TOKEN_TYPE_REFRESH);
     }
 
     // JWT 토큰 생성
-    private String generateToken(String username, String role, long validityInMilliseconds, String type) {
+    private String generateToken(UUID id, String username, String role, long validityInMilliseconds, String type) {
         try {
             Date now = new Date();
             Date expirationTime = new Date(now.getTime() + validityInMilliseconds);
 
             // Claims 구성
-            JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+            JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
                     .issuer(jwtProperties.getIssuer())
                     .subject(username)
                     .issueTime(now)
                     .expirationTime(expirationTime)
                     .claim("role", role)
-                    .claim("type", type)
-                    .build();
+                    .claim("type", type);
+
+            if (id != null) {
+                builder.claim("id", id.toString());
+            }
+
+            JWTClaimsSet claimsSet = builder.build();
 
             SignedJWT signedJWT = new SignedJWT(
                     new JWSHeader(JWSAlgorithm.HS256), // 헤더 설정
