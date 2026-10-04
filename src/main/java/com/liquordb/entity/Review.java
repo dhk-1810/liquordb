@@ -149,11 +149,4 @@ public class Review extends LikeableEntity {
         // 연관 댓글 삭제는 서비스단에서 수행.
     }
 
-    public void restore(){ // TODO
-        if (this.status != ReviewStatus.DELETED) return;
-        this.status = ReviewStatus.ACTIVE;
-        this.deletedAt = null;
-        // 연관 댓글 복구는 서비스단에서 수행.
-    }
-
 }

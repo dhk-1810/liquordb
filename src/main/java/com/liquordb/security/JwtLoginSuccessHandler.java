@@ -1,7 +1,7 @@
 package com.liquordb.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.liquordb.dto.JwtDto;
+import com.liquordb.dto.auth.AuthResponseDto;
 import com.liquordb.dto.user.UserResponseDto;
 import com.liquordb.entity.User;
 import com.liquordb.enums.UserStatus;
@@ -83,8 +83,8 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        JwtDto jwtDto = new JwtDto(userDto, accessToken);
+        AuthResponseDto authResponseDto = new AuthResponseDto(userDto, accessToken);
 
-        response.getWriter().write(objectMapper.writeValueAsString(jwtDto));
+        response.getWriter().write(objectMapper.writeValueAsString(authResponseDto));
     }
 }

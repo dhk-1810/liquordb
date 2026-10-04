@@ -1,6 +1,6 @@
 package com.liquordb.controller;
 
-import com.liquordb.dto.JwtDto;
+import com.liquordb.dto.auth.AuthResponseDto;
 import com.liquordb.dto.auth.PasswordFindRequest;
 import com.liquordb.dto.auth.PasswordResetRequest;
 import com.liquordb.dto.auth.SignUpRequest;
@@ -32,16 +32,16 @@ public class AuthController {
 
     // 토큰 재발급 - 엑세스 토큰이 만료되면 호출.
     @PostMapping("/token-refresh")
-    public ResponseEntity<JwtDto> refreshToken(
+    public ResponseEntity<AuthResponseDto> refreshToken(
             @CookieValue(value = "REFRESH_TOKEN", required = false) String refreshToken,
             HttpServletResponse response
     ) {
         JwtInformation newInfo = authService.refresh(refreshToken);
         Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(newInfo.refreshToken());
         response.addCookie(refreshCookie);
-        JwtDto jwtDto = new JwtDto(newInfo.dto(), newInfo.accessToken());
+        AuthResponseDto authResponseDto = new AuthResponseDto(newInfo.dto(), newInfo.accessToken());
 
-        return ResponseEntity.ok(jwtDto);
+        return ResponseEntity.ok(authResponseDto);
     }
 
     // 비밀번호 재설정 링크 전송
@@ -63,12 +63,12 @@ public class AuthController {
 
     // 계정 복구
     @PostMapping("/restore")
-    public ResponseEntity<JwtDto> restore(@RequestParam String email, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDto> restore(@RequestParam String email, HttpServletResponse response) {
         JwtInformation info = authService.restore(email);
         if (info.refreshToken() != null) {
             Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(info.refreshToken());
             response.addCookie(refreshCookie);
         }
-        return ResponseEntity.ok(new JwtDto(info.dto(), info.accessToken()));
+        return ResponseEntity.ok(new AuthResponseDto(info.dto(), info.accessToken()));
     }
 }

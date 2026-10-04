@@ -1,6 +1,6 @@
 package com.liquordb.controller;
 
-import com.liquordb.dto.JwtDto;
+import com.liquordb.dto.auth.AuthResponseDto;
 import com.liquordb.dto.user.*;
 import com.liquordb.exception.user.UserAccessDeniedException;
 import com.liquordb.security.CustomUserDetails;
@@ -39,13 +39,14 @@ public class UserController {
 
     // 회원정보 수정 (프로필사진, 닉네임)
     @PatchMapping(path = "/{userId}/update", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<JwtDto> update(
+    public ResponseEntity<AuthResponseDto> update(
             @PathVariable UUID userId,
             @ModelAttribute UserUpdateRequest request,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
             @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
             @AuthenticationPrincipal CustomUserDetails user,
-            HttpServletResponse response) {
+            HttpServletResponse response
+    ) {
         authorizeUser(userId, user);
         MultipartFile fileToUpload = (profileImage != null && !profileImage.isEmpty()) ? profileImage : request.profileImage();
         JwtInformation newInfo = userService.update(userId, request, fileToUpload, refreshToken);
@@ -53,7 +54,7 @@ public class UserController {
             Cookie refreshCookie = TokenUtil.createRefreshTokenCookie(newInfo.refreshToken());
             response.addCookie(refreshCookie);
         }
-        return ResponseEntity.ok(new JwtDto(newInfo.dto(), newInfo.accessToken()));
+        return ResponseEntity.ok(new AuthResponseDto(newInfo.dto(), newInfo.accessToken()));
     }
 
     // 비밀번호 수정 (로그인 상태에서)
