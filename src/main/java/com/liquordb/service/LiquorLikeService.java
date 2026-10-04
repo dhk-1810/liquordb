@@ -25,6 +25,7 @@ public class LiquorLikeService {
     private final LiquorLikeRepository liquorLikeRepository;
     private final UserRepository userRepository;
     private final LiquorActivityManager liquorActivityManager;
+    private final LiquorLikeCacheService liquorLikeCacheService;
 
     @Transactional
     public void like(Long liquorId, UUID userId) {
@@ -46,6 +47,7 @@ public class LiquorLikeService {
 
         liquorRepository.updateLikeCount(liquorId, 1);
         liquorActivityManager.trackActivity(liquorId, 5);
+        liquorLikeCacheService.addLike(userId, liquorId);
     }
 
     @Transactional
@@ -56,6 +58,7 @@ public class LiquorLikeService {
 
         liquorLikeRepository.delete(liquorlike);
         liquorRepository.updateLikeCount(liquorId, -1);
+        liquorLikeCacheService.removeLike(userId, liquorId);
     }
 
 }

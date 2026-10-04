@@ -36,7 +36,7 @@ public class LiquorService {
     private final LiquorRepository liquorRepository;
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
-    private final LiquorLikeRepository liquorLikeRepository;
+    private final LiquorLikeCacheService liquorLikeCacheService;
     private final LiquorSubcategoryRepository liquorSubcategoryRepository;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
@@ -69,9 +69,7 @@ public class LiquorService {
         List<Long> liquorIds = liquors.getContent().stream()
                 .map(Liquor::getId)
                 .toList();
-        Set<Long> likedLiquorIds = (userId != null)
-                ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, liquorIds)
-                : Collections.emptySet();
+        Set<Long> likedLiquorIds = liquorLikeCacheService.getLikedLiquorIds(userId, liquorIds);
 
         Slice<LiquorSummaryDto> response = liquors.map(liquor -> {
             boolean isLiked = likedLiquorIds.contains(liquor.getId());
@@ -152,7 +150,7 @@ public class LiquorService {
         Set<TagResponseDto> tags = liquor.getLiquorTags().stream()
                 .map(TagMapper::toDto)
                 .collect(Collectors.toSet());
-        boolean likedByMe = (userId != null) && liquorLikeRepository.existsByLiquor_IdAndUser_Id(liquorId, userId);
+        boolean likedByMe = liquorLikeCacheService.isLiked(userId, liquorId);
         String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
 
         String subcategoryName = null;

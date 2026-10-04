@@ -6,7 +6,6 @@ import com.liquordb.entity.Liquor;
 import com.liquordb.entity.LiquorRanking;
 import com.liquordb.enums.PeriodType;
 import com.liquordb.mapper.LiquorMapper;
-import com.liquordb.repository.LiquorLikeRepository;
 import com.liquordb.repository.liquor.LiquorRankingRepository;
 import com.liquordb.repository.liquor.LiquorRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,7 @@ public class LiquorRankingService {
 
     private final LiquorRepository liquorRepository;
     private final LiquorRankingRepository liquorRankingRepository;
-    private final LiquorLikeRepository liquorLikeRepository;
+    private final LiquorLikeCacheService liquorLikeCacheService;
     private final S3Service s3Service; // 단방향 참조
 
     private final RedisTemplate<String, String> redisTemplate;
@@ -46,9 +45,7 @@ public class LiquorRankingService {
         }
 
         if (!ids.isEmpty()) { // Fallback - 좋아요 많은 순
-            Set<Long> likedLiquorIds = (userId != null)
-                    ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, ids)
-                    : Collections.emptySet();
+            Set<Long> likedLiquorIds = liquorLikeCacheService.getLikedLiquorIds(userId, ids);
 
             Map<Long, Liquor> liquorMap = liquorRepository.findByIdIn(ids).stream()
                     .collect(Collectors.toMap(Liquor::getId, liquor -> liquor));
@@ -70,9 +67,7 @@ public class LiquorRankingService {
         }
 
         List<Long> topLikedIds = topLikedLiquors.stream().map(Liquor::getId).toList();
-        Set<Long> likedLiquorIds = (userId != null)
-                ? liquorLikeRepository.findLikedLiquorIdsByUserIdAndLiquorIds(userId, topLikedIds)
-                : Collections.emptySet();
+        Set<Long> likedLiquorIds = liquorLikeCacheService.getLikedLiquorIds(userId, topLikedIds);
 
         return topLikedLiquors.stream()
                 .map(liquor -> {
@@ -114,7 +109,7 @@ public class LiquorRankingService {
             if (topActive != null && !topActive.isEmpty()) {
                 int rank = 1;
                 for (ZSetOperations.TypedTuple<String> tuple : topActive) {
-                    Long liquorId = Long.valueOf(tuple.getValue());
+                    Long liquorId = Long.valueOf(Objects.requireNonNull(tuple.getValue()));
                     long score = Math.round(tuple.getScore() != null ? tuple.getScore() : 0.0);
 
                     redisTemplate.opsForZSet().add(rankingKey, String.valueOf(liquorId), score);

@@ -25,4 +25,7 @@ public interface LiquorLikeRepository extends JpaRepository<LiquorLike, LiquorLi
     Set<Long> findLikedLiquorIdsByUserIdAndLiquorIds(@Param("userId") UUID userId,
             @Param("liquorIds") List<Long> liquorIds);
 
+    @Query("SELECT ll.liquor.id FROM LiquorLike ll WHERE ll.user.id = :userId")
+    Set<Long> findLikedLiquorIdsByUserId(@Param("userId") UUID userId);
+
 }

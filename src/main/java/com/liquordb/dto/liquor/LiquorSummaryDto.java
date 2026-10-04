@@ -14,7 +14,7 @@ public record LiquorSummaryDto (
         Double averageRating,
         long reviewCount,
         long likeCount,
-        boolean likedByMe // TODO false 반환하고 Redis에 캐싱 가능
+        boolean likedByMe
 ) {
 
 }
