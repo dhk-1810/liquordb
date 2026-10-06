@@ -71,10 +71,10 @@ function AppContent() {
       try {
         const jwtData = await fetchAuthToken();
         if (jwtData) {
-          setUser(jwtData.userDto);
+          setUser(jwtData.user);
           
-          if (jwtData.userDto) {
-            const url = jwtData.userDto.profileImageUrl;
+          if (jwtData.user) {
+            const url = jwtData.user.profileImageUrl;
             setProfileImageUrl(url && !url.includes('default-profile') ? url : '/default-avatar.svg');
           }
         } else {

@@ -9,7 +9,7 @@ function Home() {
     DAILY: [],
     WEEKLY: []
   });
-  const [activeTab, setActiveTab] = useState('THREE_HOURS');
+  const [activeTab, setActiveTab] = useState('WEEKLY');
   const [pinnedNotices, setPinnedNotices] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -113,9 +113,9 @@ function Home() {
                 {/* Scope Tabs */}
                 <div className="flex items-center gap-1 bg-slate-200/50 p-1 rounded-xl self-start">
                   {[
-                    { id: 'THREE_HOURS', label: t('home.tabs.threeHours') },
+                    { id: 'WEEKLY', label: t('home.tabs.weekly') },
                     { id: 'DAILY', label: t('home.tabs.daily') },
-                    { id: 'WEEKLY', label: t('home.tabs.weekly') }
+                    { id: 'THREE_HOURS', label: t('home.tabs.threeHours') }
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -147,7 +147,6 @@ function Home() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-slate-600">{t('home.noTrending')}</h3>
-                <p className="text-slate-400 mt-2">{t('home.noTrendingDesc')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -197,8 +196,8 @@ function Home() {
                       <div className="mt-auto pt-5 border-t border-slate-100 flex items-center justify-between text-slate-500 text-sm font-medium">
                         <div className="flex items-center gap-5">
                           <div className="flex items-center gap-2 group/icon transition-transform hover:scale-110">
-                            <svg className="w-4.5 h-4.5 text-slate-300 group-hover/icon:text-amber-500 transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                            <svg className="w-4.5 h-4.5 text-slate-300 group-hover/icon:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             <span className="group-hover/icon:text-slate-800 transition-colors">{liquor.reviewCount || 0}</span>
                           </div>

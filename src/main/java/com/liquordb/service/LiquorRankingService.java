@@ -44,32 +44,18 @@ public class LiquorRankingService {
             ids = liquorRankingRepository.findTrendingLiquorIdsByPeriod(period);
         }
 
-        if (!ids.isEmpty()) { // Fallback - 좋아요 많은 순
-            Set<Long> likedLiquorIds = liquorLikeCacheService.getLikedLiquorIds(userId, ids);
-
-            Map<Long, Liquor> liquorMap = liquorRepository.findByIdIn(ids).stream()
-                    .collect(Collectors.toMap(Liquor::getId, liquor -> liquor));
-
-            return ids.stream()
-                    .map(liquorMap::get)
-                    .filter(Objects::nonNull)
-                    .map(liquor -> {
-                        boolean isLiked = likedLiquorIds.contains(liquor.getId());
-                        String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe
-                        return LiquorMapper.toSummaryDto(liquor, imageUrl, isLiked);
-                    })
-                    .toList();
-        }
-
-        List<Liquor> topLikedLiquors = liquorRepository.findTopLikedLiquors(PageRequest.of(0, 10));
-        if (topLikedLiquors.isEmpty()) {
+        if (ids.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Long> topLikedIds = topLikedLiquors.stream().map(Liquor::getId).toList();
-        Set<Long> likedLiquorIds = liquorLikeCacheService.getLikedLiquorIds(userId, topLikedIds);
+        Set<Long> likedLiquorIds = liquorLikeCacheService.getLikedLiquorIds(userId, ids);
 
-        return topLikedLiquors.stream()
+        Map<Long, Liquor> liquorMap = liquorRepository.findByIdIn(ids).stream()
+                .collect(Collectors.toMap(Liquor::getId, liquor -> liquor));
+
+        return ids.stream()
+                .map(liquorMap::get)
+                .filter(Objects::nonNull)
                 .map(liquor -> {
                     boolean isLiked = likedLiquorIds.contains(liquor.getId());
                     String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey()); // null-safe

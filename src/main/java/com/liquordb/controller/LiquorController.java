@@ -32,7 +32,7 @@ public class LiquorController {
     // 인기 주류 조회
     @GetMapping("/liquors/trending")
     public ResponseEntity<List<LiquorSummaryDto>> getTrending(
-            @RequestParam(defaultValue = "THREE_HOURS") PeriodType period,
+            @RequestParam(defaultValue = "WEEKLY") PeriodType period,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         UUID viewerId = (user != null) ? user.id() : null;
