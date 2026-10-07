@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -53,12 +54,12 @@ public class CommentController {
 
     // 특정 댓글의 답글 목록 조회 (작성일/ID 오래된 순)
     @GetMapping("/comments/{commentId}/replies")
-    public ResponseEntity<java.util.List<CommentResponseDto>> getReplies(
+    public ResponseEntity<List<CommentResponseDto>> getReplies(
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         UUID currentUserId = user != null ? user.id() : null;
-        java.util.List<CommentResponseDto> replies = commentService.getRepliesByParentId(commentId, currentUserId);
+        List<CommentResponseDto> replies = commentService.getRepliesByParentId(commentId, currentUserId);
         return ResponseEntity.ok(replies);
     }
 

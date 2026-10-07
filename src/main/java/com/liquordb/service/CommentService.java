@@ -205,6 +205,12 @@ public class CommentService {
         }
         comment.softDelete(LocalDateTime.now());
         commentRepository.save(comment);
+
+        Review review = comment.getReview();
+        if (review != null) {
+            review.decreaseCommentCount();
+            reviewRepository.save(review);
+        }
     }
 
     private Map<Long, Long> getReplyCountMap(List<Comment> comments) {

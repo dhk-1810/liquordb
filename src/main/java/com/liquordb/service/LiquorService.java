@@ -171,9 +171,13 @@ public class LiquorService {
     @Transactional
     public LiquorResponseDto create(LiquorRequest request, MultipartFile file) {
         Liquor liquor = LiquorMapper.toEntity(request, null);
-        FileResponseDto fileResponseDto = fileService.uploadAndSave(file, File.FileType.LIQUOR, liquor.getId());
-        liquor.updateImage(fileResponseDto.key());
         liquorRepository.save(liquor);
+
+        if (file != null && !file.isEmpty()) {
+            FileResponseDto fileResponseDto = fileService.uploadAndSave(file, File.FileType.LIQUOR, liquor.getId());
+            liquor.updateImage(fileResponseDto.key());
+            liquorRepository.save(liquor);
+        }
 
         String imageUrl = s3Service.getLiquorImageUrl(liquor.getImageKey());
         String subcategoryName = null;

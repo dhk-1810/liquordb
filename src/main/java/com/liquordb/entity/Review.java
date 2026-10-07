@@ -132,7 +132,7 @@ public class Review extends LikeableEntity {
     }
 
     public void  decreaseCommentCount() {
-        if (likeCount > 0) {
+        if (commentCount > 0) {
             this.commentCount--;
         }
     }

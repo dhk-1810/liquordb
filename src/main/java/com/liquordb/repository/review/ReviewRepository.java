@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,5 +67,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, CustomRev
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Review r SET r.user = null WHERE r.user.id IN :userIds")
-    void setNullUserByUserIds(@Param("userIds") java.util.List<UUID> userIds);
+    void setNullUserByUserIds(@Param("userIds") List<UUID> userIds);
 }

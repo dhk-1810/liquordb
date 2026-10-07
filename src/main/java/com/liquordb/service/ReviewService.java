@@ -207,6 +207,17 @@ public class ReviewService {
             throw new ReviewAccessDeniedException(reviewId, userId);
         }
 
+        // 평점 변경 시 주류 평균 평점 갱신
+        int oldRating = review.getRating();
+        Integer newRating = request.rating();
+        if (newRating != null && newRating != oldRating) {
+            Liquor liquor = review.getLiquor();
+            if (liquor != null) {
+                liquor.modifyReviewRating(oldRating, newRating);
+                liquorRepository.save(liquor);
+            }
+        }
+
         // 공통 필드 수정
         review.update(request);
 

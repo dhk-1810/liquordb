@@ -150,7 +150,17 @@ public class Liquor extends LikeableEntity {
         }
         double totalScore = (this.averageRating * this.reviewCount) - deletedRating;
         this.reviewCount--;
-        this.averageRating = totalScore / this.reviewCount;
+        this.averageRating = Math.round((totalScore / this.reviewCount) * 100.0) / 100.0;
+    }
+
+    public void modifyReviewRating(double oldRating, double newRating) {
+        if (this.reviewCount <= 0) {
+            this.averageRating = newRating;
+            this.reviewCount = 1L;
+            return;
+        }
+        double totalScore = (this.averageRating * this.reviewCount) - oldRating + newRating;
+        this.averageRating = Math.round((totalScore / this.reviewCount) * 100.0) / 100.0;
     }
 
     public void softDelete(LocalDateTime deletedAt) {

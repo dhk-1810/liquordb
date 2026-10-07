@@ -71,8 +71,9 @@ public class SecurityConfig {
                         .requestMatchers("/", "/v3/api-docs/**", "/swagger-ui/**", "/error").permitAll()
                         .requestMatchers("/api/auth/restore").authenticated()
                         .requestMatchers( "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/liquors", "/api/liquors/**").permitAll() // 주류, 리뷰 조회 허용
-                        .requestMatchers(HttpMethod.GET, "/api/reviews/*/comments", "/api/reviews/*/comments/**").permitAll() // 댓글 조회 허용
+                        .requestMatchers(HttpMethod.GET, "/api/liquors", "/api/liquors/**").permitAll() // 주류 및 주류별 리뷰 조회 허용
+                        .requestMatchers(HttpMethod.GET, "/api/reviews", "/api/reviews/**").permitAll() // 리뷰 및 리뷰 번역 조회 허용
+                        .requestMatchers(HttpMethod.GET, "/api/comments", "/api/comments/**").permitAll() // 댓글, 답글 및 댓글 번역 조회 허용
                         .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").permitAll() // 공지 조회 허용
                         .anyRequest().authenticated()
                 );
