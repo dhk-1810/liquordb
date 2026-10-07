@@ -11,8 +11,6 @@ import com.liquordb.exception.user.*;
 import com.liquordb.mapper.UserMapper;
 import com.liquordb.repository.*;
 
-import com.liquordb.repository.comment.CommentRepository;
-import com.liquordb.repository.review.ReviewRepository;
 import com.liquordb.repository.user.UserRepository;
 import com.liquordb.repository.user.UserSearchCondition;
 import com.liquordb.security.JwtInformation;
@@ -32,11 +30,6 @@ import java.util.*;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ReviewRepository reviewRepository;
-    private final CommentRepository commentRepository;
-    private final LiquorLikeRepository liquorLikeRepository;
-    private final ReviewLikeRepository reviewLikeRepository;
-    private final CommentLikeRepository commentLikeRepository;
     private final FileService fileService; // 단방향 참조
     private final S3Service s3Service; // 단방향 참조
     private final JwtTokenProvider jwtTokenProvider;
@@ -51,24 +44,17 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        // 마이페이지 조회 횟수가 많지 않을 것이라 판단,
-        // 매 활동마다 User 엔터티의 count 정보도 업데이트 하지 않고 리포지토리 직접 조회.
-        long reviewCount = reviewRepository.countByUser_IdAndStatus(userId, Review.ReviewStatus.ACTIVE);
-        long commentCount = commentRepository.countByUser_IdAndStatus(userId, Comment.CommentStatus.ACTIVE);
-
-        long likedLiquorCount = liquorLikeRepository.countByUser_IdAndLiquorIsDeletedFalse(userId);
-        long likedReviewCount = reviewLikeRepository.countByUser_IdAndReviewStatus(userId, Review.ReviewStatus.ACTIVE);
-        long likedCommentCount = commentLikeRepository.countByUser_IdAndCommentStatus(userId, Comment.CommentStatus.ACTIVE);
+        UserActivityCountDto counts = userRepository.getUserActivityCounts(userId);
 
         String imageUrl = s3Service.getProfileImageUrl(user.getProfileImageKey()); // null-safe 메서드.
         return UserMapper.toMyPageDto(
                 user,
                 imageUrl,
-                reviewCount,
-                commentCount,
-                likedLiquorCount,
-                likedReviewCount,
-                likedCommentCount
+                counts.reviewCount(),
+                counts.commentCount(),
+                counts.likedLiquorCount(),
+                counts.likedReviewCount(),
+                counts.likedCommentCount()
         );
     }
 
