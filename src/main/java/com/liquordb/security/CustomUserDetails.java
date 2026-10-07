@@ -36,6 +36,6 @@ public record CustomUserDetails (
 
     @Override
     public boolean isEnabled() {
-        return status != UserStatus.WITHDRAWN;
+        return true;
     }
 }

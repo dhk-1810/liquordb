@@ -196,7 +196,7 @@
     "confirmNewPassword": "새 비밀번호 확인",
     "updatePassword": "비밀번호 변경",
     "updating": "변경 중...",
-    "confirmDeleteAccount": "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "confirmDeleteAccount": "정말로 계정을 삭제하시겠습니까?",
     "profileUpdated": "프로필이 성공적으로 업데이트되었습니다!",
     "passwordUpdated": "비밀번호가 성공적으로 변경되었습니다!",
     "passwordMismatch": "새 비밀번호가 일치하지 않습니다.",

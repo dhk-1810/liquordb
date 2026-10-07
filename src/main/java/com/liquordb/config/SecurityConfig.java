@@ -2,6 +2,7 @@ package com.liquordb.config;
 
 import com.liquordb.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.liquordb.filter.JwtAuthenticationFilter;
+import com.liquordb.handler.JwtAuthenticationFailureHandler;
 import com.liquordb.handler.JwtLogoutHandler;
 import com.liquordb.security.JwtLoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,6 +29,7 @@ import org.springframework.security.config.Customizer;
 public class SecurityConfig {
 
     private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
+    private final JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler;
     private final JwtLogoutHandler jwtLogoutHandler;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -66,7 +68,7 @@ public class SecurityConfig {
 
                 // 인가
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/", "/v3/api-docs/**", "/swagger-ui/**", "/error").permitAll()
                         .requestMatchers("/api/auth/restore").authenticated()
                         .requestMatchers( "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/liquors", "/api/liquors/**").permitAll() // 주류, 리뷰 조회 허용
@@ -85,6 +87,7 @@ public class SecurityConfig {
 
         filter.setFilterProcessesUrl("/api/auth/login");
         filter.setAuthenticationSuccessHandler(jwtLoginSuccessHandler);
+        filter.setAuthenticationFailureHandler(jwtAuthenticationFailureHandler);
         return filter;
     }
 

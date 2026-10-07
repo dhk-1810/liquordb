@@ -37,9 +37,9 @@ function MyPage() {
         navigate('/signin');
         return;
       }
-      setUser(jwtData.userDto);
+      setUser(jwtData.user);
       
-      const response = await fetch(`/api/users/${jwtData.userDto.id}/my-page`, {
+      const response = await fetch(`/api/users/${jwtData.user.id}/my-page`, {
         headers: {
           'Authorization': `Bearer ${jwtData.accessToken}`
         }

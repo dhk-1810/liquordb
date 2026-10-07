@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -54,7 +55,7 @@ public class Review extends LikeableEntity {
     private List<ReviewTag> reviewTags;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReviewImageKey> imageKeys;
+    private List<ReviewImageKey> imageKeys = new ArrayList<>();
 
     @Column(nullable = false)
     private long commentCount;
@@ -140,6 +141,13 @@ public class Review extends LikeableEntity {
         if (likeCount > 0) {
             this.likeCount--;
         }
+    }
+
+    public void addImageKey(String imageKey) {
+        if (this.imageKeys == null) {
+            this.imageKeys = new ArrayList<>();
+        }
+        this.imageKeys.add(new ReviewImageKey(this, imageKey));
     }
 
     public void softDelete(LocalDateTime deletedAt) {

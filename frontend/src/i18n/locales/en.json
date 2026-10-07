@@ -196,7 +196,7 @@
     "confirmNewPassword": "Confirm New Password",
     "updatePassword": "Update Password",
     "updating": "Updating...",
-    "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
+    "confirmDeleteAccount": "Are you sure you want to delete your account?",
     "profileUpdated": "Profile updated successfully!",
     "passwordUpdated": "Password updated successfully!",
     "passwordMismatch": "New passwords don't match.",

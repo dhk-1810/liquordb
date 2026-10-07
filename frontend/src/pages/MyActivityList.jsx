@@ -75,7 +75,7 @@ function MyActivityList() {
         return;
       }
 
-      const endpoint = getEndpoint(jwtData.userDto.id);
+      const endpoint = getEndpoint(jwtData.user.id);
       if (!endpoint) {
         setError('Invalid category.');
         return;

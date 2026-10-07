@@ -42,13 +42,15 @@ function SignIn() {
         return;
       }
 
-      if (data.userDto && data.userDto.status === 'WITHDRAWN') {
+      const user = data.user || data.userDto;
+
+      if (user && user.status === 'WITHDRAWN') {
         const confirmRestore = window.confirm(
           '탈퇴 신청된 계정입니다. 1주일 이내이므로 계정을 복구하고 다시 이용하실 수 있습니다. 계정을 복구하고 로그인하시겠습니까?'
         );
         if (confirmRestore) {
           try {
-            const restoreRes = await fetch(`/api/auth/restore?email=${encodeURIComponent(data.userDto.email)}`, {
+            const restoreRes = await fetch(`/api/auth/restore?email=${encodeURIComponent(user.email)}`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${data.accessToken}`

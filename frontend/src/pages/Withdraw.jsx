@@ -23,7 +23,7 @@ function Withdraw() {
         return;
       }
 
-      const response = await fetch(`/api/users/${jwtData.userDto.id}?password=${encodeURIComponent(withdrawPassword)}`, {
+      const response = await fetch(`/api/users/${jwtData.user.id}?password=${encodeURIComponent(withdrawPassword)}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${jwtData.accessToken}`

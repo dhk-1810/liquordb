@@ -95,14 +95,12 @@ public class ReviewService {
         }
 
         List<String> imageUrls = new ArrayList<>();
-        List<ReviewImageKey> keys = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             images.forEach(file -> {
                 FileResponseDto dto = fileService.uploadAndSave(file, File.FileType.REVIEW, review.getId());
-                keys.add(new ReviewImageKey(review, dto.key()));
+                review.addImageKey(dto.key());
                 imageUrls.add(s3Service.getReviewImageUrl(dto.key()));
             });
-            reviewImageKeyRepository.saveAll(keys);
         }
 
         liquorRepository.updateReviewStats(liquorId, request.rating().doubleValue());
