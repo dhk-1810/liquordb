@@ -8,8 +8,8 @@
   - 이벤트 기반으로 **변동이 발생한 주류만 점수를 가산** 하고 집계가 끝나면 통계 테이블에 저장, ZSet으로 순위 캐싱.
 
 
-- **Redisson 분산 락**: 멀티 WAS 환경에서 Refresh Token 등록/로테이션 시 동시성 제어
-- **JWT Refresh Token 관리**: 유저별 토큰 리스트 및 역색인을 통한 세션 관리와 동시 접속 기기(최대 3대) 제한
+- **Redisson 분산 락**: 스케줄러 중복 실행 방지 등 분산 환경 동시성 제어
+- **JWT Refresh Token 관리 (ZSet + Lua Script)**: 유저별 ZSet 단일 키와 Lua Script를 통한 원자적 세션 관리 및 동시 접속 기기(최대 3대) 제한
 
 
 - **SSE 알림 라우팅 & 세션 관리**: 접속 WAS 추적 세션(`sse:session`) 및 타겟 서버 Pub/Sub(`sse:server`) 채널 발행
@@ -19,24 +19,48 @@
   - 영속성이 필요 없고, TTL 기반 자동 삭제가 가능하므로 Redis가 RDB보다 적절.
   - 연속 요청 시 Key-Value 덮어쓰기로 기존 링크 무효화 + 신규 링크 발급을 O(1)에 깔끔하게 처리 가능.
 
-### 2. Redis가 싱글 스레드 기반임에도 Redisson 분산 락을 쓰는 이유
-- '싱글 스레드 기반'이라는건 Redis 서버가 개별 명령어 하나하나를 원자적으로 처리한다는 뜻. 비즈니스 로직 전체가 원자적으로 실행되는 것은 아님.
-- 조회 -> 메모리 판단 -> 삭제/추가(Write) 과정이 여러 Redis 명령어로 쪼개져 있기 때문에 분산 락이 필요함.
 
+### 2. JWT Refresh Token 관리 개선: List 방식에서 ZSet + Lua Script 방식으로 전환
 
-- 이 프로젝트는 기기 동시 접속 제어을 위해 다음과 같은 과정을 거침.
-  1. 현재 접속 기기 수 조회
-  2. 3대 이상이면 가장 오래된 토큰을 LPOP
-  3. 새 토큰 RPUSH (추가)
-  4. 역색인 등록 (SET)
+#### (1) 기존 방식 (List + String 역색인 + Redisson 분산 락)의 문제점
+- **데이터 불일치 버그 (역색인 고아 데이터)**:
+  - 동시 접속 제한(3대)을 초과하여 `LPOP`으로 토큰이 밀려나거나, 전체 로그아웃 시 `DEL userKey`를 해도 개별 역색인 String(`jwt:refresh:token:{token}`)이 남아있음.
+  - 토큰 유효성 검사(`isRefreshTokenActive`)가 역색인의 `hasKey`만 조회했기 때문에, 밀려나거나 로그아웃된 세션이 계속 유효한 토큰으로 인정되는 심각한 결함 존재.
+- **개별 토큰 만료 시간(TTL) 미반영**:
+  - Redis List는 원소별 TTL을 지원하지 않아 새 기기 로그인 시 `EXPIRE`로 전체 List의 TTL이 연장되어 기존 기기들의 토큰 수명까지 연장됨.
+- **분산 락 오버헤드**:
+  - Redis 조작이 여러 단계(크기 확인, pop, push, 역색인 등록 등)로 나뉘어 있어 Redisson 분산 락 획득/반환으로 인한 네트워크 RTT 및 지연 발생.
 
+#### (2) 개선된 구조 (ZSet 단일 키 + Lua Script 원자적 실행)
+- **Key 구조**: `jwt:refresh:user:{userId}` (ZSet 단일 키)
+- **Member**: `refreshToken` (문자열)
+- **Score**: `만료 Timestamp` (`System.currentTimeMillis() + refreshTokenValidity`)
 
-- 문제 상황 (Race Condition)
-  - 만약 같은 유저가 서로 다른 기기에서 동시에 로그인을 시도하면:
-  1. 서버 1 (스마트폰 로그인): size(userKey) 조회 → 현재 2개 확인
-  2. 서버 2 (태블릿 로그인): 거의 동시에 size(userKey) 조회 → 현재 2개 확인
-  3. 서버 1: 3대 미만이므로 leftPop 없이 새 토큰 rightPush → 총 3개
-  4. 서버 2: 3대 미만이라 판단했으므로 leftPop 없이 새 토큰 rightPush → 총 4개 (동시 접속 3대 제한 뚫림!)
+#### (3) Lua Script를 통한 원자적 처리 흐름
+분산 락(Redisson Lock)을 사용하지 않고, Redis 싱글 스레드 특성을 활용하는 **Lua Script**로 단일 네트워크 요청 내에서 모든 작업을 원자적으로 처리합니다.
+
+1. **토큰 등록 (`REGISTER_SCRIPT`)**:
+   - `ZREMRANGEBYSCORE`: 현재 시각 기준으로 이미 만료된 토큰을 먼저 정리.
+   - `ZADD`: 신규 발급된 토큰을 만료 Timestamp를 Score로 지정하여 추가.
+   - `ZREMRANGEBYRANK`: 랭크 범위(0부터 `-4` 인덱스) 삭제를 통해 최대 기기 대수(3대)를 초과하는 오래된 토큰을 즉시 일괄 제거.
+   - `EXPIRE`: 유저 Key 자체의 보존 TTL을 토큰 유효기간으로 갱신.
+
+2. **토큰 로테이션 (`ROTATE_SCRIPT`)**:
+   - `ZREM`: 이전 Refresh Token을 즉시 제거.
+   - `ZREMRANGEBYSCORE`: 만료된 토큰 정리.
+   - `ZADD`: 새로 발급된 Refresh Token 추가.
+   - `ZREMRANGEBYRANK`: 초과분 제거.
+   - `EXPIRE`: Key TTL 갱신.
+
+3. **토큰 검증 및 로그아웃**:
+   - **유효성 검사**: JWT Claim에서 추출한 `userId`를 바탕으로 `ZSCORE jwt:refresh:user:{userId} <token>`을 조회하여 Score가 존재하고 현재 시각보다 큰지 $O(1)$로 검증.
+   - **전체 로그아웃**: `DEL jwt:refresh:user:{userId}` 한 줄로 해당 유저의 모든 활성 기기 토큰이 즉시 완벽하게 무효화됨.
+
+#### (4) 전환 효과
+- **완벽한 정합성 보장**: 단일 Key 관리로 역색인 누락 버그 및 고아 데이터 원천 차단.
+- **성능 향상**: Redisson 분산 락(Lock 획득, 검증, 해제 등 다중 RTT)을 제거하고 Lua Script 1회 실행으로 왕복 시간 대폭 단축.
+- **토큰별 독립 수명 관리**: Score 기반 만료 Timestamp 관리로 각 기기별 정확한 만료 시간 유지.
+
 
 
 ### 3. SSE 알림 라우팅 & 세션 관리 (타겟팅 Pub/Sub)

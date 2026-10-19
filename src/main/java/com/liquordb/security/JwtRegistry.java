@@ -15,7 +15,7 @@ public interface JwtRegistry {
 
     void invalidateAllRefreshTokensByUserId(UUID userId);
 
-    boolean isRefreshTokenActive(String refreshToken);
+    boolean isRefreshTokenActive(UUID userId, String refreshToken);
 
     void clearExpiredTokens();
 }

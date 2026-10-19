@@ -1,128 +1,145 @@
 package com.liquordb.security;
 
-import com.liquordb.redis.RedisLockProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * 리프레시 토큰 관리 (동시 로그인 기기 대수 제한, 세션 무효화)
- * 토큰 유효기간 만료 시 캐시에서 삭제
+ * Redis ZSet + Lua Script 기반으로 원자적 동시성 제어 및 토큰 만료 관리
  */
 @Component
 @Slf4j
 public class RedisJwtRegistry implements JwtRegistry {
 
-    private static final String REFRESH_USER_LIST_PREFIX = "jwt:refresh:user";
-    private static final String REFRESH_TOKEN_PREFIX = "jwt:refresh:token";
-    private static final String REFRESH_LOCK_PREFIX = "lock:jwt:refresh:";
+    private static final String REFRESH_USER_ZSET_PREFIX = "jwt:refresh:user:";
     private static final int MAX_ACTIVE_JWT_COUNT = 3; // 동시 접속 제한
 
-    private final Duration refreshTokenValidity;
+    private static final RedisScript<Long> REGISTER_SCRIPT = new DefaultRedisScript<>(
+            """
+            local userKey = KEYS[1]
+            local expireScore = tonumber(ARGV[1])
+            local refreshToken = ARGV[2]
+            local maxCount = tonumber(ARGV[3])
+            local now = tonumber(ARGV[4])
+            local ttlSeconds = tonumber(ARGV[5])
 
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisLockProvider redisLockProvider;
+            redis.call('ZREMRANGEBYSCORE', userKey, '-inf', now)
+            redis.call('ZADD', userKey, expireScore, refreshToken)
+            redis.call('ZREMRANGEBYRANK', userKey, 0, -(maxCount + 1))
+            redis.call('EXPIRE', userKey, ttlSeconds)
+
+            return 1
+            """,
+            Long.class
+    );
+
+    private static final RedisScript<Long> ROTATE_SCRIPT = new DefaultRedisScript<>(
+            """
+            local userKey = KEYS[1]
+            local oldToken = ARGV[1]
+            local newToken = ARGV[2]
+            local expireScore = tonumber(ARGV[3])
+            local maxCount = tonumber(ARGV[4])
+            local now = tonumber(ARGV[5])
+            local ttlSeconds = tonumber(ARGV[6])
+
+            redis.call('ZREM', userKey, oldToken)
+            redis.call('ZREMRANGEBYSCORE', userKey, '-inf', now)
+            redis.call('ZADD', userKey, expireScore, newToken)
+            redis.call('ZREMRANGEBYRANK', userKey, 0, -(maxCount + 1))
+            redis.call('EXPIRE', userKey, ttlSeconds)
+
+            return 1
+            """,
+            Long.class
+    );
+
+    private final Duration refreshTokenValidity;
+    private final StringRedisTemplate stringRedisTemplate;
 
     public RedisJwtRegistry(
             JwtProperties jwtProperties,
-            RedisTemplate<String, Object> redisTemplate,
-            RedisLockProvider redisLockProvider
+            StringRedisTemplate stringRedisTemplate
     ) {
-        this.redisTemplate = redisTemplate;
-        this.redisLockProvider = redisLockProvider;
+        this.stringRedisTemplate = stringRedisTemplate;
         this.refreshTokenValidity = Duration.ofMillis(jwtProperties.getRefreshTokenValidityInMs());
     }
 
     @Override
     public void registerRefreshToken(UUID userId, String refreshToken) {
+        String userKey = getRefreshUserKey(userId);
+        long now = System.currentTimeMillis();
+        long expireTimestamp = now + refreshTokenValidity.toMillis();
+        long ttlSeconds = refreshTokenValidity.toSeconds();
 
-        String userKey = getRefreshUserKey(userId); // 데이터 저장 주소
-        String lockKey = getRefreshLockKey(userId); // 다른 스레드가 수정 못하게 Lock
-        String tokenIndexKey = getRefreshTokenIndexKey(refreshToken); // 유효한지 검사 위해 역색인 데이터 추가 저장
-
-        redisLockProvider.acquireLock(lockKey); // 사용자 단위
-        try {
-            Long currentSize = redisTemplate.opsForList().size(userKey);
-            while (currentSize != null && currentSize >= MAX_ACTIVE_JWT_COUNT) {
-                redisTemplate.opsForList().leftPop(userKey);
-                currentSize--;
-            }
-            redisTemplate.opsForList().rightPush(userKey, refreshToken);
-            redisTemplate.expire(userKey, refreshTokenValidity);
-
-            redisTemplate.opsForValue().set(tokenIndexKey, userId.toString(), refreshTokenValidity);
-
-        } finally {
-            redisLockProvider.releaseLock(lockKey);
-        }
+        List<String> keys = Collections.singletonList(userKey);
+        stringRedisTemplate.execute(
+                REGISTER_SCRIPT,
+                keys,
+                String.valueOf(expireTimestamp),
+                refreshToken,
+                String.valueOf(MAX_ACTIVE_JWT_COUNT),
+                String.valueOf(now),
+                String.valueOf(ttlSeconds)
+        );
     }
 
     @Override
     public void rotateRefreshToken(String oldRefreshToken, String newRefreshToken, UUID userId) {
-
         String userKey = getRefreshUserKey(userId);
-        String lockKey = getRefreshLockKey(userId);
-        String oldTokenIndexKey = getRefreshTokenIndexKey(oldRefreshToken);
-        String newTokenIndexKey = getRefreshTokenIndexKey(newRefreshToken);
+        long now = System.currentTimeMillis();
+        long expireTimestamp = now + refreshTokenValidity.toMillis();
+        long ttlSeconds = refreshTokenValidity.toSeconds();
 
-        redisLockProvider.acquireLock(lockKey);
-        try {
-            redisTemplate.delete(oldTokenIndexKey);
-            redisTemplate.opsForList().remove(userKey, 1, oldRefreshToken);
-
-            redisTemplate.opsForList().rightPush(userKey, newRefreshToken);
-            redisTemplate.opsForValue().set(newTokenIndexKey, userId.toString(), refreshTokenValidity);
-
-            // 전체 리스트 만료 시간 갱신
-            redisTemplate.expire(userKey, refreshTokenValidity);
-
-        } finally {
-            redisLockProvider.releaseLock(lockKey);
-        }
+        List<String> keys = Collections.singletonList(userKey);
+        stringRedisTemplate.execute(
+                ROTATE_SCRIPT,
+                keys,
+                oldRefreshToken,
+                newRefreshToken,
+                String.valueOf(expireTimestamp),
+                String.valueOf(MAX_ACTIVE_JWT_COUNT),
+                String.valueOf(now),
+                String.valueOf(ttlSeconds)
+        );
     }
 
     @Override
     public void invalidateAllRefreshTokensByUserId(UUID userId) {
-
-        String userKey = getRefreshUserKey(userId);
-        String lockKey = getRefreshLockKey(userId);
-
-        redisLockProvider.acquireLock(lockKey);
-        try {
-            redisTemplate.delete(userKey);
-        } finally {
-            redisLockProvider.releaseLock(lockKey);
+        if (userId == null) {
+            return;
         }
+        String userKey = getRefreshUserKey(userId);
+        stringRedisTemplate.delete(userKey);
     }
 
     @Override
-    public boolean isRefreshTokenActive(String refreshToken) {
-        String key = REFRESH_TOKEN_PREFIX + refreshToken;
-        return redisTemplate.hasKey(key); // 토큰 자체를 키로 사용하여 바로 조회
+    public boolean isRefreshTokenActive(UUID userId, String refreshToken) {
+        if (userId == null || refreshToken == null) {
+            return false;
+        }
+        String userKey = getRefreshUserKey(userId);
+        Double score = stringRedisTemplate.opsForZSet().score(userKey, refreshToken);
+        if (score == null) {
+            return false;
+        }
+        return score > System.currentTimeMillis();
     }
 
     @Override
     public void clearExpiredTokens() {
-        // TTL 지나면 Redis에서 자동으로 삭제됨.
+        // ZSet 등록 및 로테이션 시점의 Lua 스크립트(ZREMRANGEBYSCORE)와 Redis Key TTL을 통해 자동 만료 및 정리됨.
     }
-
-    /**
-     * 헬퍼 메서드들
-     */
 
     private String getRefreshUserKey(UUID userId) {
-        return REFRESH_USER_LIST_PREFIX + userId.toString();
+        return REFRESH_USER_ZSET_PREFIX + userId.toString();
     }
-
-    private String getRefreshLockKey(UUID userId) {
-        return REFRESH_LOCK_PREFIX + userId.toString();
-    }
-
-    private String getRefreshTokenIndexKey(String token) {
-        return REFRESH_TOKEN_PREFIX + token;
-    }
-
 }

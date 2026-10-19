@@ -15,6 +15,7 @@ import com.liquordb.repository.user.UserRepository;
 import com.liquordb.security.JwtInformation;
 import com.liquordb.security.JwtRegistry;
 import com.liquordb.security.JwtTokenProvider;
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -78,16 +79,25 @@ public class AuthService {
     // 토큰 재발급 - 엑세스 토큰이 만료되면 호출.
     public JwtInformation refresh(String refreshToken) {
 
-        // 서명 유효성, DB 존재 여부 확인
-        if (refreshToken == null
-                || !jwtTokenProvider.validateRefreshToken(refreshToken)
-                || !jwtRegistry.isRefreshTokenActive(refreshToken)
-        ) {
+        // 서명 유효성 확인
+        if (refreshToken == null || !jwtTokenProvider.validateRefreshToken(refreshToken)) {
+            throw new InvalidTokenException();
+        }
+
+        JWTClaimsSet claims = jwtTokenProvider.getClaims(refreshToken);
+        Object idClaim = claims.getClaim("id");
+        if (idClaim == null) {
+            throw new InvalidTokenException();
+        }
+        UUID userId = UUID.fromString(idClaim.toString());
+
+        // Redis 등록 여부 및 만료 확인
+        if (!jwtRegistry.isRefreshTokenActive(userId, refreshToken)) {
             throw new InvalidTokenException();
         }
 
         // 정보 조회
-        String email = jwtTokenProvider.getClaims(refreshToken).getSubject();
+        String email = claims.getSubject();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
