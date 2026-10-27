@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.liquordb.redis.RedisSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,9 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -32,15 +29,6 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.port}")
     private int redisPort;
-
-    // 환경변수가 있으면 쓰고, 없으면 UUID 생성
-    @Value("${server.instance.id:${SERVER_ID:#{T(java.util.UUID).randomUUID().toString().substring(0,8)}}}")
-    private String serverId;
-
-    @Bean(name = "serverId")
-    public String serverId() {
-        return serverId;
-    }
 
     @Bean
     public RedissonClient redissonClient() {
@@ -108,20 +96,9 @@ public class RedisConfig {
      */
 
     @Bean
-    public MessageListenerAdapter messageListenerAdapter(RedisSubscriber subscriber) {
-        return new MessageListenerAdapter(subscriber, "onMessage");
-    }
-
-    // 자기 서버 전용 Redis 채널(sse:server:{serverId})을 구독하고 메시지를 대기하는 컨테이너
-    @Bean
-    public RedisMessageListenerContainer redisContainer(
-            RedisConnectionFactory factory,
-            MessageListenerAdapter adapter,
-            @Qualifier("serverId") String serverId
-    ) {
+    public RedisMessageListenerContainer redisContainer(RedisConnectionFactory factory) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(factory);
-        container.addMessageListener(adapter, new ChannelTopic("sse:server:" + serverId));
         return container;
     }
 }
