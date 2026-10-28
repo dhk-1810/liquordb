@@ -42,8 +42,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 기본 설정
-                .cors(Customizer.withDefaults())
+                .cors(Customizer.withDefaults()) // Spring Security가 Spring MVC의 WebConfig CORS 매핑 설정을 참조하여 필터 레벨에서 처리.
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
